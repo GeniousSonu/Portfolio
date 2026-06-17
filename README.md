@@ -14,7 +14,7 @@
 
 <br />
 
-[![Live Site](https://img.shields.io/badge/🌐%20Live%20Site-Visit%20Now-10B981?style=for-the-badge&labelColor=050505)](https://sksahinurislam.dev)
+[![Live Site](https://img.shields.io/badge/🌐%20Live%20Site-Visit%20Now-10B981?style=for-the-badge&labelColor=050505)](https://genioussonu.netlify.app/)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/sksahinurislam/)
 [![GitHub](https://img.shields.io/badge/GitHub-Follow-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/GeniousSonu)
 [![Upwork](https://img.shields.io/badge/Upwork-Hire%20Me-14A800?style=for-the-badge&logo=upwork&logoColor=white)](https://www.upwork.com/freelancers/~0104912246c7c7bdbf)
@@ -38,8 +38,9 @@
 
 ## 📌 About This Project
 
-This is my **personal developer portfolio** — built entirely by me from the ground up. Every line of CSS, every animation, every component was thought through, designed, and written by hand. I didn't use any component library, UI framework, or pre-built template. This was my way of demonstrating that I can build production-grade, visually rich interfaces using core web technologies.
+This **portfolio showcases** my professional journey, technical expertise, and selected projects across Information Technology, Network Engineering, and Web Development. Designed with a focus on clarity, performance, and user experience, it serves as a platform to highlight my skills, experience, certifications, and ongoing commitment to learning and innovation.
 
+The goal of this website is to provide a comprehensive overview of my work while demonstrating modern web development practices and a strong attention to detail.
 The design aesthetic draws from **dark terminal interfaces**, **cyberpunk developer culture**, and **premium SaaS product design** — blending them into something that feels both technical and polished.
 
 ---
@@ -206,7 +207,7 @@ I build things that live on the web and run on servers. I'm passionate about cle
 
 | Platform     | Link                                                                                                 |
 | ------------ | ---------------------------------------------------------------------------------------------------- |
-| 🌐 Website   | [sksahinurislam.dev](https://sksahinurislam.dev)                                                     |
+| 🌐 Website   | [genioussonu.netlify.app](https://genioussonu.netlify.app/)                                                     |
 | 💼 LinkedIn  | [linkedin.com/in/sksahinurislam](https://www.linkedin.com/in/sksahinurislam/)                        |
 | 🐙 GitHub    | [github.com/GeniousSonu](https://github.com/GeniousSonu)                                             |
 | 💚 Upwork    | [upwork.com/freelancers/~0104912246c7c7bdbf](https://www.upwork.com/freelancers/~0104912246c7c7bdbf) |
