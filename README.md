@@ -14,7 +14,7 @@
 
 <br />
 
-[![Live Site](https://img.shields.io/badge/🌐%20Live%20Site-Visit%20Now-10B981?style=for-the-badge&labelColor=050505)](https://sksahinurislam.dev)
+[![Live Site](https://img.shields.io/badge/🌐%20Live%20Site-Visit%20Now-10B981?style=for-the-badge&labelColor=050505)](https://genioussonu.netlify.app/)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/sksahinurislam/)
 [![GitHub](https://img.shields.io/badge/GitHub-Follow-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/GeniousSonu)
 [![Upwork](https://img.shields.io/badge/Upwork-Hire%20Me-14A800?style=for-the-badge&logo=upwork&logoColor=white)](https://www.upwork.com/freelancers/~0104912246c7c7bdbf)
