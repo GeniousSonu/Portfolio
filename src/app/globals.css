@@ -1,3 +1,69 @@
+/* ─── Brooklyn Custom Font ─── */
+@font-face {
+  font-family: 'Brooklyn';
+  src: url('/fonts/Brooklyn Normal 1.ttf') format('truetype'),
+       url('/fonts/Brooklyn Normal 1.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Brooklyn';
+  src: url('/fonts/Brooklyn Italic.ttf') format('truetype'),
+       url('/fonts/Brooklyn Italic.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Brooklyn';
+  src: url('/fonts/Brooklyn SemiBold.ttf') format('truetype'),
+       url('/fonts/Brooklyn SemiBold.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Brooklyn';
+  src: url('/fonts/Brooklyn SemiBoldItalic.ttf') format('truetype'),
+       url('/fonts/Brooklyn SemiBoldItalic.otf') format('opentype');
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Brooklyn';
+  src: url('/fonts/Brooklyn Bold 1.ttf') format('truetype'),
+       url('/fonts/Brooklyn Bold 1.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Brooklyn';
+  src: url('/fonts/Brooklyn BoldItalic.ttf') format('truetype'),
+       url('/fonts/Brooklyn BoldItalic.otf') format('opentype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Brooklyn';
+  src: url('/fonts/Brooklyn Heavy 1.ttf') format('truetype'),
+       url('/fonts/Brooklyn Heavy 1.otf') format('opentype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Brooklyn';
+  src: url('/fonts/Brooklyn HeavyItalic.ttf') format('truetype'),
+       url('/fonts/Brooklyn HeavyItalic.otf') format('opentype');
+  font-weight: 800;
+  font-style: italic;
+  font-display: swap;
+}
+
 /* ─── Reset & Root ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -8,7 +74,8 @@
   --silver: #8A9BAD; --silver-bright: #C1CDD9;
   --green: #4ADE80; --amber: #FBBF24; --blue: #60A5FA;
   --red: #F87171; --purple: #A78BFA;
-  --font-sans: 'General Sans', 'Inter', system-ui, sans-serif;
+  --font-sans: 'Brooklyn', 'General Sans', 'Inter', system-ui, sans-serif;
+  --font-display: 'Brooklyn', 'General Sans', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', 'JetBrains Mono', monospace;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -164,9 +231,10 @@ body::after {
   50% { box-shadow: 0 0 0 5px rgba(74,222,128,0); }
 }
 .hero-name {
-  font-size: clamp(3.2rem, 8vw, 7rem); font-weight: 700;
-  line-height: 1.0; letter-spacing: -0.04em;
+  font-size: clamp(3.2rem, 8vw, 7rem); font-weight: 800;
+  line-height: 0.95; letter-spacing: -0.04em;
   color: var(--text-primary); margin-bottom: 0.2rem;
+  font-family: var(--font-display);
   overflow: hidden;
 }
 .hero-name-line { overflow: hidden; display: block; }
@@ -174,8 +242,9 @@ body::after {
   display: block; transform: translateY(110%); opacity: 0;
 }
 .hero-role {
-  font-size: clamp(1.1rem, 2.5vw, 1.6rem); font-weight: 400;
+  font-size: clamp(1.1rem, 2.5vw, 1.6rem); font-weight: 600;
   color: var(--gold); letter-spacing: -0.01em;
+  font-family: var(--font-display);
   margin-bottom: 1.5rem; opacity: 0; transform: translateY(20px);
 }
 .hero-desc {
@@ -198,12 +267,29 @@ body::after {
   padding-top: 3rem; border-top: 1px solid var(--border-dim);
   margin-top: 3rem; opacity: 0; transform: translateY(20px);
 }
-.stat-item { }
+/* ── Stats: premium number treatment ── */
+.stat-item { position: relative; }
 .stat-value {
-  font-size: 2rem; font-weight: 700; color: var(--text-primary);
-  letter-spacing: -0.04em; line-height: 1;
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 4.5vw, 3.6rem);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  /* Gradient number fill */
+  background: linear-gradient(135deg, var(--text-primary) 40%, var(--gold-bright) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  /* Tabular numerals for alignment */
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
 }
-.stat-value span { color: var(--gold); }
+/* Suffix — the + or % stays gold */
+.stat-value span {
+  -webkit-text-fill-color: var(--gold);
+  background: none;
+  font-weight: 800;
+}
 .stat-label {
   font-family: var(--font-mono); font-size: 0.65rem;
   color: var(--text-muted); letter-spacing: 0.15em;
@@ -798,7 +884,8 @@ footer {
   background: linear-gradient(90deg, transparent, var(--border-dim), transparent);
 }
 .section-title {
-  font-size: clamp(2rem, 4vw, 3rem); font-weight: 700;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3rem); font-weight: 800;
   letter-spacing: -0.04em; margin-bottom: 0.75rem;
 }
 .section-subtitle { font-size: 1rem; color: var(--text-secondary); line-height: 1.6; max-width: 540px; }
