@@ -68,20 +68,20 @@ The design aesthetic draws from **dark terminal interfaces**, **cyberpunk develo
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology | Version | Purpose |
-|---|---|---|---|
-| **Framework** | [Next.js](https://nextjs.org/) | 16.2.9 | App routing, SSR, file structure |
-| **UI Library** | [React](https://react.dev/) | 19.2.4 | Component model, state, effects |
-| **Animation** | [GSAP (GreenSock)](https://gsap.com/) | 3.15.0 | All motion — hero, scroll, text, counters |
-| **3D Globe** | [Globe.gl](https://globe.gl/) | 2.46.1 | Interactive rotating globe with arcs |
-| **3D Engine** | [Three.js](https://threejs.org/) | 0.184.0 | WebGL renderer powering Globe.gl |
-| **Styling** | Vanilla CSS | — | Custom design system, all components |
-| **Fonts** | [IBM Plex Mono](https://fonts.google.com/specimen/IBM+Plex+Mono) | — | Terminal / mono elements |
-| **Fonts** | [General Sans](https://fontshare.com/fonts/general-sans) | — | Body and heading typography |
-| **Icons** | Inline SVG | — | All brand icons — zero dependencies |
-| **Matrix Rain** | Canvas API | Native | Animated Japanese/hex character rain |
-| **Build** | ESLint + Next Build | — | Linting and production bundling |
-| **Deploy** | Vercel / Netlify | — | Edge hosting |
+| Layer           | Technology                                                       | Version | Purpose                                   |
+| --------------- | ---------------------------------------------------------------- | ------- | ----------------------------------------- |
+| **Framework**   | [Next.js](https://nextjs.org/)                                   | 16.2.9  | App routing, SSR, file structure          |
+| **UI Library**  | [React](https://react.dev/)                                      | 19.2.4  | Component model, state, effects           |
+| **Animation**   | [GSAP (GreenSock)](https://gsap.com/)                            | 3.15.0  | All motion — hero, scroll, text, counters |
+| **3D Globe**    | [Globe.gl](https://globe.gl/)                                    | 2.46.1  | Interactive rotating globe with arcs      |
+| **3D Engine**   | [Three.js](https://threejs.org/)                                 | 0.184.0 | WebGL renderer powering Globe.gl          |
+| **Styling**     | Vanilla CSS                                                      | —       | Custom design system, all components      |
+| **Fonts**       | [IBM Plex Mono](https://fonts.google.com/specimen/IBM+Plex+Mono) | —       | Terminal / mono elements                  |
+| **Fonts**       | [General Sans](https://fontshare.com/fonts/general-sans)         | —       | Body and heading typography               |
+| **Icons**       | Inline SVG                                                       | —       | All brand icons — zero dependencies       |
+| **Matrix Rain** | Canvas API                                                       | Native  | Animated Japanese/hex character rain      |
+| **Build**       | ESLint + Next Build                                              | —       | Linting and production bundling           |
+| **Deploy**      | Vercel / Netlify                                                 | —       | Edge hosting                              |
 
 ---
 
@@ -150,17 +150,17 @@ npm start
 
 ## 📸 Sections
 
-| Section | Description |
-|---|---|
-| **Hero** | Animated name reveal, role, description, stats, terminal |
-| **About** | Bio, system info panel, patent card |
-| **Experience** | Timeline with company, role, tech tags |
-| **Projects** | 6 projects with live demos and GitHub links |
-| **Globe** | Interactive 3D globe showing global presence |
-| **Skills** | Animated skill bars across 5 categories |
-| **Certifications** | 16 of 30+ real certifications with provider logos |
-| **Contact** | Email form, social links, Linktree hub |
-| **Footer** | Matrix rain background, multi-column links |
+| Section            | Description                                              |
+| ------------------ | -------------------------------------------------------- |
+| **Hero**           | Animated name reveal, role, description, stats, terminal |
+| **About**          | Bio, system info panel, patent card                      |
+| **Experience**     | Timeline with company, role, tech tags                   |
+| **Projects**       | 6 projects with live demos and GitHub links              |
+| **Globe**          | Interactive 3D globe showing global presence             |
+| **Skills**         | Animated skill bars across 5 categories                  |
+| **Certifications** | 16 of 30+ real certifications with provider logos        |
+| **Contact**        | Email form, social links, Linktree hub                   |
+| **Footer**         | Matrix rain background, multi-column links               |
 
 ---
 
@@ -169,6 +169,7 @@ npm start
 This portfolio is **open-source and free to use** as inspiration or a starting point for your own portfolio.
 
 **Rules:**
+
 1. ✅ You may use this as a reference or template
 2. ✅ You may fork and modify it for your own portfolio
 3. ⚠️ **You must give credit** — link back to this repo or mention my name
@@ -176,6 +177,7 @@ This portfolio is **open-source and free to use** as inspiration or a starting p
 5. ❌ Do not resell or redistribute as a commercial template
 
 **Credit line (add to your README or footer):**
+
 ```
 Design inspired by SK Sahinur Islam — github.com/GeniousSonu/Portfolio
 ```
@@ -202,14 +204,14 @@ All technology used in this project is open-source and free. Grateful to the tea
 
 I build things that live on the web and run on servers. I'm passionate about clean code, great UX, Linux systems, cybersecurity, and building tools that actually solve problems.
 
-| Platform | Link |
-|---|---|
-| 🌐 Website | [sksahinurislam.dev](https://sksahinurislam.dev) |
-| 💼 LinkedIn | [linkedin.com/in/sksahinurislam](https://www.linkedin.com/in/sksahinurislam/) |
-| 🐙 GitHub | [github.com/GeniousSonu](https://github.com/GeniousSonu) |
-| 💚 Upwork | [upwork.com/freelancers/~0104912246c7c7bdbf](https://www.upwork.com/freelancers/~0104912246c7c7bdbf) |
-| 🌴 Linktree | [linktr.ee/sksahinurislam](https://linktr.ee/sksahinurislam) |
-| 📸 Instagram | [@genious.exe](https://instagram.com/genious.exe) |
+| Platform     | Link                                                                                                 |
+| ------------ | ---------------------------------------------------------------------------------------------------- |
+| 🌐 Website   | [sksahinurislam.dev](https://sksahinurislam.dev)                                                     |
+| 💼 LinkedIn  | [linkedin.com/in/sksahinurislam](https://www.linkedin.com/in/sksahinurislam/)                        |
+| 🐙 GitHub    | [github.com/GeniousSonu](https://github.com/GeniousSonu)                                             |
+| 💚 Upwork    | [upwork.com/freelancers/~0104912246c7c7bdbf](https://www.upwork.com/freelancers/~0104912246c7c7bdbf) |
+| 🌴 Linktree  | [linktr.ee/sksahinurislam](https://linktr.ee/sksahinurislam)                                         |
+| 📸 Instagram | [@genious.exe](https://instagram.com/genious.exe)                                                    |
 
 ---
 
