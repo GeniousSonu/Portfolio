@@ -38,8 +38,9 @@
 
 ## 📌 About This Project
 
-This is my **personal developer portfolio** — built entirely by me from the ground up. Every line of CSS, every animation, every component was thought through, designed, and written by hand. I didn't use any component library, UI framework, or pre-built template. This was my way of demonstrating that I can build production-grade, visually rich interfaces using core web technologies.
+This **portfolio showcases** my professional journey, technical expertise, and selected projects across Information Technology, Network Engineering, and Web Development. Designed with a focus on clarity, performance, and user experience, it serves as a platform to highlight my skills, experience, certifications, and ongoing commitment to learning and innovation.
 
+The goal of this website is to provide a comprehensive overview of my work while demonstrating modern web development practices and a strong attention to detail.
 The design aesthetic draws from **dark terminal interfaces**, **cyberpunk developer culture**, and **premium SaaS product design** — blending them into something that feels both technical and polished.
 
 ---
