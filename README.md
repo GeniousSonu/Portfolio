@@ -206,7 +206,7 @@ I build things that live on the web and run on servers. I'm passionate about cle
 
 | Platform     | Link                                                                                                 |
 | ------------ | ---------------------------------------------------------------------------------------------------- |
-| 🌐 Website   | [sksahinurislam.dev](https://sksahinurislam.dev)                                                     |
+| 🌐 Website   | [genioussonu.netlify.app](https://genioussonu.netlify.app/)                                                     |
 | 💼 LinkedIn  | [linkedin.com/in/sksahinurislam](https://www.linkedin.com/in/sksahinurislam/)                        |
 | 🐙 GitHub    | [github.com/GeniousSonu](https://github.com/GeniousSonu)                                             |
 | 💚 Upwork    | [upwork.com/freelancers/~0104912246c7c7bdbf](https://www.upwork.com/freelancers/~0104912246c7c7bdbf) |
