@@ -1,0 +1,48 @@
+# SK Sahinur Islam — Profile & Technical Resume
+
+> SK Sahinur Islam is a Senior Web Application Developer, Co-Founder, and IT Engineer based in Kolkata, West Bengal, India.
+
+## Summary
+- **Current Primary Role**: Senior Web Application Developer at Ib Arts (Jul 2026 – Present), specializing in Backend Architecture & DevOps Infrastructure.
+- **Co-Founder**: WEFIK (Mar 2021 – Present), digital agency serving 30+ clients across 5+ countries.
+- **Freelance**: Top-Rated Full-Stack Developer on Upwork (Apr 2025 – Present).
+- **Previous Role**: Quality Assurance Trainee at ARC Document Solutions (Sep 2025 – Jun 2026).
+- **Education**: B.Tech in Information Technology from Guru Nanak Institute of Technology (GNIT), Kolkata (2021–2025, CGPA 8.17).
+- **Patent Holder**: Patent No. 202531060002 A — Solar Powered IoT Vaccine Preservation System with MQTT Telemetry & Zone-wise Peltier Cooling (Granted Jul 4, 2025).
+
+## Contact & Links
+- **Official Website**: https://sksahinurislam.dev
+- **Email**: sahinurislamm2002@gmail.com
+- **LinkedIn**: https://www.linkedin.com/in/sksahinurislam/
+- **GitHub**: https://github.com/GeniousSonu
+- **Upwork**: https://www.upwork.com/freelancers/~0104912246c7c7bdbf
+- **Linktree**: https://linktr.ee/sksahinurislam
+- **Location**: Kolkata, West Bengal, India (Timezone: IST, UTC+5:30)
+
+## Core Technical Stack
+- **Languages**: JavaScript, TypeScript, Python, PHP, C++, SQL, HTML5, CSS3
+- **Frontend**: React, Next.js, Gatsby, HTML5/CSS3, GSAP, WebGL, TailwindCSS
+- **Backend & APIs**: Node.js, Express, Laravel, FastAPI, REST APIs, GraphQL, MQTT
+- **Databases**: MongoDB, MySQL, PostgreSQL, Redis, Pinecone Vector DB
+- **DevOps & Linux**: Linux Server Admin (Ubuntu/Debian), Docker, Nginx, CI/CD, AWS, Bash Scripting
+- **Cybersecurity & IoT**: Network Security, Pen Testing basics, CompTIA A+ concepts, NodeMCU, ESP8266, Embedded Systems
+- **Certifications**: 30+ certifications from CompTIA, TryHackMe, Coursera (IBM, Duke, UC Irvine), Udemy, and LinkedIn Learning.
+
+## Career History
+1. **Senior Web Application Developer at Ib Arts** (Jul 2026 – Present | Kolkata, India)
+   - Backend architecture, RESTful API design, Docker containerization, CI/CD pipelines, high-availability server configurations.
+2. **Quality Assurance Trainee at ARC Document Solutions** (Sep 2025 – Jun 2026 | Kolkata, India)
+   - Quality assurance, document processing pipeline validation, technical test documentation, regression testing.
+3. **Co-Founder at WEFIK** (Mar 2021 – Present | Remote)
+   - Led 30+ web and mobile solutions projects globally across 5+ countries.
+4. **Freelance Full-Stack Developer on Upwork** (Apr 2025 – Present | Remote)
+   - Shipped custom MERN, Laravel, WordPress, and AI-integrated applications for global clients.
+5. **Head of Development at Teenager Esports** (Sep 2023 – Feb 2024)
+   - Built tournament systems and streaming API infrastructure.
+6. **Web Developer at Guru Nanak Institute of Technology** (Jul 2023 – Feb 2024)
+   - Built institutional portals, event management systems used by 3,000+ students.
+
+## Key Projects
+- **LearnAI**: Adaptive intelligent tutoring system with MERN stack + Python ML microservices.
+- **Solar IoT Vaccine Preservation System**: Patented hardware/software cold chain preservation system with MQTT & Peltier cooling.
+- **WEFIK Platform**: Production SaaS digital agency platform serving global clients.

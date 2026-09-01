@@ -81,11 +81,28 @@ const NAV_ITEMS = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollToPlugin);
+    let lastY = window.scrollY;
 
-    const handleScroll = () => setScrolled(window.scrollY > 60);
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      
+      // Scrolled state past 40px
+      setScrolled(currentY > 40);
+
+      // Auto-hide logic: Hide when scrolling down, show when scrolling up
+      if (currentY > 120 && currentY > lastY + 6) {
+        setHidden(true);
+      } else if (currentY < lastY - 6 || currentY <= 40) {
+        setHidden(false);
+      }
+
+      lastY = currentY;
+    };
+
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     // Close mobile nav on scroll
@@ -119,7 +136,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav id="nav" className={scrolled ? 'scrolled' : ''} role="navigation" aria-label="Main navigation">
+      <nav id="nav" className={`${scrolled ? 'scrolled' : ''} ${hidden ? 'nav-hidden' : ''}`} role="navigation" aria-label="Main navigation">
         <div className="nav-inner">
           {/* Logo */}
           <a href="#" onClick={(e) => handleLinkClick(e, '#')} className="nav-logo" aria-label="SK Sahinur Islam — Home">

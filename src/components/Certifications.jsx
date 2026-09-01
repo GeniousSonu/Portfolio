@@ -5,7 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 /* ── Provider Logo Components ─────────────────────────────── */
 
-/* LinkedIn Learning — official blue "in" mark */
+/* LinkedIn Learning — inline SVG (no logo file provided) */
 const LogoLinkedIn = () => (
   <svg viewBox="0 0 72 72" width="28" height="28" aria-label="LinkedIn" role="img">
     <rect width="72" height="72" rx="8" fill="#0A66C2"/>
@@ -13,57 +13,25 @@ const LogoLinkedIn = () => (
   </svg>
 );
 
-/* TryHackMe — red lock icon */
+/* Image-based logos using /logo/ assets */
 const LogoTryHackMe = () => (
-  <svg viewBox="0 0 72 72" width="28" height="28" aria-label="TryHackMe" role="img">
-    <rect width="72" height="72" rx="8" fill="#212C42"/>
-    <path fill="#C11111" d="M36 10c-5.5 0-10 4.5-10 10v4H20v28h32V24h-6v-4c0-5.5-4.5-10-10-10zm0 6c2.2 0 4 1.8 4 4v4H32v-4c0-2.2 1.8-4 4-4zm0 18a4 4 0 1 1 0 8 4 4 0 0 1 0-8z"/>
-    <text x="36" y="68" textAnchor="middle" fill="#C11111" fontSize="9" fontFamily="monospace" fontWeight="bold">THM</text>
-  </svg>
+  <img src="/logo/tryhackme.png" alt="TryHackMe" width="28" height="28" style={{ objectFit: 'contain', borderRadius: '4px' }} />
 );
 
-/* Coursera — blue C mark */
 const LogoCoursera = () => (
-  <svg viewBox="0 0 72 72" width="28" height="28" aria-label="Coursera" role="img">
-    <rect width="72" height="72" rx="8" fill="#0056D2"/>
-    <path fill="#fff" d="M36 14C23.85 14 14 23.85 14 36s9.85 22 22 22 22-9.85 22-22S48.15 14 36 14zm0 6c7.7 0 14.2 5.2 16.1 12.3-1.9.6-3.9.9-6 .9-5.9 0-11.2-2.7-14.8-6.9A15.9 15.9 0 0 1 36 20zm0 32c-7.7 0-14.2-5.2-16.1-12.3 1.9-.6 3.9-.9 6-.9 5.9 0 11.2 2.7 14.8 6.9A15.9 15.9 0 0 1 36 52z"/>
-  </svg>
+  <img src="/logo/coursera.png" alt="Coursera" width="28" height="28" style={{ objectFit: 'contain', borderRadius: '4px' }} />
 );
 
-/* Udemy — purple U */
 const LogoUdemy = () => (
-  <svg viewBox="0 0 72 72" width="28" height="28" aria-label="Udemy" role="img">
-    <rect width="72" height="72" rx="8" fill="#A435F0"/>
-    <path fill="#fff" d="M22 20h9v20.5c0 4.2 2.2 6.5 5.5 6.5s5.5-2.3 5.5-6.5V20h9v21c0 9-5.5 14.5-14.5 14.5S22 50 22 41V20z"/>
-  </svg>
+  <img src="/logo/udemy.png" alt="Udemy" width="28" height="28" style={{ objectFit: 'contain', borderRadius: '4px' }} />
 );
 
-/* CompTIA — red/gray shield */
-const LogoCompTIA = () => (
-  <svg viewBox="0 0 72 72" width="28" height="28" aria-label="CompTIA" role="img">
-    <rect width="72" height="72" rx="8" fill="#C8102E"/>
-    <path fill="#fff" d="M36 12 L56 22 L56 42 C56 52 46 62 36 66 C26 62 16 52 16 42 L16 22 Z"/>
-    <path fill="#C8102E" d="M36 18 L50 26 L50 42 C50 50 43 58 36 61 C29 58 22 50 22 42 L22 26 Z"/>
-    <text x="36" y="46" textAnchor="middle" fill="#fff" fontSize="11" fontFamily="sans-serif" fontWeight="bold">A+</text>
-  </svg>
-);
-
-/* Aon / CoCubes — corporate blue */
 const LogoAon = () => (
-  <svg viewBox="0 0 72 72" width="28" height="28" aria-label="Aon" role="img">
-    <rect width="72" height="72" rx="8" fill="#1C1C1C"/>
-    <text x="36" y="45" textAnchor="middle" fill="#fff" fontSize="22" fontFamily="Georgia,serif" fontWeight="bold" letterSpacing="1">Aon</text>
-  </svg>
+  <img src="/logo/Aon.png" alt="Aon" width="28" height="28" style={{ objectFit: 'contain', borderRadius: '4px' }} />
 );
 
-/* Ardent Computech — teal badge */
 const LogoArdent = () => (
-  <svg viewBox="0 0 72 72" width="28" height="28" aria-label="Ardent Computech" role="img">
-    <rect width="72" height="72" rx="8" fill="#0D7377"/>
-    <text x="36" y="32" textAnchor="middle" fill="#fff" fontSize="11" fontFamily="sans-serif" fontWeight="700">ARDENT</text>
-    <text x="36" y="47" textAnchor="middle" fill="#92E3E4" fontSize="8" fontFamily="monospace">COMPUTECH</text>
-    <path fill="none" stroke="#fff" strokeWidth="2" d="M20 54 L36 42 L52 54"/>
-  </svg>
+  <img src="/logo/ardent.png" alt="Ardent Computech" width="28" height="28" style={{ objectFit: 'contain', borderRadius: '4px' }} />
 );
 
 /* ── Cert data ─────────────────────────────────────────────── */
@@ -96,8 +64,8 @@ const CERTS = [
   },
   {
     Logo: LogoAon,
-    bg: 'rgba(255,255,255,0.05)',
-    border: 'rgba(255,255,255,0.1)',
+    bg: 'rgba(230,30,30,0.08)',
+    border: 'rgba(230,30,30,0.2)',
     title: 'CoCubes Certified — Coding & Aptitude',
     issuer: 'Aon',
     date: 'Dec 2024',

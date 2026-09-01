@@ -50,16 +50,31 @@ export default function Experience() {
         </div>
 
         <div className="exp-list">
-          {/* ARC */}
+          {/* Ib Arts */}
           <div className="exp-item reveal">
             <div className="exp-date">
               <div className="current-badge">● CURRENT</div>
-              Sep 2025 – Present<br/>10 mos
+              Jul 2026 – Present<br/>2 mos
+            </div>
+            <div className="exp-body">
+              <div className="exp-company">Ib Arts · Full-time · On-site</div>
+              <div className="exp-role">Senior Web Application Developer</div>
+              <div className="exp-desc">Driving backend architecture and DevOps infrastructure for production-grade web applications. Designing scalable RESTful APIs, optimizing CI/CD pipelines, managing containerized deployments, and ensuring high-availability server configurations. Collaborating cross-functionally to bridge frontend delivery with robust backend systems.</div>
+              <div className="exp-tags">
+                <span className="tag">Node.js</span><span className="tag">Express</span><span className="tag">Docker</span><span className="tag">CI/CD</span><span className="tag">AWS</span><span className="tag">MongoDB</span><span className="tag">PostgreSQL</span><span className="tag">DevOps</span>
+              </div>
+            </div>
+          </div>
+
+          {/* ARC */}
+          <div className="exp-item reveal">
+            <div className="exp-date">
+              Sep 2025 – Jun 2026<br/>10 mos
             </div>
             <div className="exp-body">
               <div className="exp-company">ARC Document Solutions · Internship · On-site</div>
               <div className="exp-role">Quality Assurance Trainee</div>
-              <div className="exp-desc">Embedded in production QA workflows for document processing pipelines. Validate output integrity across large-volume scanning operations, flag regression defects in document management software, and contribute to test case documentation.</div>
+              <div className="exp-desc">Embedded in production QA workflows for document processing pipelines. Validated output integrity across large-volume scanning operations, flagged regression defects in document management software, and contributed to test case documentation.</div>
               <div className="exp-tags">
                 <span className="tag">QA Testing</span><span className="tag">Document Management</span><span className="tag">Process Improvement</span><span className="tag">Technical Writing</span>
               </div>

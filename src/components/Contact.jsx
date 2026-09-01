@@ -149,11 +149,22 @@ export default function Contact() {
     e.preventDefault();
     if (!name.trim() || !email.trim() || !message.trim()) {
       setFeedbackColor('var(--red)');
-      setFeedback('⚠ Please fill all fields.');
+      setFeedback('⚠ Please fill all fields before sending.');
       return;
     }
+    
+    // Construct mailto link fallback for guaranteed transmission
+    const subject = encodeURIComponent(`Portfolio Inquiry from ${name}`);
+    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`);
+    const mailtoUrl = `mailto:sahinurislamm2002@gmail.com?subject=${subject}&body=${body}`;
+    
     setFeedbackColor('var(--green)');
-    setFeedback('✓ Message transmitted. Will respond within 24h.');
+    setFeedback('✓ Message prepared. Opening your mail client...');
+    
+    setTimeout(() => {
+      window.location.href = mailtoUrl;
+    }, 600);
+    
     setName(''); setEmail(''); setMessage('');
   };
 
@@ -236,7 +247,8 @@ export default function Contact() {
                 </span>
               </div>
               <div className="sysinfo-body">
-                <form className="contact-form" onSubmit={handleFormSubmit}>
+                <form className="contact-form" name="contact" method="POST" data-netlify="true" onSubmit={handleFormSubmit}>
+                  <input type="hidden" name="form-name" value="contact" />
                   <div className="form-group">
                     <label className="form-label" htmlFor="name-field">your_name</label>
                     <input type="text" id="name-field" className="form-input" placeholder="John Doe"

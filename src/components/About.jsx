@@ -56,7 +56,7 @@ export default function About() {
             <div className="s-label">About Me</div>
             <h2>Building at the edge of <em>code</em> and <em>infrastructure</em></h2>
             <p>
-              I'm an IT Engineer and Full Stack Developer from Kolkata, India with a B.Tech in Information Technology from Guru Nanak Institute of Technology (CGPA: 8.17). I've been writing code professionally since 2021 — from PHP internships to co-founding a digital agency, leading dev teams in esports, and now freelancing globally on Upwork.
+              I&apos;m an IT Engineer and Senior Web Application Developer from Kolkata, India with a B.Tech in Information Technology from Guru Nanak Institute of Technology (CGPA: 8.17). Currently, I serve as Senior Web Application Developer at Ib Arts, leading backend architecture and DevOps systems. Since 2021, I&apos;ve co-founded digital agency WEFIK, led dev teams in esports, interned in document QA at ARC, and engineered software for global clients.
             </p>
             <p>
               My work spans the full stack: React/Next.js frontends, Node.js/Laravel APIs, MongoDB and MySQL databases, Linux server administration, and increasingly — AI integrations and IoT systems. I hold 30+ certifications across CompTIA, TryHackMe, Coursera, and Udemy.

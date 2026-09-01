@@ -1,68 +1,178 @@
 import "./globals.css";
+import { Geist } from "next/font/google";
+
+const geist = Geist({
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700"],
+});
 
 export const metadata = {
-  title: "SK Sahinur Islam — Full Stack Developer & IT Engineer",
-  description: "SK Sahinur Islam — Full Stack Developer, Cybersecurity Enthusiast & IT Engineer from Kolkata, India. MERN stack, IoT, Linux, networking, and web solutions for global clients.",
-  keywords: "SK Sahinur Islam, Full Stack Developer, MERN Stack, React, Node.js, Cybersecurity, Network Engineer, Kolkata, Upwork, IoT, Linux",
-  authors: [{ name: "SK Sahinur Islam" }],
-  robots: "index, follow",
+  metadataBase: new URL("https://sksahinurislam.dev"),
+  title: "SK Sahinur Islam — Senior Web Application Developer & IT Engineer",
+  description: "Official portfolio of SK Sahinur Islam — Senior Web Application Developer at Ib Arts, Co-Founder of WEFIK, Patent Holder, and IT Engineer from Kolkata, India. Specialized in Backend Architecture, DevOps, Node.js, React, Linux, and IoT.",
+  keywords: [
+    "SK Sahinur Islam",
+    "Sahinur Islam",
+    "GeniousSonu",
+    "Senior Web Application Developer",
+    "Ib Arts",
+    "WEFIK Co-Founder",
+    "Full Stack Developer Kolkata",
+    "Backend Developer",
+    "DevOps Engineer India",
+    "MERN Stack Developer",
+    "IoT Patent Vaccine Preservation",
+    "Node.js Developer",
+    "React Developer",
+    "Linux Systems Administrator"
+  ],
+  authors: [{ name: "SK Sahinur Islam", url: "https://sksahinurislam.dev" }],
+  creator: "SK Sahinur Islam",
+  publisher: "SK Sahinur Islam",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   alternates: {
     canonical: "https://sksahinurislam.dev",
   },
   openGraph: {
-    type: "website",
+    type: "profile",
     url: "https://sksahinurislam.dev",
-    title: "SK Sahinur Islam — Full Stack Developer & IT Engineer",
-    description: "Building reliable systems at the intersection of web, infrastructure, and security. MERN stack, IoT, Linux, penetration testing, and more.",
+    title: "SK Sahinur Islam — Senior Web Application Developer & IT Engineer",
+    description: "Senior Web Application Developer at Ib Arts, Co-Founder of WEFIK, and Patent Holder. Engineering web applications, backend APIs, DevOps pipelines, and IoT systems.",
     images: [
       {
-        url: "https://sksahinurislam.dev/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "SK Sahinur Islam Profile",
+        url: "/logo.svg",
+        width: 800,
+        height: 800,
+        alt: "SK Sahinur Islam Logo",
       }
     ],
-    siteName: "SK Sahinur Islam",
+    siteName: "SK Sahinur Islam Portfolio",
     locale: "en_IN",
+    firstName: "SK Sahinur",
+    lastName: "Islam",
+    username: "GeniousSonu",
+    gender: "male",
   },
   twitter: {
     card: "summary_large_image",
-    title: "SK Sahinur Islam — Full Stack Developer & IT Engineer",
-    description: "Building reliable systems at the intersection of web, infrastructure, and security.",
-    images: ["https://sksahinurislam.dev/og-image.jpg"],
+    title: "SK Sahinur Islam — Senior Web Application Developer & IT Engineer",
+    description: "Senior Web Application Developer at Ib Arts, Co-Founder of WEFIK, and Patent Holder. Building reliable systems.",
+    images: ["/logo.svg"],
   }
 };
 
-const jsonLd = {
+const jsonLdGraph = {
   "@context": "https://schema.org",
-  "@type": "Person",
-  "name": "SK Sahinur Islam",
-  "url": "https://sksahinurislam.dev",
-  "email": "sahinurislamm2002@gmail.com",
-  "jobTitle": "Full Stack Developer & IT Engineer",
-  "worksFor": { "@type": "Organization", "name": "WEFIK" },
-  "alumniOf": { "@type": "EducationalOrganization", "name": "Guru Nanak Institute of Technology, Kolkata" },
-  "address": { "@type": "PostalAddress", "addressLocality": "Kolkata", "addressRegion": "West Bengal", "addressCountry": "IN" },
-  "sameAs": [
-    "https://www.linkedin.com/in/sksahinurislam/",
-    "https://github.com/GeniousSonu",
-    "https://www.upwork.com/freelancers/~0104912246c7c7bdbf"
-  ],
-  "knowsAbout": ["Full-Stack Development", "React", "Node.js", "MongoDB", "Linux", "Cybersecurity", "IoT", "Machine Learning"]
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": "https://sksahinurislam.dev/#person",
+      "name": "SK Sahinur Islam",
+      "alternateName": ["Sahinur Islam", "GeniousSonu", "SK Sahinur"],
+      "url": "https://sksahinurislam.dev",
+      "image": "https://sksahinurislam.dev/logo.svg",
+      "email": "mailto:sahinurislamm2002@gmail.com",
+      "telephone": "+918159871669",
+      "jobTitle": "Senior Web Application Developer",
+      "description": "Senior Web Application Developer at Ib Arts, Co-Founder of WEFIK, IT Engineer, and IoT Patent Holder.",
+      "worksFor": [
+        {
+          "@type": "Organization",
+          "name": "Ib Arts",
+          "role": "Senior Web Application Developer",
+          "startDate": "2026-07"
+        },
+        {
+          "@type": "Organization",
+          "name": "WEFIK",
+          "role": "Co-Founder",
+          "startDate": "2021-03"
+        }
+      ],
+      "alumniOf": {
+        "@type": "EducationalOrganization",
+        "name": "Guru Nanak Institute of Technology, Kolkata",
+        "sameAs": "https://www.gnit.ac.in/"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Kolkata",
+        "addressRegion": "West Bengal",
+        "addressCountry": "IN"
+      },
+      "sameAs": [
+        "https://www.linkedin.com/in/sksahinurislam/",
+        "https://github.com/GeniousSonu",
+        "https://www.upwork.com/freelancers/~0104912246c7c7bdbf",
+        "https://linktr.ee/sksahinurislam",
+        "https://instagram.com/genious.exe"
+      ],
+      "knowsAbout": [
+        "Full-Stack Development",
+        "Backend Architecture",
+        "DevOps",
+        "React",
+        "Next.js",
+        "Node.js",
+        "Express",
+        "MongoDB",
+        "MySQL",
+        "PostgreSQL",
+        "Docker",
+        "Linux Server Administration",
+        "Cybersecurity",
+        "IoT & Embedded Systems",
+        "MQTT Telemetry",
+        "Python"
+      ],
+      "hasCredential": [
+        { "@type": "EducationalOccupationalCredential", "name": "CompTIA A+" },
+        { "@type": "EducationalOccupationalCredential", "name": "TryHackMe Pre Security Certification" },
+        { "@type": "EducationalOccupationalCredential", "name": "CoCubes Certified Coding & Aptitude" },
+        { "@type": "EducationalOccupationalCredential", "name": "IBM Machine Learning with Python (Honors)" }
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://sksahinurislam.dev/#website",
+      "url": "https://sksahinurislam.dev",
+      "name": "SK Sahinur Islam Portfolio",
+      "publisher": { "@id": "https://sksahinurislam.dev/#person" },
+      "inLanguage": "en-US"
+    },
+    {
+      "@type": "ProfilePage",
+      "@id": "https://sksahinurislam.dev/#profilepage",
+      "url": "https://sksahinurislam.dev",
+      "name": "SK Sahinur Islam — Official Portfolio & Engineering Resume",
+      "mainEntity": { "@id": "https://sksahinurislam.dev/#person" }
+    }
+  ]
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className={`dark ${geist.className}`}>
       <head>
         <link rel="icon" href="/logo.svg" type="image/svg+xml" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet" />
-        <link href="https://api.fontshare.com/v2/css?f[]=general-sans@200,300,400,500,600,700&display=swap" rel="stylesheet" />
+        <link rel="shortcut icon" href="/logo.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/logo.svg" />
+        <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+        <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM Technical Summary" />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdGraph) }}
         />
       </head>
       <body>

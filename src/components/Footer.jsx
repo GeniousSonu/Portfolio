@@ -31,7 +31,7 @@ function MatrixRain() {
         if (y < 0) { drops[i]++; continue; }
 
         // Head char — brighter
-        ctx.font        = `${fontSize}px "IBM Plex Mono", monospace`;
+        ctx.font        = `${fontSize}px "Geist", "Geist Fallback", monospace`;
         ctx.fillStyle   = 'rgba(52,211,153,0.95)';   // bright emerald head
         ctx.fillText(chars[Math.random() * chars.length | 0], i * fontSize, y);
 
