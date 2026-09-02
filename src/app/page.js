@@ -13,6 +13,7 @@ import Experience from '../components/Experience';
 import Projects from '../components/Projects';
 import Skills from '../components/Skills';
 import Certifications from '../components/Certifications';
+import HomeBlogSection from '../components/HomeBlogSection';
 import Contact from '../components/Contact';
 import Footer from '../components/Footer';
 
@@ -135,7 +136,12 @@ export default function Home() {
             </section>
 
             <div className="site-container" style={{ position: 'relative', zIndex: 10 }}>
-              <div className="rack-sep">[ SECTION 07 · CONTACT ]</div>
+              <div className="rack-sep">[ SECTION 07 · LATEST ARTICLES & BLOG ]</div>
+            </div>
+            <HomeBlogSection />
+
+            <div className="site-container" style={{ position: 'relative', zIndex: 10 }}>
+              <div className="rack-sep">[ SECTION 08 · CONTACT ]</div>
             </div>
             <Contact />
           </main>
