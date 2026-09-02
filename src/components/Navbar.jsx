@@ -1,5 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import gsap from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 
@@ -75,10 +77,13 @@ const NAV_ITEMS = [
   { id: '#projects',   label: 'Projects' },
   { id: '#skills',     label: 'Skills' },
   { id: '#certs',      label: 'Certs' },
+  { id: '/blog',       label: 'Blog' },
   { id: '#contact',    label: 'Contact' },
 ];
 
 export default function Navbar() {
+  const router = useRouter();
+  const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
@@ -124,13 +129,30 @@ export default function Navbar() {
   const handleLinkClick = (e, targetId) => {
     e.preventDefault();
     setMobileOpen(false);
+
     if (targetId === '#') {
-      gsap.to(window, { scrollTo: { y: 0 }, duration: 1, ease: 'power3.inOut' });
+      if (pathname === '/') {
+        gsap.to(window, { scrollTo: { y: 0 }, duration: 1, ease: 'power3.inOut' });
+      } else {
+        router.push('/');
+      }
       return;
     }
-    const target = document.querySelector(targetId);
-    if (target) {
-      gsap.to(window, { scrollTo: { y: target, offsetY: 80 }, duration: 1, ease: 'power3.inOut' });
+
+    if (targetId.startsWith('/')) {
+      router.push(targetId);
+      return;
+    }
+
+    if (targetId.startsWith('#')) {
+      if (pathname === '/') {
+        const target = document.querySelector(targetId);
+        if (target) {
+          gsap.to(window, { scrollTo: { y: target, offsetY: 80 }, duration: 1, ease: 'power3.inOut' });
+        }
+      } else {
+        router.push('/' + targetId);
+      }
     }
   };
 

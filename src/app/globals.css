@@ -479,180 +479,312 @@ html {
 .patent-title { font-size: 0.82rem; color: var(--text-primary); line-height: 1.5; margin-bottom: 0.5rem; }
 .patent-meta { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); }
 
-/* ─── EXPERIENCE SECTION REDESIGN ─── */
-.exp-list {
+/* ─── EXPERIENCE SECTION (TWO-PART CAREER HISTORY) ─── */
+.exp-part {
   position: relative;
+  width: 100%;
+}
+
+.exp-part-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-dim);
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.exp-part-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--green);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  padding: 0.25rem 0.75rem;
+  background: rgba(74, 222, 128, 0.06);
+  border: 1px solid rgba(74, 222, 128, 0.2);
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.exp-part-meta {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+/* ── Part 1: Current Roles List ── */
+.current-roles-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
-/* Timeline track (desktop) */
-@media (min-width: 901px) {
-  .exp-list::before {
-    content: '';
-    position: absolute;
-    top: 3rem;
-    bottom: 3rem;
-    left: 184px; /* Align precisely in the middle of the column gap */
-    width: 1px;
-    background: linear-gradient(to bottom, var(--border), var(--border-dim) 80%, transparent);
-    z-index: 1;
-  }
-}
-
-/* Timeline track (mobile) */
-@media (max-width: 900px) {
-  .exp-list::before {
-    content: '';
-    position: absolute;
-    top: 2rem;
-    bottom: 2rem;
-    left: 24px;
-    width: 1px;
-    background: linear-gradient(to bottom, var(--border), var(--border-dim) 80%, transparent);
-    z-index: 1;
-  }
-}
-
-.exp-item {
-  display: grid;
-  grid-template-columns: 160px 1fr;
-  gap: 3rem;
-  padding: 2.5rem 1.5rem;
-  border-radius: 12px;
+.current-role-card {
+  background: rgba(15, 17, 21, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem 2.25rem;
   position: relative;
-  transition: all 0.3s var(--ease-out);
-  margin: 0.5rem -1.5rem;
-  z-index: 2;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
 }
 
-.exp-item:hover {
-  background: rgba(15, 17, 21, 0.65);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 12px 30px rgba(0, 0, 0, 0.4);
+/* Green border overlay hover on Current Roles */
+.current-role-card:hover {
+  border-color: rgba(16, 185, 129, 0.65);
+  background: rgba(18, 22, 28, 0.85);
+  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.7), 0 0 25px rgba(16, 185, 129, 0.15), inset 0 0 0 1px rgba(16, 185, 129, 0.25);
+  transform: translateY(-3px);
 }
 
-/* Timeline dot (desktop) */
-@media (min-width: 901px) {
-  .exp-item::before {
-    content: '';
-    position: absolute;
-    left: 204px; /* Center aligned with the timeline line */
-    top: 2.9rem;
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: var(--void);
-    border: 2px solid var(--border);
-    z-index: 3;
-    transition: all 0.3s var(--ease-out);
-  }
-  .exp-item:hover::before {
-    background: var(--gold-bright);
-    border-color: var(--gold-bright);
-    box-shadow: 0 0 12px rgba(52, 211, 153, 0.6);
-    transform: scale(1.25);
-  }
-  .exp-item:has(.current-badge)::before {
-    background: var(--green);
-    border-color: var(--green);
-    box-shadow: 0 0 8px rgba(74, 222, 128, 0.4);
-  }
-  .exp-item:has(.current-badge):hover::before {
-    box-shadow: 0 0 14px rgba(74, 222, 128, 0.9);
-  }
+.role-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
 }
 
-/* Timeline dot (mobile) */
-@media (max-width: 900px) {
-  .exp-item {
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
-    padding: 2rem 1.5rem 2rem 3.5rem;
-  }
-  .exp-item::before {
-    content: '';
-    position: absolute;
-    left: 20px;
-    top: 2.3rem;
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: var(--void);
-    border: 2px solid var(--border);
-    z-index: 3;
-    transition: all 0.3s var(--ease-out);
-  }
-  .exp-item:hover::before {
-    background: var(--gold-bright);
-    border-color: var(--gold-bright);
-    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
-    transform: scale(1.15);
-  }
-  .exp-item:has(.current-badge)::before {
-    background: var(--green);
-    border-color: var(--green);
-    box-shadow: 0 0 8px rgba(74, 222, 128, 0.4);
-  }
+.role-logo-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 6px;
+  flex-shrink: 0;
+  transition: border-color 0.3s;
 }
 
-.exp-date {
+.current-role-card:hover .role-logo-wrap {
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.role-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.role-header-text {
+  flex: 1;
+  min-width: 240px;
+}
+
+.role-company-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.35rem;
+}
+
+.role-company-name {
   font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  line-height: 1.6;
+  font-size: 0.88rem;
+  color: var(--gold-bright);
+  font-weight: 600;
   letter-spacing: 0.02em;
 }
 
-.exp-date .current-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  margin-bottom: 0.65rem;
-  padding: 0.2rem 0.6rem;
-  background: rgba(74, 222, 128, 0.06);
-  border: 1px solid rgba(74, 222, 128, 0.2);
+.role-type-tag {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.15rem 0.5rem;
   border-radius: 4px;
+}
+
+.current-live-badge {
+  font-family: var(--font-mono);
   font-size: 0.62rem;
   font-weight: 600;
   color: var(--green);
-  letter-spacing: 0.08em;
+  background: rgba(74, 222, 128, 0.08);
+  border: 1px solid rgba(74, 222, 128, 0.25);
+  border-radius: 9999px;
+  padding: 0.12rem 0.5rem;
+  letter-spacing: 0.06em;
 }
 
-.exp-body {
+.role-title-text {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.role-date-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: var(--font-mono);
+  text-align: right;
+  gap: 0.2rem;
+}
+
+.role-date-str {
+  font-size: 0.78rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.role-duration-str {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.role-description-text {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.75;
+  margin: 1.1rem 0 1.35rem 0;
+  max-width: 920px;
+}
+
+.role-tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* ── Part 2: Pinned Scroll-Stacked Cards ── */
+.past-roles-part {
+  width: 100%;
+}
+
+.past-roles-pin-wrapper {
+  width: 100%;
+  position: relative;
   display: flex;
   flex-direction: column;
 }
 
-.exp-company {
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  color: var(--gold-bright);
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  margin-bottom: 0.4rem;
+.past-badge {
+  color: #A78BFA;
+  background: rgba(167, 139, 250, 0.08);
+  border-color: rgba(167, 139, 250, 0.25);
 }
 
-.exp-role {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -0.02em;
-  margin-bottom: 0.85rem;
+.deck-container {
+  position: relative;
+  width: 100%;
+  max-width: 1060px;
+  margin: 1.5rem auto 0 auto;
+  height: 440px;
+  min-height: 440px;
 }
 
-.exp-desc {
-  font-size: 0.98rem;
-  color: var(--text-secondary);
-  line-height: 1.8;
-  margin-bottom: 1.25rem;
-  max-width: 720px;
+.deck-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #131722 0%, #0B0E14 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transform-origin: top center;
+  overflow: hidden;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-.exp-tags {
+.deck-card:hover {
+  border-color: rgba(167, 139, 250, 0.45);
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.9), 0 0 25px rgba(167, 139, 250, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.deck-card-inner {
+  padding: 1.85rem 2.25rem;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  flex-direction: column;
+}
+
+.deck-card-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 0.85rem;
+  margin-bottom: 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+
+.deck-num-badge {
+  color: #A78BFA;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.deck-timeline-badge {
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.past-logo-wrap {
+  border-color: rgba(167, 139, 250, 0.15);
+}
+
+.deck-card:hover .past-logo-wrap {
+  border-color: rgba(167, 139, 250, 0.5);
+}
+
+.past-desc {
+  max-width: 900px;
+}
+
+/* ── Mobile Responsiveness for Experience Section ── */
+@media (max-width: 768px) {
+  .current-role-card {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .role-card-top {
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .role-date-box {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .deck-container {
+    height: 520px;
+    min-height: 520px;
+  }
+
+  .deck-card-inner {
+    padding: 1.35rem 1.25rem;
+  }
+
+  .role-title-text {
+    font-size: 1.15rem;
+  }
+
+  .role-description-text {
+    font-size: 0.88rem;
+    line-height: 1.65;
+  }
 }
 
 .tag {
