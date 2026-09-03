@@ -184,35 +184,45 @@ export default function Certifications() {
     let titleTrigger;
     if (revealEl) {
       titleTrigger = gsap.fromTo(revealEl,
-        { opacity: 0, y: 40 },
-        { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out',
+        { opacity: 0, y: 35 },
+        { opacity: 1, y: 0, duration: 0.85, ease: 'power3.out',
           scrollTrigger: { trigger: revealEl, start: 'top 85%', toggleActions: 'play none none none' }
         }
       );
     }
 
     const gridEl = containerRef.current?.querySelector('.certs-grid');
-    let staggerTrigger;
-    if (gridEl) {
-      const children = gridEl.querySelectorAll('.stagger-child');
-      staggerTrigger = gsap.fromTo(children,
-        { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, duration: 0.7, stagger: 0.06, ease: 'power3.out',
-          scrollTrigger: { trigger: gridEl, start: 'top 80%', toggleActions: 'play none none none' }
-        }
-      );
-    }
+    let mm = gsap.matchMedia();
+
+    mm.add("(min-width: 769px)", () => {
+      if (gridEl) {
+        const children = gridEl.querySelectorAll('.stagger-child');
+        gsap.fromTo(children,
+          { opacity: 0, y: 30 },
+          { opacity: 1, y: 0, duration: 0.6, stagger: 0.05, ease: 'power3.out',
+            scrollTrigger: { trigger: gridEl, start: 'top 80%', toggleActions: 'play none none none' }
+          }
+        );
+      }
+    });
+
+    mm.add("(max-width: 768px)", () => {
+      if (gridEl) {
+        const children = gridEl.querySelectorAll('.stagger-child');
+        gsap.set(children, { opacity: 1, y: 0 }); // Always visible on mobile for immediate horizontal swiping
+      }
+    });
 
     return () => {
       titleTrigger?.scrollTrigger?.kill(); titleTrigger?.kill();
-      staggerTrigger?.scrollTrigger?.kill(); staggerTrigger?.kill();
+      mm.revert();
     };
   }, []);
 
   return (
     <section id="certs" className="section" ref={containerRef}>
       <div className="site-container">
-        <div style={{ marginBottom: '3rem' }} className="reveal">
+        <div style={{ marginBottom: '2.5rem' }} className="reveal">
           <div className="s-label">Credentials</div>
           <h2 className="section-title">30+ Certifications</h2>
           <p className="section-subtitle">
@@ -220,30 +230,38 @@ export default function Certifications() {
           </p>
         </div>
 
-        <div className="certs-grid">
-          {CERTS.map((cert, i) => (
-            <div key={i} className="cert-card stagger-child">
-              {/* Provider logo */}
-              <div
-                className="cert-logo-wrap"
-                style={{ background: cert.bg, borderColor: cert.border }}
-              >
-                <cert.Logo />
-              </div>
+        {/* Mobile Swipe Hint Badge */}
+        <div className="certs-swipe-hint" aria-hidden="true">
+          <span>← Swipe to explore certifications →</span>
+        </div>
 
-              {/* Text content */}
-              <div className="cert-body">
-                <div className="cert-title">{cert.title}</div>
-                <div className="cert-issuer">{cert.issuer}</div>
-                <div className="cert-meta-row">
-                  <span className="cert-date">{cert.date}</span>
-                  {cert.credId && (
-                    <span className="cert-cred-id">{cert.credId}</span>
-                  )}
+        {/* Horizontal scroll snap wrapper on mobile */}
+        <div className="certs-scroll-wrapper">
+          <div className="certs-grid" role="region" aria-label="Certifications carousel">
+            {CERTS.map((cert, i) => (
+              <div key={i} className="cert-card stagger-child">
+                {/* Provider logo */}
+                <div
+                  className="cert-logo-wrap"
+                  style={{ background: cert.bg, borderColor: cert.border }}
+                >
+                  <cert.Logo />
+                </div>
+
+                {/* Text content */}
+                <div className="cert-body">
+                  <div className="cert-title">{cert.title}</div>
+                  <div className="cert-issuer">{cert.issuer}</div>
+                  <div className="cert-meta-row">
+                    <span className="cert-date">{cert.date}</span>
+                    {cert.credId && (
+                      <span className="cert-cred-id">{cert.credId}</span>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         <div className="certs-footer">

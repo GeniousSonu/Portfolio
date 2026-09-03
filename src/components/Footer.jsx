@@ -77,13 +77,20 @@ export default function Footer() {
               </div>
 
               {/* Quick links */}
-              <div className="footer-col">
+              <div className="footer-col footer-nav-col">
                 <h4 className="footer-col-title">Navigation</h4>
-                <ul className="footer-col-links">
-                  {['about','experience','projects','skills','certs','contact'].map(id => (
+                <ul className="footer-col-links footer-compact-grid">
+                  {[
+                    { id: 'about', label: 'About' },
+                    { id: 'experience', label: 'Experience' },
+                    { id: 'projects', label: 'Projects' },
+                    { id: 'skills', label: 'Skills' },
+                    { id: 'certs', label: 'Certs' },
+                    { id: 'contact', label: 'Contact' },
+                  ].map(({ id, label }) => (
                     <li key={id}>
                       <a href={`#${id}`} className="footer-col-link">
-                        <span className="footer-link-arrow">›</span> {id.charAt(0).toUpperCase() + id.slice(1)}
+                        <span className="footer-link-arrow">›</span> {label}
                       </a>
                     </li>
                   ))}
@@ -91,19 +98,19 @@ export default function Footer() {
               </div>
 
               {/* Connect */}
-              <div className="footer-col">
+              <div className="footer-col footer-connect-col">
                 <h4 className="footer-col-title">Connect</h4>
-                <ul className="footer-col-links">
+                <ul className="footer-col-links footer-compact-grid">
                   <li><a href="https://www.linkedin.com/in/sksahinurislam/" target="_blank" rel="noopener noreferrer" className="footer-col-link"><span className="footer-link-arrow">›</span> LinkedIn</a></li>
-                  <li><a href="https://github.com/GeniousSonu"               target="_blank" rel="noopener noreferrer" className="footer-col-link"><span className="footer-link-arrow">›</span> GitHub</a></li>
+                  <li><a href="https://github.com/GeniousSonu" target="_blank" rel="noopener noreferrer" className="footer-col-link"><span className="footer-link-arrow">›</span> GitHub</a></li>
                   <li><a href="https://www.upwork.com/freelancers/~0104912246c7c7bdbf" target="_blank" rel="noopener noreferrer" className="footer-col-link"><span className="footer-link-arrow">›</span> Upwork</a></li>
-                  <li><a href="https://linktr.ee/sksahinurislam"              target="_blank" rel="noopener noreferrer" className="footer-col-link"><span className="footer-link-arrow">›</span> Linktree</a></li>
-                  <li><a href="mailto:sahinurislamm2002@gmail.com"                       className="footer-col-link"><span className="footer-link-arrow">›</span> Email Me</a></li>
+                  <li><a href="https://linktr.ee/sksahinurislam" target="_blank" rel="noopener noreferrer" className="footer-col-link"><span className="footer-link-arrow">›</span> Linktree</a></li>
+                  <li className="footer-link-full"><a href="mailto:sahinurislamm2002@gmail.com" className="footer-col-link"><span className="footer-link-arrow">›</span> Email Me</a></li>
                 </ul>
               </div>
 
-              {/* Terminal card */}
-              <div className="footer-col">
+              {/* Terminal card (Desktop only, hidden on mobile) */}
+              <div className="footer-col footer-terminal-col">
                 <h4 className="footer-col-title">System Status</h4>
                 <div className="footer-terminal-card">
                   <div className="terminal-header" style={{ marginBottom: '0.75rem' }}>
@@ -111,11 +118,11 @@ export default function Footer() {
                     <span style={{ marginLeft: '0.5rem', fontSize: '0.62rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>sahinur@dev:~</span>
                   </div>
                   {[
-                    { key: 'uptime',    val: '99.9%' },
-                    { key: 'kernel',    val: '6.8.0-49-generic' },
-                    { key: 'load avg',  val: '0.42, 0.38, 0.41' },
+                    { key: 'uptime', val: '99.9%' },
+                    { key: 'kernel', val: '6.8.0-49-generic' },
+                    { key: 'load avg', val: '0.42, 0.38, 0.41' },
                     { key: 'processes', val: '247 running' },
-                    { key: 'location',  val: 'Kolkata, IN' },
+                    { key: 'location', val: 'Kolkata, IN' },
                   ].map(({ key, val }) => (
                     <div key={key} className="footer-sys-row">
                       <span className="footer-sys-key">{key}</span>

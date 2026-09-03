@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import gsap from 'gsap';
@@ -87,6 +87,8 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
+  const hamburgerBtnRef = useRef(null);
+  const mobileNavRef = useRef(null);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollToPlugin);
@@ -110,21 +112,74 @@ export default function Navbar() {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
 
-    // Close mobile nav on scroll
-    const closeOnScroll = () => { if (mobileOpen) setMobileOpen(false); };
-    window.addEventListener('scroll', closeOnScroll, { passive: true });
-
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('scroll', closeOnScroll);
     };
+  }, []);
+
+  // Lock body scroll and handle focus trapping when mobile nav is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+
+      // Focus the close button inside the modal on open
+      const timer = setTimeout(() => {
+        const closeBtn = mobileNavRef.current?.querySelector('#mobile-nav-close');
+        closeBtn?.focus();
+      }, 60);
+
+      // Keydown listener for Escape and Tab focus trap
+      const handleKeyDown = (e) => {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          setMobileOpen(false);
+          hamburgerBtnRef.current?.focus();
+          return;
+        }
+
+        if (e.key === 'Tab') {
+          const focusables = Array.from(
+            mobileNavRef.current?.querySelectorAll(
+              'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+            ) || []
+          );
+          if (focusables.length === 0) return;
+
+          const firstEl = focusables[0];
+          const lastEl = focusables[focusables.length - 1];
+
+          if (e.shiftKey) {
+            if (document.activeElement === firstEl) {
+              e.preventDefault();
+              lastEl.focus();
+            }
+          } else {
+            if (document.activeElement === lastEl) {
+              e.preventDefault();
+              firstEl.focus();
+            }
+          }
+        }
+      };
+
+      window.addEventListener('keydown', handleKeyDown);
+      return () => {
+        clearTimeout(timer);
+        window.removeEventListener('keydown', handleKeyDown);
+        document.body.style.overflow = '';
+        document.body.style.touchAction = '';
+      };
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    }
   }, [mobileOpen]);
 
-  // Lock body scroll when mobile nav is open
-  useEffect(() => {
-    document.body.style.overflow = mobileOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [mobileOpen]);
+  const closeMobileNav = () => {
+    setMobileOpen(false);
+    hamburgerBtnRef.current?.focus();
+  };
 
   const handleLinkClick = (e, targetId) => {
     e.preventDefault();
@@ -179,12 +234,19 @@ export default function Navbar() {
 
           {/* Hamburger — animated 3-bar → X */}
           <button
+            ref={hamburgerBtnRef}
             className={`nav-hamburger${mobileOpen ? ' is-open' : ''}`}
             id="hamburger-btn"
-            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav"
-            onClick={() => setMobileOpen(v => !v)}
+            onClick={() => {
+              if (mobileOpen) {
+                closeMobileNav();
+              } else {
+                setMobileOpen(true);
+              }
+            }}
           >
             <span className="ham-bar ham-bar--top" />
             <span className="ham-bar ham-bar--mid" />
@@ -195,6 +257,7 @@ export default function Navbar() {
 
       {/* ── Full-Screen Mobile Nav ── */}
       <div
+        ref={mobileNavRef}
         id="mobile-nav"
         className={mobileOpen ? 'open' : ''}
         role="dialog"
@@ -208,8 +271,8 @@ export default function Navbar() {
         {/* Close button */}
         <button
           id="mobile-nav-close"
-          aria-label="Close menu"
-          onClick={() => setMobileOpen(false)}
+          aria-label="Close navigation menu"
+          onClick={closeMobileNav}
         >
           <span className="ham-bar ham-bar--top" />
           <span className="ham-bar ham-bar--bot" />
@@ -264,7 +327,7 @@ export default function Navbar() {
         <div
           className="mnav-backdrop"
           aria-hidden="true"
-          onClick={() => setMobileOpen(false)}
+          onClick={closeMobileNav}
         />
       )}
     </>

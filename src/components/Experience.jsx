@@ -121,114 +121,173 @@ export default function Experience() {
     const ctx = gsap.context(() => {
       const mm = gsap.matchMedia();
 
-      // ── Desktop Stacking Setup ──
+      // ── Desktop / Tablet Stacking Setup (min-width: 768px) ──
       mm.add("(min-width: 768px)", () => {
-        const offsetStep = 24; // px vertical offset per stacked card
-        const scaleStep = 0.025; // scaling reduction per layer
+        const offsetStep = 40; // px vertical offset per stacked card so top-bar peeks out
+        const totalCards = cards.length;
 
-        // Initial setup
+        // Clean initial state for all cards (eliminates flash before/during scroll)
         cards.forEach((card, i) => {
           if (i === 0) {
-            gsap.set(card, { y: 0, scale: 1, opacity: 1 });
+            gsap.set(card, {
+              y: 0,
+              scale: 1,
+              opacity: 1,
+              visibility: 'visible',
+              filter: 'brightness(1)',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              transformOrigin: 'top center',
+              zIndex: 1,
+            });
           } else {
-            gsap.set(card, { y: window.innerHeight * 0.9, scale: 0.95, opacity: 0 });
+            gsap.set(card, {
+              y: 140 + (i - 1) * 20,
+              scale: 0.96,
+              opacity: 0,
+              visibility: 'visible',
+              filter: 'brightness(1)',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              transformOrigin: 'top center',
+              zIndex: i + 1,
+            });
           }
         });
 
+        // Master pinning timeline with well-calibrated scroll distance (450px per incoming card)
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: pastPinRef.current,
             start: "top 12%",
-            end: "+=2400",
+            end: `+=${(totalCards - 1) * 450}`,
             pin: true,
-            scrub: 0.7,
+            scrub: 0.5,
             anticipatePin: 1,
             invalidateOnRefresh: true,
           }
         });
 
         // Sequence through incoming cards (1, 2, 3...)
-        for (let i = 1; i < cards.length; i++) {
+        for (let i = 1; i < totalCards; i++) {
           const stepLabel = `step-${i}`;
+          const currentTargetY = i * offsetStep;
+          const startY = 130 + (i - 1) * 15;
 
-          // Scale down underneath cards
+          // 1. Incoming card fades to solid opacity quickly in the first 25% of scroll
+          // This eliminates transparent text-ghosting / double-exposure over underneath cards
+          tl.fromTo(
+            cards[i],
+            { opacity: 0 },
+            {
+              opacity: 1,
+              duration: 0.25,
+              ease: "power1.in",
+            },
+            stepLabel
+          );
+
+          // 2. Incoming card smoothly translates up to its stacked offset
+          tl.fromTo(
+            cards[i],
+            {
+              y: startY,
+              scale: 0.96,
+            },
+            {
+              y: currentTargetY,
+              scale: 1,
+              duration: 1,
+              ease: "none",
+            },
+            stepLabel
+          );
+
+          // 3. All cards underneath stay solid, subtly scaling down and dimming for tactile depth
           for (let j = 0; j < i; j++) {
-            const prevScale = 1 - (i - j) * scaleStep;
-            const prevY = j * offsetStep;
-            tl.to(cards[j], {
-              scale: prevScale,
-              y: prevY,
-              duration: 0.6,
-              ease: "power2.out"
-            }, stepLabel);
-          }
+            const depthFromTop = i - j;
+            const targetScale = 1 - depthFromTop * 0.025;
+            const targetBrightness = Math.max(0.65, 1 - depthFromTop * 0.1);
 
-          // Animate current card in
-          const currentY = i * offsetStep;
-          tl.to(cards[i], {
-            y: currentY,
-            scale: 1,
-            opacity: 1,
-            duration: 0.6,
-            ease: "power2.out"
-          }, stepLabel);
+            tl.to(
+              cards[j],
+              {
+                scale: targetScale,
+                filter: `brightness(${targetBrightness})`,
+                duration: 1,
+                ease: "none",
+              },
+              stepLabel
+            );
+          }
         }
       });
 
-      // ── Mobile / Tablet Stacking Setup ──
+      // ── Mobile Setup (max-width: 767px) Natural scroll, clean vertical list ──
       mm.add("(max-width: 767px)", () => {
-        const offsetStep = 16;
-        const scaleStep = 0.018;
-
-        cards.forEach((card, i) => {
-          if (i === 0) {
-            gsap.set(card, { y: 0, scale: 1, opacity: 1 });
-          } else {
-            gsap.set(card, { y: window.innerHeight * 0.75, scale: 0.96, opacity: 0 });
-          }
-        });
-
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: pastPinRef.current,
-            start: "top 8%",
-            end: "+=1700",
-            pin: true,
-            scrub: 0.7,
-            anticipatePin: 1,
-            invalidateOnRefresh: true,
-          }
-        });
-
-        for (let i = 1; i < cards.length; i++) {
-          const stepLabel = `step-m-${i}`;
-
-          for (let j = 0; j < i; j++) {
-            const prevScale = 1 - (i - j) * scaleStep;
-            const prevY = j * offsetStep;
-            tl.to(cards[j], {
-              scale: prevScale,
-              y: prevY,
-              duration: 0.6,
-              ease: "power2.out"
-            }, stepLabel);
-          }
-
-          const currentY = i * offsetStep;
-          tl.to(cards[i], {
-            y: currentY,
+        cards.forEach((card) => {
+          gsap.set(card, {
+            y: 0,
             scale: 1,
             opacity: 1,
-            duration: 0.6,
-            ease: "power2.out"
-          }, stepLabel);
-        }
+            visibility: 'visible',
+            filter: 'none',
+            position: 'relative',
+            top: 'auto',
+            left: 'auto',
+            right: 'auto',
+            transform: 'none',
+          });
+          gsap.fromTo(
+            card,
+            { opacity: 0.4, y: 18 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.45,
+              ease: "power2.out",
+              scrollTrigger: {
+                trigger: card,
+                start: "top 90%",
+                toggleActions: "play none none reverse",
+              }
+            }
+          );
+        });
       });
     }, containerRef);
+
+    // Debounced orientation / resize refresh to prevent stale ScrollTrigger coordinates
+    let refreshTimer;
+    const handleViewportChange = () => {
+      clearTimeout(refreshTimer);
+      refreshTimer = setTimeout(() => {
+        ScrollTrigger.refresh();
+      }, 150);
+    };
+
+    window.addEventListener('resize', handleViewportChange, { passive: true });
+    window.addEventListener('orientationchange', handleViewportChange, { passive: true });
+    window.addEventListener('load', handleViewportChange, { passive: true });
+
+    // Refresh once fonts load to avoid coordinate shifts
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(() => {
+        ScrollTrigger.refresh();
+      });
+    }
 
     return () => {
       headerTrigger?.scrollTrigger?.kill();
       headerTrigger?.kill();
+      clearTimeout(refreshTimer);
+      window.removeEventListener('resize', handleViewportChange);
+      window.removeEventListener('orientationchange', handleViewportChange);
+      window.removeEventListener('load', handleViewportChange);
       ctx.revert();
     };
   }, []);

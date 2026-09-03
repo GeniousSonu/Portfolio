@@ -7,6 +7,13 @@ const geist = Geist({
   weight: ["300", "400", "500", "600", "700"],
 });
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: "#05070c",
+};
+
 export const metadata = {
   metadataBase: new URL("https://sksahinurislam.dev"),
   title: "SK Sahinur Islam — Senior Web Application Developer & IT Engineer",
@@ -162,6 +169,7 @@ const jsonLdGraph = {
 };
 
 import CustomCursor from "@/components/CustomCursor";
+import MobileBottomCTA from "@/components/MobileBottomCTA";
 
 export default function RootLayout({ children }) {
   return (
@@ -180,6 +188,7 @@ export default function RootLayout({ children }) {
       <body>
         <CustomCursor />
         {children}
+        <MobileBottomCTA />
       </body>
     </html>
   );

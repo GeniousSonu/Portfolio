@@ -93,28 +93,31 @@ export default function Hero() {
 
     const typingStartTimeout = setTimeout(typeNext, 1500);
 
-    // Magnetic buttons effect
+    // Magnetic buttons effect (desktop / fine pointer only)
     const buttons = actionsRef.current?.querySelectorAll('.btn') || [];
     const buttonHandlers = [];
+    const isTouch = window.matchMedia('(pointer: coarse)').matches;
 
-    buttons.forEach(btn => {
-      const handleMouseMove = (e) => {
-        const rect = btn.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        const dx = (e.clientX - cx) * 0.25;
-        const dy = (e.clientY - cy) * 0.25;
-        gsap.to(btn, { x: dx, y: dy, duration: 0.3, ease: 'power2.out' });
-      };
+    if (!isTouch) {
+      buttons.forEach(btn => {
+        const handleMouseMove = (e) => {
+          const rect = btn.getBoundingClientRect();
+          const cx = rect.left + rect.width / 2;
+          const cy = rect.top + rect.height / 2;
+          const dx = (e.clientX - cx) * 0.25;
+          const dy = (e.clientY - cy) * 0.25;
+          gsap.to(btn, { x: dx, y: dy, duration: 0.3, ease: 'power2.out' });
+        };
 
-      const handleMouseLeave = () => {
-        gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1, 0.5)' });
-      };
+        const handleMouseLeave = () => {
+          gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1, 0.5)' });
+        };
 
-      btn.addEventListener('mousemove', handleMouseMove);
-      btn.addEventListener('mouseleave', handleMouseLeave);
-      buttonHandlers.push({ btn, handleMouseMove, handleMouseLeave });
-    });
+        btn.addEventListener('mousemove', handleMouseMove);
+        btn.addEventListener('mouseleave', handleMouseLeave);
+        buttonHandlers.push({ btn, handleMouseMove, handleMouseLeave });
+      });
+    }
 
     // Parallax background scroll
     const parallaxTrigger = gsap.to('.hero-bg', {
@@ -149,7 +152,7 @@ export default function Hero() {
       />
       <div className="hero-ripple-scrim" aria-hidden="true" />
       <div className="site-container" style={{ width: '100%' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '2rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="hero-grid-layout">
           <div className="hero-content">
             <div className="hero-eyebrow" id="hero-eyebrow" ref={eyebrowRef}>
               <span className="status-dot"></span>
