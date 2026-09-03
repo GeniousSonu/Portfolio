@@ -203,7 +203,7 @@ export default function Navbar() {
       if (pathname === '/') {
         const target = document.querySelector(targetId);
         if (target) {
-          gsap.to(window, { scrollTo: { y: target, offsetY: 80 }, duration: 1, ease: 'power3.inOut' });
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       } else {
         router.push('/' + targetId);

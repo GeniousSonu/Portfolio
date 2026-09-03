@@ -1,5 +1,8 @@
 "use client";
-import React from 'react';
+import React, { useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import gsap from 'gsap';
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import WaterRippleEffect from './ui/WaterRippleEffect';
 
 /* ── Logo SVG (inline, inherits color) ──────────────────────── */
@@ -38,7 +41,51 @@ function SocialLink({ href, label, children }) {
 
 /* ── Main Footer ─────────────────────────────────────────────── */
 export default function Footer() {
+  const pathname = usePathname();
+  const router = useRouter();
   const year = new Date().getFullYear();
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollToPlugin);
+  }, []);
+
+  const handleNavClick = (e, targetId) => {
+    e.preventDefault();
+
+    if (targetId === '#') {
+      if (pathname === '/') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        router.push('/');
+      }
+      return;
+    }
+
+    if (targetId.startsWith('/')) {
+      router.push(targetId);
+      return;
+    }
+
+    const hash = targetId.startsWith('#') ? targetId : `#${targetId}`;
+    if (pathname === '/') {
+      const target = document.querySelector(hash);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } else {
+      router.push('/' + hash);
+    }
+  };
+
+  const NAV_LINKS = [
+    { id: 'about', label: 'About' },
+    { id: 'experience', label: 'Experience' },
+    { id: 'projects', label: 'Projects' },
+    { id: 'skills', label: 'Skills' },
+    { id: 'certs', label: 'Certs' },
+    { id: '/blog', label: 'Blog', isRoute: true },
+    { id: 'contact', label: 'Contact' },
+  ];
 
   return (
     <footer id="footer" style={{ position: 'relative', overflow: 'hidden' }}>
@@ -62,7 +109,14 @@ export default function Footer() {
             <div className="footer-top-grid">
               {/* Brand col */}
               <div className="footer-brand">
-                <FooterLogo />
+                <a
+                  href="#"
+                  onClick={(e) => handleNavClick(e, '#')}
+                  aria-label="SK Sahinur Islam — Back to top"
+                  style={{ display: 'inline-block', textDecoration: 'none', cursor: 'pointer' }}
+                >
+                  <FooterLogo />
+                </a>
                 <p className="footer-tagline">
                   Engineering at the intersection of<br/>
                   <span style={{ color: 'var(--gold)' }}>web, infrastructure &amp; security.</span>
@@ -80,20 +134,20 @@ export default function Footer() {
               <div className="footer-col footer-nav-col">
                 <h4 className="footer-col-title">Navigation</h4>
                 <ul className="footer-col-links footer-compact-grid">
-                  {[
-                    { id: 'about', label: 'About' },
-                    { id: 'experience', label: 'Experience' },
-                    { id: 'projects', label: 'Projects' },
-                    { id: 'skills', label: 'Skills' },
-                    { id: 'certs', label: 'Certs' },
-                    { id: 'contact', label: 'Contact' },
-                  ].map(({ id, label }) => (
-                    <li key={id}>
-                      <a href={`#${id}`} className="footer-col-link">
-                        <span className="footer-link-arrow">›</span> {label}
-                      </a>
-                    </li>
-                  ))}
+                  {NAV_LINKS.map(({ id, label, isRoute }) => {
+                    const href = isRoute ? id : (pathname === '/' ? `#${id}` : `/#${id}`);
+                    return (
+                      <li key={id}>
+                        <a
+                          href={href}
+                          onClick={(e) => handleNavClick(e, id)}
+                          className="footer-col-link"
+                        >
+                          <span className="footer-link-arrow">›</span> {label}
+                        </a>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
 

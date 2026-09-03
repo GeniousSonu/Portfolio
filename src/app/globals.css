@@ -84,6 +84,7 @@ html {
   color-scheme: dark;
   -webkit-font-smoothing: antialiased;
   scroll-behavior: auto;
+  scroll-padding-top: 80px;
   font-family: 'Geist', 'Geist Fallback', system-ui, sans-serif;
   font-size: 16px;
   font-weight: 400;
@@ -186,7 +187,7 @@ body::after {
 
 /* ─── Layout ─── */
 .site-container { max-width: 1280px; margin: 0 auto; padding: 0 clamp(1.2rem, 4vw, 3rem); }
-.section { padding: clamp(5rem, 10vw, 9rem) 0; position: relative; z-index: 10; }
+.section { padding: clamp(5rem, 10vw, 9rem) 0; position: relative; z-index: 10; scroll-margin-top: 80px; }
 
 /* ─── Keyboard Focus Accessibility & Smooth Scrolling ─── */
 html {
@@ -1130,6 +1131,18 @@ input, textarea, select, .form-input {
 .contact-link-label { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; }
 .contact-link-value { font-size: 0.85rem; color: var(--text-primary); overflow-wrap: anywhere; word-break: break-word; }
 .contact-link-arrow { color: var(--text-muted); font-size: 0.85rem; }
+@media (max-width: 768px) {
+  .contact-link.contact-link-desktop-only {
+    display: none !important;
+  }
+  .contact-intro.reveal-left,
+  .contact-form-card.reveal-right,
+  .about-text.reveal-left,
+  .about-visual.reveal-right {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
 .contact-terminal { font-family: var(--font-mono); }
 .contact-form { display: flex; flex-direction: column; gap: 1rem; }
 .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
@@ -1748,7 +1761,6 @@ footer {
   flex-shrink: 0; width: 20px; height: 20px;
   transition: color 0.25s;
 }
-.linktree-grid-item:hover .linktree-svg-icon { /* inherit hover color from parent */ }
 
 /* ─── GLOBE SECTION ─── */
 #global-reach {
@@ -1893,6 +1905,7 @@ footer {
   margin-bottom: 1.5rem;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   flex-grow: 1;

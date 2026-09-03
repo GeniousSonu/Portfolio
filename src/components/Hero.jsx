@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { TextPlugin } from 'gsap/TextPlugin';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import WaterRippleEffect from './ui/WaterRippleEffect';
 
 export default function Hero() {
@@ -16,7 +17,7 @@ export default function Hero() {
   const typingRef = useRef(null);
 
   useEffect(() => {
-    gsap.registerPlugin(TextPlugin, ScrollTrigger);
+    gsap.registerPlugin(TextPlugin, ScrollTrigger, ScrollToPlugin);
 
     // Entry Animations
     const heroTL = gsap.timeline({ delay: 0.1 });
@@ -174,7 +175,19 @@ export default function Hero() {
             </p>
 
             <div className="hero-actions" id="hero-actions" ref={actionsRef}>
-              <a href="#projects" className="btn btn-gold">View Projects ↓</a>
+              <a
+                href="#projects"
+                onClick={(e) => {
+                  e.preventDefault();
+                  const target = document.getElementById('projects');
+                  if (target) {
+                    gsap.to(window, { scrollTo: { y: target, offsetY: 70 }, duration: 1, ease: 'power3.inOut' });
+                  }
+                }}
+                className="btn btn-gold"
+              >
+                View Projects ↓
+              </a>
               <a href="https://www.linkedin.com/in/sksahinurislam/" target="_blank" rel="noopener noreferrer" className="btn btn-ghost">LinkedIn →</a>
             </div>
 

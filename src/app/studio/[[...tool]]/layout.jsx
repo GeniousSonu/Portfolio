@@ -29,10 +29,8 @@ export default async function StudioLayout({ children }) {
   }
 
   return (
-    <html lang="en">
-      <body style={{ margin: 0, padding: 0, height: '100%' }}>
-        {children}
-      </body>
-    </html>
+    <div style={{ margin: 0, padding: 0, height: '100%', minHeight: '100vh' }}>
+      {children}
+    </div>
   )
 }

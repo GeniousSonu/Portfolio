@@ -185,26 +185,29 @@ export default function Contact() {
 
             {/* Main contact links */}
             <div className="contact-links">
-              {CONTACT_LINKS.map(({ href, Icon, iconBg, iconBorder, iconColor, label, value, external }) => (
-                <a
-                  key={label}
-                  href={href}
-                  className="contact-link"
-                  {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                >
-                  <div
-                    className="contact-link-icon"
-                    style={{ background: iconBg, border: iconBorder, color: iconColor }}
+              {CONTACT_LINKS.map(({ href, Icon, iconBg, iconBorder, iconColor, label, value, external }) => {
+                const isEmail = label === 'Email';
+                return (
+                  <a
+                    key={label}
+                    href={href}
+                    className={`contact-link ${!isEmail ? 'contact-link-desktop-only' : ''}`}
+                    {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                   >
-                    <Icon />
-                  </div>
-                  <div className="contact-link-body">
-                    <div className="contact-link-label">{label}</div>
-                    <div className="contact-link-value">{value}</div>
-                  </div>
-                  <span className="contact-link-arrow">→</span>
-                </a>
-              ))}
+                    <div
+                      className="contact-link-icon"
+                      style={{ background: iconBg, border: iconBorder, color: iconColor }}
+                    >
+                      <Icon />
+                    </div>
+                    <div className="contact-link-body">
+                      <div className="contact-link-label">{label}</div>
+                      <div className="contact-link-value">{value}</div>
+                    </div>
+                    <span className="contact-link-arrow">→</span>
+                  </a>
+                );
+              })}
             </div>
 
             {/* Linktree Hub terminal box */}
