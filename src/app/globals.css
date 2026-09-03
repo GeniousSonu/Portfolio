@@ -908,43 +908,157 @@ input, textarea, select, .form-input {
   border-radius: 12px; padding: 1.75rem;
   transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
   position: relative; overflow: hidden;
+  display: flex; flex-direction: column;
 }
 .project-card::before {
   content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity 0.3s;
   background: radial-gradient(ellipse at top right, rgba(16,185,129,0.06), transparent 60%);
+  pointer-events: none;
 }
-.project-card:hover { border-color: rgba(16,185,129,0.3); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+.project-card:hover { border-color: rgba(16,185,129,0.35); transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.45); }
 .project-card:hover::before { opacity: 1; }
+
+/* ── Patent Project Premium Spotlight ── */
+.project-card.project-card-patent {
+  background: linear-gradient(165deg, rgba(16, 185, 129, 0.08) 0%, #0F1216 45%, #0B0E12 100%);
+  border: 1px solid rgba(16, 185, 129, 0.38);
+  box-shadow: 0 4px 24px rgba(16, 185, 129, 0.08);
+}
+.project-card.project-card-patent::before {
+  background: radial-gradient(ellipse at top right, rgba(52, 211, 153, 0.12), transparent 70%);
+  opacity: 0.7;
+}
+.project-card.project-card-patent:hover {
+  border-color: rgba(52, 211, 153, 0.65);
+  box-shadow: 0 18px 48px rgba(16, 185, 129, 0.18);
+  transform: translateY(-5px);
+}
+.patent-spotlight-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.35rem 0.65rem; background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.28); border-radius: 6px;
+  font-family: var(--font-mono); font-size: 0.62rem;
+  color: var(--gold-bright); letter-spacing: 0.08em; margin-bottom: 0.9rem;
+}
+.patent-spotlight-tag { display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 600; }
+.patent-spotlight-status { color: var(--text-muted); font-size: 0.58rem; }
+
 .project-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.75rem; }
 .project-cat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 0.3rem; }
 .project-links { display: flex; gap: 0.5rem; }
 .project-link {
-  width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
   background: var(--gunmetal); border: 1px solid var(--border);
   border-radius: 6px; color: var(--text-muted); text-decoration: none;
   font-size: 0.75rem; transition: all 0.2s;
 }
-.project-link:hover { border-color: var(--gold); color: var(--gold); }
+.project-link:hover {
+  border-color: var(--gold); color: var(--gold-bright);
+  background: rgba(16, 185, 129, 0.1); transform: translateY(-1px);
+}
 .project-year {
   font-family: var(--font-mono); font-size: 0.65rem;
   color: var(--text-muted); letter-spacing: 0.1em;
 }
+
+/* Clickable Title */
 .project-title {
   font-size: 1.05rem; font-weight: 600; color: var(--text-primary);
   letter-spacing: -0.02em; margin-bottom: 0.6rem; line-height: 1.3;
 }
+.project-title-link {
+  color: var(--text-primary); text-decoration: none;
+  transition: color 0.2s ease; display: inline-block;
+}
+.project-title-link:hover,
+.project-card:hover .project-title-link {
+  color: var(--gold-bright);
+}
+
 .project-desc { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.65; margin-bottom: 1rem; }
-.project-stack { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.project-stack { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 1.25rem; }
 .stack-chip {
   padding: 0.15rem 0.5rem; background: var(--surface);
   border: 1px solid var(--border-dim); border-radius: 3px;
   font-family: var(--font-mono); font-size: 0.6rem;
   color: var(--text-muted); letter-spacing: 0.05em;
 }
-.project-metrics { display: flex; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-dim); }
+
+/* Card Bottom Container pinned to bottom */
+.project-card-bottom {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.project-metrics { display: flex; gap: 1rem; padding-top: 0.9rem; border-top: 1px solid var(--border-dim); }
 .metric { font-family: var(--font-mono); font-size: 0.65rem; }
 .metric-val { color: var(--gold); font-weight: 600; }
 .metric-label { color: var(--text-muted); }
+
+/* Prominent Bottom-Left Action Button */
+.project-bottom-action {
+  display: flex; align-items: center; justify-content: flex-start;
+}
+.project-action-btn {
+  display: inline-flex; align-items: center; gap: 0.55rem;
+  padding: 0.55rem 0.95rem; border-radius: 8px;
+  font-size: 0.78rem; font-weight: 500;
+  text-decoration: none; min-height: 40px;
+  transition: all 0.2s ease; width: auto;
+}
+
+/* GitHub Native Style */
+.project-btn-github {
+  background: #181c24;
+  border: 1px solid rgba(240, 246, 252, 0.18);
+  color: #f0f6fc;
+}
+.project-btn-github:hover {
+  background: #242933;
+  border-color: rgba(240, 246, 252, 0.4);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+.project-btn-github .action-btn-icon { color: #f0f6fc; flex-shrink: 0; }
+
+/* Patent Native Emerald/Gold Style */
+.project-btn-patent {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.12) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  color: #34D399; font-weight: 600;
+}
+.project-btn-patent:hover {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(5, 150, 105, 0.2) 100%);
+  border-color: #34D399; color: #6EE7B7;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.25);
+}
+.project-btn-patent .action-btn-icon { color: #34D399; flex-shrink: 0; }
+
+/* Agency / Internal Platform Style */
+.project-btn-agency {
+  background: rgba(96, 165, 250, 0.1);
+  border: 1px solid rgba(96, 165, 250, 0.3);
+  color: #93C5FD;
+}
+.project-btn-agency:hover {
+  background: rgba(96, 165, 250, 0.18);
+  border-color: #60A5FA; color: #BFDBFE;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(96, 165, 250, 0.2);
+}
+.project-btn-agency .action-btn-icon { color: #93C5FD; flex-shrink: 0; }
+
+.action-btn-arrow {
+  font-size: 0.82rem; transition: transform 0.2s ease; margin-left: 0.15rem;
+}
+.project-action-btn:hover .action-btn-arrow {
+  transform: translate(2px, -2px);
+}
+
 .patent-badge {
   display: inline-flex; align-items: center; gap: 0.4rem;
   padding: 0.25rem 0.6rem; background: rgba(16,185,129,0.1);
