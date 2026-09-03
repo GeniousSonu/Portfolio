@@ -1,9 +1,11 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import gsap from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 
 export default function MobileBottomCTA() {
+  const pathname = usePathname();
   const [visible, setVisible] = useState(false);
   const [inContact, setInContact] = useState(false);
 
@@ -64,6 +66,8 @@ export default function MobileBottomCTA() {
       });
     }
   };
+
+  if (pathname?.startsWith('/studio')) return null;
 
   const isHidden = !visible || inContact;
 

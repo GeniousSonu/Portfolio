@@ -13,10 +13,8 @@ export const metadata = {
  */
 export default function StudioLoginLayout({ children }) {
   return (
-    <html lang="en" className={inter.className}>
-      <body style={{ margin: 0, padding: 0 }}>
-        {children}
-      </body>
-    </html>
+    <div className={inter.className} style={{ margin: 0, padding: 0, minHeight: '100vh', background: 'var(--void, #05070c)' }}>
+      {children}
+    </div>
   )
 }
