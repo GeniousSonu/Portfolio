@@ -170,6 +170,7 @@ const jsonLdGraph = {
 
 import CustomCursor from "@/components/CustomCursor";
 import MobileBottomCTA from "@/components/MobileBottomCTA";
+import { Analytics } from "@vercel/analytics/next";
 
 export default function RootLayout({ children }) {
   return (
@@ -192,6 +193,7 @@ export default function RootLayout({ children }) {
       <body>
         <CustomCursor />
         {children}
+        <Analytics />
         <MobileBottomCTA />
       </body>
     </html>
