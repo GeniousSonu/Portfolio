@@ -1,0 +1,32 @@
+{
+  "name": "studio-portfolio",
+  "private": true,
+  "version": "1.0.0",
+  "main": "package.json",
+  "type": "module",
+  "scripts": {
+    "dev": "sanity dev",
+    "start": "sanity start",
+    "build": "sanity build",
+    "deploy": "sanity deploy",
+    "typegen": "sanity schemas extract --force && sanity typegen generate"
+  },
+  "keywords": [
+    "sanity"
+  ],
+  "dependencies": {
+    "@sanity/vision": "^3.78.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-is": "^19.0.0",
+    "sanity": "^3.78.0",
+    "styled-components": "^6.1.15"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  },
+  "prettier": {
+    "semi": false,
+    "singleQuote": true
+  }
+}

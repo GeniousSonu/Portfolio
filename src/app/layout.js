@@ -161,6 +161,8 @@ const jsonLdGraph = {
   ]
 };
 
+import CustomCursor from "@/components/CustomCursor";
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`dark ${geist.className}`}>
@@ -176,6 +178,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
+        <CustomCursor />
         {children}
       </body>
     </html>

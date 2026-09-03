@@ -8,7 +8,19 @@ const nextConfig = {
       },
     ],
   },
+
+  // Required for Sanity Studio embedded at /studio
+  async headers() {
+    return [
+      {
+        // Allow Sanity Studio to load resources from its CDN
+        source: '/studio/:path*',
+        headers: [
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+        ],
+      },
+    ]
+  },
 };
 
 export default nextConfig;
-

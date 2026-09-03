@@ -40,7 +40,8 @@ const SAMPLE_POSTS = [
 ];
 
 export default function HomeBlogSection() {
-  const [posts, setPosts] = useState(SAMPLE_POSTS);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -49,11 +50,13 @@ export default function HomeBlogSection() {
     async function fetchPosts() {
       try {
         const data = await client.fetch(POSTS_QUERY);
-        if (isMounted && Array.isArray(data) && data.length > 0) {
+        if (isMounted && Array.isArray(data)) {
           setPosts(data.slice(0, 3));
         }
-      } catch (err) {
-        console.warn('Using sample posts for blog section:', err?.message || err);
+      } catch {
+        // Silently handle fetch error if Sanity API is unreachable
+      } finally {
+        if (isMounted) setLoading(false);
       }
     }
     fetchPosts();
@@ -89,22 +92,24 @@ export default function HomeBlogSection() {
     let staggerTrigger;
     if (gridEl) {
       const children = gridEl.querySelectorAll('.home-blog-card');
-      staggerTrigger = gsap.fromTo(
-        children,
-        { opacity: 0, y: 30 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.7,
-          stagger: 0.12,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: gridEl,
-            start: 'top 80%',
-            toggleActions: 'play none none none',
-          },
-        }
-      );
+      if (children && children.length > 0) {
+        staggerTrigger = gsap.fromTo(
+          children,
+          { opacity: 0, y: 30 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.7,
+            stagger: 0.12,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: gridEl,
+              start: 'top 80%',
+              toggleActions: 'play none none none',
+            },
+          }
+        );
+      }
     }
 
     return () => {
@@ -114,6 +119,10 @@ export default function HomeBlogSection() {
       staggerTrigger?.kill();
     };
   }, [posts]);
+
+  if (!loading && posts.length === 0) {
+    return null;
+  }
 
   return (
     <section id="blog-section" className="section" ref={containerRef}>

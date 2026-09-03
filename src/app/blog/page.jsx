@@ -1,10 +1,10 @@
 import React from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import CustomCursor from '@/components/CustomCursor'
 import { client } from '@/sanity/client'
 import { POSTS_QUERY } from '@/sanity/queries'
 import BlogListClient from './BlogListClient'
+import WaterRippleEffect from '@/components/ui/WaterRippleEffect'
 import styles from './blog.module.css'
 
 export const revalidate = 30 // ISR cache revalidation every 30 seconds
@@ -29,11 +29,14 @@ export default async function BlogPage() {
 
   return (
     <main className={styles.blogPage}>
-      <CustomCursor />
       <Navbar />
 
-      {/* Ambient background glow */}
+      {/* Ambient background glow & Water Ripple Layer */}
       <div className={styles.ambientGlow} />
+      <WaterRippleEffect
+        imageSrc="/water-ripple-background.svg"
+        className="water-ripple-layer"
+      />
 
       <div className={styles.container}>
         {/* Header Section */}

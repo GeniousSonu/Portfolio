@@ -4,7 +4,6 @@ import dynamic from 'next/dynamic';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-import CustomCursor from '../components/CustomCursor';
 import Loader from '../components/Loader';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
@@ -80,7 +79,6 @@ export default function Home() {
 
   return (
     <>
-      <CustomCursor />
       {loading ? (
         <Loader onComplete={() => setLoading(false)} />
       ) : (

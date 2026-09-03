@@ -4,11 +4,11 @@ import Link from 'next/link'
 import Image from 'next/image'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import CustomCursor from '@/components/CustomCursor'
 import PortableTextRenderer from '@/components/PortableTextRenderer'
 import { client } from '@/sanity/client'
 import { POST_QUERY, POST_SLUGS_QUERY } from '@/sanity/queries'
 import ShareButtons from './ShareButtons'
+import WaterRippleEffect from '@/components/ui/WaterRippleEffect'
 import styles from './post.module.css'
 
 export const revalidate = 30 // ISR cache revalidation every 30 seconds
@@ -108,11 +108,14 @@ export default async function BlogPostPage({ params }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <CustomCursor />
       <Navbar />
 
-      {/* Ambient background glow */}
+      {/* Ambient background glow & Water Ripple Layer */}
       <div className={styles.ambientGlow} />
+      <WaterRippleEffect
+        imageSrc="/water-ripple-background.svg"
+        className="water-ripple-layer"
+      />
 
       <div className={styles.container}>
         {/* Back Link */}

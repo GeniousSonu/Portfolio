@@ -1,7 +1,7 @@
 import { defineQuery } from 'next-sanity'
 
 export const POSTS_QUERY = defineQuery(`
-  *[_type == "post" && defined(slug.current)] | order(featured desc, publishedAt desc, _createdAt desc) {
+  *[_type == "post" && defined(slug.current) && !(_id in path("drafts.**")) && defined(publishedAt)] | order(featured desc, publishedAt desc, _createdAt desc) {
     _id,
     title,
     "slug": slug.current,

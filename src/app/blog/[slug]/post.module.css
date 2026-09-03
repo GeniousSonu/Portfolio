@@ -4,7 +4,6 @@
   color: var(--text-primary);
   position: relative;
   overflow-x: hidden;
-  padding-bottom: 6rem;
 }
 
 .ambientGlow {
