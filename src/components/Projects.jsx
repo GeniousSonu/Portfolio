@@ -62,7 +62,7 @@ export default function Projects() {
       <div className="site-container">
         <div style={{ marginBottom: '3rem' }} className="reveal">
           <div className="s-label">Selected Work</div>
-          <h2 className="section-title">Things I've built</h2>
+          <h2 className="section-title">Things I&apos;ve built</h2>
           <p className="section-subtitle">From AI tutoring systems to patented IoT hardware — projects where the code actually runs somewhere.</p>
         </div>
         <div className="projects-grid">
