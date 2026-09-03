@@ -1,81 +1,6 @@
 "use client";
-import React, { useEffect, useRef } from 'react';
-
-/* ── Matrix Rain Canvas ─────────────────────────────────────── */
-function MatrixRain() {
-  const canvasRef = useRef(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-
-    const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEF<>{}[]|#$%&@!;:./\\';
-    const fontSize = 13;
-    let cols, drops, animId;
-
-    const resize = () => {
-      canvas.width  = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-      cols  = Math.floor(canvas.width / fontSize);
-      drops = Array.from({ length: cols }, () => Math.random() * -50 | 0);
-    };
-
-    const draw = () => {
-      // Very subtle dark fade — keeps trails short
-      ctx.fillStyle = 'rgba(5,5,5,0.18)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      for (let i = 0; i < drops.length; i++) {
-        const y = drops[i] * fontSize;
-        if (y < 0) { drops[i]++; continue; }
-
-        // Head char — brighter
-        ctx.font        = `${fontSize}px "Geist", "Geist Fallback", monospace`;
-        ctx.fillStyle   = 'rgba(52,211,153,0.95)';   // bright emerald head
-        ctx.fillText(chars[Math.random() * chars.length | 0], i * fontSize, y);
-
-        // Random mid chars — dimmer
-        ctx.fillStyle = i % 3 === 0
-          ? 'rgba(16,185,129,0.55)'    // medium green
-          : 'rgba(16,185,129,0.28)';   // very dim green
-
-        // reset to top occasionally
-        if (y > canvas.height && Math.random() > 0.975) {
-          drops[i] = Math.random() * -30 | 0;
-        } else {
-          drops[i]++;
-        }
-      }
-      animId = requestAnimationFrame(draw);
-    };
-
-    resize();
-    window.addEventListener('resize', resize);
-    animId = requestAnimationFrame(draw);
-
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener('resize', resize);
-    };
-  }, []);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      aria-hidden="true"
-      style={{
-        position: 'absolute',
-        inset: 0,
-        width: '100%',
-        height: '100%',
-        opacity: 0.18,          /* low opacity — blends subtly */
-        pointerEvents: 'none',
-        zIndex: 0,
-      }}
-    />
-  );
-}
+import React from 'react';
+import WaterRippleEffect from './ui/WaterRippleEffect';
 
 /* ── Logo SVG (inline, inherits color) ──────────────────────── */
 function FooterLogo() {
@@ -117,8 +42,10 @@ export default function Footer() {
 
   return (
     <footer id="footer" style={{ position: 'relative', overflow: 'hidden' }}>
-      {/* Matrix Rain background */}
-      <MatrixRain />
+      <WaterRippleEffect
+        imageSrc="/water-ripple-background.svg"
+        className="water-ripple-layer footer-ripple"
+      />
 
       {/* Top gradient fade from page into footer */}
       <div style={{
@@ -128,7 +55,7 @@ export default function Footer() {
       }} />
 
       {/* Content */}
-      <div style={{ position: 'relative', zIndex: 2 }}>
+      <div className="footer-content">
         {/* ── Upper section ── */}
         <div className="footer-upper">
           <div className="site-container">

@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { TextPlugin } from 'gsap/TextPlugin';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import WaterRippleEffect from './ui/WaterRippleEffect';
 
 export default function Hero() {
   const eyebrowRef = useRef(null);
@@ -142,6 +143,11 @@ export default function Hero() {
   return (
     <section id="hero">
       <div className="hero-bg" aria-hidden="true"></div>
+      <WaterRippleEffect
+        imageSrc="/water-ripple-background.svg"
+        className="water-ripple-layer hero-ripple"
+      />
+      <div className="hero-ripple-scrim" aria-hidden="true" />
       <div className="site-container" style={{ width: '100%' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '2rem', alignItems: 'center', flexWrap: 'wrap' }}>
           <div className="hero-content">
@@ -160,7 +166,7 @@ export default function Hero() {
             <p className="hero-role" id="hero-role" ref={roleRef}>Full Stack Developer &amp; IT Engineer</p>
 
             <p className="hero-desc" id="hero-desc" ref={descRef}>
-              I build systems that don't fail at 3 AM. From MERN stack web apps to patented IoT cold chains,
+              I build systems that don&apos;t fail at 3 AM. From MERN stack web apps to patented IoT cold chains,
               I engineer at the intersection of <span className="gold">web, infrastructure, and security.</span>
             </p>
 

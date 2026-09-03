@@ -1,10 +1,13 @@
 "use client";
 import React from 'react';
 import Link from 'next/link';
+import CustomCursor from '../components/CustomCursor';
 
 export default function NotFound() {
   return (
-    <div style={{
+    <>
+      <CustomCursor />
+      <div style={{
       minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column',
@@ -115,6 +118,7 @@ export default function NotFound() {
           ← Return to Terminal
         </Link>
       </main>
-    </div>
+      </div>
+    </>
   );
 }
