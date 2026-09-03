@@ -9,6 +9,11 @@ const withPWA = withPWAInit({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Next.js 16 uses Turbopack by default; the PWA plugin injects a webpack
+  // config for service-worker generation. An empty turbopack key tells Next
+  // that the webpack config (from next-pwa) is intentional.
+  turbopack: {},
+
   images: {
     remotePatterns: [
       {
