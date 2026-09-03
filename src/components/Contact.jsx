@@ -113,6 +113,7 @@ export default function Contact() {
   const [message, setMessage] = useState('');
   const [feedback, setFeedback] = useState('');
   const [feedbackColor, setFeedbackColor] = useState('var(--green)');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -145,27 +146,49 @@ export default function Contact() {
     };
   }, []);
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim() || !email.trim() || !message.trim()) {
       setFeedbackColor('var(--red)');
       setFeedback('⚠ Please fill all fields before sending.');
       return;
     }
-    
-    // Construct mailto link fallback for guaranteed transmission
-    const subject = encodeURIComponent(`Portfolio Inquiry from ${name}`);
-    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`);
-    const mailtoUrl = `mailto:sahinurislamm2002@gmail.com?subject=${subject}&body=${body}`;
-    
-    setFeedbackColor('var(--green)');
-    setFeedback('✓ Message prepared. Opening your mail client...');
-    
-    setTimeout(() => {
-      window.location.href = mailtoUrl;
-    }, 600);
-    
-    setName(''); setEmail(''); setMessage('');
+
+    setIsSubmitting(true);
+    setFeedbackColor('var(--gold, #f59e0b)');
+    setFeedback('Sending message...');
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.trim(), email: email.trim(), message: message.trim() }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setFeedbackColor('var(--green)');
+        setFeedback('✓ Message delivered! I will get back to you soon.');
+        setName('');
+        setEmail('');
+        setMessage('');
+      } else {
+        throw new Error(data.error || 'Delivery failed');
+      }
+    } catch (err) {
+      console.warn('API route send error, using mail client fallback:', err);
+      // Fallback to mailto link
+      const subject = encodeURIComponent(`Portfolio Inquiry from ${name}`);
+      const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`);
+      setFeedbackColor('var(--green)');
+      setFeedback('Opening email client for direct transmission...');
+      setTimeout(() => {
+        window.location.href = `mailto:sahinurislamm2002@gmail.com?subject=${subject}&body=${body}`;
+      }, 600);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -267,8 +290,18 @@ export default function Contact() {
                     <textarea id="msg-field" className="form-input" placeholder="Hi Sahinur, I need help with..."
                       value={message} onChange={(e) => setMessage(e.target.value)} />
                   </div>
-                  <button type="submit" className="btn btn-gold" style={{ width: '100%', justifyContent: 'center' }}>
-                    Send Message →
+                  <button
+                    type="submit"
+                    className="btn btn-gold"
+                    disabled={isSubmitting}
+                    style={{
+                      width: '100%',
+                      justifyContent: 'center',
+                      opacity: isSubmitting ? 0.75 : 1,
+                      cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    {isSubmitting ? 'Sending Message...' : 'Send Message →'}
                   </button>
                   <div id="form-feedback" style={{
                     fontFamily: 'var(--font-mono)', fontSize: '0.72rem',

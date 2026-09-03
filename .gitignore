@@ -47,3 +47,7 @@ public/workbox-*.js
 public/swe-worker-*.js
 public/sw.js.map
 public/workbox-*.js.map
+
+# Skills tool symlinks
+.claude/
+agent/
