@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import gsap from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
@@ -218,7 +219,7 @@ export default function Navbar() {
         <div className="nav-inner">
           {/* Logo */}
           <a href="#" onClick={(e) => handleLinkClick(e, '#')} className="nav-logo" aria-label="SK Sahinur Islam — Home">
-            <img src="/logo.svg" alt="SONU" className="nav-logo-img" />
+            <Image src="/logo.svg" alt="SONU" width={90} height={26} priority className="nav-logo-img" />
           </a>
 
           {/* Desktop links */}

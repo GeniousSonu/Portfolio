@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useRef } from 'react';
+import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -319,7 +320,7 @@ export default function Experience() {
               <div key={role.company} className="current-role-card">
                 <div className="role-card-top">
                   <div className="role-logo-wrap">
-                    <img src={role.logo} alt={`${role.company} Logo`} className="role-logo-img" />
+                    <Image src={role.logo} alt={`${role.company} Logo`} width={44} height={44} className="role-logo-img" style={{ objectFit: 'contain' }} />
                   </div>
                   <div className="role-header-text">
                     <div className="role-company-row">
@@ -373,7 +374,7 @@ export default function Experience() {
 
                     <div className="role-card-top">
                       <div className="role-logo-wrap past-logo-wrap">
-                        <img src={role.logo} alt={`${role.company} Logo`} className="role-logo-img" />
+                        <Image src={role.logo} alt={`${role.company} Logo`} width={44} height={44} className="role-logo-img" style={{ objectFit: 'contain' }} />
                       </div>
                       <div className="role-header-text">
                         <div className="role-company-row">

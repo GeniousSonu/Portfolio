@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import PortableTextRenderer from '@/components/PortableTextRenderer'
 import { client } from '@/sanity/client'
+import { getOptimizedImageUrl } from '@/sanity/image'
 import { POST_QUERY, POST_SLUGS_QUERY } from '@/sanity/queries'
 import ShareButtons from './ShareButtons'
 import WaterRippleEffect from '@/components/ui/WaterRippleEffect'
@@ -37,7 +38,7 @@ export async function generateMetadata({ params }) {
 
   const title = `${post.title} — SK Sahinur Islam`
   const description = post.excerpt || `Read ${post.title} by SK Sahinur Islam.`
-  const imageUrl = post.mainImage?.asset?.url || 'https://sksahinurislam.dev/logo.svg'
+  const imageUrl = getOptimizedImageUrl(post.mainImage, 1200, 85) || post.mainImage?.asset?.url || 'https://sksahinurislam.dev/logo.svg'
 
   return {
     title,
@@ -143,10 +144,10 @@ export default async function BlogPostPage({ params }) {
 
           <div className={styles.authorMeta}>
             <div className={styles.authorDetails}>
-              {post.author?.image?.asset?.url ? (
+              {post.author?.image ? (
                 <div className={styles.authorAvatar}>
                   <Image
-                    src={post.author.image.asset.url}
+                    src={getOptimizedImageUrl(post.author.image, 96) || post.author.image.asset?.url}
                     alt={post.author.name || 'Author'}
                     fill
                     className="object-cover"
@@ -184,10 +185,10 @@ export default async function BlogPostPage({ params }) {
         </header>
 
         {/* Cover Image */}
-        {post.mainImage?.asset?.url && (
+        {post.mainImage && (
           <div className={styles.coverImageWrapper}>
             <Image
-              src={post.mainImage.asset.url}
+              src={getOptimizedImageUrl(post.mainImage, 1200) || post.mainImage.asset?.url}
               alt={post.mainImage.alt || post.title}
               fill
               priority

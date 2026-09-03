@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { getOptimizedImageUrl } from '@/sanity/image'
 import styles from './blog.module.css'
 
 export default function BlogListClient({ initialPosts = [] }) {
@@ -116,9 +117,9 @@ export default function BlogListClient({ initialPosts = [] }) {
             <section className={styles.featuredSection}>
               <Link href={`/blog/${featuredPost.slug}`} className={styles.featuredCard}>
                 <div className={styles.featuredImageWrapper}>
-                  {featuredPost.mainImage?.asset?.url ? (
+                  {featuredPost.mainImage ? (
                     <Image
-                      src={featuredPost.mainImage.asset.url}
+                      src={getOptimizedImageUrl(featuredPost.mainImage, 1000) || featuredPost.mainImage.asset?.url}
                       alt={featuredPost.mainImage.alt || featuredPost.title}
                       fill
                       priority
@@ -146,16 +147,16 @@ export default function BlogListClient({ initialPosts = [] }) {
                   </div>
                   <div className={styles.featuredMeta}>
                     <div className={styles.authorInfo}>
-                      {featuredPost.author?.image?.asset?.url && (
+                      {featuredPost.author?.image ? (
                         <div className={styles.authorAvatar}>
                           <Image
-                            src={featuredPost.author.image.asset.url}
+                            src={getOptimizedImageUrl(featuredPost.author.image, 80) || featuredPost.author.image.asset?.url}
                             alt={featuredPost.author.name || 'Author'}
                             fill
                             className="object-cover"
                           />
                         </div>
-                      )}
+                      ) : null}
                       <span>{featuredPost.author?.name || 'SK Sahinur Islam'}</span>
                     </div>
                     <div>
@@ -182,9 +183,9 @@ export default function BlogListClient({ initialPosts = [] }) {
               {remainingPosts.map((post) => (
                 <Link key={post._id} href={`/blog/${post.slug}`} className={styles.card}>
                   <div className={styles.cardImageWrapper}>
-                    {post.mainImage?.asset?.url ? (
+                    {post.mainImage ? (
                       <Image
-                        src={post.mainImage.asset.url}
+                        src={getOptimizedImageUrl(post.mainImage, 700) || post.mainImage.asset?.url}
                         alt={post.mainImage.alt || post.title}
                         fill
                         className="object-cover"

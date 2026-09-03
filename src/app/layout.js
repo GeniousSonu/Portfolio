@@ -171,8 +171,9 @@ const jsonLdGraph = {
 import CustomCursor from "@/components/CustomCursor";
 import MobileBottomCTA from "@/components/MobileBottomCTA";
 import PWARegistration from "@/components/PWARegistration";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import ConsentAnalyticsGate from "@/components/ConsentAnalyticsGate";
+import CookieConsentBanner from "@/components/CookieConsentBanner";
+import UserPreferences from "@/components/UserPreferences";
 
 export default function RootLayout({ children }) {
   return (
@@ -199,10 +200,11 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <PWARegistration />
+        <UserPreferences />
         <CustomCursor />
         {children}
-        <Analytics />
-        <SpeedInsights />
+        <ConsentAnalyticsGate />
+        <CookieConsentBanner />
         <MobileBottomCTA />
       </body>
     </html>

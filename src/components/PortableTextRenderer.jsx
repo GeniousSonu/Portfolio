@@ -75,7 +75,7 @@ const Callout = ({ value }) => {
 export const components = {
   types: {
     image: ({ value }) => {
-      const imgUrl = urlForImage(value)?.width(1200).url()
+      const imgUrl = urlForImage(value)?.width(1200).quality(80).auto('format').url()
       if (!imgUrl) return null
       return (
         <figure className="my-8 rounded-2xl overflow-hidden border border-border/30 bg-card/40">

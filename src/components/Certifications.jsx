@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useRef } from 'react';
+import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -13,25 +14,25 @@ const LogoLinkedIn = () => (
   </svg>
 );
 
-/* Image-based logos using /logo/ assets */
+/* Image-based logos using Next.js Image optimization */
 const LogoTryHackMe = () => (
-  <img src="/logo/tryhackme.png" alt="TryHackMe" width="28" height="28" style={{ objectFit: 'contain', borderRadius: '4px' }} />
+  <Image src="/logo/tryhackme.png" alt="TryHackMe" width={28} height={28} style={{ objectFit: 'contain', borderRadius: '4px' }} />
 );
 
 const LogoCoursera = () => (
-  <img src="/logo/coursera.png" alt="Coursera" width="28" height="28" style={{ objectFit: 'contain', borderRadius: '4px' }} />
+  <Image src="/logo/coursera.png" alt="Coursera" width={28} height={28} style={{ objectFit: 'contain', borderRadius: '4px' }} />
 );
 
 const LogoUdemy = () => (
-  <img src="/logo/udemy.png" alt="Udemy" width="28" height="28" style={{ objectFit: 'contain', borderRadius: '4px' }} />
+  <Image src="/logo/udemy.png" alt="Udemy" width={28} height={28} style={{ objectFit: 'contain', borderRadius: '4px' }} />
 );
 
 const LogoAon = () => (
-  <img src="/logo/Aon.png" alt="Aon" width="28" height="28" style={{ objectFit: 'contain', borderRadius: '4px' }} />
+  <Image src="/logo/Aon.png" alt="Aon" width={28} height={28} style={{ objectFit: 'contain', borderRadius: '4px' }} />
 );
 
 const LogoArdent = () => (
-  <img src="/logo/ardent.png" alt="Ardent Computech" width="28" height="28" style={{ objectFit: 'contain', borderRadius: '4px' }} />
+  <Image src="/logo/ardent.png" alt="Ardent Computech" width={28} height={28} style={{ objectFit: 'contain', borderRadius: '4px' }} />
 );
 
 /* ── Cert data ─────────────────────────────────────────────── */
