@@ -1,19 +1,5 @@
-import withPWAInit from "@ducanh2912/next-pwa";
-
-const withPWA = withPWAInit({
-  dest: "public",
-  register: true,
-  skipWaiting: true,
-  disable: process.env.NODE_ENV === "development",
-});
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Next.js 16 uses Turbopack by default; the PWA plugin injects a webpack
-  // config for service-worker generation. An empty turbopack key tells Next
-  // that the webpack config (from next-pwa) is intentional.
-  turbopack: {},
-
   images: {
     remotePatterns: [
       {
@@ -26,7 +12,7 @@ const nextConfig = {
   // Transpile packages that expose TS development source in node_modules
   transpilePackages: ['@sanity/workbench', '@sanity/sdk-react', 'sanity', '@sanity/vision'],
 
-  // Required for Sanity Studio embedded at /studio
+  // Required headers for Sanity Studio & PWA Service Worker
   async headers() {
     return [
       {
@@ -36,8 +22,17 @@ const nextConfig = {
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
         ],
       },
-    ]
+      {
+        // Service worker headers for PWA
+        source: '/sw.js',
+        headers: [
+          { key: 'Content-Type', value: 'application/javascript; charset=utf-8' },
+          { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
+          { key: 'Service-Worker-Allowed', value: '/' },
+        ],
+      },
+    ];
   },
 };
 
-export default withPWA(nextConfig);
+export default nextConfig;

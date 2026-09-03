@@ -2212,11 +2212,42 @@ footer {
   color: #10b981;
 }
 
+.install-modal-footer {
+  margin-top: 0.8rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.68rem;
+  font-family: var(--font-mono, monospace);
+  color: #10b981;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
 @media (max-width: 768px) {
+  .install-app-wrapper {
+    margin-left: 0.25rem;
+  }
+  .install-app-btn {
+    padding: 0.45rem 0.6rem;
+    min-height: 40px;
+    min-width: 40px;
+    justify-content: center;
+  }
   .install-app-label {
     display: none;
   }
-  .install-app-btn {
-    padding: 0.42rem 0.55rem;
+  .install-ios-tooltip {
+    position: fixed;
+    top: auto;
+    bottom: 24px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+    max-width: 360px;
+    margin: 0 auto;
+    z-index: 10000;
+  }
+  .install-ios-tooltip::before {
+    display: none;
   }
 }

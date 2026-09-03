@@ -170,7 +170,9 @@ const jsonLdGraph = {
 
 import CustomCursor from "@/components/CustomCursor";
 import MobileBottomCTA from "@/components/MobileBottomCTA";
+import PWARegistration from "@/components/PWARegistration";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export default function RootLayout({ children }) {
   return (
@@ -178,11 +180,16 @@ export default function RootLayout({ children }) {
       <head>
         <link rel="icon" href="/logo.svg" type="image/svg+xml" />
         <link rel="shortcut icon" href="/logo.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.webmanifest" />
+        <meta name="theme-color" content="#05070c" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="application-name" content="SONU" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="SONU" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png" />
+        <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png" />
         <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
         <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM Technical Summary" />
         <script
@@ -191,9 +198,11 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
+        <PWARegistration />
         <CustomCursor />
         {children}
         <Analytics />
+        <SpeedInsights />
         <MobileBottomCTA />
       </body>
     </html>
