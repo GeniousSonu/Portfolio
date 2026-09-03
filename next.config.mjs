@@ -9,6 +9,9 @@ const nextConfig = {
     ],
   },
 
+  // Transpile packages that expose TS development source in node_modules
+  transpilePackages: ['@sanity/workbench', '@sanity/sdk-react', 'sanity', '@sanity/vision'],
+
   // Required for Sanity Studio embedded at /studio
   async headers() {
     return [

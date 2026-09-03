@@ -46,17 +46,14 @@ export async function middleware(request) {
   const sessionCookie = request.cookies.get(COOKIE_NAME)?.value
   const expectedToken = await computeExpectedToken()
 
-  // If env vars aren't set, allow access (dev safety valve — set your env vars!)
-  if (!expectedToken) {
-    console.warn('[Studio Gate] STUDIO_SESSION_SECRET / STUDIO_ADMIN_EMAIL / STUDIO_ADMIN_PASSWORD env vars are not set. Studio is unprotected.')
-    return NextResponse.next()
-  }
-
-  // Constant-time comparison to prevent timing attacks
+  // Must have a valid expected token and matching session cookie
   const isValid =
-    sessionCookie != null &&
-    sessionCookie.length === expectedToken.length &&
-    sessionCookie === expectedToken
+    Boolean(
+      expectedToken &&
+      sessionCookie &&
+      sessionCookie.length === expectedToken.length &&
+      sessionCookie === expectedToken
+    )
 
   if (!isValid) {
     const loginUrl = new URL(LOGIN_PATH, request.url)
@@ -68,5 +65,5 @@ export async function middleware(request) {
 }
 
 export const config = {
-  matcher: ['/studio/:path*'],
+  matcher: ['/studio', '/studio/:path*'],
 }
