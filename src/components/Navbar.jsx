@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import gsap from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
+import InstallAppButton from './InstallAppButton';
 
 /* ── Brand SVG Icons ── */
 const IconGitHub = () => (
@@ -231,6 +232,9 @@ export default function Navbar() {
               </li>
             ))}
           </ul>
+
+          {/* Install App Button */}
+          <InstallAppButton />
 
           {/* Hamburger — animated 3-bar → X */}
           <button
