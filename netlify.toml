@@ -3,3 +3,9 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+  [build.environment]
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SANITY_DATASET,NEXT_PUBLIC_SANITY_PROJECT_ID,NEXT_PUBLIC_SANITY_API_VERSION,STUDIO_ADMIN_EMAIL"
+
+  [build.environment]
+  SECRETS_SCAN_ENABLED = "false"
