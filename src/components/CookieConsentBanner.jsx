@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { getConsentStatus, setConsentStatus } from "@/lib/consent";
+import { getConsentStatus, getConsentChoice, setConsentChoice } from "@/lib/consent";
 
 export default function CookieConsentBanner() {
   const pathname = usePathname();
@@ -10,9 +10,10 @@ export default function CookieConsentBanner() {
   const [analyticsEnabled, setAnalyticsEnabled] = useState(true);
 
   useEffect(() => {
-    // Only show if user hasn't made a choice yet
+    // Only show banner if user has not yet made a choice
+    const choice = getConsentChoice();
     const status = getConsentStatus();
-    if (status === "pending") {
+    if (choice === "none" && status === "pending") {
       // Small delay so it doesn't disrupt initial page entry animation
       const timer = setTimeout(() => {
         setVisible(true);
@@ -42,19 +43,19 @@ export default function CookieConsentBanner() {
   }
 
   const handleAcceptAll = () => {
-    setConsentStatus("granted");
+    setConsentChoice("accept_all", true);
     setAnalyticsEnabled(true);
     setVisible(false);
   };
 
   const handleDecline = () => {
-    setConsentStatus("denied");
+    setConsentChoice("reject", false);
     setAnalyticsEnabled(false);
     setVisible(false);
   };
 
   const handleSavePreferences = () => {
-    setConsentStatus(analyticsEnabled ? "granted" : "denied");
+    setConsentChoice("custom", analyticsEnabled);
     setVisible(false);
   };
 

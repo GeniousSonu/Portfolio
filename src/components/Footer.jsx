@@ -1,9 +1,10 @@
 "use client";
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import gsap from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import WaterRippleEffect from './ui/WaterRippleEffect';
+import { isConsentFullAccepted } from '@/lib/consent';
 
 /* ── Logo SVG (inline, inherits color) ──────────────────────── */
 function FooterLogo() {
@@ -44,9 +45,33 @@ export default function Footer() {
   const pathname = usePathname();
   const router = useRouter();
   const year = new Date().getFullYear();
+  const [showCookieControl, setShowCookieControl] = useState(false);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollToPlugin);
+
+    // Initial check: show cookie control ONLY if user hasn't fully accepted all cookies
+    const updateCookieVisibility = () => {
+      setShowCookieControl(!isConsentFullAccepted());
+    };
+    updateCookieVisibility();
+
+    // Listen for consent updates (Accept All, Reject, or Custom preferences)
+    const handleConsentChoice = (e) => {
+      if (e?.detail?.fullAccepted !== undefined) {
+        setShowCookieControl(!e.detail.fullAccepted);
+      } else {
+        updateCookieVisibility();
+      }
+    };
+
+    window.addEventListener('cookie-consent-choice-changed', handleConsentChoice);
+    window.addEventListener('analytics-consent-changed', updateCookieVisibility);
+
+    return () => {
+      window.removeEventListener('cookie-consent-choice-changed', handleConsentChoice);
+      window.removeEventListener('analytics-consent-changed', updateCookieVisibility);
+    };
   }, []);
 
   const handleNavClick = (e, targetId) => {
@@ -207,18 +232,20 @@ export default function Footer() {
                 <a href="https://github.com/GeniousSonu"               target="_blank" rel="noopener noreferrer" className="footer-link">GitHub</a>
                 <a href="https://www.upwork.com/freelancers/~0104912246c7c7bdbf" target="_blank" rel="noopener noreferrer" className="footer-link">Upwork</a>
                 <a href="https://linktr.ee/sksahinurislam"              target="_blank" rel="noopener noreferrer" className="footer-link">Linktree</a>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (typeof window !== 'undefined') {
-                      window.dispatchEvent(new CustomEvent('open-cookie-preferences'));
-                    }
-                  }}
-                  className="footer-link footer-cookie-link"
-                  style={{ background: 'transparent', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer' }}
-                >
-                  Cookie Settings
-                </button>
+                {showCookieControl && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof window !== 'undefined') {
+                        window.dispatchEvent(new CustomEvent('open-cookie-preferences'));
+                      }
+                    }}
+                    className="footer-link footer-cookie-link"
+                    style={{ background: 'transparent', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer' }}
+                  >
+                    Cookie Settings
+                  </button>
+                )}
               </div>
             </div>
           </div>

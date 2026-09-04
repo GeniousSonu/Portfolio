@@ -1,7 +1,7 @@
 // High-Performance PWA Service Worker for SK Sahinur Islam Portfolio
 // Cache-First for static assets; Stale-While-Revalidate for HTML pages & dynamic routes
 
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v-1788532639339';
 const STATIC_CACHE = `sks-static-${CACHE_VERSION}`;
 const PAGES_CACHE = `sks-pages-${CACHE_VERSION}`;
 const IMAGE_CACHE = `sks-images-${CACHE_VERSION}`;
@@ -40,6 +40,13 @@ self.addEventListener('activate', (event) => {
       );
     }).then(() => self.clients.claim())
   );
+});
+
+// 2b. Explicit skip-waiting message listener
+self.addEventListener('message', (event) => {
+  if (event.data && (event.data.type === 'SKIP_WAITING' || event.data === 'skipWaiting')) {
+    self.skipWaiting();
+  }
 });
 
 // 3. Fetch Event Routing

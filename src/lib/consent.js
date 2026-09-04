@@ -2,6 +2,8 @@
 
 const CONSENT_STORAGE_KEY = 'sks_analytics_consent';
 const CONSENT_COOKIE_KEY = 'sks_analytics_consent';
+const CONSENT_CHOICE_STORAGE_KEY = 'sks_consent_choice';
+const CONSENT_CHOICE_COOKIE_KEY = 'sks_consent_choice';
 
 function getGaMeasurementId() {
   return process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
@@ -72,6 +74,71 @@ export function getConsentStatus() {
   }
 
   return 'pending';
+}
+
+/**
+ * Get the specific consent choice made by user
+ * @returns {'accept_all' | 'reject' | 'custom' | 'none'}
+ */
+export function getConsentChoice() {
+  if (typeof window === 'undefined') return 'none';
+
+  try {
+    const choice = localStorage.getItem(CONSENT_CHOICE_STORAGE_KEY);
+    if (choice === 'accept_all' || choice === 'reject' || choice === 'custom') {
+      return choice;
+    }
+  } catch {
+    // LocalStorage blocked
+  }
+
+  if (typeof document !== 'undefined') {
+    const match = document.cookie.match(new RegExp(`(^| )${CONSENT_CHOICE_COOKIE_KEY}=([^;]+)`));
+    if (match && (match[2] === 'accept_all' || match[2] === 'reject' || match[2] === 'custom')) {
+      return match[2];
+    }
+  }
+
+  return 'none';
+}
+
+/**
+ * Check if the user has performed full "Accept All".
+ * If true, the footer consent control is permanently hidden.
+ * If false (rejected, custom, or pending), the footer control remains visible.
+ * @returns {boolean}
+ */
+export function isConsentFullAccepted() {
+  return getConsentChoice() === 'accept_all';
+}
+
+/**
+ * Record user consent choice (Accept All, Reject, or Custom preferences)
+ * and update Google Analytics consent state.
+ * @param {'accept_all' | 'reject' | 'custom'} choice
+ * @param {boolean} [analyticsGranted]
+ */
+export function setConsentChoice(choice, analyticsGranted) {
+  if (typeof window === 'undefined') return;
+
+  try {
+    localStorage.setItem(CONSENT_CHOICE_STORAGE_KEY, choice);
+  } catch {
+    // LocalStorage blocked
+  }
+
+  if (typeof document !== 'undefined') {
+    document.cookie = `${CONSENT_CHOICE_COOKIE_KEY}=${choice}; max-age=31536000; path=/; SameSite=Lax`;
+  }
+
+  const isGranted = choice === 'accept_all' ? true : (choice === 'reject' ? false : Boolean(analyticsGranted));
+  setConsentStatus(isGranted ? 'granted' : 'denied');
+
+  window.dispatchEvent(
+    new CustomEvent('cookie-consent-choice-changed', {
+      detail: { choice, fullAccepted: choice === 'accept_all' },
+    })
+  );
 }
 
 /**
