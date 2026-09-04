@@ -206,6 +206,18 @@ export default function Footer() {
                 <a href="https://github.com/GeniousSonu"               target="_blank" rel="noopener noreferrer" className="footer-link">GitHub</a>
                 <a href="https://www.upwork.com/freelancers/~0104912246c7c7bdbf" target="_blank" rel="noopener noreferrer" className="footer-link">Upwork</a>
                 <a href="https://linktr.ee/sksahinurislam"              target="_blank" rel="noopener noreferrer" className="footer-link">Linktree</a>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof window !== 'undefined') {
+                      window.dispatchEvent(new CustomEvent('open-cookie-preferences'));
+                    }
+                  }}
+                  className="footer-link footer-cookie-link"
+                  style={{ background: 'transparent', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer' }}
+                >
+                  Cookie Settings
+                </button>
               </div>
             </div>
           </div>

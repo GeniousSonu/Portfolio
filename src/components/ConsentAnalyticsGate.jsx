@@ -1,8 +1,10 @@
 "use client";
-import React, { useSyncExternalStore } from "react";
+import React, { useEffect, useSyncExternalStore } from "react";
+import { usePathname } from "next/navigation";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { getConsentStatus } from "@/lib/consent";
+import { GoogleAnalytics } from "@next/third-parties/google";
+import { getConsentStatus, applyAnalyticsDisableFlag } from "@/lib/consent";
 
 function subscribeConsent(callback) {
   if (typeof window === "undefined") return () => {};
@@ -25,17 +27,45 @@ function getConsentServerSnapshot() {
 /**
  * ConsentAnalyticsGate ensures analytics scripts and telemetry components
  * only mount and initialize after explicit user consent has been granted.
+ *
+ * It guarantees:
+ * 1. Zero analytics scripts load on /studio or /studio-login (Sanity Studio CMS).
+ * 2. GA4 (@next/third-parties/google), Vercel Analytics, and Speed Insights
+ *    only initialize when the user clicks 'Accept' on the cookie consent banner.
+ * 3. Immediate tracking termination and cookie removal if consent is revoked.
  */
 export default function ConsentAnalyticsGate() {
+  const pathname = usePathname();
   const hasConsent = useSyncExternalStore(
     subscribeConsent,
     getConsentSnapshot,
     getConsentServerSnapshot
   );
 
+  const isStudio = pathname?.startsWith("/studio");
+
+  useEffect(() => {
+    // If on studio or without consent, ensure disable flag is active
+    if (isStudio) {
+      const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+      if (gaId && typeof window !== "undefined") {
+        window[`ga-disable-${gaId}`] = true;
+      }
+      return;
+    }
+    applyAnalyticsDisableFlag();
+  }, [hasConsent, isStudio]);
+
+  // Strictly do NOT load on /studio or /studio-login
+  if (isStudio) {
+    return null;
+  }
+
   if (!hasConsent) {
     return null;
   }
+
+  const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
   return (
     <>
@@ -43,11 +73,8 @@ export default function ConsentAnalyticsGate() {
       <Analytics />
       <SpeedInsights />
 
-      {/* 
-        Future Analytics Slot:
-        Plug in Google Analytics, Plausible, PostHog, or custom visitor loggers here.
-        They will strictly load only after the user has given consent.
-      */}
+      {/* Google Analytics 4 (Mounted only after explicit user consent) */}
+      {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
     </>
   );
 }

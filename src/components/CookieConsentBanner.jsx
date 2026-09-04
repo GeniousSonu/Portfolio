@@ -1,8 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { getConsentStatus, setConsentStatus } from "@/lib/consent";
 
 export default function CookieConsentBanner() {
+  const pathname = usePathname();
   const [visible, setVisible] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
   const [analyticsEnabled, setAnalyticsEnabled] = useState(true);
@@ -16,16 +18,38 @@ export default function CookieConsentBanner() {
         setVisible(true);
       }, 1200);
       return () => clearTimeout(timer);
+    } else {
+      setAnalyticsEnabled(status === "granted");
     }
   }, []);
 
+  // Allow re-opening preferences at any time from footer or settings
+  useEffect(() => {
+    const handleOpenPrefs = () => {
+      const status = getConsentStatus();
+      setAnalyticsEnabled(status === "granted");
+      setShowPreferences(true);
+      setVisible(true);
+    };
+
+    window.addEventListener("open-cookie-preferences", handleOpenPrefs);
+    return () => window.removeEventListener("open-cookie-preferences", handleOpenPrefs);
+  }, []);
+
+  // Strictly do NOT render cookie banner on /studio or /studio-login
+  if (pathname?.startsWith("/studio")) {
+    return null;
+  }
+
   const handleAcceptAll = () => {
     setConsentStatus("granted");
+    setAnalyticsEnabled(true);
     setVisible(false);
   };
 
   const handleDecline = () => {
     setConsentStatus("denied");
+    setAnalyticsEnabled(false);
     setVisible(false);
   };
 
@@ -97,7 +121,7 @@ export default function CookieConsentBanner() {
             <div className="cookie-pref-row">
               <div>
                 <div className="cookie-pref-name">Anonymous Analytics</div>
-                <div className="cookie-pref-sub">Vercel Web Analytics &amp; Core Web Vitals</div>
+                <div className="cookie-pref-sub">Google Analytics 4 &amp; Vercel Web Analytics</div>
               </div>
               <label className="cookie-switch" aria-label="Toggle anonymous analytics">
                 <input
@@ -120,9 +144,9 @@ export default function CookieConsentBanner() {
               <button
                 type="button"
                 className="cookie-btn cookie-btn-decline"
-                onClick={() => setShowPreferences(false)}
+                onClick={handleDecline}
               >
-                Back
+                Reject All
               </button>
             </div>
           </div>
