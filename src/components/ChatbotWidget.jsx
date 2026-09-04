@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import styles from './ChatbotWidget.module.css';
+import useScrollLock from '../hooks/useScrollLock';
 
 const MAX_CHAR_COUNT = 500;
 
@@ -67,6 +68,9 @@ export default function ChatbotWidget() {
   const pathname = usePathname();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  const [isTabVisible, setIsTabVisible] = useState(true);
+  const [isFirstVisit, setIsFirstVisit] = useState(false);
   const [messages, setMessages] = useState([INITIAL_MESSAGE]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -75,6 +79,33 @@ export default function ChatbotWidget() {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const chatPanelRef = useRef(null);
+
+  // Cross-device body scroll lock whenever the chatbot is open
+  useScrollLock(isOpen);
+
+  // Pause floating animations when browser tab is hidden to save mobile battery/CPU
+  useEffect(() => {
+    const handleVisibility = () => {
+      setIsTabVisible(document.visibilityState === 'visible');
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, []);
+
+  // One-time attention pulse on first site visit (recorded in localStorage)
+  useEffect(() => {
+    try {
+      const seen = localStorage.getItem('genious_bot_intro_seen');
+      if (!seen) {
+        setIsFirstVisit(true);
+        localStorage.setItem('genious_bot_intro_seen', 'true');
+        const timer = setTimeout(() => setIsFirstVisit(false), 4500);
+        return () => clearTimeout(timer);
+      }
+    } catch (e) {
+      // Storage access protected / private browsing
+    }
+  }, []);
 
   // Exclude widget from Sanity Studio routes entirely
   if (pathname?.startsWith('/studio')) {
@@ -87,21 +118,35 @@ export default function ChatbotWidget() {
   };
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !isClosing) {
       scrollToBottom();
       // Auto-focus input on open
       const timer = setTimeout(() => {
         inputRef.current?.focus();
-      }, 100);
+      }, 120);
       return () => clearTimeout(timer);
     }
-  }, [isOpen, messages]);
+  }, [isOpen, isClosing, messages]);
+
+  const handleOpen = () => {
+    setIsClosing(false);
+    setIsOpen(true);
+  };
+
+  const handleClose = () => {
+    if (isClosing) return;
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsOpen(false);
+      setIsClosing(false);
+    }, 220); // Sync with CSS exit animation duration
+  };
 
   // Handle keyboard navigation (Escape to close)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && isOpen) {
-        setIsOpen(false);
+        handleClose();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -125,7 +170,7 @@ export default function ChatbotWidget() {
       }
       // On mobile screens, minimize chat so the user immediately sees the navigated section
       if (typeof window !== 'undefined' && window.innerWidth <= 768) {
-        setIsOpen(false);
+        handleClose();
       }
     } else if (action.type === 'open') {
       window.open(action.target, '_blank', 'noopener,noreferrer');
@@ -217,81 +262,107 @@ export default function ChatbotWidget() {
     <div className={styles.widgetWrapper}>
       {/* Floating Trigger Button */}
       {!isOpen && (
-        <button
-          type="button"
-          className={styles.triggerBtn}
-          onClick={() => setIsOpen(true)}
-          aria-expanded={isOpen}
-          aria-label="Open genious.exe systems assistant"
-          title="Ask genious.exe about Sahinur"
-        >
-          <div className={styles.triggerIcon} aria-hidden="true">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
-          </div>
-          <span className={styles.triggerText}>genious.exe</span>
-          <span className={styles.pulseDot} aria-hidden="true" />
-        </button>
+        <div className={`${styles.triggerWrapper} ${isFirstVisit ? styles.firstVisitAttention : ''}`}>
+          <button
+            type="button"
+            className={styles.triggerBtn}
+            onClick={handleOpen}
+            aria-expanded={isOpen}
+            aria-label="Open genious.exe systems assistant"
+            title="Ask genious.exe about Sahinur"
+          >
+            {/* 3D Floating Bot Icon with synchronous drop shadow */}
+            <div className={styles.botFigureWrap} aria-hidden="true">
+              <div
+                className={styles.botBobbingFigure}
+                style={{ animationPlayState: isTabVisible ? 'running' : 'paused' }}
+              >
+                <img
+                  src="/Image/bot.svg"
+                  alt=""
+                  width={34}
+                  height={34}
+                  className={styles.botAvatarImg}
+                  loading="eager"
+                />
+              </div>
+              <div
+                className={styles.botShadow}
+                style={{ animationPlayState: isTabVisible ? 'running' : 'paused' }}
+                aria-hidden="true"
+              />
+            </div>
+
+            <span className={styles.triggerText}>genious.exe</span>
+            <span className={styles.pulseDot} aria-hidden="true" />
+          </button>
+        </div>
       )}
 
-      {/* Expandable Chat Panel */}
+      {/* Expandable Chat Panel & Backdrop */}
       {isOpen && (
-        <div
-          ref={chatPanelRef}
-          className={styles.chatPanel}
-          role="dialog"
-          aria-label="genious.exe Systems Assistant"
-          aria-modal="true"
-        >
-          {/* Header */}
-          <div className={styles.header}>
-            <div className={styles.headerInfo}>
-              <div className={styles.botAvatar} aria-hidden="true">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 8V4H8" />
-                  <rect width="16" height="12" x="4" y="8" rx="2" />
-                  <path d="M2 14h2" />
-                  <path d="M20 14h2" />
-                  <path d="M15 13v2" />
-                  <path d="M9 13v2" />
-                </svg>
-              </div>
-              <div className={styles.headerTitles}>
-                <h3>genious.exe</h3>
-                <span>● Online · Systems Assistant</span>
-              </div>
-            </div>
+        <>
+          {/* Dimmed backdrop for click-outside dismissal */}
+          <div
+            className={`${styles.backdrop} ${isClosing ? styles.backdropClosing : ''}`}
+            onClick={handleClose}
+            aria-hidden="true"
+          />
 
-            <div className={styles.headerActions}>
-              <button
-                type="button"
-                className={styles.iconBtn}
-                onClick={handleClearChat}
-                title="Reset conversation"
-                aria-label="Reset conversation"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-                  <path d="M21 3v5h-5" />
-                  <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-                  <path d="M8 16H3v5" />
-                </svg>
-              </button>
-              <button
-                type="button"
-                className={styles.iconBtn}
-                onClick={() => setIsOpen(false)}
-                title="Close chat panel (Esc)"
-                aria-label="Close chat panel"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
+          <div
+            ref={chatPanelRef}
+            className={`${styles.chatPanel} ${isClosing ? styles.chatPanelClosing : ''}`}
+            role="dialog"
+            aria-label="genious.exe Systems Assistant"
+            aria-modal="true"
+          >
+            {/* Pinned Header */}
+            <div className={styles.header}>
+              <div className={styles.headerInfo}>
+                <div className={styles.botHeaderAvatarWrap} aria-hidden="true">
+                  <img
+                    src="/Image/bot.svg"
+                    alt=""
+                    width={28}
+                    height={28}
+                    className={styles.headerAvatarImg}
+                  />
+                </div>
+                <div className={styles.headerTitles}>
+                  <h3>genious.exe</h3>
+                  <span>● Online · Systems Assistant</span>
+                </div>
+              </div>
+
+              <div className={styles.headerActions}>
+                <button
+                  type="button"
+                  className={styles.iconBtn}
+                  onClick={handleClearChat}
+                  title="Reset conversation"
+                  aria-label="Reset conversation"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                    <path d="M21 3v5h-5" />
+                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                    <path d="M8 16H3v5" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  className={styles.iconBtn}
+                  onClick={handleClose}
+                  title="Close chat panel (Esc)"
+                  aria-label="Close chat panel"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
             </div>
-          </div>
 
           {/* Messages List */}
           <div className={styles.messagesList} role="log" aria-live="polite">
@@ -417,6 +488,7 @@ export default function ChatbotWidget() {
             </form>
           </div>
         </div>
+        </>
       )}
     </div>
   );

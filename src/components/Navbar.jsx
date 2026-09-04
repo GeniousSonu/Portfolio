@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import gsap from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import InstallAppButton from './InstallAppButton';
+import useScrollLock from '../hooks/useScrollLock';
 
 /* ── Brand SVG Icons ── */
 const IconGitHub = () => (
@@ -93,6 +94,9 @@ export default function Navbar() {
   const hamburgerBtnRef = useRef(null);
   const mobileNavRef = useRef(null);
 
+  // Hook-based cross-device scroll lock with exact scroll position preservation
+  useScrollLock(mobileOpen);
+
   useEffect(() => {
     gsap.registerPlugin(ScrollToPlugin);
     let lastY = window.scrollY;
@@ -120,12 +124,9 @@ export default function Navbar() {
     };
   }, []);
 
-  // Lock body scroll and handle focus trapping when mobile nav is open
+  // Handle focus trapping and keyboard shortcuts when mobile nav is open
   useEffect(() => {
     if (mobileOpen) {
-      document.body.style.overflow = 'hidden';
-      document.body.style.touchAction = 'none';
-
       // Focus the close button inside the modal on open
       const timer = setTimeout(() => {
         const closeBtn = mobileNavRef.current?.querySelector('#mobile-nav-close');
@@ -170,12 +171,7 @@ export default function Navbar() {
       return () => {
         clearTimeout(timer);
         window.removeEventListener('keydown', handleKeyDown);
-        document.body.style.overflow = '';
-        document.body.style.touchAction = '';
       };
-    } else {
-      document.body.style.overflow = '';
-      document.body.style.touchAction = '';
     }
   }, [mobileOpen]);
 

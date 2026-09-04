@@ -146,19 +146,20 @@ footer {
 #cursor {
   position: fixed; top: 0; left: 0; width: 8px; height: 8px;
   background: var(--gold); border-radius: 50%;
-  pointer-events: none; z-index: 99999; transform: translate(-50%, -50%);
+  pointer-events: none; z-index: 2147483647; transform: translate(-50%, -50%);
   transition: width 0.2s, height 0.2s, opacity 0.2s;
   mix-blend-mode: normal;
 }
 #cursor-ring {
   position: fixed; top: 0; left: 0; width: 32px; height: 32px;
   border: 1px solid rgba(16,185,129,0.4); border-radius: 50%;
-  pointer-events: none; z-index: 99998; transform: translate(-50%, -50%);
+  pointer-events: none; z-index: 2147483646; transform: translate(-50%, -50%);
   transition: width 0.3s var(--ease-out), height 0.3s var(--ease-out),
               border-color 0.3s, opacity 0.3s;
 }
 body:has(a:hover) #cursor-ring,
-body:has(button:hover) #cursor-ring { width: 50px; height: 50px; border-color: var(--gold); }
+body:has(button:hover) #cursor-ring,
+body:has([role="button"]:hover) #cursor-ring { width: 50px; height: 50px; border-color: var(--gold); }
 
 /* ─── Grid Overlay ─── */
 #grid-overlay {

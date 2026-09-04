@@ -9,14 +9,34 @@ export default function CustomCursor() {
     if (!cursor || !ring) return;
 
     let mx = -100, my = -100, rx = -100, ry = -100;
+    let isVisible = false;
 
     const handleMouseMove = (e) => {
       mx = e.clientX;
       my = e.clientY;
+      if (!isVisible) {
+        isVisible = true;
+        cursor.style.opacity = '1';
+        ring.style.opacity = '1';
+      }
       gsap.to(cursor, { x: mx, y: my, duration: 0.05, ease: 'none' });
     };
 
+    const handleMouseLeave = () => {
+      isVisible = false;
+      cursor.style.opacity = '0';
+      ring.style.opacity = '0';
+    };
+
+    const handleMouseEnter = () => {
+      isVisible = true;
+      cursor.style.opacity = '1';
+      ring.style.opacity = '1';
+    };
+
     document.addEventListener('mousemove', handleMouseMove);
+    document.documentElement.addEventListener('mouseleave', handleMouseLeave);
+    document.documentElement.addEventListener('mouseenter', handleMouseEnter);
 
     let animationFrameId;
     const animateRing = () => {
@@ -30,6 +50,8 @@ export default function CustomCursor() {
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
+      document.documentElement.removeEventListener('mouseleave', handleMouseLeave);
+      document.documentElement.removeEventListener('mouseenter', handleMouseEnter);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);

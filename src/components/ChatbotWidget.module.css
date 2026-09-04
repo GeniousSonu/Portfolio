@@ -4,7 +4,7 @@
   position: fixed;
   bottom: 1.5rem;
   right: 1.5rem;
-  z-index: 995;
+  z-index: 100050;
   font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
 }
 
@@ -15,44 +15,133 @@
   }
 }
 
-/* ─── Floating Trigger Button ─── */
+/* ─── Trigger Button & First-Visit Attention ─── */
+.triggerWrapper {
+  display: inline-block;
+  border-radius: 9999px;
+  will-change: transform, box-shadow;
+}
+
+.firstVisitAttention {
+  animation: firstVisitPulse 3.5s cubic-bezier(0.25, 1, 0.5, 1) 1;
+}
+
+@keyframes firstVisitPulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(230, 57, 70, 0.7);
+  }
+  20% {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 16px rgba(230, 57, 70, 0);
+  }
+  40% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(230, 57, 70, 0.5);
+  }
+  60% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 12px rgba(230, 57, 70, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(230, 57, 70, 0);
+  }
+}
+
 .triggerBtn {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.75rem 1.1rem;
-  background: rgba(14, 18, 28, 0.92);
+  gap: 0.65rem;
+  padding: 0.55rem 1.15rem 0.55rem 0.65rem;
+  background: rgba(14, 18, 28, 0.94);
   color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 9999px;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 15px rgba(230, 57, 70, 0.25);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 18px rgba(230, 57, 70, 0.25);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s ease,
+              box-shadow 0.25s ease;
+  user-select: none;
 }
 
 .triggerBtn:hover {
   transform: translateY(-2px);
-  border-color: rgba(230, 57, 70, 0.6);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 22px rgba(230, 57, 70, 0.4);
+  border-color: rgba(230, 57, 70, 0.65);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65), 0 0 24px rgba(230, 57, 70, 0.45);
 }
 
-.triggerIcon {
+/* ─── 3D Floating Bot Figure with Synchronous Drop Shadow ─── */
+.botFigureWrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+}
+
+.botBobbingFigure {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  will-change: transform;
+  animation: floatBob 3.4s ease-in-out infinite;
+  z-index: 2;
+}
+
+.botAvatarImg {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--red, #e63946), #b91c1c);
-  color: #fff;
+  object-fit: cover;
+  border: 1.5px solid rgba(230, 57, 70, 0.6);
+  box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
+  display: block;
+}
+
+.botShadow {
+  position: absolute;
+  bottom: 0px;
+  width: 20px;
+  height: 5px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0) 75%);
+  will-change: transform, opacity;
+  animation: floatShadow 3.4s ease-in-out infinite;
+  z-index: 1;
+}
+
+/* Continuous smooth floating physics: shadow shrinks/lightens as bot rises, expands/darkens as bot descends */
+@keyframes floatBob {
+  0%, 100% {
+    transform: translateY(-4px);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+
+@keyframes floatShadow {
+  0%, 100% {
+    transform: scale(0.8);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.75;
+  }
 }
 
 .triggerText {
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.02em;
+  color: #f1f5f9;
 }
 
 .pulseDot {
@@ -69,37 +158,79 @@
   50% { opacity: 0.4; transform: scale(0.85); }
 }
 
+/* ─── Dimmed Backdrop (Click to close) ─── */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 7, 18, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 100040;
+  animation: backdropFadeIn 0.22s ease-out forwards;
+}
+
+.backdropClosing {
+  animation: backdropFadeOut 0.2s ease-in forwards;
+}
+
+@keyframes backdropFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes backdropFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
 /* ─── Chat Window Panel ─── */
 .chatPanel {
-  position: absolute;
-  bottom: calc(100% + 12px);
-  right: 0;
-  width: 380px;
-  height: 520px;
-  max-height: calc(100vh - 120px);
-  background: rgba(10, 13, 20, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  position: fixed;
+  bottom: 5.5rem;
+  right: 1.5rem;
+  width: 390px;
+  height: 550px;
+  max-height: calc(100vh - 110px);
+  background: rgba(10, 13, 20, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.13);
   border-radius: 18px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 35px rgba(230, 57, 70, 0.15);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  animation: panelSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 100050;
+  animation: panelEntrance 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes panelSlideUp {
-  from {
+.chatPanelClosing {
+  animation: panelExit 0.2s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+@keyframes panelEntrance {
+  0% {
     opacity: 0;
-    transform: translateY(16px) scale(0.96);
+    transform: scale(0.92) translateY(16px);
   }
-  to {
+  100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: scale(1) translateY(0);
   }
 }
 
+@keyframes panelExit {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.94) translateY(14px);
+  }
+}
+
+/* ─── True Full-Screen Fixed Overlay on Mobile ─── */
 @media (max-width: 768px) {
   .chatPanel {
     position: fixed;
@@ -108,23 +239,57 @@
     right: 0;
     bottom: 0;
     width: 100vw;
+    height: 100%;
     height: 100dvh;
     max-height: 100dvh;
     border-radius: 0;
     border: none;
-    z-index: 1000;
+    z-index: 100050;
     background: #05070c;
+    animation: panelEntranceMobile 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .chatPanelClosing {
+    animation: panelExitMobile 0.2s cubic-bezier(0.4, 0, 1, 1) forwards;
+  }
+
+  @keyframes panelEntranceMobile {
+    0% {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes panelExitMobile {
+    0% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(24px);
+    }
   }
 }
 
-/* ─── Header ─── */
+/* ─── Pinned Header ─── */
 .header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0.85rem 1rem;
-  background: rgba(18, 22, 34, 0.85);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(14, 18, 28, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .headerInfo {
@@ -133,16 +298,25 @@
   gap: 0.65rem;
 }
 
-.botAvatar {
+.botHeaderAvatarWrap {
   width: 32px;
   height: 32px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, rgba(230, 57, 70, 0.25), rgba(230, 57, 70, 0.05));
-  border: 1px solid rgba(230, 57, 70, 0.4);
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1.5px solid rgba(230, 57, 70, 0.5);
+  box-shadow: 0 0 10px rgba(230, 57, 70, 0.25);
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--red, #e63946);
+  background: rgba(230, 57, 70, 0.1);
+}
+
+.headerAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .headerTitles h3 {
@@ -309,8 +483,9 @@
 
 /* ─── Footer Input Area ─── */
 .footer {
-  padding: 0.75rem 1rem;
-  background: rgba(14, 18, 28, 0.85);
+  flex-shrink: 0;
+  padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  background: rgba(14, 18, 28, 0.96);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
