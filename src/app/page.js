@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -21,6 +21,7 @@ const GlobeConnect = dynamic(() => import('../components/GlobeConnect'), { ssr: 
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
+  const handleLoaderComplete = useCallback(() => setLoading(false), []);
 
   useEffect(() => {
     if (loading) return;
@@ -80,7 +81,7 @@ export default function Home() {
   return (
     <>
       {loading ? (
-        <Loader onComplete={() => setLoading(false)} />
+        <Loader onComplete={handleLoaderComplete} />
       ) : (
         <>
           <div id="grid-overlay" aria-hidden="true"></div>

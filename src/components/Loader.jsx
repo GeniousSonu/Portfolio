@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 
 const loaderTexts = [
@@ -13,6 +13,11 @@ const loaderTexts = [
 export default function Loader({ onComplete }) {
   const [index, setIndex] = useState(0);
   const [percent, setPercent] = useState(0);
+  const onCompleteRef = useRef(onComplete);
+
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   useEffect(() => {
     let currentIdx = 0;
@@ -33,18 +38,18 @@ export default function Loader({ onComplete }) {
               ease: 'power2.in',
               onComplete: () => {
                 loader.style.display = 'none';
-                if (onComplete) onComplete();
+                if (onCompleteRef.current) onCompleteRef.current();
               }
             });
           } else {
-            if (onComplete) onComplete();
+            if (onCompleteRef.current) onCompleteRef.current();
           }
         }, 400);
       }
     }, 350);
 
     return () => clearInterval(interval);
-  }, [onComplete]);
+  }, []);
 
   return (
     <div id="loader" role="status" aria-label="Loading">

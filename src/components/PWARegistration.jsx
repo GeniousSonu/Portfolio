@@ -21,31 +21,53 @@ export default function PWARegistration() {
       return () => window.removeEventListener("beforeinstallprompt", handleEarlyPrompt);
     }
 
+    // In local development (npm run dev), unregister any active service worker to prevent
+    // dev server request loops, cache collisions with Turbopack, and loader freezing.
+    if (process.env.NODE_ENV === "development") {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (const registration of registrations) {
+          registration.unregister();
+          console.log("PWA: Development mode active; unregistered service worker to prevent dev loops.");
+        }
+      });
+      return () => window.removeEventListener("beforeinstallprompt", handleEarlyPrompt);
+    }
+
+    // 2. Production Service Worker & Update Coordination
+    // Check if the page had an existing controller when it initially loaded.
+    // If it did NOT (first-time visit or fresh install), claiming the client is the initial setup
+    // and must NEVER reload the page. Only true updates (replacing an existing worker) reload.
+    let hadExistingController = Boolean(navigator.serviceWorker.controller);
     let swRegistration = null;
-    let refreshing = false;
+    let isReloading = false;
 
-    // 2. Controller change listener:
-    // When a new service worker activates and claims clients, reload once silently.
     const handleControllerChange = () => {
-      if (refreshing) return;
-      refreshing = true;
-
-      // Prevent potential reload loop if controllerchange fires multiple times in quick succession
-      const lastReload = sessionStorage.getItem("pwa_sw_last_reload");
-      const now = Date.now();
-      if (lastReload && now - Number(lastReload) < 5000) {
-        console.log("PWA: Rapid controller change detected; skipping duplicate reload.");
+      // First-time install: page already has the freshest assets, do NOT reload
+      if (!hadExistingController) {
+        hadExistingController = true;
+        console.log("PWA: Initial service worker claimed control (first install, skipping reload).");
         return;
       }
-      sessionStorage.setItem("pwa_sw_last_reload", String(now));
 
-      console.log("PWA: New service worker active. Silently reloading to apply update.");
+      if (isReloading) return;
+
+      // Prevent reload loops: reload at most once per 30 seconds
+      const lastReload = sessionStorage.getItem("pwa_sw_last_reload");
+      const now = Date.now();
+      if (lastReload && now - Number(lastReload) < 30000) {
+        console.log("PWA: Duplicate controllerchange ignored (recently reloaded).");
+        return;
+      }
+
+      isReloading = true;
+      sessionStorage.setItem("pwa_sw_last_reload", String(now));
+      console.log("PWA: New service worker activated. Silently reloading page once to apply update.");
       window.location.reload();
     };
 
     navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
 
-    // 3. Register service worker and wire update checks
+    // 3. Register service worker
     const registerSW = async () => {
       try {
         const registration = await navigator.serviceWorker.register("/sw.js", {
@@ -53,12 +75,12 @@ export default function PWARegistration() {
         });
         swRegistration = registration;
 
-        // If there is already an installed worker waiting, tell it to skip waiting immediately
-        if (registration.waiting) {
+        // If an updated worker is already waiting, tell it to skip waiting immediately
+        if (registration.waiting && navigator.serviceWorker.controller) {
           registration.waiting.postMessage({ type: "SKIP_WAITING" });
         }
 
-        // Listen for future worker updates
+        // Listen for new worker updates
         registration.addEventListener("updatefound", () => {
           const installingWorker = registration.installing;
           if (installingWorker) {
@@ -67,16 +89,12 @@ export default function PWARegistration() {
                 installingWorker.state === "installed" &&
                 navigator.serviceWorker.controller
               ) {
-                // New worker is ready and an existing controller is running; skip waiting immediately
-                console.log("PWA: New service worker installed. Triggering skipWaiting.");
+                console.log("PWA: New service worker version installed. Triggering skipWaiting.");
                 installingWorker.postMessage({ type: "SKIP_WAITING" });
               }
             });
           }
         });
-
-        // Trigger immediate check against server
-        registration.update().catch(() => {});
       } catch (err) {
         console.warn("PWA Service Worker registration error:", err);
       }
@@ -85,11 +103,17 @@ export default function PWARegistration() {
     if (document.readyState === "complete") {
       registerSW();
     } else {
-      window.addEventListener("load", registerSW);
+      window.addEventListener("load", registerSW, { once: true });
     }
 
-    // 4. Actively check for updates when PWA is reopened from home screen or brought to foreground
+    // 4. Check for updates when PWA is reopened from home screen or brought to foreground
+    // Throttled to at most once per 60 seconds to prevent rapid-fire requests
+    let lastUpdateCheck = Date.now();
     const handleCheckUpdate = () => {
+      const now = Date.now();
+      if (now - lastUpdateCheck < 60000) return;
+      lastUpdateCheck = now;
+
       if (swRegistration) {
         swRegistration.update().catch(() => {});
       } else if (navigator.serviceWorker.ready) {
@@ -106,10 +130,8 @@ export default function PWARegistration() {
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("pageshow", handleCheckUpdate);
-    window.addEventListener("focus", handleCheckUpdate);
 
-    // Periodic check every 60 minutes for long-lived sessions
+    // Periodic check every 60 minutes for long-running sessions
     const interval = setInterval(handleCheckUpdate, 60 * 60 * 1000);
 
     return () => {
@@ -117,8 +139,6 @@ export default function PWARegistration() {
       window.removeEventListener("load", registerSW);
       navigator.serviceWorker.removeEventListener("controllerchange", handleControllerChange);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("pageshow", handleCheckUpdate);
-      window.removeEventListener("focus", handleCheckUpdate);
       clearInterval(interval);
     };
   }, []);
