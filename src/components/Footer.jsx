@@ -84,6 +84,7 @@ export default function Footer() {
     { id: 'skills', label: 'Skills' },
     { id: 'certs', label: 'Certs' },
     { id: '/blog', label: 'Blog', isRoute: true },
+    { id: '/store', label: 'Store', isRoute: true },
     { id: 'contact', label: 'Contact' },
   ];
 

@@ -85,3 +85,22 @@ export const POST_SLUGS_QUERY = defineQuery(`
     "slug": slug.current
   }
 `)
+
+export const PRODUCTS_QUERY = defineQuery(`
+  *[_type == "product" && !(_id in path("drafts.**"))] | order(featured desc, _createdAt desc) {
+    _id,
+    name,
+    description,
+    category,
+    price,
+    affiliateUrl,
+    featured,
+    image {
+      asset->{
+        _id,
+        url
+      },
+      alt
+    }
+  }
+`)

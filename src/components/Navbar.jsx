@@ -80,6 +80,7 @@ const NAV_ITEMS = [
   { id: '#skills',     label: 'Skills' },
   { id: '#certs',      label: 'Certs' },
   { id: '/blog',       label: 'Blog' },
+  { id: '/store',      label: 'Store' },
   { id: '#contact',    label: 'Contact' },
 ];
 

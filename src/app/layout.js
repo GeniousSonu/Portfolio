@@ -184,6 +184,7 @@ import PWARegistration from "@/components/PWARegistration";
 import ConsentAnalyticsGate from "@/components/ConsentAnalyticsGate";
 import CookieConsentBanner from "@/components/CookieConsentBanner";
 import UserPreferences from "@/components/UserPreferences";
+import ChatbotWidget from "@/components/ChatbotWidget";
 
 export default function RootLayout({ children }) {
   return (
@@ -216,6 +217,7 @@ export default function RootLayout({ children }) {
         <ConsentAnalyticsGate />
         <CookieConsentBanner />
         <MobileBottomCTA />
+        <ChatbotWidget />
       </body>
     </html>
   );
