@@ -38,7 +38,7 @@ export async function POST(request) {
               New Inquiry from Portfolio
             </h2>
             <p style="margin: 4px 0 0; font-size: 13px; color: #94a3b8;">
-              Direct submission via sksahinurislam.dev
+              Direct submission via genioussonu.me
             </p>
           </div>
 

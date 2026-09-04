@@ -10,12 +10,31 @@ import styles from './blog.module.css'
 export const revalidate = 30 // ISR cache revalidation every 30 seconds
 
 export const metadata = {
-  title: 'Engineering Blog & Articles — SK Sahinur Islam',
-  description: 'Deep dives on backend architecture, system design, DevOps, Node.js, Next.js, and IoT innovations by SK Sahinur Islam.',
+  title: 'Engineering Blog & Articles — SK Sahinur Islam (Genious Sonu)',
+  description: 'Deep dives on backend architecture, system design, DevOps, Node.js, Next.js, and IoT innovations by SK Sahinur Islam (Genious Sonu).',
+  alternates: {
+    canonical: 'https://genioussonu.me/blog',
+  },
   openGraph: {
-    title: 'Engineering Blog & Articles — SK Sahinur Islam',
-    description: 'Deep dives on backend architecture, system design, DevOps, Node.js, Next.js, and IoT innovations by SK Sahinur Islam.',
-    url: 'https://sksahinurislam.dev/blog',
+    title: 'Engineering Blog & Articles — SK Sahinur Islam (Genious Sonu)',
+    description: 'Deep dives on backend architecture, system design, DevOps, Node.js, Next.js, and IoT innovations by SK Sahinur Islam (Genious Sonu).',
+    url: 'https://genioussonu.me/blog',
+    siteName: 'SK Sahinur Islam (Genious Sonu) Portfolio',
+    images: [
+      {
+        url: '/icon-512.png',
+        width: 512,
+        height: 512,
+        alt: 'Engineering Insights by SK Sahinur Islam (Genious Sonu)',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Engineering Blog & Articles — SK Sahinur Islam (Genious Sonu)',
+    description: 'Deep dives on backend architecture, system design, DevOps, and IoT innovations.',
+    creator: '@GeniousSonu',
+    images: ['/icon-512.png'],
   },
 }
 

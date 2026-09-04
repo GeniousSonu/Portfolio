@@ -317,9 +317,9 @@ export default function Contact() {
             <div className="ssh-prompt">
               <div className="ssh-line">
                 <span className="ssh-prompt-str">sahinur@dev:~$</span>
-                <span className="ssh-cmd">ping -c 1 sksahinurislam.dev</span>
+                <span className="ssh-cmd">ping -c 1 genioussonu.me</span>
               </div>
-              <div className="ssh-line ssh-out">PING sksahinurislam.dev: 56 data bytes</div>
+              <div className="ssh-line ssh-out">PING genioussonu.me: 56 data bytes</div>
               <div className="ssh-line ssh-out">64 bytes: icmp_seq=0 ttl=64 time=12ms</div>
               <div className="ssh-line ssh-out" style={{ color: 'var(--green)' }}>
                 ✓ 1 packet transmitted, 1 received, 0% packet loss

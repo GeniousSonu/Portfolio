@@ -36,23 +36,24 @@ export async function generateMetadata({ params }) {
     }
   }
 
-  const title = `${post.title} — SK Sahinur Islam`
-  const description = post.excerpt || `Read ${post.title} by SK Sahinur Islam.`
-  const imageUrl = getOptimizedImageUrl(post.mainImage, 1200, 85) || post.mainImage?.asset?.url || 'https://sksahinurislam.dev/logo.svg'
+  const title = `${post.title} — SK Sahinur Islam (Genious Sonu)`
+  const description = post.excerpt || `Read ${post.title} by SK Sahinur Islam (Genious Sonu).`
+  const imageUrl = getOptimizedImageUrl(post.mainImage, 1200, 85) || post.mainImage?.asset?.url || 'https://genioussonu.me/icon-512.png'
 
   return {
     title,
     description,
     alternates: {
-      canonical: post.syncMetadata?.canonicalUrl || `https://sksahinurislam.dev/blog/${slug}`,
+      canonical: post.syncMetadata?.canonicalUrl || `https://genioussonu.me/blog/${slug}`,
     },
     openGraph: {
       title,
       description,
       type: 'article',
-      url: `https://sksahinurislam.dev/blog/${slug}`,
+      url: `https://genioussonu.me/blog/${slug}`,
+      siteName: 'SK Sahinur Islam (Genious Sonu) Portfolio',
       publishedTime: post.publishedAt,
-      authors: [post.author?.name || 'SK Sahinur Islam'],
+      authors: [post.author?.name || 'SK Sahinur Islam (Genious Sonu)'],
       images: [
         {
           url: imageUrl,
@@ -66,6 +67,7 @@ export async function generateMetadata({ params }) {
       card: 'summary_large_image',
       title,
       description,
+      creator: '@GeniousSonu',
       images: [imageUrl],
     },
   }
@@ -85,21 +87,21 @@ export default async function BlogPostPage({ params }) {
     '@type': 'BlogPosting',
     headline: post.title,
     description: post.excerpt,
-    image: post.mainImage?.asset?.url,
+    image: post.mainImage?.asset?.url || imageUrl,
     datePublished: post.publishedAt,
     author: {
       '@type': 'Person',
-      name: post.author?.name || 'SK Sahinur Islam',
-      url: 'https://sksahinurislam.dev',
+      name: post.author?.name || 'SK Sahinur Islam (Genious Sonu)',
+      url: 'https://genioussonu.me',
     },
     publisher: {
       '@type': 'Person',
-      name: 'SK Sahinur Islam',
-      url: 'https://sksahinurislam.dev',
+      name: 'SK Sahinur Islam (Genious Sonu)',
+      url: 'https://genioussonu.me',
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `https://sksahinurislam.dev/blog/${slug}`,
+      '@id': `https://genioussonu.me/blog/${slug}`,
     },
   }
 

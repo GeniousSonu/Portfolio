@@ -161,10 +161,11 @@ export default function Hero() {
               <span>Open to Global Roles · IST (UTC+5:30)</span>
             </div>
 
-            <h1 className="hero-name" aria-label="SK Sahinur Islam" ref={nameRef}>
+            <h1 className="hero-name" aria-label="SK Sahinur Islam (Genious Sonu) — Full Stack Developer & IT Engineer" ref={nameRef}>
               <span className="hero-name-line"><span>SK</span></span>
               <span className="hero-name-line"><span>Sahinur</span></span>
               <span className="hero-name-line"><span>Islam</span></span>
+              <span className="sr-only"> (Genious Sonu) — Full Stack Developer &amp; IT Engineer</span>
             </h1>
 
             <p className="hero-role" id="hero-role" ref={roleRef}>Full Stack Developer &amp; IT Engineer</p>

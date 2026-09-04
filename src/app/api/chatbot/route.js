@@ -166,8 +166,8 @@ function isValidOrigin(req) {
     if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
       return true;
     }
-    // Allow portfolio domain
-    if (url.hostname.endsWith('sksahinurislam.dev')) {
+    // Allow portfolio domains
+    if (url.hostname.endsWith('genioussonu.me') || url.hostname.endsWith('sksahinurislam.dev')) {
       return true;
     }
     // Allow vercel deployment previews
@@ -365,7 +365,7 @@ async function callOpenRouterModel({ apiKey, systemPrompt, messages, timeoutMs =
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${apiKey}`,
-          'HTTP-Referer': 'https://sksahinurislam.dev',
+          'HTTP-Referer': 'https://genioussonu.me',
           'X-Title': 'SK Sahinur Islam Portfolio (genious.exe)',
         },
         body: JSON.stringify(body),

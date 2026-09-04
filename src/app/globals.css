@@ -211,6 +211,19 @@ img, svg, video, canvas {
   outline-offset: 3px;
   border-radius: 4px;
 }
+
+/* ─── Screen Reader & SEO Semantic Helper ─── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
 @media (pointer: coarse) {
   #cursor, #cursor-ring { display: none !important; }
   body { cursor: auto !important; }

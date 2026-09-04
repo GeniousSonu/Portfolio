@@ -15,13 +15,22 @@ export const viewport = {
 };
 
 export const metadata = {
-  metadataBase: new URL("https://sksahinurislam.dev"),
-  title: "SK Sahinur Islam — Senior Web Application Developer & IT Engineer",
-  description: "Official portfolio of SK Sahinur Islam — Senior Web Application Developer at Ib Arts, Co-Founder of WEFIK, Patent Holder, and IT Engineer from Kolkata, India. Specialized in Backend Architecture, DevOps, Node.js, React, Linux, and IoT.",
+  metadataBase: new URL("https://genioussonu.me"),
+  title: {
+    default: "SK Sahinur Islam (Genious Sonu) — Full Stack Developer & IT Engineer Portfolio",
+    template: "%s | SK Sahinur Islam (Genious Sonu)",
+  },
+  description: "Official portfolio of SK Sahinur Islam (Genious Sonu, Sahinur) — Senior Web Application Developer at Ib Arts, Co-Founder of WEFIK, Patent Holder, and IT Engineer. Explore full stack projects, backend architecture, and engineering articles.",
   keywords: [
     "SK Sahinur Islam",
     "Sahinur Islam",
+    "Sahinur",
+    "Genious Sonu",
     "GeniousSonu",
+    "Sonu",
+    "portfolio of Sahinur",
+    "Sahinur Islam portfolio",
+    "Sonu portfolio",
     "Senior Web Application Developer",
     "Ib Arts",
     "WEFIK Co-Founder",
@@ -34,8 +43,8 @@ export const metadata = {
     "React Developer",
     "Linux Systems Administrator"
   ],
-  authors: [{ name: "SK Sahinur Islam", url: "https://sksahinurislam.dev" }],
-  creator: "SK Sahinur Islam",
+  authors: [{ name: "SK Sahinur Islam (Genious Sonu)", url: "https://genioussonu.me" }],
+  creator: "SK Sahinur Islam (Genious Sonu)",
   publisher: "SK Sahinur Islam",
   robots: {
     index: true,
@@ -49,23 +58,24 @@ export const metadata = {
     },
   },
   alternates: {
-    canonical: "https://sksahinurislam.dev",
+    canonical: "https://genioussonu.me",
   },
   openGraph: {
     type: "profile",
-    url: "https://sksahinurislam.dev",
-    title: "SK Sahinur Islam — Senior Web Application Developer & IT Engineer",
-    description: "Senior Web Application Developer at Ib Arts, Co-Founder of WEFIK, and Patent Holder. Engineering web applications, backend APIs, DevOps pipelines, and IoT systems.",
+    url: "https://genioussonu.me",
+    title: "SK Sahinur Islam (Genious Sonu) — Full Stack Developer & IT Engineer Portfolio",
+    description: "Official portfolio of SK Sahinur Islam (Genious Sonu, Sahinur) — Senior Web Application Developer at Ib Arts, Co-Founder of WEFIK, and IoT Patent Holder.",
     images: [
       {
-        url: "/logo.svg",
-        width: 800,
-        height: 800,
-        alt: "SK Sahinur Islam Logo",
+        url: "/icon-512.png",
+        width: 512,
+        height: 512,
+        alt: "SK Sahinur Islam (Genious Sonu) — Full Stack Developer & IT Engineer",
       }
     ],
-    siteName: "SK Sahinur Islam Portfolio",
-    locale: "en_IN",
+    siteName: "SK Sahinur Islam (Genious Sonu) Portfolio",
+    locale: "en_US",
+    alternateLocale: ["en_IN"],
     firstName: "SK Sahinur",
     lastName: "Islam",
     username: "GeniousSonu",
@@ -73,9 +83,10 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "SK Sahinur Islam — Senior Web Application Developer & IT Engineer",
-    description: "Senior Web Application Developer at Ib Arts, Co-Founder of WEFIK, and Patent Holder. Building reliable systems.",
-    images: ["/logo.svg"],
+    title: "SK Sahinur Islam (Genious Sonu) — Full Stack Developer & IT Engineer Portfolio",
+    description: "Official portfolio of SK Sahinur Islam (Genious Sonu, Sahinur) — Senior Web Application Developer at Ib Arts, Co-Founder of WEFIK, and IoT Patent Holder.",
+    creator: "@GeniousSonu",
+    images: ["/icon-512.png"],
   },
   manifest: "/manifest.webmanifest",
   appleWebApp: {
@@ -94,14 +105,21 @@ const jsonLdGraph = {
   "@graph": [
     {
       "@type": "Person",
-      "@id": "https://sksahinurislam.dev/#person",
+      "@id": "https://genioussonu.me/#person",
       "name": "SK Sahinur Islam",
-      "alternateName": ["Sahinur Islam", "GeniousSonu", "SK Sahinur"],
-      "url": "https://sksahinurislam.dev",
-      "image": "https://sksahinurislam.dev/logo.svg",
+      "alternateName": [
+        "Genious Sonu",
+        "Sonu",
+        "Sahinur Islam",
+        "Sahinur",
+        "GeniousSonu",
+        "SK Sahinur"
+      ],
+      "url": "https://genioussonu.me",
+      "image": "https://genioussonu.me/icon-512.png",
       "email": "mailto:sahinurislamm2002@gmail.com",
       "telephone": "+918159871669",
-      "jobTitle": "Senior Web Application Developer",
+      "jobTitle": "Senior Web Application Developer & Full Stack IT Engineer",
       "description": "Senior Web Application Developer at Ib Arts, Co-Founder of WEFIK, IT Engineer, and IoT Patent Holder.",
       "worksFor": [
         {
@@ -131,9 +149,13 @@ const jsonLdGraph = {
       "sameAs": [
         "https://www.linkedin.com/in/sksahinurislam/",
         "https://github.com/GeniousSonu",
+        "https://x.com/GeniousSonu",
+        "https://twitter.com/GeniousSonu",
+        "https://instagram.com/genious.exe",
+        "https://www.youtube.com/@GeniousSonu",
         "https://www.upwork.com/freelancers/~0104912246c7c7bdbf",
         "https://linktr.ee/sksahinurislam",
-        "https://instagram.com/genious.exe"
+        "https://www.facebook.com/profile.php?id=61561884613549"
       ],
       "knowsAbout": [
         "Full-Stack Development",
@@ -154,6 +176,7 @@ const jsonLdGraph = {
         "Python"
       ],
       "hasCredential": [
+        { "@type": "EducationalOccupationalCredential", "name": "Indian Patent No. 544062 (IoT Real-Time Vaccine Storage Monitoring)" },
         { "@type": "EducationalOccupationalCredential", "name": "CompTIA A+" },
         { "@type": "EducationalOccupationalCredential", "name": "TryHackMe Pre Security Certification" },
         { "@type": "EducationalOccupationalCredential", "name": "CoCubes Certified Coding & Aptitude" },
@@ -162,18 +185,18 @@ const jsonLdGraph = {
     },
     {
       "@type": "WebSite",
-      "@id": "https://sksahinurislam.dev/#website",
-      "url": "https://sksahinurislam.dev",
-      "name": "SK Sahinur Islam Portfolio",
-      "publisher": { "@id": "https://sksahinurislam.dev/#person" },
+      "@id": "https://genioussonu.me/#website",
+      "url": "https://genioussonu.me",
+      "name": "SK Sahinur Islam (Genious Sonu) Portfolio",
+      "publisher": { "@id": "https://genioussonu.me/#person" },
       "inLanguage": "en-US"
     },
     {
       "@type": "ProfilePage",
-      "@id": "https://sksahinurislam.dev/#profilepage",
-      "url": "https://sksahinurislam.dev",
-      "name": "SK Sahinur Islam — Official Portfolio & Engineering Resume",
-      "mainEntity": { "@id": "https://sksahinurislam.dev/#person" }
+      "@id": "https://genioussonu.me/#profilepage",
+      "url": "https://genioussonu.me",
+      "name": "SK Sahinur Islam (Genious Sonu) — Official Portfolio & Engineering Resume",
+      "mainEntity": { "@id": "https://genioussonu.me/#person" }
     }
   ]
 };

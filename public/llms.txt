@@ -11,7 +11,7 @@
 - **Patent Holder**: Patent No. 202531060002 A — Solar Powered IoT Vaccine Preservation System with MQTT Telemetry & Zone-wise Peltier Cooling (Granted Jul 4, 2025).
 
 ## Contact & Links
-- **Official Website**: https://sksahinurislam.dev
+- **Official Website**: https://genioussonu.me
 - **Email**: sahinurislamm2002@gmail.com
 - **LinkedIn**: https://www.linkedin.com/in/sksahinurislam/
 - **GitHub**: https://github.com/GeniousSonu

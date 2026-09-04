@@ -4,7 +4,7 @@ import styles from './post.module.css'
 
 export default function ShareButtons({ title, slug }) {
   const [copied, setCopied] = useState(false)
-  const url = typeof window !== 'undefined' ? window.location.href : `https://sksahinurislam.dev/blog/${slug}`
+  const url = typeof window !== 'undefined' ? window.location.href : `https://genioussonu.me/blog/${slug}`
 
   const handleCopy = () => {
     navigator.clipboard.writeText(url)

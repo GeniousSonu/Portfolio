@@ -1,26 +1,7 @@
-# Allow all AI crawlers, search engines, and LLM bots
 User-agent: *
 Allow: /
+Disallow: /studio/
+Disallow: /studio-login
+Disallow: /api/
 
-User-agent: GPTBot
-Allow: /
-
-User-agent: ChatGPT-User
-Allow: /
-
-User-agent: ClaudeBot
-Allow: /
-
-User-agent: Claude-Web
-Allow: /
-
-User-agent: PerplexityBot
-Allow: /
-
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-Sitemap: https://sksahinurislam.dev/sitemap.xml
+Sitemap: https://genioussonu.me/sitemap.xml

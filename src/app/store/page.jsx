@@ -10,33 +10,34 @@ import styles from './store.module.css';
 export const revalidate = 30; // ISR cache revalidation every 30 seconds
 
 export const metadata = {
-  title: 'Curated Gear, Dev Tools & Recommendations — SK Sahinur Islam',
+  title: 'Curated Tech Gear & Dev Tools — SK Sahinur Islam (Genious Sonu)',
   description:
-    'Hardware, desk setups, developer tools, SaaS, and engineering books personally battle-tested and recommended by SK Sahinur Islam.',
+    'Hardware, desk setups, developer tools, SaaS, and engineering books personally battle-tested and recommended by SK Sahinur Islam (Genious Sonu).',
   alternates: {
-    canonical: 'https://sksahinurislam.dev/store',
+    canonical: 'https://genioussonu.me/store',
   },
   openGraph: {
-    title: 'Curated Gear, Dev Tools & Recommendations — SK Sahinur Islam',
+    title: 'Curated Tech Gear & Dev Tools — SK Sahinur Islam (Genious Sonu)',
     description:
-      'Hardware, desk setups, developer tools, SaaS, and engineering books personally battle-tested and recommended by SK Sahinur Islam.',
-    url: 'https://sksahinurislam.dev/store',
-    siteName: 'SK Sahinur Islam Portfolio',
+      'Hardware, desk setups, developer tools, SaaS, and engineering books personally battle-tested and recommended by SK Sahinur Islam (Genious Sonu).',
+    url: 'https://genioussonu.me/store',
+    siteName: 'SK Sahinur Islam (Genious Sonu) Portfolio',
     images: [
       {
-        url: '/logo.svg',
-        width: 800,
-        height: 800,
-        alt: 'SK Sahinur Islam Recommended Gear',
+        url: '/icon-512.png',
+        width: 512,
+        height: 512,
+        alt: 'SK Sahinur Islam (Genious Sonu) Recommended Gear & Dev Tools',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Curated Gear & Dev Tools — SK Sahinur Islam',
+    title: 'Curated Tech Gear & Dev Tools — SK Sahinur Islam (Genious Sonu)',
     description:
-      'Hardware, desk setups, developer tools, and engineering books recommended by SK Sahinur Islam.',
-    images: ['/logo.svg'],
+      'Hardware, desk setups, developer tools, and engineering books recommended by SK Sahinur Islam (Genious Sonu).',
+    creator: '@GeniousSonu',
+    images: ['/icon-512.png'],
   },
 };
 
@@ -54,7 +55,7 @@ export default async function StorePage() {
     '@type': 'ItemList',
     name: 'Curated Developer Gear & Recommendations by SK Sahinur Islam',
     description: 'Hardware, software, books, and developer tooling recommendations.',
-    url: 'https://sksahinurislam.dev/store',
+    url: 'https://genioussonu.me/store',
     numberOfItems: products?.length || 0,
     itemListElement: (products || []).map((prod, index) => ({
       '@type': 'ListItem',
