@@ -45,14 +45,26 @@ export default function ConsentAnalyticsGate() {
   const isStudio = pathname?.startsWith("/studio");
 
   useEffect(() => {
+    const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+
     // If on studio or without consent, ensure disable flag is active
     if (isStudio) {
-      const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
       if (gaId && typeof window !== "undefined") {
         window[`ga-disable-${gaId}`] = true;
       }
       return;
     }
+
+    // Sync Google Consent Mode v2
+    if (typeof window !== "undefined" && typeof window.gtag === "function") {
+      window.gtag("consent", "update", {
+        analytics_storage: hasConsent ? "granted" : "denied",
+        ad_storage: hasConsent ? "granted" : "denied",
+        ad_user_data: hasConsent ? "granted" : "denied",
+        ad_personalization: hasConsent ? "granted" : "denied",
+      });
+    }
+
     applyAnalyticsDisableFlag();
   }, [hasConsent, isStudio]);
 
@@ -61,20 +73,16 @@ export default function ConsentAnalyticsGate() {
     return null;
   }
 
-  if (!hasConsent) {
-    return null;
-  }
-
-  const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
-
   return (
     <>
-      {/* Vercel Web Analytics & Speed Insights (Mounted only with consent) */}
-      <Analytics />
-      <SpeedInsights />
-
-      {/* Google Analytics 4 (Mounted only after explicit user consent) */}
-      {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
+      {/* Vercel Web Analytics & Speed Insights (Mounted only with explicit consent) */}
+      {hasConsent ? (
+        <>
+          <Analytics />
+          <SpeedInsights />
+        </>
+      ) : null}
     </>
   );
 }
+

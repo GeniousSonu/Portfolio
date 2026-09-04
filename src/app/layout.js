@@ -185,8 +185,11 @@ import ConsentAnalyticsGate from "@/components/ConsentAnalyticsGate";
 import CookieConsentBanner from "@/components/CookieConsentBanner";
 import UserPreferences from "@/components/UserPreferences";
 import ChatbotWidget from "@/components/ChatbotWidget";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 export default function RootLayout({ children }) {
+  const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+
   return (
     <html lang="en" className={`dark ${geist.className}`}>
       <head>
@@ -208,6 +211,38 @@ export default function RootLayout({ children }) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdGraph) }}
         />
+        {/* Google Consent Mode v2 Default Configuration (Allows tag detection while enforcing consent) */}
+        {gaId && (
+          <script
+            id="google-consent-mode-default"
+            dangerouslySetInnerHTML={{
+              __html: `
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('consent', 'default', {
+                  'analytics_storage': 'denied',
+                  'ad_storage': 'denied',
+                  'ad_user_data': 'denied',
+                  'ad_personalization': 'denied',
+                  'wait_for_update': 500
+                });
+                (function(){
+                  try {
+                    var c = localStorage.getItem('sks_analytics_consent') || (document.cookie.match(/(?:^| )sks_analytics_consent=([^;]+)/) || [])[1];
+                    if (c === 'granted') {
+                      gtag('consent', 'update', {
+                        'analytics_storage': 'granted',
+                        'ad_storage': 'granted',
+                        'ad_user_data': 'granted',
+                        'ad_personalization': 'granted'
+                      });
+                    }
+                  } catch(e) {}
+                })();
+              `,
+            }}
+          />
+        )}
       </head>
       <body>
         <PWARegistration />
@@ -218,6 +253,8 @@ export default function RootLayout({ children }) {
         <CookieConsentBanner />
         <MobileBottomCTA />
         <ChatbotWidget />
+        {/* Google Tag (detected by Google Tag Assistant & Analytics on page load) */}
+        {gaId && <GoogleAnalytics gaId={gaId} />}
       </body>
     </html>
   );

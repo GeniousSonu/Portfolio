@@ -10,7 +10,8 @@ const MAX_HISTORY_TURNS = 6;
 const IP_WINDOW_SECONDS = 600; // 10 minutes
 const IP_MAX_REQUESTS = 10;    // Max 10 messages per user per 10-minute window
 const DAILY_WINDOW_SECONDS = 86400; // 24 hours
-const DAILY_MAX_REQUESTS = Number(process.env.CHATBOT_DAILY_CAP) || 400; // Hard-cap safely below free tier ceiling
+const GEMINI_DAILY_MAX_REQUESTS = Number(process.env.CHATBOT_DAILY_CAP) || 400; // Independent cap for Gemini
+const OPENROUTER_DAILY_MAX_REQUESTS = Number(process.env.OPENROUTER_DAILY_CAP) || 400; // Independent cap for OpenRouter
 
 // In-memory fallback if Supabase rate limit table is not yet created
 const memoryRateLimit = new Map();
@@ -184,8 +185,29 @@ function isValidOrigin(req) {
   return false;
 }
 
+const STOP_WORDS = new Set([
+  'a', 'about', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'from',
+  'has', 'he', 'in', 'is', 'it', 'its', 'of', 'on', 'or', 'that', 'the',
+  'to', 'was', 'were', 'will', 'with', 'what', 'when', 'where', 'which',
+  'who', 'why', 'how', 'can', 'could', 'would', 'should', 'do', 'does',
+  'did', 'have', 'had', 'been', 'there', 'their', 'they', 'this', 'these',
+  'those', 'i', 'me', 'my', 'you', 'your', 'we', 'our', 'us', 'tell',
+  'give', 'show', 'say', 'know', 'many', 'much', 'briefly', 'explain',
+  'word', 'more', 'some', 'any', 'please', 'just', 'like'
+]);
+
+const PERSONAL_KEYWORDS = new Set([
+  'sahinur', 'sonu', 'islam', 'patent', 'patents', 'iot', 'vaccine', 'vaccines',
+  'wefik', 'arts', 'developer', 'engineer', 'stack', 'technologies', 'skills',
+  'skill', 'projects', 'project', 'books', 'book', 'movies', 'movie', 'hobbies',
+  'hobby', 'career', 'resume', 'bio', 'contact', 'experience', 'certs', 'certifications',
+  'cert', 'education', 'college', 'gnit', 'agency', 'frontend', 'backend', 'devops',
+  'linux', 'docker', 'coldchain', 'temperature', 'portfolio', 'work'
+]);
+
 /**
  * Fetch relevant FAQs from Supabase or static fallback.
+ * Returns match status, FAQ context string, and match count.
  */
 async function getFaqContext(userMessage) {
   let faqs = [];
@@ -207,12 +229,18 @@ async function getFaqContext(userMessage) {
     faqs = DEFAULT_FAQ_CONTEXT;
   }
 
-  // Score relevance based on keyword match
+  // Filter out stop words and keep meaningful keywords
   const words = userMessage
     .toLowerCase()
     .replace(/[^a-z0-9\s]/g, '')
     .split(/\s+/)
-    .filter((w) => w.length > 2);
+    .filter((w) => w.length > 2 && !STOP_WORDS.has(w));
+
+  if (words.length === 0) {
+    return { hasMatch: false, faqContext: '', matchedCount: 0 };
+  }
+
+  const hasPersonalTerm = words.some((w) => PERSONAL_KEYWORDS.has(w));
 
   const scored = faqs.map((faq) => {
     const combined = `${faq.category} ${faq.question} ${faq.answer}`.toLowerCase();
@@ -225,21 +253,44 @@ async function getFaqContext(userMessage) {
 
   scored.sort((a, b) => b.score - a.score);
 
-  // Take the most relevant items, or the first 5 if no specific match
-  const topFaqs = scored.slice(0, 5).map((s) => s.faq);
-  return topFaqs
+  const matched = scored.filter((s) => s.score > 0);
+  const hasMatch = hasPersonalTerm || matched.length > 0;
+
+  const topFaqs = hasMatch ? (matched.length > 0 ? matched.slice(0, 5).map((s) => s.faq) : faqs.slice(0, 3)) : [];
+  const faqContext = topFaqs
     .map((f) => `[Category: ${f.category}]\nQ: ${f.question}\nA: ${f.answer}`)
     .join('\n\n');
+
+  return { hasMatch, faqContext, matchedCount: matched.length, topFaqs };
 }
 
 /**
- * Call Free-tier Flash Model safely with strict timeout.
- * Never retries excessively to protect zero-budget free tier.
+ * Strips reasoning tokens or thinking traces if any reasoning model generates them.
  */
-async function callFreeTierModel({ apiKey, systemPrompt, contents, timeoutMs = 25000 }) {
-  const modelName = process.env.GEMINI_MODEL || 'gemini-flash-latest';
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+function cleanAiResponse(text) {
+  if (!text) return '';
+  let cleaned = text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+  if (cleaned.startsWith("Here's a thinking process:")) {
+    const parts = cleaned.split(/\n\s*\n/);
+    if (parts.length > 1) {
+      const nonReasoning = parts.filter(
+        (p) => !p.startsWith("Here's a thinking process:") && !p.match(/^\d+\.\s+\*\*/)
+      );
+      if (nonReasoning.length > 0) {
+        cleaned = nonReasoning.join('\n\n').trim();
+      }
+    }
+  }
+  return cleaned;
+}
 
+/**
+ * Call Free-tier Flash Model (Gemini) safely with quick timeout.
+ * If congested or rate-limited, immediately fails over so OpenRouter can respond without delay.
+ */
+async function callFreeTierModel({ apiKey, systemPrompt, contents, timeoutMs = 4000 }) {
+  const modelName = process.env.GEMINI_MODEL || 'gemini-flash-lite-latest';
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
   const body = {
     contents,
     systemInstruction: {
@@ -263,21 +314,92 @@ async function callFreeTierModel({ apiKey, systemPrompt, contents, timeoutMs = 2
     });
     clearTimeout(timer);
 
-    if (!res.ok) {
-      const errorText = await res.text().catch(() => '');
-      throw { status: res.status, message: errorText };
+    if (res.ok) {
+      const data = await res.json();
+      const raw = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+      const text = cleanAiResponse(raw);
+      if (text) return text;
     }
-
-    const data = await res.json();
-    const text =
-      data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ||
-      "I am genious.exe, here to answer questions about Sahinur Islam and his portfolio. What would you like to know?";
-    return text;
+    const errorText = await res.text().catch(() => '');
+    throw { status: res.status, message: errorText };
   } catch (err) {
     clearTimeout(timer);
     throw err;
   }
 }
+
+/**
+ * Call OpenRouter Free-tier Model with reasoning suppressed for instant, clean answers.
+ * Tries user-requested google/gemma-4-26b-a4b-it:free first, then reliable free candidates.
+ */
+async function callOpenRouterModel({ apiKey, systemPrompt, messages, timeoutMs = 6000 }) {
+  const models = [
+    process.env.OPENROUTER_MODEL,
+    'google/gemma-4-26b-a4b-it:free',
+    'nvidia/nemotron-3.5-lightning:free',
+    'google/gemma-4-31b-it:free',
+    'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+  ].filter(Boolean);
+
+  let lastError = null;
+
+  for (const modelName of models) {
+    const url = 'https://openrouter.ai/api/v1/chat/completions';
+    const body = {
+      model: modelName,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...messages,
+      ],
+      reasoning: { max_tokens: 0 },
+      temperature: 0.6,
+      max_tokens: 600,
+    };
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+          'HTTP-Referer': 'https://sksahinurislam.dev',
+          'X-Title': 'SK Sahinur Islam Portfolio (genious.exe)',
+        },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+
+      if (res.ok) {
+        const data = await res.json();
+        const choice = data.choices?.[0];
+        const raw = choice?.message?.content?.trim() || choice?.message?.reasoning?.trim();
+        const text = cleanAiResponse(raw);
+        if (text) return text;
+      } else {
+        const errorText = await res.text().catch(() => '');
+        lastError = { status: res.status, message: errorText };
+        if (res.status === 429 || res.status === 503 || res.status === 404) {
+          continue; // Try next free model in pool
+        }
+        throw lastError;
+      }
+    } catch (err) {
+      clearTimeout(timer);
+      lastError = err;
+      if (err?.status === 429 || err?.status === 503 || err?.status === 404 || err?.name === 'AbortError') {
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  throw lastError || { status: 500, message: 'OpenRouter models exhausted' };
+}
+
 
 export async function POST(req) {
   // 1. Origin verification
@@ -319,30 +441,13 @@ export async function POST(req) {
         typeof turn.text === 'string' &&
         turn.text.trim().length > 0 &&
         turn.text.length <= MAX_MESSAGE_LENGTH
-    )
-    .map((turn) => ({
-      role: turn.role,
-      parts: [{ text: turn.text.trim() }],
-    }));
+    );
 
   // 4. Rate Limiting: Client IP extraction
   const forwarded = req.headers.get('x-forwarded-for');
   const ip = forwarded ? forwarded.split(',')[0].trim() : req.headers.get('x-real-ip') || '127.0.0.1';
 
-  // ── LAYER 1: Global Daily Cap (Hard Stop to protect zero-budget free tier) ──
-  const todayKey = `global:${new Date().toISOString().slice(0, 10)}`;
-  const globalCheck = await checkRateLimit(todayKey, DAILY_MAX_REQUESTS, DAILY_WINDOW_SECONDS);
-  if (!globalCheck.allowed) {
-    console.warn(`[RATE_LIMIT] Global daily cap of ${DAILY_MAX_REQUESTS} reached today (${todayKey}). API call blocked.`);
-    return NextResponse.json(
-      {
-        reply: "I've hit my daily limit of questions — try again tomorrow!",
-      },
-      { status: 429 }
-    );
-  }
-
-  // ── LAYER 2: Per-User Rate Limit (Max 10 messages per 10 minutes) ──
+  // ── LAYER 1: Per-User Rate Limit (Max 10 messages per 10 minutes) ──
   const ipKey = `ip:${ip}`;
   const ipCheck = await checkRateLimit(ipKey, IP_MAX_REQUESTS, IP_WINDOW_SECONDS);
   if (!ipCheck.allowed) {
@@ -354,11 +459,27 @@ export async function POST(req) {
     );
   }
 
-  // 5. Gather FAQ Context
-  const faqContext = await getFaqContext(rawMessage);
+  // 5. Check FAQ Context & Determine Routing
+  const { hasMatch, faqContext, matchedCount, topFaqs } = await getFaqContext(rawMessage);
+  const today = new Date().toISOString().slice(0, 10);
 
-  // 6. Formulate System Prompt for genious.exe
-  const systemPrompt = `You are genious.exe, the intelligent systems assistant for SK Sahinur Islam's official portfolio. Sahinur is a Senior Web Application Developer at Ib Arts, Co-Founder of WEFIK, and an IT Engineer based in Kolkata, India.
+  // ── PATH A: FAQ MATCH FOUND -> ROUTE TO GEMINI (Personal & Portfolio Context) ──
+  if (hasMatch) {
+    const todayGeminiKey = `global:gemini:${today}`;
+    const geminiDailyCheck = await checkRateLimit(todayGeminiKey, GEMINI_DAILY_MAX_REQUESTS, DAILY_WINDOW_SECONDS);
+    if (!geminiDailyCheck.allowed) {
+      console.warn(`[RATE_LIMIT] Gemini global daily cap of ${GEMINI_DAILY_MAX_REQUESTS} reached today (${todayGeminiKey}). API call blocked.`);
+      return NextResponse.json(
+        {
+          reply: "I've hit my daily limit of questions — try again tomorrow!",
+        },
+        { status: 429 }
+      );
+    }
+
+    console.log(`[CHATBOT_ROUTING] Query: "${rawMessage.slice(0, 40)}" -> Handled by: GEMINI (${matchedCount} FAQ matches)`);
+
+    const systemPrompt = `You are genious.exe, the intelligent systems assistant for SK Sahinur Islam's official portfolio. Sahinur is a Senior Web Application Developer at Ib Arts, Co-Founder of WEFIK, and an IT Engineer based in Kolkata, India.
 
 YOUR MISSION:
 Answer user inquiries about Sahinur's background, engineering career, tech stack, IoT vaccine patent, projects, favorite books, and hobbies accurately and concisely based strictly on the provided FAQ context below.
@@ -392,59 +513,157 @@ Whenever a user asks to see, view, or explore something (like projects, skills, 
   [action:open:https://linktr.ee/sksahinurislam|Official Linktree ↗]
 Example: "Sahinur holds an Indian Patent (Patent No. 544062) for an IoT-based real-time monitoring system for cold-chain vaccine storage. [action:nav:#certs|View Patent Certificate] [action:open:https://github.com/GeniousSonu|Visit GitHub ↗]"`;
 
-  // 7. Call Free-Tier Model
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    const openRouterApiKey = process.env.OPENROUTER_API_KEY;
+
+    if (apiKey) {
+      const geminiContents = [
+        ...sanitizedHistory.map((turn) => ({
+          role: turn.role,
+          parts: [{ text: turn.text.trim() }],
+        })),
+        {
+          role: 'user',
+          parts: [{ text: rawMessage }],
+        },
+      ];
+
+      try {
+        const reply = await callFreeTierModel({
+          apiKey,
+          systemPrompt,
+          contents: geminiContents,
+          timeoutMs: 6000,
+        });
+
+        return NextResponse.json({ reply });
+      } catch (err) {
+        // If Gemini candidate models all failed, fall through to OpenRouter fallback if available
+        console.warn('[CHATBOT_ROUTING] Gemini free models exhausted or timed out. Attempting OpenRouter fallback...');
+      }
+    }
+
+    // Fallback 1: If Gemini key is not configured or all Gemini candidates hit rate limit, use OpenRouter with FAQ context
+    if (openRouterApiKey) {
+      try {
+        const openRouterMessages = sanitizedHistory.map((turn) => ({
+          role: turn.role === 'model' ? 'assistant' : turn.role,
+          content: turn.text.trim(),
+        }));
+        openRouterMessages.push({ role: 'user', content: rawMessage });
+
+        const reply = await callOpenRouterModel({
+          apiKey: openRouterApiKey,
+          systemPrompt,
+          messages: openRouterMessages,
+          timeoutMs: 8000,
+        });
+
+        return NextResponse.json({ reply });
+      } catch (openRouterErr) {
+        console.warn('[CHATBOT_ROUTING] OpenRouter fallback also failed or rate-limited. Using direct verified FAQ fallback.');
+      }
+    }
+
+    // Fallback 2: Direct Verified FAQ match fallback (Zero-Downtime Guarantee)
+    if (topFaqs && topFaqs.length > 0) {
+      const best = topFaqs[0];
+      let actionToken = '[action:nav:#about|Explore Portfolio]';
+      const cat = (best.category || '').toLowerCase();
+      if (cat.includes('skill') || cat.includes('stack')) {
+        actionToken = '[action:nav:#skills|Explore Technical Skills]';
+      } else if (cat.includes('patent') || cat.includes('cert')) {
+        actionToken = '[action:nav:#certs|View Patent Certificate]';
+      } else if (cat.includes('experience') || cat.includes('career')) {
+        actionToken = '[action:nav:#experience|View Experience Timeline]';
+      } else if (cat.includes('project')) {
+        actionToken = '[action:nav:#projects|View Projects]';
+      } else if (cat.includes('contact')) {
+        actionToken = '[action:nav:#contact|Open Contact Form]';
+      }
+      return NextResponse.json({
+        reply: `${best.answer} ${actionToken}`,
+      });
+    }
+
+    return NextResponse.json(
+      { reply: "genious.exe is ready! Please ask about Sahinur's engineering projects, tech stack, or cold-chain patent. [action:nav:#skills|Explore Technical Skills]" },
+      { status: 200 }
+    );
+  }
+
+  // ── PATH B: NO FAQ MATCH -> ROUTE TO OPENROUTER ──
+  const todayOpenRouterKey = `global:openrouter:${today}`;
+  const openRouterDailyCheck = await checkRateLimit(todayOpenRouterKey, OPENROUTER_DAILY_MAX_REQUESTS, DAILY_WINDOW_SECONDS);
+  if (!openRouterDailyCheck.allowed) {
+    console.warn(`[RATE_LIMIT] OpenRouter global daily cap of ${OPENROUTER_DAILY_MAX_REQUESTS} reached today (${todayOpenRouterKey}). API call blocked.`);
+    return NextResponse.json(
+      {
+        reply: "I've hit my daily limit of general questions — try again tomorrow!",
+      },
+      { status: 429 }
+    );
+  }
+
+  const openRouterApiKey = process.env.OPENROUTER_API_KEY;
+  if (!openRouterApiKey) {
+    console.warn('[ROUTING] OPENROUTER_API_KEY missing in environment.');
     return NextResponse.json({
-      reply:
-        "genious.exe is currently initializing its systems configuration. Please check back shortly or use the contact form to reach Sahinur directly!",
+      reply: "I am genious.exe, configured to answer questions about Sahinur Islam's engineering work and portfolio. What would you like to know about his projects or skills? [action:nav:#skills|Explore Technical Skills]",
     });
   }
 
-  const geminiContents = [
-    ...sanitizedHistory,
-    {
-      role: 'user',
-      parts: [{ text: rawMessage }],
-    },
-  ];
+  console.log(`[CHATBOT_ROUTING] Query: "${rawMessage.slice(0, 40)}" -> Handled by: OPENROUTER [General query]`);
+
+  const openRouterSystemPrompt = `You are genious.exe, a helpful general-purpose assistant embedded in SK Sahinur Islam's official portfolio site.
+Sahinur is a Senior Web Application Developer at Ib Arts, Co-Founder of WEFIK, and an IT Engineer based in Kolkata, India.
+
+YOUR MISSION:
+Answer the user's question normally, accurately, and helpfully.
+If asked something about Sahinur specifically that you don't have information on, politely say you don't have that detail and suggest they ask something else about him (such as his engineering projects, IoT vaccine patent, tech stack, or favorite books), or suggest they reach out through the contact form.
+
+STRICT GUARDRAILS:
+1. Identity: You are genious.exe. NEVER reveal the name of any underlying AI models, providers, or platforms (never mention Gemini, Google, OpenRouter, OpenAI, etc.). Always identify yourself strictly as genious.exe, Sahinur's autonomous systems assistant.
+2. Tone & Length: Keep answers concise (2-4 sentences), highly articulate, friendly, and formatted cleanly. Do NOT output raw HTML tags.
+3. Navigation & Action Powers:
+   If the user asks to view or explore sections of Sahinur's portfolio, or his external links, attach 1 or 2 action tokens at the end:
+   - [action:nav:#projects|View Projects]
+   - [action:nav:#skills|Explore Technical Skills]
+   - [action:nav:#experience|View Experience Timeline]
+   - [action:nav:#certs|View Certifications & Patent]
+   - [action:nav:#about|Read Full Bio]
+   - [action:nav:#contact|Open Contact Form]
+   - [action:nav:/blog|Read Engineering Blog]
+   - [action:nav:/store|Explore Curated Gear]
+   - [action:open:https://www.linkedin.com/in/sksahinurislam/|LinkedIn Profile ↗]
+   - [action:open:https://github.com/GeniousSonu|GitHub Repositories ↗]
+   - [action:open:https://www.upwork.com/freelancers/~0104912246c7c7bdbf|Upwork Profile ↗]
+   - [action:open:https://linktr.ee/sksahinurislam|Official Linktree ↗]`;
+
+  const openRouterMessages = sanitizedHistory.map((turn) => ({
+    role: turn.role === 'model' ? 'assistant' : turn.role,
+    content: turn.text.trim(),
+  }));
+  openRouterMessages.push({ role: 'user', content: rawMessage });
 
   try {
-    const reply = await callFreeTierModel({
-      apiKey,
-      systemPrompt,
-      contents: geminiContents,
-      timeoutMs: 25000,
+    const reply = await callOpenRouterModel({
+      apiKey: openRouterApiKey,
+      systemPrompt: openRouterSystemPrompt,
+      messages: openRouterMessages,
+      timeoutMs: 8000,
     });
 
     return NextResponse.json({ reply });
   } catch (err) {
     if (err?.status === 429) {
       return NextResponse.json(
-        {
-          reply:
-            "I'm getting a lot of questions right now — please try asking again in a moment!",
-        },
+        { reply: "I'm getting a lot of questions right now — please try asking again in a moment!" },
         { status: 429 }
       );
     }
-
-    if (err?.name === 'AbortError') {
-      return NextResponse.json(
-        {
-          reply:
-            "That request took a little longer than expected. Please try asking again!",
-        },
-        { status: 200 }
-      );
-    }
-
-    // Friendly generic fallback for any unexpected API failure
     return NextResponse.json(
-      {
-        reply:
-          "genious.exe encountered a temporary processing hiccup. Please try asking again or reach out through the contact form!",
-      },
+      { reply: "I am genious.exe, Sahinur Islam's systems assistant! What would you like to know about Sahinur's engineering projects, skills, or IoT cold-chain patent? [action:nav:#skills|Explore Technical Skills] [action:nav:#projects|View Projects]" },
       { status: 200 }
     );
   }
