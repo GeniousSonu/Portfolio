@@ -8,6 +8,12 @@
   font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
 }
 
+:global(body.mobile-nav-active) .widgetWrapper {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 @media (max-width: 768px) {
   .widgetWrapper {
     bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));

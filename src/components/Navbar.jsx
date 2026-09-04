@@ -97,6 +97,24 @@ export default function Navbar() {
   // Hook-based cross-device scroll lock with exact scroll position preservation
   useScrollLock(mobileOpen);
 
+  // Notify other global components (e.g. ChatbotWidget) when mobile nav opens/closes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('mobile-nav-toggle', { detail: { open: mobileOpen } }));
+      if (mobileOpen) {
+        document.body.classList.add('mobile-nav-active');
+      } else {
+        document.body.classList.remove('mobile-nav-active');
+      }
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        document.body.classList.remove('mobile-nav-active');
+        window.dispatchEvent(new CustomEvent('mobile-nav-toggle', { detail: { open: false } }));
+      }
+    };
+  }, [mobileOpen]);
+
   useEffect(() => {
     gsap.registerPlugin(ScrollToPlugin);
     let lastY = window.scrollY;

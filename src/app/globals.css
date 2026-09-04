@@ -1620,7 +1620,7 @@ footer {
 
 /* ─── FULL-SCREEN SOLID MOBILE NAV ─────────────────────── */
 #mobile-nav {
-  position: fixed; inset: 0; z-index: 10000;
+  position: fixed; inset: 0; z-index: 200000;
   width: 100vw; width: 100dvw;
   height: 100vh; height: 100dvh;
   background: #05070c; /* Solid opaque theme background — no transparency or blurred-over text */
@@ -1793,9 +1793,17 @@ footer {
 
 /* Backdrop (dimmed area behind) */
 .mnav-backdrop {
-  position: fixed; inset: 0; z-index: 9999;
+  position: fixed; inset: 0; z-index: 199999;
   background: rgba(0, 0, 0, 0.7);
   display: block;
+}
+
+/* Ensure chatbot floating widget is completely hidden when mobile nav menu is open */
+body.mobile-nav-active [class*="widgetWrapper"],
+body.mobile-nav-active [class*="backdrop"] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 /* ─── MOBILE PERSISTENT BOTTOM CTA ─── */

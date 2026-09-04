@@ -107,10 +107,27 @@ export default function ChatbotWidget() {
     }
   }, []);
 
-  // Exclude widget from Sanity Studio routes entirely
-  if (pathname?.startsWith('/studio')) {
-    return null;
-  }
+  const [isNavOpen, setIsNavOpen] = useState(false);
+
+  // Synchronize with mobile navigation: close chatbot and hide trigger bubble when mobile nav is open
+  useEffect(() => {
+    if (typeof document !== 'undefined' && document.body.classList.contains('mobile-nav-active')) {
+      setIsNavOpen(true);
+    }
+
+    const handleNavToggle = (e) => {
+      const navOpen = Boolean(e?.detail?.open);
+      setIsNavOpen(navOpen);
+      if (navOpen) {
+        // Close chatbot automatically if it was open when nav menu opened
+        setIsOpen(false);
+        setIsClosing(false);
+      }
+    };
+
+    window.addEventListener('mobile-nav-toggle', handleNavToggle);
+    return () => window.removeEventListener('mobile-nav-toggle', handleNavToggle);
+  }, []);
 
   // Auto-scroll messages list to bottom
   const scrollToBottom = () => {
@@ -257,6 +274,11 @@ export default function ChatbotWidget() {
 
   const remainingChars = MAX_CHAR_COUNT - inputValue.length;
   const isNearLimit = remainingChars < 50;
+
+  // Exclude widget from Sanity Studio routes or when full-screen mobile nav is open
+  if (pathname?.startsWith('/studio') || isNavOpen) {
+    return null;
+  }
 
   return (
     <div className={styles.widgetWrapper}>
