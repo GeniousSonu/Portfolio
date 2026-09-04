@@ -76,7 +76,17 @@ export const metadata = {
     title: "SK Sahinur Islam — Senior Web Application Developer & IT Engineer",
     description: "Senior Web Application Developer at Ib Arts, Co-Founder of WEFIK, and Patent Holder. Building reliable systems.",
     images: ["/logo.svg"],
-  }
+  },
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "SONU",
+  },
+  icons: {
+    icon: "/logo.svg",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 const jsonLdGraph = {

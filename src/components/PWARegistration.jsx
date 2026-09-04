@@ -3,8 +3,22 @@ import { useEffect } from "react";
 
 export default function PWARegistration() {
   useEffect(() => {
-    if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
+    if (typeof window === "undefined") {
       return;
+    }
+
+    // Capture beforeinstallprompt globally as early as possible so it is never lost
+    const handleEarlyPrompt = (e) => {
+      e.preventDefault();
+      window.__pwaDeferredPrompt = e;
+      window.dispatchEvent(new CustomEvent("pwa-prompt-ready"));
+      console.log("PWA: Native beforeinstallprompt captured globally.");
+    };
+
+    window.addEventListener("beforeinstallprompt", handleEarlyPrompt);
+
+    if (!("serviceWorker" in navigator)) {
+      return () => window.removeEventListener("beforeinstallprompt", handleEarlyPrompt);
     }
 
     const registerSW = async () => {
@@ -36,8 +50,12 @@ export default function PWARegistration() {
       registerSW();
     } else {
       window.addEventListener("load", registerSW);
-      return () => window.removeEventListener("load", registerSW);
     }
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleEarlyPrompt);
+      window.removeEventListener("load", registerSW);
+    };
   }, []);
 
   return null;

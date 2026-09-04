@@ -301,6 +301,11 @@ export default function Navbar() {
           ))}
         </nav>
 
+        {/* Mobile Install App Button */}
+        <div className="mnav-install-box">
+          <InstallAppButton isMobileMenu={true} />
+        </div>
+
         {/* Social icons row */}
         <div className="mnav-socials">
           {MOBILE_SOCIALS.map(({ href, Icon, label, color }) => (

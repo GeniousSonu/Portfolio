@@ -35,7 +35,7 @@ async function computeExpectedToken() {
     .join('')
 }
 
-export async function middleware(request) {
+export async function proxy(request) {
   const { pathname } = request.nextUrl
 
   // Only guard /studio paths (not /studio-login itself or api routes)
@@ -63,6 +63,8 @@ export async function middleware(request) {
 
   return NextResponse.next()
 }
+
+export { proxy as middleware }
 
 export const config = {
   matcher: ['/studio', '/studio/:path*'],

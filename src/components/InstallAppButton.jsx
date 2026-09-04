@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef, useCallback, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 
 /* ── SVG Icons ── */
 const InstallIcon = () => (
@@ -31,7 +32,7 @@ const IOSShareIcon = () => (
     strokeLinecap="round"
     strokeLinejoin="round"
     aria-hidden="true"
-    style={{ display: "inline-block", verticalAlign: "middle", margin: "0 4px" }}
+    style={{ display: "inline-block", verticalAlign: "middle", margin: "0 4px", color: "#38bdf8" }}
   >
     <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
     <polyline points="16 6 12 2 8 6" />
@@ -46,7 +47,7 @@ const AndroidMenuIcon = () => (
     viewBox="0 0 24 24"
     fill="currentColor"
     aria-hidden="true"
-    style={{ display: "inline-block", verticalAlign: "middle", margin: "0 4px" }}
+    style={{ display: "inline-block", verticalAlign: "middle", margin: "0 4px", color: "#10b981" }}
   >
     <circle cx="12" cy="5" r="2" />
     <circle cx="12" cy="12" r="2" />
@@ -54,24 +55,31 @@ const AndroidMenuIcon = () => (
   </svg>
 );
 
-/* ── Standalone detection store for React 19 ── */
+/* ── Standalone display-mode detection for React 19 ── */
 function subscribeStandalone(callback) {
   if (typeof window === "undefined") return () => {};
-  const mql = window.matchMedia("(display-mode: standalone)");
-  mql.addEventListener("change", callback);
+  const mqlStandalone = window.matchMedia("(display-mode: standalone)");
+  const mqlFullscreen = window.matchMedia("(display-mode: fullscreen)");
+  const mqlMinimal = window.matchMedia("(display-mode: minimal-ui)");
+
+  mqlStandalone.addEventListener("change", callback);
+  mqlFullscreen.addEventListener("change", callback);
+  mqlMinimal.addEventListener("change", callback);
   window.addEventListener("appinstalled", callback);
+
   return () => {
-    mql.removeEventListener("change", callback);
+    mqlStandalone.removeEventListener("change", callback);
+    mqlFullscreen.removeEventListener("change", callback);
+    mqlMinimal.removeEventListener("change", callback);
     window.removeEventListener("appinstalled", callback);
   };
 }
 
 function getStandaloneSnapshot() {
   if (typeof window === "undefined") return false;
-  return (
+  return Boolean(
     window.matchMedia("(display-mode: standalone)").matches ||
-    window.navigator?.standalone === true ||
-    document.referrer.includes("android-app://")
+    window.navigator?.standalone === true
   );
 }
 
@@ -94,147 +102,215 @@ function getDevicePlatform() {
   return "desktop";
 }
 
-export default function InstallAppButton() {
+export default function InstallAppButton({ className = "", isMobileMenu = false }) {
   const isInstalled = useSyncExternalStore(
     subscribeStandalone,
     getStandaloneSnapshot,
     getStandaloneServerSnapshot
   );
 
+  const [platform, setPlatform] = useState("desktop");
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const modalRef = useRef(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Capture native install prompt event (Chrome Android / Chrome Desktop / Edge)
+    setMounted(true);
+    setPlatform(getDevicePlatform());
+
+    // Check if early prompt was already stored on window
+    if (window.__pwaDeferredPrompt) {
+      setDeferredPrompt(window.__pwaDeferredPrompt);
+    }
+
+    // Capture native beforeinstallprompt (Chrome / Android / Edge)
     const handleBeforeInstall = (e) => {
       e.preventDefault();
+      window.__pwaDeferredPrompt = e;
       setDeferredPrompt(e);
       console.log("PWA: Native beforeinstallprompt captured.");
     };
 
+    const handlePromptReady = () => {
+      if (window.__pwaDeferredPrompt) {
+        setDeferredPrompt(window.__pwaDeferredPrompt);
+      }
+    };
+
+    const handleAppInstalled = () => {
+      window.__pwaDeferredPrompt = null;
+      setDeferredPrompt(null);
+      setShowModal(false);
+      console.log("PWA: App successfully installed.");
+    };
+
     window.addEventListener("beforeinstallprompt", handleBeforeInstall);
+    window.addEventListener("pwa-prompt-ready", handlePromptReady);
+    window.addEventListener("appinstalled", handleAppInstalled);
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
+      window.removeEventListener("pwa-prompt-ready", handlePromptReady);
+      window.removeEventListener("appinstalled", handleAppInstalled);
     };
   }, []);
 
-  // Close modal when clicking outside or pressing Escape
+  // Close modal on Escape
   useEffect(() => {
     if (!showModal) return;
-
-    const handleOutsideClick = (e) => {
-      if (modalRef.current && !modalRef.current.contains(e.target)) {
-        setShowModal(false);
-      }
-    };
-
     const handleEsc = (e) => {
       if (e.key === "Escape") setShowModal(false);
     };
-
-    document.addEventListener("mousedown", handleOutsideClick);
-    document.addEventListener("touchstart", handleOutsideClick);
-    document.addEventListener("keydown", handleEsc);
-
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
-      document.removeEventListener("touchstart", handleOutsideClick);
-      document.removeEventListener("keydown", handleEsc);
-    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
   }, [showModal]);
 
-  const handleInstallClick = useCallback(async () => {
-    // If native prompt is available (Android Chrome or Desktop Chrome/Edge)
-    if (deferredPrompt) {
+  const isIOS = platform === "ios";
+
+  const handleInstallClick = useCallback(async (e) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+
+    // 1. If native prompt is available (Android / Chromium Desktop / Edge)
+    const promptEvent = deferredPrompt || (typeof window !== "undefined" ? window.__pwaDeferredPrompt : null);
+    if (promptEvent) {
       try {
-        await deferredPrompt.prompt();
-        const choice = await deferredPrompt.userChoice;
-        if (choice.outcome === "accepted") {
+        await promptEvent.prompt();
+        const choice = await promptEvent.userChoice;
+        if (choice && choice.outcome === "accepted") {
           setDeferredPrompt(null);
+          if (typeof window !== "undefined") window.__pwaDeferredPrompt = null;
         }
         return;
       } catch (err) {
-        console.warn("PWA prompt error:", err);
+        console.warn("PWA prompt trigger error:", err);
       }
     }
 
-    // Otherwise, show guided install modal
-    setShowModal((prev) => !prev);
+    // 2. On iOS (Safari) or fallback, show guided instructions modal
+    setShowModal(true);
   }, [deferredPrompt]);
 
-  // If already installed, hide the button completely
+  // If already installed in standalone PWA mode, don't show install button
   if (isInstalled) {
     return null;
   }
 
-  const platform = getDevicePlatform();
+  // Exact expected behavior:
+  // - Android/Chrome/Chromium: Appears automatically once beforeinstallprompt fires (or if in mobile menu)
+  // - iOS/Safari: Appears immediately because iOS does not support beforeinstallprompt
+  // - In full-screen mobile menu drawer: always available so mobile users never miss it
+  const canShow = mounted && (isIOS || Boolean(deferredPrompt) || isMobileMenu);
+  if (!canShow) {
+    return null;
+  }
 
-  return (
-    <div className="install-app-wrapper" ref={modalRef}>
-      <button
-        type="button"
-        className="install-app-btn"
-        onClick={handleInstallClick}
-        aria-label="Install Portfolio App"
-        title="Install Web App for Offline Access"
+  const modalContent = showModal && mounted && typeof document !== "undefined" ? (
+    createPortal(
+      <div
+        className="install-modal-backdrop"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Install Portfolio App Instructions"
+        onClick={() => setShowModal(false)}
       >
-        <InstallIcon />
-        <span className="install-app-label">Install App</span>
-      </button>
+        <div
+          className="install-modal-card"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="install-modal-header">
+            <div className="install-modal-badge">
+              <InstallIcon />
+              <span>INSTALL WEB APP</span>
+            </div>
+            <button
+              type="button"
+              className="install-modal-close"
+              onClick={() => setShowModal(false)}
+              aria-label="Close modal"
+            >
+              ×
+            </button>
+          </div>
 
-      {/* Guided Install Modal for Android, iOS & Desktop fallback */}
-      {showModal && (
-        <div className="install-ios-tooltip" role="dialog" aria-modal="true">
-          <button
-            type="button"
-            className="install-ios-close"
-            onClick={() => setShowModal(false)}
-            aria-label="Close instructions"
-          >
-            ×
-          </button>
+          <h3 className="install-modal-title">Install SK Sahinur Islam App</h3>
+          <p className="install-modal-desc">
+            Add this portfolio to your home screen for instant full-screen access, lightning-fast load times, and offline browsing.
+          </p>
 
-          <p className="install-ios-title">Install Portfolio App</p>
-
-          {platform === "ios" ? (
-            <ol className="install-ios-steps">
-              <li>
-                Tap the <IOSShareIcon /> <strong>Share</strong> icon in Safari.
-              </li>
-              <li>Scroll down the menu.</li>
-              <li>
-                Tap <strong>&quot;Add to Home Screen&quot;</strong>.
-              </li>
-            </ol>
-          ) : platform === "android" ? (
-            <ol className="install-ios-steps">
-              <li>
-                Tap the browser menu <AndroidMenuIcon /> (3 dots in top right).
-              </li>
-              <li>
-                Tap <strong>&quot;Install app&quot;</strong> or{" "}
-                <strong>&quot;Add to Home screen&quot;</strong>.
-              </li>
-              <li>Confirm to add the app icon to your Android launcher.</li>
-            </ol>
+          {/* Platform Specific Steps */}
+          {isIOS ? (
+            <div className="install-steps-container">
+              <div className="install-step-item">
+                <span className="install-step-num">1</span>
+                <span className="install-step-text">
+                  Tap the <IOSShareIcon /> <strong>Share</strong> button at the bottom of Safari.
+                </span>
+              </div>
+              <div className="install-step-item">
+                <span className="install-step-num">2</span>
+                <span className="install-step-text">
+                  Scroll down the share sheet and tap <strong>&quot;Add to Home Screen&quot;</strong>.
+                </span>
+              </div>
+              <div className="install-step-item">
+                <span className="install-step-num">3</span>
+                <span className="install-step-text">
+                  Tap <strong>&quot;Add&quot;</strong> in the top-right corner to finish.
+                </span>
+              </div>
+            </div>
           ) : (
-            <ol className="install-ios-steps">
-              <li>
-                Click the <strong>Install</strong> icon in your browser address bar (⊕).
-              </li>
-              <li>
-                Or open Chrome menu (⋮) → <strong>&quot;Install SK Sahinur Islam...&quot;</strong>.
-              </li>
-            </ol>
+            <div className="install-steps-container">
+              <div className="install-step-item">
+                <span className="install-step-num">1</span>
+                <span className="install-step-text">
+                  Tap the browser menu <AndroidMenuIcon /> (three dots in top right).
+                </span>
+              </div>
+              <div className="install-step-item">
+                <span className="install-step-num">2</span>
+                <span className="install-step-text">
+                  Tap <strong>&quot;Install app&quot;</strong> or <strong>&quot;Add to Home screen&quot;</strong>.
+                </span>
+              </div>
+              <div className="install-step-item">
+                <span className="install-step-num">3</span>
+                <span className="install-step-text">
+                  Confirm the prompt to add the SONU icon to your launcher.
+                </span>
+              </div>
+            </div>
           )}
 
           <div className="install-modal-footer">
-            <span>Fast · Offline Ready · Zero Lag</span>
+            <span className="install-feature-tag">✓ Fullscreen App</span>
+            <span className="install-feature-tag">✓ Zero Lag</span>
+            <span className="install-feature-tag">✓ Offline Ready</span>
           </div>
         </div>
-      )}
-    </div>
+      </div>,
+      document.body
+    )
+  ) : null;
+
+  return (
+    <>
+      <div className={`install-app-wrapper ${className}`}>
+        <button
+          type="button"
+          className="install-app-btn"
+          onClick={handleInstallClick}
+          aria-label="Install Portfolio App"
+          title={isIOS ? "Add to Home Screen (iOS)" : "Install Web App"}
+        >
+          <InstallIcon />
+          <span className="install-app-label">Install App</span>
+        </button>
+      </div>
+
+      {modalContent}
+    </>
   );
 }

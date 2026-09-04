@@ -1689,6 +1689,35 @@ footer {
   transition: opacity 0.25s, transform 0.25s;
 }
 
+/* Mobile menu install button container */
+.mnav-install-box {
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto 1.5rem auto;
+  display: flex;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.5s 0.35s cubic-bezier(0.23,1,0.32,1),
+              transform 0.5s 0.35s cubic-bezier(0.23,1,0.32,1);
+}
+#mobile-nav.open .mnav-install-box { opacity: 1; transform: translateY(0); }
+.mnav-install-box .install-app-wrapper {
+  margin: 0;
+  width: 100%;
+}
+.mnav-install-box .install-app-btn {
+  width: 100%;
+  justify-content: center;
+  padding: 0.65rem 1rem;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  gap: 0.6rem;
+}
+.mnav-install-box .install-app-label {
+  display: inline !important;
+}
+
 /* Social icons row */
 .mnav-socials {
   display: flex; gap: 0.85rem; flex-wrap: wrap;
@@ -2142,85 +2171,161 @@ footer {
   pointer-events: none;
 }
 
-/* iOS Safari instruction tooltip */
-.install-ios-tooltip {
-  position: absolute;
-  top: calc(100% + 12px);
-  right: 0;
-  width: 280px;
-  padding: 1rem 1.1rem;
-  background: var(--card, #111318);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  border-radius: 10px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
-  z-index: 9999;
-  animation: ios-tip-in 0.25s ease;
+/* PWA Install Modal (Rendered via Portal on document.body) */
+.install-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 6, 10, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: installFadeIn 0.22s ease-out;
 }
 
-@keyframes ios-tip-in {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes installFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* Little arrow pointing up */
-.install-ios-tooltip::before {
-  content: "";
-  position: absolute;
-  top: -7px;
-  right: 18px;
-  width: 12px;
-  height: 12px;
-  background: var(--card, #111318);
-  border-left: 1px solid rgba(16, 185, 129, 0.25);
-  border-top: 1px solid rgba(16, 185, 129, 0.25);
-  transform: rotate(45deg);
+.install-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  background: linear-gradient(180deg, #10141d 0%, #090c12 100%);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: 16px;
+  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  padding: 1.5rem 1.6rem;
+  z-index: 100001;
+  color: #f1f5f9;
+  animation: installPopIn 0.26s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.install-ios-close {
-  position: absolute;
-  top: 6px;
-  right: 10px;
-  background: none;
-  border: none;
-  color: var(--text-muted, #888);
-  font-size: 1.3rem;
-  cursor: pointer;
-  padding: 4px;
-  line-height: 1;
+@keyframes installPopIn {
+  from { opacity: 0; transform: scale(0.94) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-.install-ios-title {
-  margin: 0 0 0.6rem;
-  font-size: 0.85rem;
+.install-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.9rem;
+}
+
+.install-modal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.25rem 0.65rem;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 9999px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.68rem;
   font-weight: 700;
-  color: #e2e8f0;
-}
-
-.install-ios-steps {
-  margin: 0;
-  padding-left: 1.2rem;
-  font-size: 0.78rem;
-  line-height: 1.75;
-  color: var(--text-muted, #a0aec0);
-}
-
-.install-ios-steps li {
-  margin-bottom: 0.25rem;
-}
-
-.install-ios-steps strong {
   color: #10b981;
+  letter-spacing: 0.06em;
+}
+
+.install-modal-close {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 1.25rem;
+  cursor: pointer;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.install-modal-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
+.install-modal-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 0.4rem;
+  letter-spacing: -0.01em;
+}
+
+.install-modal-desc {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  line-height: 1.55;
+  margin: 0 0 1.2rem;
+}
+
+.install-steps-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.install-step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.install-step-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  background: rgba(16, 185, 129, 0.18);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #10b981;
+  border-radius: 50%;
+  font-size: 0.72rem;
+  font-family: var(--font-mono, monospace);
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.install-step-text {
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: #cbd5e1;
+}
+
+.install-step-text strong {
+  color: #ffffff;
 }
 
 .install-modal-footer {
-  margin-top: 0.8rem;
-  padding-top: 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin-top: 1.2rem;
+  padding-top: 0.9rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  font-size: 0.68rem;
+}
+
+.install-feature-tag {
+  font-size: 0.7rem;
   font-family: var(--font-mono, monospace);
   color: #10b981;
-  letter-spacing: 0.04em;
-  text-align: center;
+  letter-spacing: 0.03em;
 }
 
 @media (max-width: 768px) {
@@ -2236,19 +2341,8 @@ footer {
   .install-app-label {
     display: none;
   }
-  .install-ios-tooltip {
-    position: fixed;
-    top: auto;
-    bottom: 24px;
-    right: 16px;
-    left: 16px;
-    width: auto;
-    max-width: 360px;
-    margin: 0 auto;
-    z-index: 10000;
-  }
-  .install-ios-tooltip::before {
-    display: none;
+  .install-modal-card {
+    padding: 1.25rem 1.2rem;
   }
 }
 

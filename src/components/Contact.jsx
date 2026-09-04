@@ -54,12 +54,12 @@ const IconFacebook = () => (
 /* ── Contact links config ──────────────────────────────────── */
 const CONTACT_LINKS = [
   {
-    href: 'mailto:sahinurislamm2002@gmail.com',
+    href: '#msg-field',
     Icon: IconEmail,
     iconBg: 'rgba(16,185,129,0.1)',
     iconBorder: '1px solid rgba(16,185,129,0.2)',
     iconColor: '#34D399',
-    label: 'Email',
+    label: 'Direct Inquiry',
     value: 'sahinurislamm2002@gmail.com',
   },
   {
@@ -177,15 +177,9 @@ export default function Contact() {
         throw new Error(data.error || 'Delivery failed');
       }
     } catch (err) {
-      console.warn('API route send error, using mail client fallback:', err);
-      // Fallback to mailto link
-      const subject = encodeURIComponent(`Portfolio Inquiry from ${name}`);
-      const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`);
-      setFeedbackColor('var(--green)');
-      setFeedback('Opening email client for direct transmission...');
-      setTimeout(() => {
-        window.location.href = `mailto:sahinurislamm2002@gmail.com?subject=${subject}&body=${body}`;
-      }, 600);
+      console.error('Contact form submission error via Resend:', err);
+      setFeedbackColor('var(--red)');
+      setFeedback('✕ Failed to send message. Please verify your details and try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -209,12 +203,20 @@ export default function Contact() {
             {/* Main contact links */}
             <div className="contact-links">
               {CONTACT_LINKS.map(({ href, Icon, iconBg, iconBorder, iconColor, label, value, external }) => {
-                const isEmail = label === 'Email';
+                const isDirectInquiry = label === 'Direct Inquiry';
                 return (
                   <a
                     key={label}
                     href={href}
-                    className={`contact-link ${!isEmail ? 'contact-link-desktop-only' : ''}`}
+                    onClick={(e) => {
+                      if (isDirectInquiry) {
+                        e.preventDefault();
+                        const field = document.querySelector('#name-field') || document.querySelector('#msg-field');
+                        field?.focus();
+                        field?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }
+                    }}
+                    className={`contact-link ${!isDirectInquiry ? 'contact-link-desktop-only' : ''}`}
                     {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                   >
                     <div
@@ -273,8 +275,7 @@ export default function Contact() {
                 </span>
               </div>
               <div className="sysinfo-body">
-                <form className="contact-form" name="contact" method="POST" data-netlify="true" onSubmit={handleFormSubmit}>
-                  <input type="hidden" name="form-name" value="contact" />
+                <form className="contact-form" onSubmit={handleFormSubmit}>
                   <div className="form-group">
                     <label className="form-label" htmlFor="name-field">your_name</label>
                     <input type="text" id="name-field" className="form-input" placeholder="John Doe"

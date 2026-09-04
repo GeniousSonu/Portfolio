@@ -159,7 +159,7 @@ export default function Footer() {
                   <li><a href="https://github.com/GeniousSonu" target="_blank" rel="noopener noreferrer" className="footer-col-link"><span className="footer-link-arrow">›</span> GitHub</a></li>
                   <li><a href="https://www.upwork.com/freelancers/~0104912246c7c7bdbf" target="_blank" rel="noopener noreferrer" className="footer-col-link"><span className="footer-link-arrow">›</span> Upwork</a></li>
                   <li><a href="https://linktr.ee/sksahinurislam" target="_blank" rel="noopener noreferrer" className="footer-col-link"><span className="footer-link-arrow">›</span> Linktree</a></li>
-                  <li className="footer-link-full"><a href="mailto:sahinurislamm2002@gmail.com" className="footer-col-link"><span className="footer-link-arrow">›</span> Email Me</a></li>
+                  <li className="footer-link-full"><a href={pathname === '/' ? '#contact' : '/#contact'} onClick={(e) => handleNavClick(e, 'contact')} className="footer-col-link"><span className="footer-link-arrow">›</span> Send Message</a></li>
                 </ul>
               </div>
 

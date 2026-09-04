@@ -41,11 +41,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# PWA service worker files (auto-generated)
-public/sw.js
+# PWA service worker generated workbox artifacts
 public/workbox-*.js
 public/swe-worker-*.js
-public/sw.js.map
 public/workbox-*.js.map
 
 # Skills tool symlinks
