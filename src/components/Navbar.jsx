@@ -198,13 +198,27 @@ export default function Navbar() {
     hamburgerBtnRef.current?.focus();
   };
 
+  const scrollToSectionWithOffset = (targetSelector) => {
+    const target = document.querySelector(targetSelector);
+    if (!target) return;
+    const navHeight = 75; // sticky header height offset
+    const top = target.getBoundingClientRect().top + window.scrollY - navHeight;
+    window.scrollTo({
+      top: Math.max(0, top),
+      behavior: 'smooth',
+    });
+  };
+
   const handleLinkClick = (e, targetId) => {
     e.preventDefault();
     setMobileOpen(false);
 
     if (targetId === '#') {
       if (pathname === '/') {
-        gsap.to(window, { scrollTo: { y: 0 }, duration: 1, ease: 'power3.inOut' });
+        if (typeof window !== 'undefined') window.__portfolioNavigatingToAnchor = true;
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 50);
       } else {
         router.push('/');
       }
@@ -218,15 +232,36 @@ export default function Navbar() {
 
     if (targetId.startsWith('#')) {
       if (pathname === '/') {
-        const target = document.querySelector(targetId);
-        if (target) {
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        if (typeof window !== 'undefined') window.__portfolioNavigatingToAnchor = true;
+        setTimeout(() => {
+          scrollToSectionWithOffset(targetId);
+        }, 60);
       } else {
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.setItem('portfolio_scroll_target', targetId);
+        }
         router.push('/' + targetId);
       }
     }
   };
+
+  // When pathname transitions to homepage with a target hash or stored scroll target
+  useEffect(() => {
+    if (pathname === '/') {
+      const storedTarget = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('portfolio_scroll_target') : null;
+      const hashTarget = window.location.hash;
+      const target = storedTarget || hashTarget;
+      if (target && target.startsWith('#')) {
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.removeItem('portfolio_scroll_target');
+        }
+        const timer = setTimeout(() => {
+          scrollToSectionWithOffset(target);
+        }, 350);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [pathname]);
 
   return (
     <>

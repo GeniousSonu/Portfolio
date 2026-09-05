@@ -36,18 +36,29 @@ export default function WaterRippleEffect({
     let w = parent.clientWidth || window.innerWidth;
     let h = parent.clientHeight || window.innerHeight;
 
+    const isTouch = typeof window !== 'undefined' && (
+      window.matchMedia('(pointer: coarse)').matches ||
+      window.innerWidth < 768
+    );
+
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
     
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true,
-      powerPreference: "high-performance",
-      precision: "highp",
-    });
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        antialias: !isTouch,
+        alpha: true,
+        powerPreference: isTouch ? "default" : "high-performance",
+        precision: isTouch ? "mediump" : "highp",
+      });
+    } catch (e) {
+      console.warn("WebGL not supported or context creation failed:", e);
+      return;
+    }
 
     renderer.setSize(w, h, false);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(isTouch ? 1 : Math.min(window.devicePixelRatio, 2));
     renderer.setClearColor(0x000000, 0);
 
     const canvas = renderer.domElement;
@@ -57,6 +68,12 @@ export default function WaterRippleEffect({
     canvas.style.position = "absolute";
     canvas.style.inset = "0";
     canvas.style.pointerEvents = "none";
+
+    const handleContextLost = (e) => {
+      e.preventDefault();
+      console.warn("WaterRippleEffect: WebGL context lost handled gracefully.");
+    };
+    canvas.addEventListener("webglcontextlost", handleContextLost, false);
 
     mountElement.appendChild(canvas);
 
@@ -184,15 +201,17 @@ export default function WaterRippleEffect({
       onLeave?.();
     };
 
-    window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    parent.addEventListener("mouseenter", handleMouseEnter);
-    parent.addEventListener("mouseleave", handleMouseLeave);
+    if (!isTouch) {
+      window.addEventListener("mousemove", handleMouseMove, { passive: true });
+      parent.addEventListener("mouseenter", handleMouseEnter);
+      parent.addEventListener("mouseleave", handleMouseLeave);
+    }
 
     const resize = () => {
       w = parent.clientWidth || window.innerWidth;
       h = parent.clientHeight || window.innerHeight;
-      if (w > 0 && h > 0) {
-        renderer.setSize(w, h, false);
+      if (w > 0 && h > 0 && rendererRef.current) {
+        rendererRef.current.setSize(w, h, false);
       }
     };
 
@@ -200,7 +219,16 @@ export default function WaterRippleEffect({
     resizeObserver.observe(parent);
     resize();
 
+    // IntersectionObserver: Pause WebGL render loop when not visible in viewport
+    let isVisible = true;
+    let animId = null;
+
     const animate = () => {
+      if (!isVisible) {
+        animId = null;
+        return;
+      }
+
       timeRef.current += 0.016;
 
       if (materialRef.current) {
@@ -221,23 +249,49 @@ export default function WaterRippleEffect({
       if (rendererRef.current && sceneRef.current) {
         rendererRef.current.render(sceneRef.current, camera);
       }
-      requestAnimationFrame(animate);
+      animId = requestAnimationFrame(animate);
     };
-    animate();
+
+    const intersectionObserver = new IntersectionObserver(
+      ([entry]) => {
+        const wasVisible = isVisible;
+        isVisible = entry.isIntersecting;
+        if (isVisible && !wasVisible) {
+          if (!animId) {
+            animId = requestAnimationFrame(animate);
+          }
+        }
+      },
+      { threshold: 0.05 }
+    );
+    intersectionObserver.observe(parent);
+
+    // Initial start
+    animId = requestAnimationFrame(animate);
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      parent.removeEventListener("mouseenter", handleMouseEnter);
-      parent.removeEventListener("mouseleave", handleMouseLeave);
+      if (animId) {
+        cancelAnimationFrame(animId);
+        animId = null;
+      }
+      intersectionObserver.disconnect();
+      if (!isTouch) {
+        window.removeEventListener("mousemove", handleMouseMove);
+        parent.removeEventListener("mouseenter", handleMouseEnter);
+        parent.removeEventListener("mouseleave", handleMouseLeave);
+      }
       resizeObserver.disconnect();
+      canvas.removeEventListener("webglcontextlost", handleContextLost);
 
       if (mountElement && canvas && mountElement.contains(canvas)) {
         mountElement.removeChild(canvas);
       }
-      renderer.dispose();
-      geometry.dispose();
-      material.dispose();
-      texture.dispose();
+      try {
+        renderer.dispose();
+        geometry.dispose();
+        material.dispose();
+        texture.dispose();
+      } catch (e) {}
     };
   }, [
     imageSrc,

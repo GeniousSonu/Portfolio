@@ -92,6 +92,36 @@ export default function ChatbotWidget() {
     return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, []);
 
+  const [isTriggerVisible, setIsTriggerVisible] = useState(false);
+
+  // PRIORITY 3: Show chatbot bubble after 8-10 second delay OR when scrolled past 25-30% of page
+  useEffect(() => {
+    let triggered = false;
+    const triggerAppearance = () => {
+      if (triggered) return;
+      triggered = true;
+      setIsTriggerVisible(true);
+      window.removeEventListener('scroll', handleScroll);
+    };
+
+    const timer = setTimeout(triggerAppearance, 8500);
+
+    const handleScroll = () => {
+      const scrollY = window.scrollY || window.pageYOffset;
+      const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (scrollableHeight > 0 && (scrollY / scrollableHeight) >= 0.25) {
+        triggerAppearance();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   // One-time attention pulse on first site visit (recorded in localStorage)
   useEffect(() => {
     try {
@@ -283,15 +313,15 @@ export default function ChatbotWidget() {
   return (
     <div className={styles.widgetWrapper}>
       {/* Floating Trigger Button */}
-      {!isOpen && (
+      {!isOpen && isTriggerVisible && (
         <div className={`${styles.triggerWrapper} ${isFirstVisit ? styles.firstVisitAttention : ''}`}>
           <button
             type="button"
             className={styles.triggerBtn}
             onClick={handleOpen}
             aria-expanded={isOpen}
-            aria-label="Open genious.exe systems assistant"
-            title="Ask genious.exe about Sahinur"
+            aria-label="Open AI systems assistant"
+            title="Ask me anything about Sahinur"
           >
             {/* 3D Floating Bot Icon with synchronous drop shadow */}
             <div className={styles.botFigureWrap} aria-hidden="true">
@@ -313,10 +343,10 @@ export default function ChatbotWidget() {
                 style={{ animationPlayState: isTabVisible ? 'running' : 'paused' }}
                 aria-hidden="true"
               />
+              <span className={styles.pulseDot} aria-hidden="true" />
             </div>
 
-            <span className={styles.triggerText}>genious.exe</span>
-            <span className={styles.pulseDot} aria-hidden="true" />
+            <span className={styles.triggerText}>Ask me anything</span>
           </button>
         </div>
       )}

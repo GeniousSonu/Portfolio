@@ -73,12 +73,16 @@ export function useScrollLock(isLocked) {
         document.body.style.width = previousStyles.width || '';
         document.body.style.touchAction = previousStyles.touchAction || '';
 
-        // Seamlessly restore scroll position without animation jump
-        window.scrollTo({
-          top: scrollYToRestore,
-          left: 0,
-          behavior: 'instant',
-        });
+        // Seamlessly restore scroll position without animation jump, unless an anchor navigation is active
+        if (typeof window !== 'undefined' && window.__portfolioNavigatingToAnchor) {
+          window.__portfolioNavigatingToAnchor = false;
+        } else {
+          window.scrollTo({
+            top: scrollYToRestore,
+            left: 0,
+            behavior: 'instant',
+          });
+        }
       }
     }
 

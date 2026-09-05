@@ -128,51 +128,48 @@ export default function Projects() {
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
 
-    const revealEl = containerRef.current?.querySelector('.reveal');
-    let titleTrigger;
-    if (revealEl) {
-      titleTrigger = gsap.fromTo(revealEl, 
-        { opacity: 0, y: 40 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.9,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: revealEl,
-            start: 'top 85%',
-            toggleActions: 'play none none none'
+    const ctx = gsap.context(() => {
+      const revealEl = containerRef.current?.querySelector('.reveal');
+      if (revealEl) {
+        gsap.fromTo(revealEl, 
+          { opacity: 0, y: 40 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.9,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: revealEl,
+              start: 'top 85%',
+              toggleActions: 'play none none none'
+            }
           }
-        }
-      );
-    }
+        );
+      }
 
-    const gridEl = containerRef.current?.querySelector('.projects-grid');
-    let staggerTrigger;
-    if (gridEl) {
-      const children = gridEl.querySelectorAll('.stagger-child');
-      staggerTrigger = gsap.fromTo(children,
-        { opacity: 0, y: 30 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.7,
-          stagger: 0.1,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: gridEl,
-            start: 'top 80%',
-            toggleActions: 'play none none none'
+      const gridEl = containerRef.current?.querySelector('.projects-grid');
+      if (gridEl) {
+        const children = gridEl.querySelectorAll('.stagger-child');
+        gsap.fromTo(children,
+          { opacity: 0, y: 30 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.7,
+            stagger: 0.1,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: gridEl,
+              start: 'top 80%',
+              toggleActions: 'play none none none'
+            }
           }
-        }
-      );
-    }
+        );
+      }
+    }, containerRef);
 
     return () => {
-      titleTrigger?.scrollTrigger?.kill();
-      titleTrigger?.kill();
-      staggerTrigger?.scrollTrigger?.kill();
-      staggerTrigger?.kill();
+      ctx.revert();
     };
   }, []);
 

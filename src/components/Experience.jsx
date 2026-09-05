@@ -92,34 +92,49 @@ export default function Experience() {
   const cardsRef = useRef([]);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
-    // Initial section header reveal
-    const revealEl = containerRef.current?.querySelector('.exp-header-reveal');
-    let headerTrigger;
-    if (revealEl) {
-      headerTrigger = gsap.fromTo(
-        revealEl,
-        { opacity: 0, y: 30 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: revealEl,
-            start: 'top 85%',
-            toggleActions: 'play none none none'
-          }
-        }
-      );
-    }
+    ScrollTrigger.config({ ignoreMobileResize: true });
 
     // GSAP Responsive Card-Stacking ScrollTrigger
     const cards = cardsRef.current.filter(Boolean);
-    if (!cards.length || !pastPinRef.current) return;
+    if (!pastPinRef.current) return;
+
+    let refreshTimer;
+    let lastWidth = typeof window !== 'undefined' ? window.innerWidth : 0;
+    const handleViewportChange = () => {
+      // Only refresh if viewport width actually changed (e.g., orientation change or desktop resize)
+      // Completely ignore vertical-only resize events caused by mobile browser address bar collapse/expand!
+      if (typeof window !== 'undefined' && window.innerWidth === lastWidth) return;
+      lastWidth = typeof window !== 'undefined' ? window.innerWidth : 0;
+
+      clearTimeout(refreshTimer);
+      refreshTimer = setTimeout(() => {
+        ScrollTrigger.refresh();
+      }, 200);
+    };
 
     const ctx = gsap.context(() => {
+      // Initial section header reveal
+      const revealEl = containerRef.current?.querySelector('.exp-header-reveal');
+      if (revealEl) {
+        gsap.fromTo(
+          revealEl,
+          { opacity: 0, y: 30 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: revealEl,
+              start: 'top 85%',
+              toggleActions: 'play none none none'
+            }
+          }
+        );
+      }
+
+      if (!cards.length) return;
+
       const mm = gsap.matchMedia();
 
       // ── Desktop / Tablet Stacking Setup (min-width: 768px) ──
@@ -262,33 +277,13 @@ export default function Experience() {
       });
     }, containerRef);
 
-    // Debounced orientation / resize refresh to prevent stale ScrollTrigger coordinates
-    let refreshTimer;
-    const handleViewportChange = () => {
-      clearTimeout(refreshTimer);
-      refreshTimer = setTimeout(() => {
-        ScrollTrigger.refresh();
-      }, 150);
-    };
-
     window.addEventListener('resize', handleViewportChange, { passive: true });
     window.addEventListener('orientationchange', handleViewportChange, { passive: true });
-    window.addEventListener('load', handleViewportChange, { passive: true });
-
-    // Refresh once fonts load to avoid coordinate shifts
-    if (document.fonts?.ready) {
-      document.fonts.ready.then(() => {
-        ScrollTrigger.refresh();
-      });
-    }
 
     return () => {
-      headerTrigger?.scrollTrigger?.kill();
-      headerTrigger?.kill();
       clearTimeout(refreshTimer);
       window.removeEventListener('resize', handleViewportChange);
       window.removeEventListener('orientationchange', handleViewportChange);
-      window.removeEventListener('load', handleViewportChange);
       ctx.revert();
     };
   }, []);

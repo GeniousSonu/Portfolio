@@ -36,10 +36,10 @@ export default function PWARegistration() {
     // 2. Production Service Worker & Update Coordination
     // Check if the page had an existing controller when it initially loaded.
     // If it did NOT (first-time visit or fresh install), claiming the client is the initial setup
-    // and must NEVER reload the page. Only true updates (replacing an existing worker) reload.
+    // and must NEVER reload the page. Only true updates (replacing an existing worker) can update.
     let hadExistingController = Boolean(navigator.serviceWorker.controller);
     let swRegistration = null;
-    let isReloading = false;
+    let updatePendingReload = false;
 
     const handleControllerChange = () => {
       // First-time install: page already has the freshest assets, do NOT reload
@@ -49,20 +49,16 @@ export default function PWARegistration() {
         return;
       }
 
-      if (isReloading) return;
-
-      // Prevent reload loops: reload at most once per 30 seconds
-      const lastReload = sessionStorage.getItem("pwa_sw_last_reload");
-      const now = Date.now();
-      if (lastReload && now - Number(lastReload) < 30000) {
-        console.log("PWA: Duplicate controllerchange ignored (recently reloaded).");
-        return;
+      // CRITICAL STABILITY FIX: NEVER reload while the user is actively viewing, reading, or scrolling the page!
+      // In an installed PWA, unexpected reloads look identical to an app crash/sudden close.
+      if (document.visibilityState === "hidden") {
+        console.log("PWA: App in background and new service worker activated. Refreshing cache silently.");
+        window.location.reload();
+      } else {
+        // Defer reload until the user leaves or backgrounds the app
+        console.log("PWA: New service worker activated. Update staged for next session/backgrounding (no interrupt during active scroll).");
+        updatePendingReload = true;
       }
-
-      isReloading = true;
-      sessionStorage.setItem("pwa_sw_last_reload", String(now));
-      console.log("PWA: New service worker activated. Silently reloading page once to apply update.");
-      window.location.reload();
     };
 
     navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
@@ -75,7 +71,7 @@ export default function PWARegistration() {
         });
         swRegistration = registration;
 
-        // If an updated worker is already waiting, tell it to skip waiting immediately
+        // If an updated worker is already waiting, tell it to skip waiting
         if (registration.waiting && navigator.serviceWorker.controller) {
           registration.waiting.postMessage({ type: "SKIP_WAITING" });
         }
@@ -106,12 +102,12 @@ export default function PWARegistration() {
       window.addEventListener("load", registerSW, { once: true });
     }
 
-    // 4. Check for updates when PWA is reopened from home screen or brought to foreground
-    // Throttled to at most once per 60 seconds to prevent rapid-fire requests
+    // 4. Check for updates ONLY when explicitly resuming from background after significant time (10+ minutes)
     let lastUpdateCheck = Date.now();
     const handleCheckUpdate = () => {
       const now = Date.now();
-      if (now - lastUpdateCheck < 60000) return;
+      // Minimum 10 minutes between update checks to prevent rapid checks during navigation/scroll
+      if (now - lastUpdateCheck < 10 * 60 * 1000) return;
       lastUpdateCheck = now;
 
       if (swRegistration) {
@@ -124,7 +120,13 @@ export default function PWARegistration() {
     };
 
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
+      if (document.visibilityState === "hidden") {
+        // If an update was staged while the user was reading, perform the reload now that they've backgrounded the app
+        if (updatePendingReload) {
+          updatePendingReload = false;
+          window.location.reload();
+        }
+      } else if (document.visibilityState === "visible") {
         handleCheckUpdate();
       }
     };

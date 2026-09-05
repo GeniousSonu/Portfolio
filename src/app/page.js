@@ -12,12 +12,12 @@ import Experience from '../components/Experience';
 import Projects from '../components/Projects';
 import Skills from '../components/Skills';
 import Certifications from '../components/Certifications';
-import HomeBlogSection from '../components/HomeBlogSection';
 import Contact from '../components/Contact';
 import Footer from '../components/Footer';
 
-// GlobeConnect uses WebGL and must be rendered client-side
+// Dynamic imports for heavy below-the-fold components to accelerate initial paint and TTI
 const GlobeConnect = dynamic(() => import('../components/GlobeConnect'), { ssr: false });
+const HomeBlogSection = dynamic(() => import('../components/HomeBlogSection'), { ssr: false });
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
@@ -28,53 +28,66 @@ export default function Home() {
     
     gsap.registerPlugin(ScrollTrigger);
 
-    // Animate page-level rack separators
-    const separators = gsap.utils.toArray('.rack-sep');
-    const sepTriggers = separators.map(sep => 
-      gsap.fromTo(sep,
-        { opacity: 0, scaleX: 0.8 },
-        {
-          opacity: 1,
-          scaleX: 1,
-          duration: 0.6,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: sep,
-            start: 'top 90%',
-            toggleActions: 'play none none none'
+    const ctx = gsap.context(() => {
+      // Animate page-level rack separators
+      const separators = gsap.utils.toArray('.rack-sep');
+      separators.forEach(sep => 
+        gsap.fromTo(sep,
+          { opacity: 0, scaleX: 0.8 },
+          {
+            opacity: 1,
+            scaleX: 1,
+            duration: 0.6,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: sep,
+              start: 'top 90%',
+              toggleActions: 'play none none none'
+            }
           }
-        }
-      )
-    );
+        )
+      );
 
-    // Animate global-reach reveal items
-    const pageReveals = gsap.utils.toArray('#global-reach .reveal');
-    const revealTriggers = pageReveals.map(el =>
-      gsap.fromTo(el,
-        { opacity: 0, y: 40 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.9,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: el,
-            start: 'top 85%',
-            toggleActions: 'play none none none'
+      // Animate global-reach reveal items
+      const pageReveals = gsap.utils.toArray('#global-reach .reveal');
+      pageReveals.forEach(el =>
+        gsap.fromTo(el,
+          { opacity: 0, y: 40 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.9,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: el,
+              start: 'top 85%',
+              toggleActions: 'play none none none'
+            }
           }
+        )
+      );
+    });
+
+    // Check if an anchor target was requested (e.g. navigated from /blog or /store to #certs)
+    const targetHash = window.location.hash || (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('portfolio_scroll_target') : null);
+    let scrollTimer;
+    if (targetHash) {
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.removeItem('portfolio_scroll_target');
+      }
+      scrollTimer = setTimeout(() => {
+        const el = document.querySelector(targetHash);
+        if (el) {
+          const navHeight = 75;
+          const top = el.getBoundingClientRect().top + window.scrollY - navHeight;
+          window.scrollTo({ top, behavior: 'smooth' });
         }
-      )
-    );
+      }, 300);
+    }
 
     return () => {
-      sepTriggers.forEach(t => {
-        t.scrollTrigger?.kill();
-        t.kill();
-      });
-      revealTriggers.forEach(t => {
-        t.scrollTrigger?.kill();
-        t.kill();
-      });
+      if (scrollTimer) clearTimeout(scrollTimer);
+      ctx.revert();
     };
   }, [loading]);
 

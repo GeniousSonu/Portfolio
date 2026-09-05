@@ -118,7 +118,28 @@ export default function GlobeConnect() {
 
     window.addEventListener('resize', handleResize);
 
+    // Pause WebGL rendering and autoRotate when offscreen
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!globeInstanceRef.current) return;
+        const currentControls = globeInstanceRef.current.controls?.();
+        if (entry.isIntersecting) {
+          if (currentControls) currentControls.autoRotate = true;
+          try { globeInstanceRef.current.resumeAnimation?.(); } catch (e) {}
+        } else {
+          if (currentControls) currentControls.autoRotate = false;
+          try { globeInstanceRef.current.pauseAnimation?.(); } catch (e) {}
+        }
+      },
+      { threshold: 0.05 }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
     return () => {
+      observer.disconnect();
       window.removeEventListener('resize', handleResize);
       if (globeInstanceRef.current) {
         // Clean up WebGL context when unmounting
