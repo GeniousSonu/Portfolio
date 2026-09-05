@@ -681,9 +681,9 @@
 .modeTabsRow {
   display: flex;
   background: rgba(8, 11, 18, 0.98);
-  padding: 0.4rem 0.75rem;
+  padding: 0.35rem 0.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
 .modeTabBtn {
@@ -691,15 +691,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
-  padding: 0.4rem 0.6rem;
+  gap: 0.3rem;
+  padding: 0.35rem 0.4rem;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   color: #94a3b8;
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   font-weight: 500;
   cursor: pointer;
+  white-space: nowrap;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   font-family: inherit;

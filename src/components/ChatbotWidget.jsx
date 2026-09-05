@@ -863,6 +863,19 @@ export default function ChatbotWidget() {
                 <span>Talk to Sonu</span>
                 {hasUnreadLiveReply && <span className={styles.unreadDot} title="New reply from Sonu" />}
               </button>
+              <button
+                type="button"
+                className={styles.modeTabBtn}
+                onClick={() => {
+                  setIsOpen(false);
+                  router.push('/space');
+                }}
+                aria-label="Navigate to Shared Space"
+                title="Public Real-time Shared Clipboard"
+              >
+                <span className={styles.tabIcon}>📋</span>
+                <span>Shared Space</span>
+              </button>
             </div>
 
             {/* ─── Body Area ─── */}

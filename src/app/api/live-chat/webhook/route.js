@@ -7,6 +7,7 @@ import {
   deleteTelegramMessages,
   deleteSessionRecords,
 } from '@/lib/liveChatSessions';
+import { deleteSpaceEntry, broadcastToSpace } from '@/lib/sharedSpace';
 
 export async function POST(req) {
   try {
@@ -47,12 +48,21 @@ export async function POST(req) {
 
       // 1. ALWAYS call answerCallbackQuery IMMEDIATELY so Telegram never shows a stuck loading spinner
       if (botToken && cb.id) {
+        let answerText = '✅ Action confirmed!';
+        if (cbData.startsWith('space_del:')) {
+          answerText = '🗑️ Entry deleted from Shared Space!';
+        } else if (cbData.startsWith('end_chat:')) {
+          answerText = '🔴 Chat ended.';
+        } else if (cbData.startsWith('qr:')) {
+          answerText = '✅ Quick reply sent!';
+        }
+
         await fetch(`https://api.telegram.org/bot${botToken}/answerCallbackQuery`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             callback_query_id: cb.id,
-            text: cbData.startsWith('end_chat:') ? '🔴 Chat ended.' : '✅ Reply sent!',
+            text: answerText,
             show_alert: false,
           }),
         }).catch((e) => console.warn('[LiveChatWebhook] answerCallbackQuery notice:', e.message));
@@ -143,6 +153,39 @@ export async function POST(req) {
         }
 
         return NextResponse.json({ ok: true, action: 'chat_ended' });
+      }
+
+      // Handle "🗑 Delete Entry" from Shared Space moderation ("space_del:<entryId>")
+      if (cbData.startsWith('space_del:')) {
+        const entryId = cbData.replace('space_del:', '').trim();
+
+        if (entryId) {
+          // 1. Delete entry from Supabase database
+          await deleteSpaceEntry(entryId).catch((err) => {
+            console.warn('[LiveChatWebhook] deleteSpaceEntry error:', err.message);
+          });
+
+          // 2. Broadcast targeted entry_deleted event to all active visitors
+          await broadcastToSpace('entry_deleted', { entryId }).catch((err) => {
+            console.warn('[LiveChatWebhook] broadcastToSpace error:', err.message);
+          });
+
+          // 3. Update the Telegram message so Sonu sees visual confirmation
+          if (botToken && targetChatId && cb.message?.message_id) {
+            await fetch(`https://api.telegram.org/bot${botToken}/editMessageText`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                chat_id: targetChatId,
+                message_id: cb.message.message_id,
+                text: `🗑️ <b>Entry Deleted from Shared Space</b>\n<b>ID:</b> <code>${entryId}</code>\n\n<i>This entry was permanently deleted from the live board by Sonu.</i>`,
+                parse_mode: 'HTML',
+              }),
+            }).catch(() => {});
+          }
+        }
+
+        return NextResponse.json({ ok: true, action: 'space_entry_deleted' });
       }
 
       return NextResponse.json({ ok: true });

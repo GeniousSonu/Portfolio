@@ -96,6 +96,7 @@ const NAV_ITEMS = [
   { id: '#certs',      label: 'Certs' },
   { id: '/blog',       label: 'Blog' },
   { id: '/store',      label: 'Store' },
+  { id: '/space',      label: 'Space' },
   { id: '#contact',    label: 'Contact' },
 ];
 
