@@ -67,7 +67,7 @@ const PROJECTS = [
     category: '2024 · Web',
     dotColor: '#059669',
     desc: 'Fourth complete rewrite of my personal site. Gatsby + GraphQL + MDX, Lighthouse 100 across all metrics, GSAP scroll animations, terminal-inspired dark theme.',
-    stack: ['Gatsby', 'React', 'GraphQL', 'GSAP', 'MDX', 'Netlify'],
+    stack: ['Gatsby', 'React', 'GraphQL', 'GSAP', 'MDX', 'CI/CD'],
     metrics: [
       { val: '100', label: 'Lighthouse' },
       { val: 'v4', label: 'Iteration' }

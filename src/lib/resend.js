@@ -5,7 +5,7 @@ let _resendInstance = null;
 /**
  * Lazy-initialized Resend client.
  * Avoids crashing at build time when RESEND_API_KEY is unavailable
- * (e.g. during Vercel/Netlify page data collection).
+ * (e.g. during Vercel page data collection).
  * The client is only instantiated on first use inside a request handler.
  */
 export function getResend() {
@@ -15,7 +15,7 @@ export function getResend() {
   if (!key) {
     throw new Error(
       'Missing RESEND_API_KEY environment variable. ' +
-      'Add it to your Vercel/Netlify Environment Variables dashboard.'
+      'Add it to your Vercel Environment Variables dashboard.'
     );
   }
 

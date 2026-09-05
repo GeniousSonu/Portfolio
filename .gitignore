@@ -46,6 +46,15 @@ public/workbox-*.js
 public/swe-worker-*.js
 public/workbox-*.js.map
 
-# Skills tool symlinks
+# Local workspace & AI assistant configuration
+.agents/
+.antigravity/
+.cursor/
+.windsurf/
 .claude/
 agent/
+AGENTS.md
+CLAUDE.md
+skills-lock.json
+scratch/
+temp_backup/
