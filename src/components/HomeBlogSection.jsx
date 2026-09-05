@@ -4,59 +4,63 @@ import Link from 'next/link';
 import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { client } from '@/sanity/client';
-import { POSTS_QUERY } from '@/sanity/queries';
 
-// High-quality fallback posts if no documents are published in Sanity yet
-const SAMPLE_POSTS = [
+// Initial post snapshot from Sanity to guarantee immediate rendering without blank state
+const INITIAL_POSTS = [
   {
-    _id: 'sample-1',
-    title: 'Building High-Throughput Event-Driven Microservices with Node.js & Redis',
-    slug: 'event-driven-microservices-nodejs-redis',
-    excerpt: 'Architectural patterns for scalable pub/sub messaging, worker queues, and resilient telemetry pipelines handling thousands of events/sec.',
-    publishedAt: '2026-08-20T10:00:00Z',
-    readTime: 6,
-    featured: true,
-    categories: [{ title: 'Backend & Architecture', color: '#E63946' }],
-  },
-  {
-    _id: 'sample-2',
-    title: 'Zero-Downtime Next.js 16 Deployment & Edge Optimization Strategies',
-    slug: 'nextjs-16-edge-optimization-zero-downtime',
-    excerpt: 'How we achieve sub-100ms TTFB globally using hybrid ISR caching, Turbopack optimizations, and containerized Docker clusters.',
-    publishedAt: '2026-08-10T12:00:00Z',
+    _id: '02ef00a0-f9df-422b-9ed5-52836792471e',
+    title: "How to Become a Hacker Without Certificates: A Beginner's Roadmap to Ethical Hacking",
+    slug: 'how-to-become-a-hacker-without-certificates',
+    excerpt:
+      "You don't need expensive certifications or a computer science degree to start learning ethical hacking. This beginner-friendly roadmap explains the fundamental skills, tools, mindset, and practical steps needed to begin your journey into cybersecurity and ethical hacking.",
+    publishedAt: '2026-09-02T07:19:42.949Z',
     readTime: 5,
-    categories: [{ title: 'Next.js & Full-Stack', color: '#00F0FF' }],
-  },
-  {
-    _id: 'sample-3',
-    title: 'Designing Real-Time IoT Telemetry with MQTT, Python & Custom Hardware',
-    slug: 'real-time-iot-telemetry-mqtt-python',
-    excerpt: 'Engineering low-latency sensor monitoring systems for patent-pending medical vaccine preservation boxes with cellular failover.',
-    publishedAt: '2026-07-28T09:30:00Z',
-    readTime: 8,
-    categories: [{ title: 'IoT & Embedded', color: '#4ADE80' }],
+    featured: true,
+    mainImage: {
+      alt: 'A Young curious boy looking Terminal style Matrix grid',
+      asset: {
+        _id: 'image-9cda1c6298d7686a344f071deced1214aedfb629-7952x5304-jpg',
+        url: 'https://cdn.sanity.io/images/zt9wetk3/production/9cda1c6298d7686a344f071deced1214aedfb629-7952x5304.jpg',
+      },
+    },
+    author: {
+      _id: 'ff78b7fe-f43c-4364-a32a-315f122d5ff6',
+      name: 'Mr Bettle',
+      role: 'Security Researcher',
+    },
+    categories: [
+      {
+        _id: '4ba3adce-af1e-4fc9-ae7a-56d72e1dd741',
+        title: 'Cyber Security',
+        slug: 'cyber-security',
+        color: '#06b6d4',
+      },
+    ],
   },
 ];
 
 export default function HomeBlogSection() {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [posts, setPosts] = useState(INITIAL_POSTS);
+  const [totalCount, setTotalCount] = useState(INITIAL_POSTS.length);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
   const containerRef = useRef(null);
+  const carouselRef = useRef(null);
 
+// Fetch up to 10 live articles from our internal server API
   useEffect(() => {
-    // Fetch live posts from Sanity
     let isMounted = true;
     async function fetchPosts() {
       try {
-        const data = await client.fetch(POSTS_QUERY);
-        if (isMounted && Array.isArray(data)) {
-          setPosts(data.slice(0, 3));
+        const res = await fetch('/api/posts');
+        if (!res.ok) return;
+        const result = await res.json();
+        if (isMounted && result?.posts && Array.isArray(result.posts) && result.posts.length > 0) {
+          setPosts(result.posts.slice(0, 10));
+          setTotalCount(result.posts.length);
         }
-      } catch {
-        // Silently handle fetch error if Sanity API is unreachable
-      } finally {
-        if (isMounted) setLoading(false);
+      } catch (err) {
+        console.warn('Could not fetch latest posts from /api/posts, using cached snapshot:', err?.message || err);
       }
     }
     fetchPosts();
@@ -65,142 +69,202 @@ export default function HomeBlogSection() {
     };
   }, []);
 
+  // Update scroll arrow states
+  const checkScrollState = () => {
+    const el = carouselRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 10);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 10);
+  };
+
+  useEffect(() => {
+    const el = carouselRef.current;
+    if (!el) return;
+    checkScrollState();
+    el.addEventListener('scroll', checkScrollState, { passive: true });
+    window.addEventListener('resize', checkScrollState, { passive: true });
+    return () => {
+      el.removeEventListener('scroll', checkScrollState);
+      window.removeEventListener('resize', checkScrollState);
+    };
+  }, [posts]);
+
+  const scrollPrev = () => {
+    if (carouselRef.current) {
+      carouselRef.current.scrollBy({ left: -360, behavior: 'smooth' });
+    }
+  };
+
+  const scrollNext = () => {
+    if (carouselRef.current) {
+      carouselRef.current.scrollBy({ left: 360, behavior: 'smooth' });
+    }
+  };
+
+  // GSAP reveal triggers
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
 
-    const revealEl = containerRef.current?.querySelector('.reveal');
-    let titleTrigger;
-    if (revealEl) {
-      titleTrigger = gsap.fromTo(
-        revealEl,
-        { opacity: 0, y: 35 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.85,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: revealEl,
-            start: 'top 85%',
-            toggleActions: 'play none none none',
-          },
-        }
-      );
-    }
-
-    const gridEl = containerRef.current?.querySelector('.home-blog-grid');
-    let staggerTrigger;
-    if (gridEl) {
-      const children = gridEl.querySelectorAll('.home-blog-card');
-      if (children && children.length > 0) {
-        staggerTrigger = gsap.fromTo(
-          children,
-          { opacity: 0, y: 30 },
+    const ctx = gsap.context(() => {
+      const revealEl = containerRef.current?.querySelector('.reveal');
+      if (revealEl) {
+        gsap.fromTo(
+          revealEl,
+          { opacity: 0, y: 35 },
           {
             opacity: 1,
             y: 0,
-            duration: 0.7,
-            stagger: 0.12,
+            duration: 0.85,
             ease: 'power3.out',
             scrollTrigger: {
-              trigger: gridEl,
-              start: 'top 80%',
+              trigger: revealEl,
+              start: 'top 85%',
               toggleActions: 'play none none none',
             },
           }
         );
       }
-    }
+    }, containerRef);
 
     return () => {
-      titleTrigger?.scrollTrigger?.kill();
-      titleTrigger?.kill();
-      staggerTrigger?.scrollTrigger?.kill();
-      staggerTrigger?.kill();
+      ctx.revert();
     };
   }, [posts]);
 
-  if (!loading && posts.length === 0) {
-    return null;
-  }
+  const isSingle = posts.length === 1;
 
   return (
     <section id="blog-section" className="section" ref={containerRef}>
       <div className="site-container">
-        {/* Section Header */}
-        <div style={{ marginBottom: '3rem' }} className="reveal">
-          <div className="s-label">
-            <span style={{ color: 'var(--red)' }}>●</span> Articles & Engineering Notes
+        {/* Section Header Row with Desktop Carousel Arrows */}
+        <div className="home-blog-header-row reveal">
+          <div className="home-blog-header-text">
+            <div className="s-label">
+              <span style={{ color: 'var(--red)' }}>●</span> Articles &amp; Engineering Notes
+            </div>
+            <h2 className="section-title">Latest from the Blog</h2>
+            <p className="section-subtitle">
+              Insights on backend architecture, system design, cybersecurity roadmaps, and modern full-stack engineering.
+            </p>
           </div>
-          <h2 className="section-title">Latest from the Blog</h2>
-          <p className="section-subtitle">
-            Insights on backend architecture, system design, DevOps pipelines, IoT telemetry, and modern full-stack development.
-          </p>
+
+          {/* Desktop Navigation Arrows (hidden on single post) */}
+          {!isSingle && (
+            <div className="home-blog-nav-arrows" aria-label="Article carousel navigation">
+              <button
+                type="button"
+                onClick={scrollPrev}
+                disabled={!canScrollLeft}
+                className="home-blog-arrow-btn"
+                aria-label="Scroll to previous article"
+                title="Previous articles"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="19" y1="12" x2="5" y2="12" />
+                  <polyline points="12 19 5 12 12 5" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                onClick={scrollNext}
+                disabled={!canScrollRight}
+                className="home-blog-arrow-btn"
+                aria-label="Scroll to next article"
+                title="Next articles"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* 3-Column Responsive Blog Cards */}
-        <div className="home-blog-grid">
-          {posts.map((post) => {
-            const category = post.categories?.[0]?.title || 'Engineering';
-            const categoryColor = post.categories?.[0]?.color || '#E63946';
-            const postDate = post.publishedAt
-              ? new Date(post.publishedAt).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                })
-              : 'Recent';
+        {/* Mobile Swipe Hint Badge */}
+        {!isSingle && (
+          <div className="certs-swipe-hint" aria-hidden="true" style={{ marginBottom: '1.25rem' }}>
+            <span>← Swipe to explore articles →</span>
+          </div>
+        )}
 
-            return (
-              <article key={post._id} className="home-blog-card">
-                {/* Optional Cover Image if available */}
-                {post.mainImage?.asset?.url && (
+        {/* Horizontal Carousel Track */}
+        <div className="home-blog-scroll-wrapper">
+          <div
+            ref={carouselRef}
+            className={`home-blog-carousel ${isSingle ? 'is-single' : ''}`}
+            role="region"
+            aria-label="Blog posts carousel"
+          >
+            {posts.map((post) => {
+              const category = post.categories?.[0]?.title || 'Engineering';
+              const categoryColor = post.categories?.[0]?.color || '#06b6d4';
+              const postDate = post.publishedAt
+                ? new Date(post.publishedAt).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })
+                : 'Recent';
+
+              return (
+                <article key={post._id} className="home-blog-card">
+                  {/* Cover Image */}
                   <div className="home-blog-thumb">
-                    <Image
-                      src={post.mainImage.asset.url}
-                      alt={post.mainImage.alt || post.title}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                    />
-                  </div>
-                )}
-
-                <div className="home-blog-body">
-                  <div className="home-blog-meta">
-                    <span className="home-blog-cat" style={{ borderColor: `${categoryColor}40`, color: categoryColor }}>
-                      {category}
-                    </span>
-                    <span className="home-blog-date mono muted">
-                      {postDate} {post.readTime ? `· ${post.readTime} min read` : ''}
-                    </span>
+                    {post.mainImage?.asset?.url ? (
+                      <Image
+                        src={post.mainImage.asset.url}
+                        alt={post.mainImage.alt || post.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 85vw, 360px"
+                      />
+                    ) : (
+                      <div className="home-blog-thumb-fallback">
+                        <span className="mono muted">ARTICLE</span>
+                      </div>
+                    )}
                   </div>
 
-                  <h3 className="home-blog-title">
-                    <Link href={`/blog/${post.slug || '#'}`}>{post.title}</Link>
-                  </h3>
+                  <div className="home-blog-body">
+                    <div className="home-blog-meta">
+                      <span
+                        className="home-blog-cat"
+                        style={{ borderColor: `${categoryColor}50`, color: categoryColor }}
+                      >
+                        {category}
+                      </span>
+                      <span className="home-blog-date mono muted">
+                        {postDate} {post.readTime ? `· ${post.readTime} min read` : ''}
+                      </span>
+                    </div>
 
-                  {post.excerpt && <p className="home-blog-desc">{post.excerpt}</p>}
+                    <h3 className="home-blog-title">
+                      <Link href={`/blog/${post.slug || '#'}`}>{post.title}</Link>
+                    </h3>
 
-                  <div className="home-blog-footer">
-                    <Link href={`/blog/${post.slug || '#'}`} className="home-blog-readmore">
-                      <span>Read Article</span>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                        <polyline points="12 5 19 12 12 19" />
-                      </svg>
-                    </Link>
+                    {post.excerpt && <p className="home-blog-desc">{post.excerpt}</p>}
+
+                    <div className="home-blog-footer">
+                      <Link href={`/blog/${post.slug || '#'}`} className="home-blog-readmore">
+                        <span>Read Article</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="5" y1="12" x2="19" y2="12" />
+                          <polyline points="12 5 19 12 12 19" />
+                        </svg>
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              </article>
-            );
-          })}
+                </article>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Separated Dedicated Button at the bottom */}
+        {/* Dedicated Explore Button for all blogs */}
         <div className="home-blog-cta-wrap reveal">
           <Link href="/blog" className="home-blog-cta-btn">
-            <span>Explore All Articles & Publications</span>
+            <span>Explore All Articles {totalCount > 1 ? `(${totalCount})` : ''}</span>
             <span className="cta-arrow">→</span>
           </Link>
         </div>
