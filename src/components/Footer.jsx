@@ -178,6 +178,9 @@ export default function Footer() {
                   <li><a href="https://www.linkedin.com/in/sksahinurislam/" target="_blank" rel="noopener noreferrer" className="footer-col-link"><span className="footer-link-arrow">›</span> LinkedIn</a></li>
                   <li><a href="https://github.com/GeniousSonu" target="_blank" rel="noopener noreferrer" className="footer-col-link"><span className="footer-link-arrow">›</span> GitHub</a></li>
                   <li><a href="https://www.upwork.com/freelancers/~0104912246c7c7bdbf" target="_blank" rel="noopener noreferrer" className="footer-col-link"><span className="footer-link-arrow">›</span> Upwork</a></li>
+                  <li><a href="https://tryhackme.com/p/mrbettle" target="_blank" rel="noopener noreferrer" className="footer-col-link"><span className="footer-link-arrow">›</span> TryHackMe</a></li>
+                  <li><a href="https://t.me/genious_sonu" target="_blank" rel="noopener noreferrer" className="footer-col-link"><span className="footer-link-arrow">›</span> Telegram</a></li>
+                  <li><a href="https://wa.me/genioussonu" target="_blank" rel="noopener noreferrer" className="footer-col-link"><span className="footer-link-arrow">›</span> WhatsApp</a></li>
                   <li><a href="https://linktr.ee/sksahinurislam" target="_blank" rel="noopener noreferrer" className="footer-col-link"><span className="footer-link-arrow">›</span> Linktree</a></li>
                   <li className="footer-link-full"><a href={pathname === '/' ? '#contact' : '/#contact'} onClick={(e) => handleNavClick(e, 'contact')} className="footer-col-link"><span className="footer-link-arrow">›</span> Send Message</a></li>
                 </ul>
