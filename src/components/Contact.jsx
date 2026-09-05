@@ -195,7 +195,12 @@ export default function Contact() {
         body: JSON.stringify({ name: name.trim(), email: email.trim(), message: message.trim() }),
       });
 
-      const data = await res.json();
+      let data = {};
+      try {
+        data = await res.json();
+      } catch {
+        // Response was not JSON
+      }
 
       if (res.ok && data.success) {
         setFeedbackColor('var(--green)');
@@ -204,12 +209,19 @@ export default function Contact() {
         setEmail('');
         setMessage('');
       } else {
-        throw new Error(data.error || 'Delivery failed');
+        setFeedbackColor('var(--red)');
+        if (res.status === 400 && data.error) {
+          setFeedback(`⚠ ${data.error}`);
+        } else if (data.error) {
+          setFeedback(`✕ ${data.error}`);
+        } else {
+          setFeedback('✕ Failed to send message. Please try again later.');
+        }
       }
     } catch (err) {
-      console.error('Contact form submission error via Resend:', err);
+      console.error('Contact form network or submission error:', err);
       setFeedbackColor('var(--red)');
-      setFeedback('✕ Failed to send message. Please verify your details and try again.');
+      setFeedback('✕ Network error. Please check your connection and try again.');
     } finally {
       setIsSubmitting(false);
     }

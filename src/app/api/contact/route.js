@@ -23,6 +23,19 @@ export async function POST(request) {
       );
     }
 
+    // Check for required API credentials
+    if (!process.env.RESEND_API_KEY) {
+      console.error('[Contact API] Missing RESEND_API_KEY environment variable.');
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Email service configuration missing. Please ensure RESEND_API_KEY is configured in Vercel Environment Variables.',
+          type: 'configuration_error'
+        },
+        { status: 503 }
+      );
+    }
+
     const recipient = process.env.CONTACT_NOTIFICATION_EMAIL || 'sahinurislamm2002@gmail.com';
 
     // Send email via Resend
@@ -69,10 +82,14 @@ export async function POST(request) {
     });
 
     if (error) {
-      console.error('Resend API send error:', error);
+      console.error('[Contact API] Resend API error response:', error);
       return NextResponse.json(
-        { error: 'Failed to send email through Resend service.' },
-        { status: 500 }
+        {
+          success: false,
+          error: error.message || 'Failed to send email through Resend service.',
+          type: 'resend_error'
+        },
+        { status: 502 }
       );
     }
 
@@ -82,9 +99,13 @@ export async function POST(request) {
       message: 'Message delivered successfully.',
     });
   } catch (err) {
-    console.error('Contact API route error:', err);
+    console.error('[Contact API] Unexpected error handling submission:', err);
     return NextResponse.json(
-      { error: 'Internal server error while processing message.' },
+      {
+        success: false,
+        error: 'Internal server error while processing message.',
+        type: 'server_error'
+      },
       { status: 500 }
     );
   }
