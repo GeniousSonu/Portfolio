@@ -161,6 +161,7 @@ export default function ChatbotWidget() {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [isLiveSending, setIsLiveSending] = useState(false);
   const [isWaitingForSonu, setIsWaitingForSonu] = useState(false);
+  const [hasShownWaitingNotice, setHasShownWaitingNotice] = useState(false);
   const [hasUnreadLiveReply, setHasUnreadLiveReply] = useState(false);
   const [unreadLiveCount, setUnreadLiveCount] = useState(0);
   const [hasInteractedAi, setHasInteractedAi] = useState(false);
@@ -220,6 +221,7 @@ export default function ChatbotWidget() {
   const resetLiveChatSession = () => {
     setLiveMessages([]);
     setIsWaitingForSonu(false);
+    setHasShownWaitingNotice(false);
     setIsSessionExpired(false);
     setIsEndingChat(false);
     setShowOfflineSuggestion(false);
@@ -238,7 +240,7 @@ export default function ChatbotWidget() {
           id: 'welcome-0',
           role: 'model',
           sender: 'sonu',
-          text: `Welcome back, ${visitorName}! Your messages forward straight to my Telegram. Type below to chat with me!`,
+          text: `Welcome back, ${visitorName}! Your messages forward directly to me. Type below to chat with me!`,
           time: formatTime(),
         },
       ]);
@@ -483,7 +485,7 @@ export default function ChatbotWidget() {
       id: 'welcome-0',
       role: 'model',
       sender: 'sonu',
-      text: `Hey ${cleanName}! I'm Sonu. Your messages forward straight to my Telegram. Type below and I'll reply as soon as I see it!`,
+      text: `Hey ${cleanName}! I'm Sonu. Your messages forward directly to my phone. Type below and I'll reply as soon as I see it!`,
       time: formatTime(),
     };
     setLiveMessages([welcomeMsg]);
@@ -587,7 +589,7 @@ export default function ChatbotWidget() {
         isSendingRef.current = false;
       }
     } else {
-      // ── "Talk to Sonu" Mode (WhatsApp/Telegram Style Relay) ──
+      // ── "Talk to Sonu" Mode ──
       if (isSessionExpired) {
         sessionIdRef.current =
           typeof crypto !== 'undefined' && crypto.randomUUID
@@ -608,7 +610,13 @@ export default function ChatbotWidget() {
       }
 
       setIsLiveSending(true);
-      setIsWaitingForSonu(true);
+
+      // Only show the waiting notice ONCE on the very first message of the session
+      if (!hasShownWaitingNotice) {
+        setIsWaitingForSonu(true);
+        setHasShownWaitingNotice(true);
+      }
+
       setLastVisitorMessageTime(Date.now());
       setShowOfflineSuggestion(false);
 
@@ -775,7 +783,7 @@ export default function ChatbotWidget() {
                   <span>
                     {chatMode === 'ai'
                       ? '● Online · Systems Assistant'
-                      : `🕐 ${sonuTime} for Sonu (IST) · Telegram Relay`}
+                      : `🕐 ${sonuTime} for Sonu (IST) · Direct Line`}
                   </span>
                 </div>
               </div>
@@ -791,7 +799,7 @@ export default function ChatbotWidget() {
                       className={styles.endChatBtn}
                       onClick={handleEndChat}
                       disabled={isEndingChat}
-                      title="End chat and clean up Telegram messages"
+                      title="End chat session"
                       aria-label="End chat"
                     >
                       🔴 End
@@ -867,7 +875,7 @@ export default function ChatbotWidget() {
                   </div>
                   <h4 className={styles.namePromptTitle}>What should Sonu call you?</h4>
                   <p className={styles.namePromptDesc}>
-                    Introduce yourself before starting a real-time Telegram chat with Sonu.
+                    Introduce yourself before starting a direct chat with Sonu.
                   </p>
                   <form onSubmit={handleStartLiveChat} className={styles.namePromptForm}>
                     <input
@@ -947,7 +955,7 @@ export default function ChatbotWidget() {
                       );
                     })
                   ) : (
-                    /* Live Chat (WhatsApp / Telegram Styled) Messages */
+                    /* Live Chat (WhatsApp Style) Messages */
                     <div className={styles.liveMessagesContainer}>
                       {liveMessages.map((msg, idx) => {
                         const isUser = msg.role === 'user';
@@ -976,7 +984,7 @@ export default function ChatbotWidget() {
                                   {isUser && (
                                     <>
                                       {msg.status === 'sending' && (
-                                        <span className={styles.bubbleSending} title="Sending to Telegram...">
+                                        <span className={styles.bubbleSending} title="Sending message...">
                                           ⋯
                                         </span>
                                       )}
@@ -1025,12 +1033,12 @@ export default function ChatbotWidget() {
                     </div>
                   )}
 
-                  {/* Waiting Notice in Live Mode */}
+                  {/* Waiting Notice in Live Mode - only shown once per session */}
                   {chatMode === 'live' && isWaitingForSonu && (
                     <div className={styles.waitingNotice}>
                       <span className={styles.waitingNoticeIcon}>⏳</span>
                       <div>
-                        <strong>Sent to Sonu's Telegram · Waiting for reply...</strong>
+                        <strong>Sent to Sonu · Waiting for reply...</strong>
                         <div>Sonu isn't always online 24/7 — he'll get back to you as soon as he can!</div>
                       </div>
                     </div>
@@ -1069,7 +1077,7 @@ export default function ChatbotWidget() {
                   {isCurrentLoading && (
                     <div className={`${styles.messageRow} ${chatMode === 'ai' ? styles.botRow : styles.liveSonuRow}`}>
                       <span className={styles.systemBadge}>
-                        {chatMode === 'ai' ? 'GENIOUS.EXE THINKING' : 'FORWARDING TO TELEGRAM'}
+                        {chatMode === 'ai' ? 'GENIOUS.EXE THINKING' : 'DELIVERING MESSAGE'}
                       </span>
                       <div className={`${styles.bubble} ${chatMode === 'ai' ? styles.botBubble : styles.liveSonuBubble} ${styles.typingIndicator}`}>
                         <span className={styles.typingDot} />
@@ -1130,7 +1138,7 @@ export default function ChatbotWidget() {
                       <span>
                         {chatMode === 'ai'
                           ? 'In-memory session only'
-                          : `Live Telegram relay · ${shortVisitorName}`}
+                          : `Direct conversation · ${shortVisitorName}`}
                       </span>
                       <span
                         className={
