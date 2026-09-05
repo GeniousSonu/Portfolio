@@ -5,6 +5,21 @@ import { defineField, defineType, defineArrayMember } from 'sanity'
 
 // ── Schema Types ────────────────────────────────────────────
 
+// Custom Quote style component to avoid React 19 invalid DOM nesting (<p> containing <div>)
+const QuoteStyle = ({ children }) => (
+  <blockquote
+    style={{
+      borderLeft: '3px solid #06b6d4',
+      paddingLeft: '0.85rem',
+      margin: '0.6rem 0',
+      fontStyle: 'italic',
+      opacity: 0.9,
+    }}
+  >
+    {children}
+  </blockquote>
+)
+
 const blockContent = defineType({
   title: 'Block Content',
   name: 'blockContent',
@@ -19,7 +34,7 @@ const blockContent = defineType({
         { title: 'H2', value: 'h2' },
         { title: 'H3', value: 'h3' },
         { title: 'H4', value: 'h4' },
-        { title: 'Quote', value: 'blockquote' },
+        { title: 'Quote', value: 'blockquote', component: QuoteStyle },
       ],
       lists: [
         { title: 'Bullet', value: 'bullet' },
