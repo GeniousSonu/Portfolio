@@ -677,3 +677,117 @@
   box-shadow: 0 2px 8px rgba(56, 189, 248, 0.25);
 }
 
+/* ─── Mode Switcher Tabs ─── */
+.modeTabsRow {
+  display: flex;
+  background: rgba(8, 11, 18, 0.98);
+  padding: 0.4rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 0.5rem;
+}
+
+.modeTabBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  font-family: inherit;
+}
+
+.modeTabBtn:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #f1f5f9;
+}
+
+.modeTabActiveAi {
+  background: rgba(230, 57, 70, 0.16) !important;
+  border-color: rgba(230, 57, 70, 0.45) !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  box-shadow: 0 0 12px rgba(230, 57, 70, 0.2);
+}
+
+.modeTabActiveLive {
+  background: rgba(16, 185, 129, 0.16) !important;
+  border-color: rgba(16, 185, 129, 0.45) !important;
+  color: #34d399 !important;
+  font-weight: 600;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+}
+
+.tabIcon {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.unreadDot {
+  width: 7px;
+  height: 7px;
+  background: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #10b981;
+  animation: pulseGreen 1.5s infinite;
+  margin-left: 2px;
+}
+
+/* ─── Live Chat Badges & Bubbles ─── */
+.liveBadge {
+  background: rgba(16, 185, 129, 0.18) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+}
+
+.sonuBubble {
+  border-left: 2.5px solid #10b981 !important;
+}
+
+/* ─── Informational Banners ─── */
+.waitingNotice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.85rem;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  border-radius: 8px;
+  font-size: 0.74rem;
+  color: #a7f3d0;
+  margin: 0.5rem 0;
+  line-height: 1.45;
+}
+
+.waitingNoticeIcon {
+  flex-shrink: 0;
+  font-size: 1rem;
+}
+
+.expiredNotice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 8px;
+  font-size: 0.74rem;
+  color: #fde68a;
+  margin: 0.5rem 0;
+  line-height: 1.45;
+}
+
+.expiredNoticeIcon {
+  flex-shrink: 0;
+  font-size: 1rem;
+}
+

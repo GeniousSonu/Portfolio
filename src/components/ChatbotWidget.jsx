@@ -4,13 +4,23 @@ import React, { useState, useRef, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import styles from './ChatbotWidget.module.css';
 import useScrollLock from '../hooks/useScrollLock';
+import { supabase } from '@/lib/supabaseClient';
 
 const MAX_CHAR_COUNT = 500;
+const SESSION_EXPIRY_MS = 6 * 60 * 60 * 1000; // 6 hours
 
-const INITIAL_MESSAGE = {
-  id: 'init-0',
+const INITIAL_AI_MESSAGE = {
+  id: 'ai-init-0',
   role: 'model',
+  sender: 'ai',
   text: "Hey! I'm genious.exe, Sahinur's portfolio systems assistant. Ask me anything about his engineering career, tech stack, IoT vaccine patent, projects, favorite books, or hobbies.",
+};
+
+const INITIAL_LIVE_MESSAGE = {
+  id: 'live-init-0',
+  role: 'model',
+  sender: 'sonu',
+  text: "Hey! You're talking directly to Sonu (SK Sahinur Islam). Type your message below — it forwards straight to his Telegram in real-time.\n\nSonu isn't always online 24/7, but he'll reply as soon as he sees it!",
 };
 
 const SUGGESTIONS = [
@@ -67,21 +77,105 @@ function SafeMessageContent({ content }) {
 export default function ChatbotWidget() {
   const pathname = usePathname();
   const router = useRouter();
+
+  // Mode: 'ai' (AI Assistant) vs 'live' (Talk to Sonu via Telegram relay)
+  const [chatMode, setChatMode] = useState('ai');
+
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [isTabVisible, setIsTabVisible] = useState(true);
   const [isFirstVisit, setIsFirstVisit] = useState(false);
-  const [messages, setMessages] = useState([INITIAL_MESSAGE]);
-  const [inputValue, setInputValue] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState(false);
 
+  // Independent conversation state per mode
+  const [aiMessages, setAiMessages] = useState([INITIAL_AI_MESSAGE]);
+  const [liveMessages, setLiveMessages] = useState([INITIAL_LIVE_MESSAGE]);
+
+  const [inputValue, setInputValue] = useState('');
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const [isLiveSending, setIsLiveSending] = useState(false);
+  const [isWaitingForSonu, setIsWaitingForSonu] = useState(false);
+  const [hasUnreadLiveReply, setHasUnreadLiveReply] = useState(false);
+  const [hasInteractedAi, setHasInteractedAi] = useState(false);
+  const [isSessionExpired, setIsSessionExpired] = useState(false);
+
+  const sessionIdRef = useRef(null);
+  const sessionStartTimeRef = useRef(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const chatPanelRef = useRef(null);
 
   // Cross-device body scroll lock whenever the chatbot is open
   useScrollLock(isOpen);
+
+  // Generate high-entropy unguessable session ID using crypto.randomUUID()
+  const getOrCreateSessionId = () => {
+    if (!sessionIdRef.current) {
+      sessionIdRef.current =
+        typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `sess_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+      sessionStartTimeRef.current = Date.now();
+      setIsSessionExpired(false);
+    }
+    return sessionIdRef.current;
+  };
+
+  // Subscribe to Supabase Realtime channel when chat widget is open
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const sid = getOrCreateSessionId();
+    const channelName = `live-chat:${sid}`;
+    const channel = supabase.channel(channelName, {
+      config: { broadcast: { ack: true } },
+    });
+
+    channel
+      .on('broadcast', { event: 'sonu_reply' }, ({ payload }) => {
+        if (payload?.text) {
+          const replyMsg = {
+            id: payload.id || `reply-${Date.now()}`,
+            role: 'model',
+            sender: 'sonu',
+            text: payload.text,
+            timestamp: payload.timestamp,
+          };
+          setLiveMessages((prev) => [...prev, replyMsg]);
+          setIsWaitingForSonu(false);
+          setChatMode((currentMode) => {
+            if (currentMode !== 'live') {
+              setHasUnreadLiveReply(true);
+            }
+            return currentMode;
+          });
+        }
+      })
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          // Channel connected and ready
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isOpen]);
+
+  // Periodic check for 6-hour session expiration
+  useEffect(() => {
+    if (!isOpen) return;
+    const checkExpiry = () => {
+      if (sessionStartTimeRef.current) {
+        const elapsed = Date.now() - sessionStartTimeRef.current;
+        if (elapsed > SESSION_EXPIRY_MS) {
+          setIsSessionExpired(true);
+        }
+      }
+    };
+    checkExpiry();
+    const interval = setInterval(checkExpiry, 60000);
+    return () => clearInterval(interval);
+  }, [isOpen]);
 
   // Pause floating animations when browser tab is hidden to save mobile battery/CPU
   useEffect(() => {
@@ -94,7 +188,7 @@ export default function ChatbotWidget() {
 
   const [isTriggerVisible, setIsTriggerVisible] = useState(false);
 
-  // PRIORITY 3: Show chatbot bubble after 8-10 second delay OR when scrolled past 25-30% of page
+  // Show chatbot bubble after 8-10 second delay OR when scrolled past 25-30% of page
   useEffect(() => {
     let triggered = false;
     const triggerAppearance = () => {
@@ -109,7 +203,7 @@ export default function ChatbotWidget() {
     const handleScroll = () => {
       const scrollY = window.scrollY || window.pageYOffset;
       const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (scrollableHeight > 0 && (scrollY / scrollableHeight) >= 0.25) {
+      if (scrollableHeight > 0 && scrollY / scrollableHeight >= 0.25) {
         triggerAppearance();
       }
     };
@@ -149,7 +243,6 @@ export default function ChatbotWidget() {
       const navOpen = Boolean(e?.detail?.open);
       setIsNavOpen(navOpen);
       if (navOpen) {
-        // Close chatbot automatically if it was open when nav menu opened
         setIsOpen(false);
         setIsClosing(false);
       }
@@ -164,16 +257,17 @@ export default function ChatbotWidget() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const activeMessages = chatMode === 'ai' ? aiMessages : liveMessages;
+
   useEffect(() => {
     if (isOpen && !isClosing) {
       scrollToBottom();
-      // Auto-focus input on open
       const timer = setTimeout(() => {
         inputRef.current?.focus();
       }, 120);
       return () => clearTimeout(timer);
     }
-  }, [isOpen, isClosing, messages]);
+  }, [isOpen, isClosing, activeMessages, chatMode]);
 
   const handleOpen = () => {
     setIsClosing(false);
@@ -215,7 +309,6 @@ export default function ChatbotWidget() {
       } else {
         router.push(target);
       }
-      // On mobile screens, minimize chat so the user immediately sees the navigated section
       if (typeof window !== 'undefined' && window.innerWidth <= 768) {
         handleClose();
       }
@@ -226,14 +319,16 @@ export default function ChatbotWidget() {
 
   const handleSendMessage = async (textToSend) => {
     const query = (textToSend || inputValue).trim();
-    if (!query || isLoading) return;
+    if (!query) return;
+
+    if (chatMode === 'ai' && isAiLoading) return;
+    if (chatMode === 'live' && isLiveSending) return;
 
     if (query.length > MAX_CHAR_COUNT) {
       alert(`Message cannot exceed ${MAX_CHAR_COUNT} characters.`);
       return;
     }
 
-    setHasInteracted(true);
     setInputValue('');
 
     const userMessage = {
@@ -242,53 +337,97 @@ export default function ChatbotWidget() {
       text: query,
     };
 
-    // Update in-memory state with user message
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
-    setIsLoading(true);
+    if (chatMode === 'ai') {
+      setHasInteractedAi(true);
+      const updatedMessages = [...aiMessages, userMessage];
+      setAiMessages(updatedMessages);
+      setIsAiLoading(true);
 
-    try {
-      // Send thread history (excluding the first greeting and keeping last 6)
-      const conversationPayload = updatedMessages
-        .slice(1, -1) // All prior turns except initial greeting and just-added message
-        .slice(-6)
-        .map((m) => ({ role: m.role, text: m.text }));
+      try {
+        const conversationPayload = updatedMessages
+          .slice(1, -1)
+          .slice(-6)
+          .map((m) => ({ role: m.role, text: m.text }));
 
-      const res = await fetch('/api/chatbot', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: query,
-          conversation: conversationPayload,
-        }),
-      });
+        const res = await fetch('/api/chatbot', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: query,
+            conversation: conversationPayload,
+          }),
+        });
 
-      const data = await res.json();
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data?.reply || data?.error || 'Failed to get response');
+        }
 
-      if (!res.ok) {
-        throw new Error(data?.reply || data?.error || 'Failed to get response');
+        const botMessage = {
+          id: `bot-${Date.now()}`,
+          role: 'model',
+          sender: 'ai',
+          text: data.reply || "I couldn't process that. Please try asking again!",
+        };
+        setAiMessages((prev) => [...prev, botMessage]);
+      } catch (err) {
+        const errorMessage = {
+          id: `error-${Date.now()}`,
+          role: 'model',
+          sender: 'ai',
+          text:
+            err.message ||
+            "I'm experiencing a temporary connection issue. Please try again or reach out through the contact form!",
+        };
+        setAiMessages((prev) => [...prev, errorMessage]);
+      } finally {
+        setIsAiLoading(false);
+      }
+    } else {
+      // ── "Talk to Sonu" Mode (Telegram Relay) ──
+      // If session was expired, regenerate sessionId and restart window
+      if (isSessionExpired) {
+        sessionIdRef.current =
+          typeof crypto !== 'undefined' && crypto.randomUUID
+            ? crypto.randomUUID()
+            : `sess_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+        sessionStartTimeRef.current = Date.now();
+        setIsSessionExpired(false);
       }
 
-      const botMessage = {
-        id: `bot-${Date.now()}`,
-        role: 'model',
-        text: data.reply || "I couldn't process that. Please try asking again!",
-      };
+      const sid = getOrCreateSessionId();
+      setLiveMessages((prev) => [...prev, userMessage]);
+      setIsLiveSending(true);
+      setIsWaitingForSonu(true);
 
-      setMessages((prev) => [...prev, botMessage]);
-    } catch (err) {
-      const errorMessage = {
-        id: `error-${Date.now()}`,
-        role: 'model',
-        text:
-          err.message ||
-          "I'm experiencing a temporary connection issue. Please try again or reach out through the contact form!",
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
+      try {
+        const res = await fetch('/api/live-chat/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: sid,
+            message: query,
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data?.error || 'Failed to deliver message to Sonu');
+        }
+      } catch (err) {
+        setIsWaitingForSonu(false);
+        const errorMessage = {
+          id: `error-${Date.now()}`,
+          role: 'model',
+          sender: 'sonu',
+          text:
+            err.message ||
+            'Could not forward message to Sonu right now. Please try again in a few moments.',
+        };
+        setLiveMessages((prev) => [...prev, errorMessage]);
+      } finally {
+        setIsLiveSending(false);
+      }
     }
   };
 
@@ -298,8 +437,20 @@ export default function ChatbotWidget() {
   };
 
   const handleClearChat = () => {
-    setMessages([INITIAL_MESSAGE]);
-    setHasInteracted(false);
+    if (chatMode === 'ai') {
+      setAiMessages([INITIAL_AI_MESSAGE]);
+      setHasInteractedAi(false);
+    } else {
+      // Regenerate session ID for fresh live chat
+      sessionIdRef.current =
+        typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `sess_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+      sessionStartTimeRef.current = Date.now();
+      setIsSessionExpired(false);
+      setIsWaitingForSonu(false);
+      setLiveMessages([INITIAL_LIVE_MESSAGE]);
+    }
   };
 
   const remainingChars = MAX_CHAR_COUNT - inputValue.length;
@@ -309,6 +460,8 @@ export default function ChatbotWidget() {
   if (pathname?.startsWith('/studio') || isNavOpen) {
     return null;
   }
+
+  const isCurrentLoading = chatMode === 'ai' ? isAiLoading : isLiveSending;
 
   return (
     <div className={styles.widgetWrapper}>
@@ -320,8 +473,8 @@ export default function ChatbotWidget() {
             className={styles.triggerBtn}
             onClick={handleOpen}
             aria-expanded={isOpen}
-            aria-label="Open AI systems assistant"
-            title="Ask me anything about Sahinur"
+            aria-label="Open chat assistant"
+            title="Ask me anything or chat live with Sonu"
           >
             {/* 3D Floating Bot Icon with synchronous drop shadow */}
             <div className={styles.botFigureWrap} aria-hidden="true">
@@ -346,7 +499,7 @@ export default function ChatbotWidget() {
               <span className={styles.pulseDot} aria-hidden="true" />
             </div>
 
-            <span className={styles.triggerText}>Ask me anything</span>
+            <span className={styles.triggerText}>Chat with me</span>
           </button>
         </div>
       )}
@@ -365,7 +518,7 @@ export default function ChatbotWidget() {
             ref={chatPanelRef}
             className={`${styles.chatPanel} ${isClosing ? styles.chatPanelClosing : ''}`}
             role="dialog"
-            aria-label="genious.exe Systems Assistant"
+            aria-label={chatMode === 'ai' ? 'genious.exe Systems Assistant' : 'Live Chat with Sonu'}
             aria-modal="true"
           >
             {/* Pinned Header */}
@@ -381,8 +534,10 @@ export default function ChatbotWidget() {
                   />
                 </div>
                 <div className={styles.headerTitles}>
-                  <h3>genious.exe</h3>
-                  <span>● Online · Systems Assistant</span>
+                  <h3>{chatMode === 'ai' ? 'genious.exe' : 'SK Sahinur Islam'}</h3>
+                  <span>
+                    {chatMode === 'ai' ? '● Online · Systems Assistant' : '● Live Relay · Direct to Telegram'}
+                  </span>
                 </div>
               </div>
 
@@ -391,7 +546,7 @@ export default function ChatbotWidget() {
                   type="button"
                   className={styles.iconBtn}
                   onClick={handleClearChat}
-                  title="Reset conversation"
+                  title={chatMode === 'ai' ? 'Reset AI conversation' : 'Start new live chat session'}
                   aria-label="Reset conversation"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -416,130 +571,196 @@ export default function ChatbotWidget() {
               </div>
             </div>
 
-          {/* Messages List */}
-          <div className={styles.messagesList} role="log" aria-live="polite">
-            {messages.map((msg) => {
-              const isUser = msg.role === 'user';
-              const { cleanText, actions } = parseMessageActions(msg.text);
+            {/* Mode Switcher Tabs */}
+            <div className={styles.modeTabsRow}>
+              <button
+                type="button"
+                className={`${styles.modeTabBtn} ${chatMode === 'ai' ? styles.modeTabActiveAi : ''}`}
+                onClick={() => setChatMode('ai')}
+                aria-label="Switch to AI Assistant"
+              >
+                <span className={styles.tabIcon}>🤖</span>
+                <span>AI Assistant</span>
+              </button>
+              <button
+                type="button"
+                className={`${styles.modeTabBtn} ${chatMode === 'live' ? styles.modeTabActiveLive : ''}`}
+                onClick={() => {
+                  setChatMode('live');
+                  setHasUnreadLiveReply(false);
+                }}
+                aria-label="Switch to Talk to Sonu"
+              >
+                <span className={styles.tabIcon}>💬</span>
+                <span>Talk to Sonu</span>
+                {hasUnreadLiveReply && <span className={styles.unreadDot} title="New reply from Sonu" />}
+              </button>
+            </div>
 
-              return (
-                <div
-                  key={msg.id}
-                  className={`${styles.messageRow} ${isUser ? styles.userRow : styles.botRow}`}
-                >
-                  <span className={styles.systemBadge}>
-                    {isUser ? 'YOU' : 'GENIOUS.EXE'}
-                  </span>
-                  <div className={`${styles.bubble} ${isUser ? styles.userBubble : styles.botBubble}`}>
-                    <SafeMessageContent content={cleanText} />
+            {/* Messages List */}
+            <div className={styles.messagesList} role="log" aria-live="polite">
+              {activeMessages.map((msg) => {
+                const isUser = msg.role === 'user';
+                const { cleanText, actions } = parseMessageActions(msg.text);
 
-                    {!isUser && actions.length > 0 && (
-                      <div className={styles.actionButtonsRow}>
-                        {actions.map((action, actIdx) => (
-                          <button
-                            key={actIdx}
-                            type="button"
-                            className={action.type === 'nav' ? styles.actionNavBtn : styles.actionOpenBtn}
-                            onClick={() => handleActionClick(action)}
-                            title={action.type === 'nav' ? `Navigate to ${action.target}` : `Open ${action.target} in new tab`}
-                          >
-                            {action.type === 'nav' ? (
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                <polyline points="9 18 15 12 9 6" />
-                              </svg>
-                            ) : (
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                                <polyline points="15 3 21 3 21 9" />
-                                <line x1="10" y1="14" x2="21" y2="3" />
-                              </svg>
-                            )}
-                            <span>{action.label}</span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                return (
+                  <div
+                    key={msg.id}
+                    className={`${styles.messageRow} ${isUser ? styles.userRow : styles.botRow}`}
+                  >
+                    <span
+                      className={`${styles.systemBadge} ${
+                        !isUser && chatMode === 'live' ? styles.liveBadge : ''
+                      }`}
+                    >
+                      {isUser ? 'YOU' : chatMode === 'ai' ? 'GENIOUS.EXE' : 'SONU (DIRECT)'}
+                    </span>
+                    <div
+                      className={`${styles.bubble} ${
+                        isUser
+                          ? styles.userBubble
+                          : `${styles.botBubble} ${chatMode === 'live' ? styles.sonuBubble : ''}`
+                      }`}
+                    >
+                      <SafeMessageContent content={cleanText} />
+
+                      {!isUser && actions.length > 0 && (
+                        <div className={styles.actionButtonsRow}>
+                          {actions.map((action, actIdx) => (
+                            <button
+                              key={actIdx}
+                              type="button"
+                              className={action.type === 'nav' ? styles.actionNavBtn : styles.actionOpenBtn}
+                              onClick={() => handleActionClick(action)}
+                              title={action.type === 'nav' ? `Navigate to ${action.target}` : `Open ${action.target} in new tab`}
+                            >
+                              {action.type === 'nav' ? (
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="9 18 15 12 9 6" />
+                                </svg>
+                              ) : (
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                                  <polyline points="15 3 21 3 21 9" />
+                                  <line x1="10" y1="14" x2="21" y2="3" />
+                                </svg>
+                              )}
+                              <span>{action.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Quick Suggestions on initial AI state */}
+              {chatMode === 'ai' && !hasInteractedAi && aiMessages.length === 1 && (
+                <div className={styles.suggestions}>
+                  {SUGGESTIONS.map((s, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      className={styles.chipBtn}
+                      onClick={() => handleSendMessage(s)}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Waiting for Sonu Indicator in Live Mode */}
+              {chatMode === 'live' && isWaitingForSonu && (
+                <div className={styles.waitingNotice}>
+                  <span className={styles.waitingNoticeIcon}>⏳</span>
+                  <div>
+                    <strong>Sent to Sonu's Telegram · Waiting for reply...</strong>
+                    <div>Sonu isn't always online 24/7 — he'll get back to you as soon as he can!</div>
                   </div>
                 </div>
-              );
-            })}
+              )}
 
-            {/* Quick Suggestions on initial state */}
-            {!hasInteracted && messages.length === 1 && (
-              <div className={styles.suggestions}>
-                {SUGGESTIONS.map((s, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    className={styles.chipBtn}
-                    onClick={() => handleSendMessage(s)}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Typing indicator */}
-            {isLoading && (
-              <div className={`${styles.messageRow} ${styles.botRow}`}>
-                <span className={styles.systemBadge}>GENIOUS.EXE THINKING</span>
-                <div className={`${styles.bubble} ${styles.botBubble} ${styles.typingIndicator}`}>
-                  <span className={styles.typingDot} />
-                  <span className={styles.typingDot} />
-                  <span className={styles.typingDot} />
+              {/* Expired Session Notice in Live Mode */}
+              {chatMode === 'live' && isSessionExpired && (
+                <div className={styles.expiredNotice}>
+                  <span className={styles.expiredNoticeIcon}>⚠️</span>
+                  <div>
+                    <strong>This conversation session has expired (6h limit).</strong>
+                    <div>Send a new message below to start a fresh chat with Sonu.</div>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            <div ref={messagesEndRef} />
+              {/* Typing indicator */}
+              {isCurrentLoading && (
+                <div className={`${styles.messageRow} ${styles.botRow}`}>
+                  <span className={styles.systemBadge}>
+                    {chatMode === 'ai' ? 'GENIOUS.EXE THINKING' : 'FORWARDING TO TELEGRAM'}
+                  </span>
+                  <div className={`${styles.bubble} ${styles.botBubble} ${styles.typingIndicator}`}>
+                    <span className={styles.typingDot} />
+                    <span className={styles.typingDot} />
+                    <span className={styles.typingDot} />
+                  </div>
+                </div>
+              )}
+
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input Footer */}
+            <div className={styles.footer}>
+              <form onSubmit={handleFormSubmit} className={styles.inputForm}>
+                <div className={styles.inputRow}>
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    className={styles.textInput}
+                    placeholder={
+                      chatMode === 'ai'
+                        ? 'Ask genious.exe about Sahinur...'
+                        : 'Send a message directly to Sonu...'
+                    }
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value.slice(0, MAX_CHAR_COUNT))}
+                    disabled={isCurrentLoading}
+                    maxLength={MAX_CHAR_COUNT}
+                    aria-label="Message input"
+                  />
+                  <button
+                    type="submit"
+                    className={styles.sendBtn}
+                    disabled={isCurrentLoading || !inputValue.trim()}
+                    aria-label="Send message"
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="22" y1="2" x2="11" y2="13" />
+                      <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className={styles.metaRow}>
+                  <span>
+                    {chatMode === 'ai' ? 'In-memory session only' : 'Real-time Telegram relay'}
+                  </span>
+                  <span
+                    className={
+                      remainingChars <= 20
+                        ? styles.charCountLimit
+                        : isNearLimit
+                        ? styles.charCountWarn
+                        : ''
+                    }
+                  >
+                    {inputValue.length}/{MAX_CHAR_COUNT}
+                  </span>
+                </div>
+              </form>
+            </div>
           </div>
-
-          {/* Input Footer */}
-          <div className={styles.footer}>
-            <form onSubmit={handleFormSubmit} className={styles.inputForm}>
-              <div className={styles.inputRow}>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  className={styles.textInput}
-                  placeholder="Ask genious.exe about Sahinur..."
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value.slice(0, MAX_CHAR_COUNT))}
-                  disabled={isLoading}
-                  maxLength={MAX_CHAR_COUNT}
-                  aria-label="Message input"
-                />
-                <button
-                  type="submit"
-                  className={styles.sendBtn}
-                  disabled={isLoading || !inputValue.trim()}
-                  aria-label="Send message"
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="22" y1="2" x2="11" y2="13" />
-                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                  </svg>
-                </button>
-              </div>
-
-              <div className={styles.metaRow}>
-                <span>In-memory session only</span>
-                <span
-                  className={
-                    remainingChars <= 20
-                      ? styles.charCountLimit
-                      : isNearLimit
-                      ? styles.charCountWarn
-                      : ''
-                  }
-                >
-                  {inputValue.length}/{MAX_CHAR_COUNT}
-                </span>
-              </div>
-            </form>
-          </div>
-        </div>
         </>
       )}
     </div>
