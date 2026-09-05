@@ -237,8 +237,8 @@ export default function Certifications() {
         </div>
 
         {/* Horizontal scroll snap wrapper on mobile */}
-        <div className="certs-scroll-wrapper">
-          <div className="certs-grid" role="region" aria-label="Certifications carousel">
+        <div className="certs-scroll-wrapper" data-lenis-prevent>
+          <div className="certs-grid" role="region" aria-label="Certifications carousel" data-lenis-prevent>
             {CERTS.map((cert, i) => (
               <div key={i} className="cert-card stagger-child">
                 {/* Provider logo */}

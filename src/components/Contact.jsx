@@ -119,30 +119,58 @@ export default function Contact() {
     gsap.registerPlugin(ScrollTrigger);
 
     const revealLeft = containerRef.current?.querySelector('.reveal-left');
-    let leftTrigger;
-    if (revealLeft) {
-      leftTrigger = gsap.fromTo(revealLeft,
-        { opacity: 0, x: -40 },
-        { opacity: 1, x: 0, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: revealLeft, start: 'top 85%', toggleActions: 'play none none none' }
-        }
-      );
-    }
-
     const revealRight = containerRef.current?.querySelector('.reveal-right');
-    let rightTrigger;
-    if (revealRight) {
-      rightTrigger = gsap.fromTo(revealRight,
-        { opacity: 0, x: 40 },
-        { opacity: 1, x: 0, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: revealRight, start: 'top 85%', toggleActions: 'play none none none' }
-        }
-      );
-    }
+    const mm = gsap.matchMedia();
+
+    // Desktop: subtle lateral entry
+    mm.add("(min-width: 768px)", () => {
+      if (revealLeft) {
+        gsap.fromTo(revealLeft,
+          { opacity: 0, x: -30 },
+          {
+            opacity: 1,
+            x: 0,
+            duration: 0.85,
+            ease: 'power3.out',
+            scrollTrigger: { trigger: revealLeft, start: 'top 85%', toggleActions: 'play none none none' }
+          }
+        );
+      }
+
+      if (revealRight) {
+        gsap.fromTo(revealRight,
+          { opacity: 0, x: 30 },
+          {
+            opacity: 1,
+            x: 0,
+            duration: 0.85,
+            ease: 'power3.out',
+            scrollTrigger: { trigger: revealRight, start: 'top 85%', toggleActions: 'play none none none' }
+          }
+        );
+      }
+    });
+
+    // Mobile: smooth vertical entry (prevents lateral jitter/overflow)
+    mm.add("(max-width: 767px)", () => {
+      const elements = [revealLeft, revealRight].filter(Boolean);
+      if (elements.length > 0) {
+        gsap.fromTo(elements,
+          { opacity: 0, y: 20 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            stagger: 0.1,
+            ease: 'power2.out',
+            scrollTrigger: { trigger: elements[0], start: 'top 90%', toggleActions: 'play none none none' }
+          }
+        );
+      }
+    });
 
     return () => {
-      leftTrigger?.scrollTrigger?.kill(); leftTrigger?.kill();
-      rightTrigger?.scrollTrigger?.kill(); rightTrigger?.kill();
+      mm.revert();
     };
   }, []);
 

@@ -10,41 +10,62 @@ export default function About() {
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
 
-    const leftTrigger = gsap.fromTo(leftRef.current, 
-      { opacity: 0, x: -40 },
-      {
-        opacity: 1,
-        x: 0,
-        duration: 0.9,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: leftRef.current,
-          start: 'top 85%',
-          toggleActions: 'play none none none'
-        }
-      }
-    );
+    const mm = gsap.matchMedia();
 
-    const rightTrigger = gsap.fromTo(rightRef.current, 
-      { opacity: 0, x: 40 },
-      {
-        opacity: 1,
-        x: 0,
-        duration: 0.9,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: rightRef.current,
-          start: 'top 85%',
-          toggleActions: 'play none none none'
+    // Desktop: subtle lateral entry
+    mm.add("(min-width: 768px)", () => {
+      gsap.fromTo(leftRef.current,
+        { opacity: 0, x: -30 },
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.85,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: leftRef.current,
+            start: 'top 85%',
+            toggleActions: 'play none none none',
+          },
         }
-      }
-    );
+      );
+
+      gsap.fromTo(rightRef.current,
+        { opacity: 0, x: 30 },
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.85,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: rightRef.current,
+            start: 'top 85%',
+            toggleActions: 'play none none none',
+          },
+        }
+      );
+    });
+
+    // Mobile: smooth vertical entry (prevents horizontal layout shift/jitter)
+    mm.add("(max-width: 767px)", () => {
+      gsap.fromTo([leftRef.current, rightRef.current],
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: leftRef.current,
+            start: 'top 90%',
+            toggleActions: 'play none none none',
+          },
+        }
+      );
+    });
 
     return () => {
-      leftTrigger.scrollTrigger?.kill();
-      leftTrigger.kill();
-      rightTrigger.scrollTrigger?.kill();
-      rightTrigger.kill();
+      mm.revert();
     };
   }, []);
 

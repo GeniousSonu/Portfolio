@@ -52,6 +52,11 @@ export function useScrollLock(isLocked) {
         document.body.style.right = '0';
         document.body.style.width = '100%';
         document.body.style.touchAction = 'none';
+
+        // Safely stop Lenis if active on desktop (optional chaining prevents throws on mobile)
+        if (typeof window !== 'undefined') {
+          window.__lenis?.stop();
+        }
       }
 
       lockCount += 1;
@@ -83,6 +88,11 @@ export function useScrollLock(isLocked) {
             behavior: 'instant',
           });
         }
+
+        // Safely resume Lenis
+        if (typeof window !== 'undefined') {
+          window.__lenis?.start();
+        }
       }
     }
 
@@ -109,6 +119,10 @@ export function useScrollLock(isLocked) {
             left: 0,
             behavior: 'instant',
           });
+
+          if (typeof window !== 'undefined') {
+            window.__lenis?.start();
+          }
         }
       }
     };

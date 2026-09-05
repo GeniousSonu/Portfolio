@@ -247,9 +247,7 @@ export default function Experience() {
       mm.add("(max-width: 767px)", () => {
         cards.forEach((card) => {
           gsap.set(card, {
-            y: 0,
             scale: 1,
-            opacity: 1,
             visibility: 'visible',
             filter: 'none',
             position: 'relative',
@@ -258,22 +256,25 @@ export default function Experience() {
             right: 'auto',
             transform: 'none',
           });
-          gsap.fromTo(
-            card,
-            { opacity: 0.4, y: 18 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.45,
-              ease: "power2.out",
-              scrollTrigger: {
-                trigger: card,
-                start: "top 90%",
-                toggleActions: "play none none reverse",
-              }
-            }
-          );
         });
+
+        // Single consolidated trigger for mobile instead of multiple reverse-scrub instances
+        gsap.fromTo(
+          cards,
+          { opacity: 0, y: 20 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+            stagger: 0.08,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: pastPinRef.current,
+              start: "top 90%",
+              toggleActions: "play none none none",
+            },
+          }
+        );
       });
     }, containerRef);
 

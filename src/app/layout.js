@@ -204,6 +204,7 @@ const jsonLdGraph = {
 import CustomCursor from "@/components/CustomCursor";
 import MobileBottomCTA from "@/components/MobileBottomCTA";
 import PWARegistration from "@/components/PWARegistration";
+import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 import ConsentAnalyticsGate from "@/components/ConsentAnalyticsGate";
 import CookieConsentBanner from "@/components/CookieConsentBanner";
 import UserPreferences from "@/components/UserPreferences";
@@ -268,6 +269,7 @@ export default function RootLayout({ children }) {
         )}
       </head>
       <body>
+        <SmoothScrollProvider />
         <PWARegistration />
         <UserPreferences />
         <CustomCursor />

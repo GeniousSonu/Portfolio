@@ -119,16 +119,19 @@ export default function Hero() {
       });
     }
 
-    // Parallax background scroll
-    const parallaxTrigger = gsap.to('.hero-bg', {
-      y: -100,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: '#hero',
-        start: 'top top',
-        end: 'bottom top',
-        scrub: 1.5
-      }
+    // Parallax background scroll - aligned strictly to desktop (min-width: 1024px) to match Lenis smoothing
+    const mm = gsap.matchMedia();
+    mm.add("(min-width: 1024px)", () => {
+      gsap.to('.hero-bg', {
+        y: -100,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '#hero',
+          start: 'top top',
+          end: 'bottom top',
+          scrub: 1.5,
+        },
+      });
     });
 
     return () => {
@@ -138,8 +141,7 @@ export default function Hero() {
         btn.removeEventListener('mousemove', handleMouseMove);
         btn.removeEventListener('mouseleave', handleMouseLeave);
       });
-      parallaxTrigger.scrollTrigger?.kill();
-      parallaxTrigger.kill();
+      mm.revert();
     };
   }, []);
 

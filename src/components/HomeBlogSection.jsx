@@ -189,12 +189,13 @@ export default function HomeBlogSection() {
         )}
 
         {/* Horizontal Carousel Track */}
-        <div className="home-blog-scroll-wrapper">
+        <div className="home-blog-scroll-wrapper" data-lenis-prevent>
           <div
             ref={carouselRef}
             className={`home-blog-carousel ${isSingle ? 'is-single' : ''}`}
             role="region"
             aria-label="Blog posts carousel"
+            data-lenis-prevent
           >
             {posts.map((post) => {
               const category = post.categories?.[0]?.title || 'Engineering';

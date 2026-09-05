@@ -29,43 +29,43 @@ export default function Home() {
     gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
-      // Animate page-level rack separators
-      const separators = gsap.utils.toArray('.rack-sep');
-      separators.forEach(sep => 
-        gsap.fromTo(sep,
-          { opacity: 0, scaleX: 0.8 },
-          {
-            opacity: 1,
-            scaleX: 1,
-            duration: 0.6,
-            ease: 'power2.out',
-            scrollTrigger: {
-              trigger: sep,
-              start: 'top 90%',
-              toggleActions: 'play none none none'
+      // Batch animate page-level rack separators (consolidates 7 separate triggers into 1)
+      ScrollTrigger.batch('.rack-sep', {
+        start: 'top 90%',
+        once: true,
+        onEnter: (batch) =>
+          gsap.fromTo(
+            batch,
+            { opacity: 0, scaleX: 0.8 },
+            {
+              opacity: 1,
+              scaleX: 1,
+              duration: 0.6,
+              stagger: 0.1,
+              ease: 'power2.out',
+              overwrite: 'auto',
             }
-          }
-        )
-      );
+          ),
+      });
 
-      // Animate global-reach reveal items
-      const pageReveals = gsap.utils.toArray('#global-reach .reveal');
-      pageReveals.forEach(el =>
-        gsap.fromTo(el,
-          { opacity: 0, y: 40 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.9,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: el,
-              start: 'top 85%',
-              toggleActions: 'play none none none'
+      // Batch animate global-reach reveal items
+      ScrollTrigger.batch('#global-reach .reveal', {
+        start: 'top 85%',
+        once: true,
+        onEnter: (batch) =>
+          gsap.fromTo(
+            batch,
+            { opacity: 0, y: 35 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.8,
+              stagger: 0.1,
+              ease: 'power3.out',
+              overwrite: 'auto',
             }
-          }
-        )
-      );
+          ),
+      });
     });
 
     // Check if an anchor target was requested (e.g. navigated from /blog or /store to #certs)
