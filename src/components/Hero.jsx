@@ -4,7 +4,6 @@ import gsap from 'gsap';
 import { TextPlugin } from 'gsap/TextPlugin';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
-import WaterRippleEffect from './ui/WaterRippleEffect';
 
 export default function Hero() {
   const eyebrowRef = useRef(null);
@@ -147,11 +146,6 @@ export default function Hero() {
   return (
     <section id="hero">
       <div className="hero-bg" aria-hidden="true"></div>
-      <WaterRippleEffect
-        imageSrc="/water-ripple-background.svg"
-        className="water-ripple-layer hero-ripple"
-      />
-      <div className="hero-ripple-scrim" aria-hidden="true" />
       <div className="site-container" style={{ width: '100%' }}>
         <div className="hero-grid-layout">
           <div className="hero-content">

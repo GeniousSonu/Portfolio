@@ -4,7 +4,6 @@ import Footer from '@/components/Footer';
 import { client } from '@/sanity/client';
 import { PRODUCTS_QUERY } from '@/sanity/queries';
 import StoreListClient from './StoreListClient';
-import WaterRippleEffect from '@/components/ui/WaterRippleEffect';
 import styles from './store.module.css';
 
 export const revalidate = 30; // ISR cache revalidation every 30 seconds
@@ -80,12 +79,8 @@ export default async function StorePage() {
     <main className={styles.storePage}>
       <Navbar />
 
-      {/* Ambient background glow & Water Ripple Layer */}
+      {/* Ambient background glow */}
       <div className={styles.ambientGlow} />
-      <WaterRippleEffect
-        imageSrc="/water-ripple-background.svg"
-        className="water-ripple-layer"
-      />
 
       {/* Schema.org Structured Data */}
       <script

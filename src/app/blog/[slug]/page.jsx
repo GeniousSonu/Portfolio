@@ -9,7 +9,6 @@ import { client } from '@/sanity/client'
 import { getOptimizedImageUrl } from '@/sanity/image'
 import { POST_QUERY, POST_SLUGS_QUERY } from '@/sanity/queries'
 import ShareButtons from './ShareButtons'
-import WaterRippleEffect from '@/components/ui/WaterRippleEffect'
 import styles from './post.module.css'
 
 export const revalidate = 30 // ISR cache revalidation every 30 seconds
@@ -113,12 +112,8 @@ export default async function BlogPostPage({ params }) {
       />
       <Navbar />
 
-      {/* Ambient background glow & Water Ripple Layer */}
+      {/* Ambient background glow */}
       <div className={styles.ambientGlow} />
-      <WaterRippleEffect
-        imageSrc="/water-ripple-background.svg"
-        className="water-ripple-layer"
-      />
 
       <div className={styles.container}>
         {/* Back Link */}

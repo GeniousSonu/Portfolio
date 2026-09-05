@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import gsap from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
-import WaterRippleEffect from './ui/WaterRippleEffect';
 import { isConsentFullAccepted } from '@/lib/consent';
 
 /* ── Logo SVG (inline, inherits color) ──────────────────────── */
@@ -115,11 +114,6 @@ export default function Footer() {
 
   return (
     <footer id="footer" style={{ position: 'relative', overflow: 'hidden' }}>
-      <WaterRippleEffect
-        imageSrc="/water-ripple-background.svg"
-        className="water-ripple-layer footer-ripple"
-      />
-
       {/* Top gradient fade from page into footer */}
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0, height: '80px',

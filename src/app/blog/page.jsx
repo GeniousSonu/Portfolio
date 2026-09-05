@@ -4,7 +4,6 @@ import Footer from '@/components/Footer'
 import { client } from '@/sanity/client'
 import { POSTS_QUERY } from '@/sanity/queries'
 import BlogListClient from './BlogListClient'
-import WaterRippleEffect from '@/components/ui/WaterRippleEffect'
 import styles from './blog.module.css'
 
 export const revalidate = 30 // ISR cache revalidation every 30 seconds
@@ -50,12 +49,8 @@ export default async function BlogPage() {
     <main className={styles.blogPage}>
       <Navbar />
 
-      {/* Ambient background glow & Water Ripple Layer */}
+      {/* Ambient background glow */}
       <div className={styles.ambientGlow} />
-      <WaterRippleEffect
-        imageSrc="/water-ripple-background.svg"
-        className="water-ripple-layer"
-      />
 
       <div className={styles.container}>
         {/* Header Section */}
