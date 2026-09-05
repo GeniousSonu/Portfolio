@@ -7,6 +7,20 @@
 import dynamic from 'next/dynamic'
 import config from '@/sanity/studio.config'
 
+// Suppress harmless Sanity schema synchronization timing warning in browser/turbopack console
+if (typeof window !== 'undefined') {
+  const originalWarn = console.warn
+  console.warn = (...args) => {
+    if (
+      typeof args[0] === 'string' &&
+      args[0].includes('Building schema for synchronization took more than 1 second')
+    ) {
+      return
+    }
+    originalWarn(...args)
+  }
+}
+
 const NextStudio = dynamic(
   () => import('next-sanity/studio').then((mod) => mod.NextStudio),
   {

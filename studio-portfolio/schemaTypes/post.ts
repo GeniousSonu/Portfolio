@@ -1,4 +1,4 @@
-import { defineField, defineType } from 'sanity'
+import { defineField, defineType, defineArrayMember } from 'sanity'
 
 export const post = defineType({
   name: 'post',
@@ -43,19 +43,24 @@ export const post = defineType({
         hotspot: true,
       },
       fields: [
-        {
+        defineField({
           name: 'alt',
           type: 'string',
           title: 'Alternative Text',
           description: 'Important for SEO and accessibility.',
-        },
+        }),
       ],
     }),
     defineField({
       name: 'categories',
       title: 'Categories & Tags',
       type: 'array',
-      of: [{ type: 'reference', to: { type: 'category' } }],
+      of: [
+        defineArrayMember({
+          type: 'reference',
+          to: [{ type: 'category' }],
+        }),
+      ],
     }),
     defineField({
       name: 'publishedAt',
@@ -87,27 +92,27 @@ export const post = defineType({
       type: 'object',
       description: 'Metadata for future syncing with Medium, Dev.to, Hashnode, etc.',
       fields: [
-        {
+        defineField({
           name: 'canonicalUrl',
           title: 'Canonical URL',
           type: 'url',
           description: 'Original URL of this article to prevent SEO duplication penalties.',
-        },
-        {
+        }),
+        defineField({
           name: 'mediumUrl',
           title: 'Medium Story URL',
           type: 'url',
-        },
-        {
+        }),
+        defineField({
           name: 'devToUrl',
           title: 'Dev.to Article URL',
           type: 'url',
-        },
-        {
+        }),
+        defineField({
           name: 'hashnodeUrl',
           title: 'Hashnode Article URL',
           type: 'url',
-        },
+        }),
       ],
     }),
   ],

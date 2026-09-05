@@ -1,4 +1,4 @@
-import { defineType, defineArrayMember } from 'sanity'
+import { defineType, defineArrayMember, defineField } from 'sanity'
 
 export const blockContent = defineType({
   title: 'Block Content',
@@ -29,24 +29,24 @@ export const blockContent = defineType({
           { title: 'Strike', value: 'strike-through' },
         ],
         annotations: [
-          {
+          defineArrayMember({
             title: 'URL',
             name: 'link',
             type: 'object',
             fields: [
-              {
+              defineField({
                 title: 'URL',
                 name: 'href',
                 type: 'url',
-              },
-              {
+              }),
+              defineField({
                 title: 'Open in new tab',
                 name: 'blank',
                 type: 'boolean',
                 initialValue: true,
-              },
+              }),
             ],
-          },
+          }),
         ],
       },
     }),
@@ -54,17 +54,17 @@ export const blockContent = defineType({
       type: 'image',
       options: { hotspot: true },
       fields: [
-        {
+        defineField({
           name: 'alt',
           type: 'string',
           title: 'Alternative Text',
           description: 'Important for SEO and accessibility.',
-        },
-        {
+        }),
+        defineField({
           name: 'caption',
           type: 'string',
           title: 'Caption',
-        },
+        }),
       ],
     }),
     defineArrayMember({
@@ -72,7 +72,7 @@ export const blockContent = defineType({
       title: 'Code Snippet',
       type: 'object',
       fields: [
-        {
+        defineField({
           name: 'language',
           title: 'Language',
           type: 'string',
@@ -93,18 +93,18 @@ export const blockContent = defineType({
             ],
           },
           initialValue: 'javascript',
-        },
-        {
+        }),
+        defineField({
           name: 'filename',
           title: 'Filename (optional)',
           type: 'string',
-        },
-        {
+        }),
+        defineField({
           name: 'code',
           title: 'Code',
           type: 'text',
           rows: 10,
-        },
+        }),
       ],
     }),
     defineArrayMember({
@@ -112,7 +112,7 @@ export const blockContent = defineType({
       title: 'Callout Box',
       type: 'object',
       fields: [
-        {
+        defineField({
           name: 'type',
           title: 'Type',
           type: 'string',
@@ -125,18 +125,18 @@ export const blockContent = defineType({
             ],
           },
           initialValue: 'info',
-        },
-        {
+        }),
+        defineField({
           name: 'title',
           title: 'Callout Title',
           type: 'string',
-        },
-        {
+        }),
+        defineField({
           name: 'content',
           title: 'Content',
           type: 'text',
           rows: 3,
-        },
+        }),
       ],
     }),
   ],

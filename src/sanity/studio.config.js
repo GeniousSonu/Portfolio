@@ -1,24 +1,8 @@
-import { defineConfig } from 'sanity'
+import { defineConfig, defineField, defineType, defineArrayMember } from 'sanity'
 import { structureTool } from 'sanity/structure'
 import { visionTool } from '@sanity/vision'
-import { defineField, defineType, defineArrayMember } from 'sanity'
 
 // ── Schema Types ────────────────────────────────────────────
-
-// Custom Quote style component to avoid React 19 invalid DOM nesting (<p> containing <div>)
-const QuoteStyle = ({ children }) => (
-  <blockquote
-    style={{
-      borderLeft: '3px solid #06b6d4',
-      paddingLeft: '0.85rem',
-      margin: '0.6rem 0',
-      fontStyle: 'italic',
-      opacity: 0.9,
-    }}
-  >
-    {children}
-  </blockquote>
-)
 
 const blockContent = defineType({
   title: 'Block Content',
@@ -34,7 +18,7 @@ const blockContent = defineType({
         { title: 'H2', value: 'h2' },
         { title: 'H3', value: 'h3' },
         { title: 'H4', value: 'h4' },
-        { title: 'Quote', value: 'blockquote', component: QuoteStyle },
+        { title: 'Quote', value: 'blockquote' },
       ],
       lists: [
         { title: 'Bullet', value: 'bullet' },
@@ -49,15 +33,15 @@ const blockContent = defineType({
           { title: 'Strike', value: 'strike-through' },
         ],
         annotations: [
-          {
+          defineArrayMember({
             title: 'URL',
             name: 'link',
             type: 'object',
             fields: [
-              { title: 'URL', name: 'href', type: 'url' },
-              { title: 'Open in new tab', name: 'blank', type: 'boolean', initialValue: true },
+              defineField({ title: 'URL', name: 'href', type: 'url' }),
+              defineField({ title: 'Open in new tab', name: 'blank', type: 'boolean', initialValue: true }),
             ],
-          },
+          }),
         ],
       },
     }),
@@ -65,8 +49,8 @@ const blockContent = defineType({
       type: 'image',
       options: { hotspot: true },
       fields: [
-        { name: 'alt', type: 'string', title: 'Alternative Text', description: 'Important for SEO and accessibility.' },
-        { name: 'caption', type: 'string', title: 'Caption' },
+        defineField({ name: 'alt', type: 'string', title: 'Alternative Text', description: 'Important for SEO and accessibility.' }),
+        defineField({ name: 'caption', type: 'string', title: 'Caption' }),
       ],
     }),
     defineArrayMember({
@@ -74,7 +58,7 @@ const blockContent = defineType({
       title: 'Code Snippet',
       type: 'object',
       fields: [
-        {
+        defineField({
           name: 'language',
           title: 'Language',
           type: 'string',
@@ -95,9 +79,9 @@ const blockContent = defineType({
             ],
           },
           initialValue: 'javascript',
-        },
-        { name: 'filename', title: 'Filename (optional)', type: 'string' },
-        { name: 'code', title: 'Code', type: 'text', rows: 10 },
+        }),
+        defineField({ name: 'filename', title: 'Filename (optional)', type: 'string' }),
+        defineField({ name: 'code', title: 'Code', type: 'text', rows: 10 }),
       ],
     }),
     defineArrayMember({
@@ -105,7 +89,7 @@ const blockContent = defineType({
       title: 'Callout Box',
       type: 'object',
       fields: [
-        {
+        defineField({
           name: 'type',
           title: 'Type',
           type: 'string',
@@ -118,9 +102,9 @@ const blockContent = defineType({
             ],
           },
           initialValue: 'info',
-        },
-        { name: 'title', title: 'Callout Title', type: 'string' },
-        { name: 'content', title: 'Content', type: 'text', rows: 3 },
+        }),
+        defineField({ name: 'title', title: 'Callout Title', type: 'string' }),
+        defineField({ name: 'content', title: 'Content', type: 'text', rows: 3 }),
       ],
     }),
   ],
@@ -162,10 +146,25 @@ const post = defineType({
     defineField({ name: 'excerpt', title: 'Excerpt / Summary', type: 'text', rows: 3, description: 'Brief summary shown on blog preview cards and SEO meta descriptions.', validation: (rule) => rule.max(300) }),
     defineField({ name: 'author', title: 'Author', type: 'reference', to: [{ type: 'author' }] }),
     defineField({
-      name: 'mainImage', title: 'Cover Image', type: 'image', options: { hotspot: true },
-      fields: [{ name: 'alt', type: 'string', title: 'Alternative Text', description: 'Important for SEO and accessibility.' }],
+      name: 'mainImage',
+      title: 'Cover Image',
+      type: 'image',
+      options: { hotspot: true },
+      fields: [
+        defineField({ name: 'alt', type: 'string', title: 'Alternative Text', description: 'Important for SEO and accessibility.' }),
+      ],
     }),
-    defineField({ name: 'categories', title: 'Categories & Tags', type: 'array', of: [{ type: 'reference', to: { type: 'category' } }] }),
+    defineField({
+      name: 'categories',
+      title: 'Categories & Tags',
+      type: 'array',
+      of: [
+        defineArrayMember({
+          type: 'reference',
+          to: [{ type: 'category' }],
+        }),
+      ],
+    }),
     defineField({ name: 'publishedAt', title: 'Published at', type: 'datetime', initialValue: () => new Date().toISOString() }),
     defineField({ name: 'readTime', title: 'Estimated Read Time (minutes)', type: 'number', initialValue: 5 }),
     defineField({ name: 'featured', title: 'Featured Post', type: 'boolean', description: 'Highlight this post at the top of the blog page.', initialValue: false }),
@@ -176,10 +175,10 @@ const post = defineType({
       type: 'object',
       description: 'Metadata for future syncing with Medium, Dev.to, Hashnode, etc.',
       fields: [
-        { name: 'canonicalUrl', title: 'Canonical URL', type: 'url', description: 'Original URL of this article to prevent SEO duplication penalties.' },
-        { name: 'mediumUrl', title: 'Medium Story URL', type: 'url' },
-        { name: 'devToUrl', title: 'Dev.to Article URL', type: 'url' },
-        { name: 'hashnodeUrl', title: 'Hashnode Article URL', type: 'url' },
+        defineField({ name: 'canonicalUrl', title: 'Canonical URL', type: 'url', description: 'Original URL of this article to prevent SEO duplication penalties.' }),
+        defineField({ name: 'mediumUrl', title: 'Medium Story URL', type: 'url' }),
+        defineField({ name: 'devToUrl', title: 'Dev.to Article URL', type: 'url' }),
+        defineField({ name: 'hashnodeUrl', title: 'Hashnode Article URL', type: 'url' }),
       ],
     }),
   ],
@@ -210,13 +209,13 @@ const product = defineType({
       type: 'image',
       options: { hotspot: true },
       fields: [
-        {
+        defineField({
           name: 'alt',
           type: 'string',
           title: 'Alternative Text',
           description: 'Important for SEO and screen readers.',
           validation: (rule) => rule.required(),
-        },
+        }),
       ],
       validation: (rule) => rule.required(),
     }),

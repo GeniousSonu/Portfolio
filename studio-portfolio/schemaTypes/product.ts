@@ -19,13 +19,13 @@ export const product = defineType({
         hotspot: true,
       },
       fields: [
-        {
+        defineField({
           name: 'alt',
           type: 'string',
           title: 'Alternative Text',
           description: 'Important for SEO and screen readers.',
           validation: (rule) => rule.required(),
-        },
+        }),
       ],
       validation: (rule) => rule.required(),
     }),
