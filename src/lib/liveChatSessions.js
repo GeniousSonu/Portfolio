@@ -4,12 +4,12 @@ import { getServiceSupabase } from '@/lib/supabaseServer';
 const SESSION_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
 
 /**
- * Persists a forwarded Telegram message mapping to a visitor session ID.
- * Each forwarded message creates a new row so replying to ANY message in the thread
- * reliably maps back to the visitor session.
+ * Persists a Telegram message ID mapping to a visitor session ID using upsert
+ * to avoid duplicate key conflicts.
+ * Tracks every message in both directions (visitor forwarded messages & Sonu replies).
  *
- * @param {number|string} telegramMessageId - Telegram message_id returned by sendMessage
- * @param {string} sessionId - Client-generated high-entropy session ID
+ * @param {number|string} telegramMessageId
+ * @param {string} sessionId
  */
 export async function saveTelegramMessage(telegramMessageId, sessionId) {
   const supabase = getServiceSupabase();
@@ -17,16 +17,19 @@ export async function saveTelegramMessage(telegramMessageId, sessionId) {
 
   const { error } = await supabase
     .from('live_chat_sessions')
-    .insert({
-      telegram_message_id: numericId,
-      session_id: sessionId,
-      created_at: new Date().toISOString(),
-    });
+    .upsert(
+      {
+        telegram_message_id: numericId,
+        session_id: sessionId,
+        created_at: new Date().toISOString(),
+      },
+      { onConflict: 'telegram_message_id' }
+    );
 
   if (error) {
     console.error(
       '[LiveChat] Database error saving telegram message mapping:',
-      `Code: ${error.code} | Message: ${error.message} | Hint: Did you run supabase/migrations/20260905_live_chat_sessions.sql?`
+      `Code: ${error.code} | Message: ${error.message}`
     );
     if (error.code === 'PGRST205') {
       throw new Error(
@@ -36,7 +39,7 @@ export async function saveTelegramMessage(telegramMessageId, sessionId) {
     throw new Error(`Database error saving live chat session mapping: ${error.message}`);
   }
 
-  // Periodic lazy cleanup of expired sessions (> 6 hours)
+  // Periodic cleanup of expired sessions (> 6 hours)
   cleanupOldSessions().catch((err) => {
     console.warn('[LiveChat] Background session cleanup notice:', err.message);
   });
@@ -45,7 +48,7 @@ export async function saveTelegramMessage(telegramMessageId, sessionId) {
 /**
  * Looks up the visitor session_id corresponding to a Telegram message_id.
  *
- * @param {number|string} telegramMessageId - reply_to_message.message_id from webhook
+ * @param {number|string} telegramMessageId
  * @returns {Promise<{ sessionId: string, isExpired: boolean } | null>}
  */
 export async function getSessionByTelegramMessageId(telegramMessageId) {
@@ -60,7 +63,6 @@ export async function getSessionByTelegramMessageId(telegramMessageId) {
 
   if (error) {
     if (error.code === 'PGRST116') {
-      // Row not found (message wasn't part of any tracked session)
       return null;
     }
     console.error(
@@ -79,6 +81,73 @@ export async function getSessionByTelegramMessageId(telegramMessageId) {
     sessionId: data.session_id,
     isExpired,
   };
+}
+
+/**
+ * Retrieves all Telegram message IDs associated with a session ID.
+ *
+ * @param {string} sessionId
+ * @returns {Promise<number[]>}
+ */
+export async function getAllSessionMessageIds(sessionId) {
+  const supabase = getServiceSupabase();
+  const { data, error } = await supabase
+    .from('live_chat_sessions')
+    .select('telegram_message_id')
+    .eq('session_id', sessionId);
+
+  if (error) {
+    console.error('[LiveChat] Error fetching all session message IDs:', error);
+    return [];
+  }
+
+  return (data || []).map((row) => Number(row.telegram_message_id)).filter(Boolean);
+}
+
+/**
+ * Deletes all session records for a given session ID from Supabase.
+ *
+ * @param {string} sessionId
+ */
+export async function deleteSessionRecords(sessionId) {
+  const supabase = getServiceSupabase();
+  const { error } = await supabase
+    .from('live_chat_sessions')
+    .delete()
+    .eq('session_id', sessionId);
+
+  if (error) {
+    console.error('[LiveChat] Error deleting session records:', error);
+    throw new Error(`Failed to delete session records: ${error.message}`);
+  }
+}
+
+/**
+ * Deletes a list of messages from Telegram chat using deleteMessage API.
+ * Telegram permits bots to delete messages in private chats within 48 hours.
+ *
+ * @param {number[]} messageIds
+ * @param {string|number} chatId
+ * @param {string} botToken
+ */
+export async function deleteTelegramMessages(messageIds, chatId, botToken) {
+  if (!Array.isArray(messageIds) || messageIds.length === 0 || !chatId || !botToken) return;
+
+  const results = await Promise.allSettled(
+    messageIds.map(async (msgId) => {
+      const res = await fetch(`https://api.telegram.org/bot${botToken}/deleteMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          message_id: msgId,
+        }),
+      });
+      return res.json();
+    })
+  );
+
+  return results;
 }
 
 /**

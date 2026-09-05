@@ -80,7 +80,7 @@ async function main() {
 
   const setWebhookPayload = {
     url: targetUrl,
-    allowed_updates: ['message', 'edited_message'],
+    allowed_updates: ['message', 'edited_message', 'callback_query'],
   };
 
   if (webhookSecret) {

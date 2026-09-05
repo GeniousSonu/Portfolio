@@ -7,7 +7,7 @@
  * Telegram Webhooks can only deliver to public HTTPS URLs (e.g. your production Vercel domain).
  * When running locally on localhost:3000, Telegram cannot reach your private IP.
  *
- * This script polls Telegram for replies and forwards them to your local webhook:
+ * This script polls Telegram for replies and button callbacks and forwards them to your local webhook:
  *   http://localhost:3000/api/live-chat/webhook
  *
  * Usage:
@@ -45,7 +45,7 @@ if (!botToken) {
 console.log('🔗 [Dev Telegram Bridge] Starting local poller...');
 console.log(`📡 Polling Telegram Bot: https://api.telegram.org/bot${botToken.slice(0, 10)}...`);
 console.log(`🎯 Forwarding to local webhook: ${localWebhookUrl}`);
-console.log('⚡ Ready! Any reply you send in Telegram will now appear live on localhost:3000!\n');
+console.log('⚡ Ready! Any reply or "🔴 End Chat" tap in Telegram will appear live on localhost:3000!\n');
 
 let lastUpdateId = 0;
 let isRunning = true;
@@ -59,7 +59,8 @@ process.on('SIGINT', () => {
 async function poll() {
   while (isRunning) {
     try {
-      const url = `https://api.telegram.org/bot${botToken}/getUpdates?offset=${lastUpdateId + 1}&timeout=20`;
+      const allowedUpdates = JSON.stringify(['message', 'edited_message', 'callback_query']);
+      const url = `https://api.telegram.org/bot${botToken}/getUpdates?offset=${lastUpdateId + 1}&timeout=20&allowed_updates=${encodeURIComponent(allowedUpdates)}`;
       const res = await fetch(url);
       const data = await res.json();
 
@@ -67,13 +68,18 @@ async function poll() {
         for (const update of data.result) {
           lastUpdateId = Math.max(lastUpdateId, update.update_id);
 
+          const isCb = Boolean(update.callback_query);
           const msg = update.message || update.edited_message;
-          if (!msg) continue;
 
-          const replyToId = msg.reply_to_message?.message_id;
-          const text = msg.text;
-
-          console.log(`📩 Telegram Update received [id: ${update.update_id}] | Text: "${text || ''}" | Reply-To: #${replyToId || 'None'}`);
+          if (isCb) {
+            console.log(`🔘 Telegram Callback received [id: ${update.update_id}] | Data: "${update.callback_query.data}"`);
+          } else if (msg) {
+            const replyToId = msg.reply_to_message?.message_id;
+            const text = msg.text;
+            console.log(`📩 Telegram Message received [id: ${update.update_id}] | Text: "${text || ''}" | Reply-To: #${replyToId || 'None'}`);
+          } else {
+            continue;
+          }
 
           // Forward to local webhook
           try {
@@ -88,7 +94,7 @@ async function poll() {
 
             const hookData = await hookRes.json().catch(() => ({}));
             if (hookRes.ok) {
-              console.log(`   ✅ Forwarded to ${localWebhookUrl} -> HTTP ${hookRes.status} (Delivered live via Realtime)`);
+              console.log(`   ✅ Forwarded to local webhook -> HTTP ${hookRes.status}`);
             } else {
               console.warn(`   ⚠️ Webhook returned HTTP ${hookRes.status}:`, hookData);
             }

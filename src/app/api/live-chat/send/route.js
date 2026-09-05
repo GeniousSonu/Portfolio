@@ -6,6 +6,13 @@ const MAX_MESSAGE_LENGTH = 500;
 const IP_WINDOW_SECONDS = 120; // 2-minute sliding window
 const IP_MAX_REQUESTS = 10;     // Max 10 messages per 2 minutes
 
+function escapeHtml(text) {
+  return String(text || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 /**
  * Rate limit checker for live-chat send endpoint.
  */
@@ -14,7 +21,6 @@ async function checkLiveChatRateLimit(key, maxRequests, windowSeconds) {
   try {
     const supabase = getServiceSupabase();
 
-    // Check rate limit table
     const { data: record, error: fetchError } = await supabase
       .from('chatbot_rate_limits')
       .select('count, reset_at')
@@ -75,7 +81,7 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Invalid JSON request payload.' }, { status: 400 });
     }
 
-    const { sessionId, message } = body;
+    const { sessionId, message, visitorName, name } = body;
 
     if (!sessionId || typeof sessionId !== 'string' || sessionId.length > 128) {
       return NextResponse.json({ error: 'Valid sessionId is required.' }, { status: 400 });
@@ -93,6 +99,9 @@ export async function POST(req) {
       );
     }
 
+    const rawName = visitorName || name || 'Visitor';
+    const displayName = rawName.trim().slice(0, 40) || 'Visitor';
+
     // 3. Telegram credentials
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID;
@@ -105,7 +114,28 @@ export async function POST(req) {
       );
     }
 
-    // 4. Format as plain text (no parse_mode) to avoid Markdown parse errors
+    // 4. Extract Vercel Geolocation headers (free, server-side, no user permission prompt)
+    const rawCity = req.headers.get('x-vercel-ip-city');
+    const country = req.headers.get('x-vercel-ip-country');
+    let city = '';
+    if (rawCity) {
+      try {
+        city = decodeURIComponent(rawCity).trim();
+      } catch (e) {
+        city = rawCity.trim();
+      }
+    }
+
+    let locationStr = '';
+    if (city && country) {
+      locationStr = `${city}, ${country}`;
+    } else if (city) {
+      locationStr = city;
+    } else if (country) {
+      locationStr = country;
+    }
+
+    // 5. Format Telegram HTML message
     const istTime = new Date().toLocaleTimeString('en-US', {
       timeZone: 'Asia/Kolkata',
       hour: '2-digit',
@@ -113,31 +143,64 @@ export async function POST(req) {
       hour12: true,
     });
 
-    const telegramText = [
-      '💬 New message from Portfolio Visitor',
-      `Session: ${sessionId}`,
-      `Time: ${istTime} IST`,
-      '',
-      cleanMessage,
-      '',
-      '(Reply directly to this message in Telegram to chat back with the visitor!)',
-    ].join('\n');
+    let telegramHtml = `💬 <b>New message from ${escapeHtml(displayName)}</b>\n`;
+    if (locationStr) {
+      telegramHtml += `📍 ${escapeHtml(locationStr)}\n`;
+    }
+    telegramHtml += `🕐 ${istTime} IST\n\n<i>${escapeHtml(cleanMessage)}</i>`;
 
-    // 5. Forward to Telegram Bot API
+    // 6. Build Telegram payload with Quick Reply & End Chat buttons
+    const telegramPayload = {
+      chat_id: chatId,
+      text: telegramHtml,
+      parse_mode: 'HTML',
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: '👋 Thanks!',
+              callback_data: `qr:thanks:${sessionId}`,
+            },
+            {
+              text: '⏳ Give me 5m',
+              callback_data: `qr:busy:${sessionId}`,
+            },
+            {
+              text: '📧 Email me',
+              callback_data: `qr:email:${sessionId}`,
+            },
+          ],
+          [
+            {
+              text: '🔴 End Chat',
+              callback_data: `end_chat:${sessionId}`,
+            },
+          ],
+        ],
+      },
+    };
+
+    // 7. Forward to Telegram Bot API
     const tgRes = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: telegramText,
-      }),
+      body: JSON.stringify(telegramPayload),
     });
 
-    const tgData = await tgRes.json();
+    const tgData = await tgRes.json().catch(() => ({}));
     if (!tgRes.ok || !tgData.ok) {
-      console.error('[LiveChat] Telegram API error:', tgData);
+      console.error('[LiveChat] Telegram API error forwarding message:', {
+        status: tgRes.status,
+        description: tgData?.description,
+        errorCode: tgData?.error_code,
+        chatId,
+      });
       return NextResponse.json(
-        { error: tgData?.description ? `Telegram error: ${tgData.description}` : 'Failed to deliver message to Telegram relay.' },
+        {
+          error: tgData?.description
+            ? `Telegram relay error: ${tgData.description}`
+            : 'Failed to deliver message to Telegram relay.',
+        },
         { status: 502 }
       );
     }
@@ -151,14 +214,16 @@ export async function POST(req) {
       );
     }
 
-    // 6. Persist telegram_message_id -> session_id mapping in Supabase (fails loudly if DB error)
+    // 8. Persist telegram_message_id -> session_id mapping in Supabase
     await saveTelegramMessage(telegramMessageId, sessionId);
 
-    // 7. Broadcast visitor message to Supabase Realtime channel
+    // 9. Broadcast visitor message to Supabase Realtime channel
     await broadcastToSession(sessionId, 'visitor_message', {
       id: `v-${Date.now()}`,
       sender: 'visitor',
       text: cleanMessage,
+      visitorName: displayName,
+      location: locationStr || null,
       timestamp: new Date().toISOString(),
     });
 
