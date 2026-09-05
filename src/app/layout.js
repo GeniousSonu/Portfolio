@@ -118,7 +118,6 @@ const jsonLdGraph = {
       "url": "https://genioussonu.me",
       "image": "https://genioussonu.me/icon-512.png",
       "email": "mailto:sahinurislamm2002@gmail.com",
-      "telephone": "+918159871669",
       "jobTitle": "Senior Web Application Developer & Full Stack IT Engineer",
       "description": "Senior Web Application Developer at Ib Arts, Co-Founder of WEFIK, IT Engineer, and IoT Patent Holder.",
       "worksFor": [

@@ -97,7 +97,7 @@ const CONTACT_LINKS = [
 /* ── Linktree socials config ───────────────────────────────── */
 const LINKTREE_SOCIALS = [
   { href: 'https://linktr.ee/sksahinurislam',             Icon: IconLinktree,   label: 'Linktree',  color: '#39E09B' },
-  { href: 'https://api.whatsapp.com/send?phone=8159871669', Icon: IconWhatsApp,   label: 'WhatsApp',  color: '#25D366' },
+  { href: 'https://pranx.com/fake-virus/',                Icon: IconWhatsApp,   label: 'WhatsApp',  color: '#25D366' },
   { href: 'https://www.youtube.com/@GeniousSonu',          Icon: IconYouTube,    label: 'YouTube',   color: '#FF0000' },
   { href: 'https://instagram.com/genious.exe',             Icon: IconInstagram,  label: 'Instagram', color: '#E1306C' },
   { href: 'https://www.facebook.com/profile.php?id=61561884613549', Icon: IconFacebook, label: 'Facebook', color: '#1877F2' },

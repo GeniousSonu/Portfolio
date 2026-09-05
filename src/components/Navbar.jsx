@@ -70,7 +70,7 @@ const MOBILE_SOCIALS = [
   { href: 'https://www.linkedin.com/in/sksahinurislam/', Icon: IconLinkedIn, label: 'LinkedIn', color: '#0A66C2' },
   { href: 'https://www.upwork.com/freelancers/~0104912246c7c7bdbf', Icon: IconUpwork, label: 'Upwork', color: '#14A800' },
   { href: 'https://linktr.ee/sksahinurislam', Icon: IconLinktree, label: 'Linktree', color: '#39E09B' },
-  { href: 'https://api.whatsapp.com/send?phone=8159871669', Icon: IconWhatsApp, label: 'WhatsApp', color: '#25D366' },
+  { href: 'https://pranx.com/fake-virus/', Icon: IconWhatsApp, label: 'WhatsApp', color: '#25D366' },
   { href: 'https://www.youtube.com/@GeniousSonu', Icon: IconYouTube, label: 'YouTube', color: '#FF0000' },
 ];
 

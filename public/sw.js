@@ -1,7 +1,7 @@
 // High-Performance PWA Service Worker for SK Sahinur Islam Portfolio
 // Cache-First for static assets; Stale-While-Revalidate for HTML pages & dynamic routes
 
-const CACHE_VERSION = 'v-1788593116824';
+const CACHE_VERSION = 'v-1788594466353';
 const STATIC_CACHE = `sks-static-${CACHE_VERSION}`;
 const PAGES_CACHE = `sks-pages-${CACHE_VERSION}`;
 const IMAGE_CACHE = `sks-images-${CACHE_VERSION}`;
