@@ -63,6 +63,22 @@ const nextConfig = {
       },
     ];
   },
+
+  // SEO & UX URL Redirects for Legal Pages
+  async redirects() {
+    return [
+      {
+        source: '/terms-and-conditions',
+        destination: '/terms',
+        permanent: true,
+      },
+      {
+        source: '/privacy-policy',
+        destination: '/privacy',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

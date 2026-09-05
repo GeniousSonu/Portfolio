@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import gsap from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
@@ -229,6 +230,10 @@ export default function Footer() {
                 <a href="https://github.com/GeniousSonu"               target="_blank" rel="noopener noreferrer" className="footer-link">GitHub</a>
                 <a href="https://www.upwork.com/freelancers/~0104912246c7c7bdbf" target="_blank" rel="noopener noreferrer" className="footer-link">Upwork</a>
                 <a href="https://linktr.ee/sksahinurislam"              target="_blank" rel="noopener noreferrer" className="footer-link">Linktree</a>
+                <span className="footer-link-separator" aria-hidden="true" style={{ color: 'var(--border)', userSelect: 'none', display: 'inline-flex', alignItems: 'center' }}>·</span>
+                <Link href="/terms" className="footer-link">Terms</Link>
+                <Link href="/privacy" className="footer-link">Privacy Policy</Link>
+                <Link href="/bot/privacy-policy" className="footer-link">Bot Privacy</Link>
                 {showCookieControl && (
                   <button
                     type="button"
