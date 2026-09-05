@@ -20,6 +20,7 @@ export default function SpaceView() {
   const [copiedId, setCopiedId] = useState(null);
   const [reportedIds, setReportedIds] = useState(new Set());
   const [turnstileToken, setTurnstileToken] = useState('');
+  const [dbError, setDbError] = useState(null);
 
   const turnstileContainerRef = useRef(null);
   const turnstileWidgetId = useRef(null);
@@ -39,6 +40,9 @@ export default function SpaceView() {
       const data = await res.json();
       if (res.ok && Array.isArray(data.entries)) {
         setEntries(data.entries);
+        setDbError(null);
+      } else if (data.error && data.error.includes('shared_space_entries')) {
+        setDbError(data.error);
       }
     } catch (err) {
       console.warn('[SpaceView] Sync error:', err.message);
@@ -334,6 +338,16 @@ export default function SpaceView() {
             tokens, or private personal data. Pastes auto-expire after 24 hours.
           </div>
         </aside>
+
+        {/* ─── Database Setup Notice (If Migration Not Run Yet) ─── */}
+        {dbError && (
+          <div className={styles.dbNoticeBanner} role="alert">
+            <span aria-hidden="true">💡</span>
+            <div>
+              <strong>Setup Notice:</strong> {dbError}
+            </div>
+          </div>
+        )}
 
         {/* ─── Toast Feedback ─── */}
         {toast && (
