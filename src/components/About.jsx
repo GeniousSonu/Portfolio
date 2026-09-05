@@ -48,10 +48,12 @@ export default function About() {
     // Mobile: smooth vertical entry (prevents horizontal layout shift/jitter)
     mm.add("(max-width: 767px)", () => {
       gsap.fromTo([leftRef.current, rightRef.current],
-        { opacity: 0, y: 20 },
+        { opacity: 0, y: 20, x: 0 },
         {
           opacity: 1,
           y: 0,
+          x: 0,
+          clearProps: 'transform',
           duration: 0.6,
           stagger: 0.1,
           ease: 'power2.out',
@@ -91,7 +93,7 @@ export default function About() {
               <a href="https://github.com/GeniousSonu" target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ fontSize: '0.8rem', padding: '0.55rem 1.1rem' }}>GitHub ↗</a>
             </div>
           </div>
-          <div className="reveal-right" ref={rightRef}>
+          <div className="about-visual reveal-right" ref={rightRef}>
             <div className="sysinfo">
               <div className="sysinfo-header">
                 <div className="dot-r"></div><div className="dot-y"></div><div className="dot-g"></div>

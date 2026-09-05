@@ -156,10 +156,12 @@ export default function Contact() {
       const elements = [revealLeft, revealRight].filter(Boolean);
       if (elements.length > 0) {
         gsap.fromTo(elements,
-          { opacity: 0, y: 20 },
+          { opacity: 0, y: 20, x: 0 },
           {
             opacity: 1,
             y: 0,
+            x: 0,
+            clearProps: 'transform',
             duration: 0.6,
             stagger: 0.1,
             ease: 'power2.out',
@@ -294,7 +296,7 @@ export default function Contact() {
           </div>
 
           {/* ── Right col ── */}
-          <div className="reveal-right">
+          <div className="contact-form-card reveal-right">
             <div className="sysinfo" style={{ marginBottom: '1.5rem' }}>
               <div className="sysinfo-header">
                 <div className="dot-r"/><div className="dot-y"/><div className="dot-g"/>
