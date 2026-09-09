@@ -211,6 +211,7 @@ import ConsentAnalyticsGate from "@/components/ConsentAnalyticsGate";
 import CookieConsentBanner from "@/components/CookieConsentBanner";
 import UserPreferences from "@/components/UserPreferences";
 import ChatbotWidget from "@/components/ChatbotWidget";
+import SiteVisitTracker from "@/components/SiteVisitTracker";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
 export default function RootLayout({ children }) {
@@ -277,6 +278,7 @@ export default function RootLayout({ children }) {
         <CustomCursor />
         {children}
         <ConsentAnalyticsGate />
+        <SiteVisitTracker />
         <CookieConsentBanner />
         <MobileBottomCTA />
         <ChatbotWidget />

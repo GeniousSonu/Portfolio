@@ -2693,3 +2693,90 @@ html.reduce-motion .ambientGlow {
   display: none !important;
 }
 
+/* ──────────────────────────────────────────────
+   Sitewide Realtime Status Strip (Footer)
+   ────────────────────────────────────────────── */
+.site-status-strip {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 0.75rem 0 1.25rem 0;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  user-select: none;
+}
+
+.status-strip-section {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  letter-spacing: 0.04em;
+}
+
+.status-strip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #10B981;
+  display: inline-block;
+  flex-shrink: 0;
+  animation: status-dot-breathe 2.2s ease-in-out infinite;
+}
+
+@keyframes status-dot-breathe {
+  0%, 100% {
+    opacity: 0.55;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.status-strip-tag {
+  color: #10B981;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  font-size: 0.65rem;
+}
+
+.status-strip-bullet {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.status-strip-num {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  font-size: 0.72rem;
+}
+
+.status-strip-label {
+  color: var(--text-muted);
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.status-strip-bar {
+  width: 1px;
+  height: 12px;
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.status-strip-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .site-status-strip {
+    flex-wrap: wrap;
+    gap: 0.75rem 1.1rem;
+    padding: 0.5rem 0 1rem 0;
+  }
+}
+
+

@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import gsap from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import { isConsentFullAccepted } from '@/lib/consent';
+import SiteStatusStrip from '@/components/SiteStatusStrip';
 
 /* ── Logo SVG (inline, inherits color) ──────────────────────── */
 function FooterLogo() {
@@ -211,6 +212,11 @@ export default function Footer() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* ── Sitewide Realtime Status Strip ── */}
+        <div className="site-container">
+          <SiteStatusStrip />
         </div>
 
         {/* ── Divider ── */}
