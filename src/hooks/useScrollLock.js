@@ -12,7 +12,6 @@ let previousStyles = {
   left: '',
   right: '',
   width: '',
-  touchAction: '',
 };
 
 /**
@@ -41,7 +40,6 @@ export function useScrollLock(isLocked) {
           left: document.body.style.left,
           right: document.body.style.right,
           width: document.body.style.width,
-          touchAction: document.body.style.touchAction,
         };
 
         // Apply cross-device scroll lock
@@ -51,7 +49,6 @@ export function useScrollLock(isLocked) {
         document.body.style.left = '0';
         document.body.style.right = '0';
         document.body.style.width = '100%';
-        document.body.style.touchAction = 'none';
 
         // Safely stop Lenis if active on desktop (optional chaining prevents throws on mobile)
         if (typeof window !== 'undefined') {
@@ -76,7 +73,6 @@ export function useScrollLock(isLocked) {
         document.body.style.left = previousStyles.left || '';
         document.body.style.right = previousStyles.right || '';
         document.body.style.width = previousStyles.width || '';
-        document.body.style.touchAction = previousStyles.touchAction || '';
 
         // Seamlessly restore scroll position without animation jump, unless an anchor or route navigation is active
         if (typeof window !== 'undefined' && window.__portfolioNavigatingToRoute) {
@@ -120,7 +116,6 @@ export function useScrollLock(isLocked) {
           document.body.style.left = previousStyles.left || '';
           document.body.style.right = previousStyles.right || '';
           document.body.style.width = previousStyles.width || '';
-          document.body.style.touchAction = previousStyles.touchAction || '';
 
           if (typeof window !== 'undefined' && window.__portfolioNavigatingToRoute) {
             window.__portfolioNavigatingToRoute = false;

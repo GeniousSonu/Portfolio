@@ -353,6 +353,8 @@ export default function Navbar() {
         aria-modal="true"
         aria-label="Site navigation"
         aria-hidden={!mobileOpen}
+        data-lenis-prevent="true"
+        onWheel={(e) => e.stopPropagation()}
       >
         {/* Background radial glow */}
         <div className="mnav-glow" aria-hidden="true" />
