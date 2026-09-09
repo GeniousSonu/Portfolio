@@ -1296,9 +1296,13 @@ footer {
 
 .footer-top-grid {
   display: grid;
-  grid-template-columns: 1.4fr 1.1fr 1.1fr 1.3fr;
+  grid-template-columns: 1.25fr 1.05fr auto 1.25fr;
   gap: 2.5rem;
   align-items: start;
+}
+
+.footer-connect-col {
+  min-width: 260px;
 }
 
 /* Brand column */
@@ -1324,41 +1328,96 @@ footer {
   border-bottom: 1px solid var(--border-dim);
 }
 
-.footer-col-links {
+/* Navigation Links Grid */
+.footer-nav-grid {
   list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  margin: 0;
   padding: 0;
-}
-
-/* Compact multi-column links layout */
-.footer-compact-grid {
+  margin: 0;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.35rem 0.85rem;
+  gap: 0.25rem 1.25rem;
 }
 
-.footer-compact-grid .footer-link-full {
-  grid-column: 1 / -1;
-}
-
-.footer-col-link {
-  font-size: 0.82rem;
+.footer-nav-item {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
   color: var(--text-secondary);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
   min-height: 44px; /* Accessible mobile touch target */
-  padding: 0.2rem 0;
-  transition: color 0.2s, transform 0.2s;
-  letter-spacing: 0.01em;
+  padding: 0.15rem 0;
+  transition: color 0.2s ease, transform 0.2s ease;
+  letter-spacing: 0.02em;
 }
-.footer-col-link:hover { color: var(--gold-bright); transform: translateX(3px); }
-.footer-link-arrow { color: var(--text-muted); font-size: 0.75rem; transition: color 0.2s; }
-.footer-col-link:hover .footer-link-arrow { color: var(--gold); }
+
+.footer-nav-item:hover {
+  color: var(--gold-bright);
+  transform: translateX(2px);
+}
+
+/* Connect Social Icon Row */
+.footer-social-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  padding-top: 0.25rem;
+}
+
+.footer-social-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.footer-social-btn:hover {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #10B981;
+  transform: translateY(-2px);
+}
+
+.footer-social-btn:focus-visible {
+  outline: 2px solid #10B981;
+  outline-offset: 2px;
+}
+
+.footer-social-tooltip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: #0f1422;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.footer-social-btn:hover .footer-social-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
 
 /* Terminal status card */
 .footer-terminal-card {
@@ -1405,12 +1464,18 @@ footer {
     grid-column: 1 / -1;
     max-width: 460px;
   }
+  .footer-connect-col {
+    min-width: auto;
+  }
 }
 
 /* Mobile: hide terminal card completely (< 768px) and compact layout */
 @media (max-width: 767px) {
   .footer-terminal-col {
     display: none !important;
+  }
+  .footer-connect-col {
+    min-width: auto;
   }
   .footer-upper {
     padding: 2.25rem 0 1.75rem;
@@ -1426,9 +1491,12 @@ footer {
     font-size: 0.82rem;
     max-width: 100%;
   }
-  .footer-compact-grid {
+  .footer-nav-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 0.2rem 1rem;
+    gap: 0.25rem 1rem;
+  }
+  .footer-social-row {
+    gap: 0.5rem;
   }
   .footer-col-title {
     margin-bottom: 0.65rem;
