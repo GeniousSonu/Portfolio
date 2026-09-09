@@ -74,6 +74,13 @@ export const product = defineType({
       description: 'Highlight this product as a top pick at the top of the store page.',
       initialValue: false,
     }),
+    defineField({
+      name: 'showOnUsesPage',
+      title: 'Show on /uses Page',
+      type: 'boolean',
+      description: 'Display this item on the developer /uses setup page.',
+      initialValue: false,
+    }),
   ],
   preview: {
     select: {

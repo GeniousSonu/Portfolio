@@ -83,6 +83,10 @@ const NAV_LINKS = [
   { id: 'certs', label: 'Certs' },
   { id: '/blog', label: 'Blog', isRoute: true },
   { id: '/store', label: 'Store', isRoute: true },
+  { id: '/changelog', label: 'Changelog', isRoute: true },
+  { id: '/architecture', label: 'Architecture', isRoute: true },
+  { id: '/uses', label: 'Uses', isRoute: true },
+  { id: '/status', label: 'Status', isRoute: true },
   { id: 'contact', label: 'Contact' },
 ];
 

@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import gsap from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import InstallAppButton from './InstallAppButton';
-import useScrollLock from '../hooks/useScrollLock';
+import { useOverlay } from '@/context/OverlayContext';
 
 /* ── Brand SVG Icons ── */
 const IconGitHub = () => (
@@ -100,22 +100,26 @@ const NAV_ITEMS = [
   { id: '#contact',    label: 'Contact' },
 ];
 
+const EXTRA_PAGES = [
+  { id: '/changelog',    label: 'Changelog' },
+  { id: '/architecture', label: 'Architecture' },
+  { id: '/uses',         label: 'Uses' },
+  { id: '/status',       label: 'Status' },
+];
+
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const { activeOverlay, openOverlay, closeOverlay } = useOverlay();
+  const mobileOpen = activeOverlay === 'nav';
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const hamburgerBtnRef = useRef(null);
   const mobileNavRef = useRef(null);
 
-  // Hook-based cross-device scroll lock with exact scroll position preservation
-  useScrollLock(mobileOpen);
-
-  // Notify other global components (e.g. ChatbotWidget) when mobile nav opens/closes
+  // Sync body class for mobile nav active styles
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('mobile-nav-toggle', { detail: { open: mobileOpen } }));
       if (mobileOpen) {
         document.body.classList.add('mobile-nav-active');
       } else {
@@ -125,7 +129,6 @@ export default function Navbar() {
     return () => {
       if (typeof window !== 'undefined') {
         document.body.classList.remove('mobile-nav-active');
-        window.dispatchEvent(new CustomEvent('mobile-nav-toggle', { detail: { open: false } }));
       }
     };
   }, [mobileOpen]);
@@ -209,7 +212,7 @@ export default function Navbar() {
   }, [mobileOpen]);
 
   const closeMobileNav = () => {
-    setMobileOpen(false);
+    closeOverlay('nav');
     hamburgerBtnRef.current?.focus();
   };
 
@@ -226,7 +229,7 @@ export default function Navbar() {
 
   const handleLinkClick = (e, targetId) => {
     e.preventDefault();
-    setMobileOpen(false);
+    closeOverlay('nav');
 
     if (targetId === '#') {
       if (pathname === '/') {
@@ -299,6 +302,22 @@ export default function Navbar() {
             ))}
           </ul>
 
+          {/* Command Palette Trigger */}
+          <button
+            className="nav-cmdk-btn"
+            onClick={() => {
+              openOverlay('palette');
+            }}
+            aria-label="Open Command Palette (Cmd+K)"
+            title="Search & Commands (⌘K)"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <span className="nav-cmdk-badge">⌘K</span>
+          </button>
+
           {/* Install App Button */}
           <InstallAppButton />
 
@@ -314,7 +333,7 @@ export default function Navbar() {
               if (mobileOpen) {
                 closeMobileNav();
               } else {
-                setMobileOpen(true);
+                openOverlay('nav');
               }
             }}
           >
@@ -348,6 +367,27 @@ export default function Navbar() {
           <span className="ham-bar ham-bar--bot" />
         </button>
 
+        {/* Mobile Quick Search / Cmd+K Pill */}
+        <div className="mnav-cmdk-box">
+          <button
+            className="mnav-cmdk-btn"
+            onClick={() => {
+              closeMobileNav();
+              setTimeout(() => {
+                openOverlay('palette');
+              }, 80);
+            }}
+            aria-label="Search & Commands"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <span>Search &amp; Commands</span>
+            <span className="nav-cmdk-badge">⌘K</span>
+          </button>
+        </div>
+
         {/* Main link list */}
         <nav className="mnav-links" aria-label="Mobile navigation">
           {NAV_ITEMS.map(({ id, label }, i) => (
@@ -365,6 +405,21 @@ export default function Navbar() {
             </a>
           ))}
         </nav>
+
+        {/* Secondary pages pills */}
+        <div className="mnav-sublinks" aria-label="Additional pages">
+          {EXTRA_PAGES.map(({ id, label }) => (
+            <a
+              key={id}
+              href={id}
+              className="mnav-sublink"
+              onClick={(e) => handleLinkClick(e, id)}
+              tabIndex={mobileOpen ? 0 : -1}
+            >
+              {label}
+            </a>
+          ))}
+        </div>
 
         {/* Mobile Install App Button */}
         <div className="mnav-install-box">

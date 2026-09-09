@@ -82,10 +82,13 @@ export async function POST(req) {
         const qrType = parts[1];
         const sessionId = parts.slice(2).join(':');
 
+        const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || process.env.CONTACT_NOTIFICATION_EMAIL;
         const cannedMap = {
           thanks: '👋 Thanks for reaching out! How can I help you today?',
           busy: '⏳ Give me just a few minutes, I am reviewing your message and will reply shortly!',
-          email: '📧 Feel free to connect over email at sahinur.dev@gmail.com, or leave your email here!',
+          email: contactEmail
+            ? `📧 Feel free to connect over email at ${contactEmail}, or leave your email here!`
+            : '📧 Feel free to connect over email via the contact form, or leave your email here!',
         };
 
         const replyText = cannedMap[qrType] || '👋 Thanks for reaching out!';

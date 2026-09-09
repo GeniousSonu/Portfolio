@@ -213,6 +213,8 @@ import UserPreferences from "@/components/UserPreferences";
 import ChatbotWidget from "@/components/ChatbotWidget";
 import SiteVisitTracker from "@/components/SiteVisitTracker";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { OverlayProvider } from "@/context/OverlayContext";
+import CommandPalette from "@/components/CommandPalette";
 
 export default function RootLayout({ children }) {
   const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
@@ -272,16 +274,19 @@ export default function RootLayout({ children }) {
         )}
       </head>
       <body suppressHydrationWarning>
-        <SmoothScrollProvider />
-        <PWARegistration />
-        <UserPreferences />
-        <CustomCursor />
-        {children}
-        <ConsentAnalyticsGate />
-        <SiteVisitTracker />
-        <CookieConsentBanner />
-        <MobileBottomCTA />
-        <ChatbotWidget />
+        <OverlayProvider>
+          <SmoothScrollProvider />
+          <PWARegistration />
+          <UserPreferences />
+          <CustomCursor />
+          {children}
+          <ConsentAnalyticsGate />
+          <SiteVisitTracker />
+          <CookieConsentBanner />
+          <MobileBottomCTA />
+          <ChatbotWidget />
+          <CommandPalette />
+        </OverlayProvider>
         {/* Google Tag (detected by Google Tag Assistant & Analytics on page load) */}
         {gaId && <GoogleAnalytics gaId={gaId} />}
       </body>

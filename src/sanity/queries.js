@@ -104,3 +104,33 @@ export const PRODUCTS_QUERY = defineQuery(`
     }
   }
 `)
+
+export const CHANGELOG_QUERY = defineQuery(`
+  *[_type == "changelogEntry" && !(_id in path("drafts.**"))] | order(date desc, _createdAt desc) {
+    _id,
+    title,
+    date,
+    category,
+    tags,
+    description
+  }
+`)
+
+export const USES_PRODUCTS_QUERY = defineQuery(`
+  *[_type == "product" && showOnUsesPage == true && !(_id in path("drafts.**"))] | order(featured desc, _createdAt desc) {
+    _id,
+    name,
+    description,
+    category,
+    price,
+    affiliateUrl,
+    featured,
+    image {
+      asset->{
+        _id,
+        url
+      },
+      alt
+    }
+  }
+`)

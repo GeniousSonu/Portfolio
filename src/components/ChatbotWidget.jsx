@@ -3,7 +3,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import styles from './ChatbotWidget.module.css';
-import useScrollLock from '../hooks/useScrollLock';
 import { supabase } from '@/lib/supabaseClient';
 
 const MAX_CHAR_COUNT = 500;
@@ -200,9 +199,6 @@ export default function ChatbotWidget() {
     }, 15000);
     return () => clearInterval(timer);
   }, []);
-
-  // Cross-device body scroll lock whenever the chatbot is open
-  useScrollLock(isOpen);
 
   // Generate high-entropy unguessable session ID using crypto.randomUUID()
   const getOrCreateSessionId = () => {
@@ -401,8 +397,24 @@ export default function ChatbotWidget() {
       }
     };
 
+    const handleOverlayChange = (e) => {
+      const active = e?.detail?.active;
+      if (active === 'chatbot') {
+        setIsClosing(false);
+        setIsOpen(true);
+        setUnreadLiveCount(0);
+      } else if (active && active !== 'none') {
+        setIsOpen(false);
+        setIsClosing(false);
+      }
+    };
+
     window.addEventListener('mobile-nav-toggle', handleNavToggle);
-    return () => window.removeEventListener('mobile-nav-toggle', handleNavToggle);
+    window.addEventListener('portfolio-overlay-change', handleOverlayChange);
+    return () => {
+      window.removeEventListener('mobile-nav-toggle', handleNavToggle);
+      window.removeEventListener('portfolio-overlay-change', handleOverlayChange);
+    };
   }, []);
 
   // Smooth auto-scroll to bottom of messages
@@ -426,6 +438,9 @@ export default function ChatbotWidget() {
     setIsClosing(false);
     setIsOpen(true);
     setUnreadLiveCount(0);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('portfolio-overlay-change', { detail: { active: 'chatbot' } }));
+    }
   };
 
   const handleClose = () => {
@@ -434,6 +449,9 @@ export default function ChatbotWidget() {
     setTimeout(() => {
       setIsOpen(false);
       setIsClosing(false);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('portfolio-overlay-change', { detail: { active: 'none' } }));
+      }
     }, 220);
   };
 
