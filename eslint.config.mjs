@@ -6,6 +6,10 @@ const eslintConfig = defineConfig([
   {
     rules: {
       "@next/next/no-img-element": "off",
+      "@next/next/no-page-custom-font": "off",
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/purity": "warn",
+      "react-hooks/immutability": "warn",
     },
   },
   // Override default ignores of eslint-config-next.

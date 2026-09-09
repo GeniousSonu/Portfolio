@@ -198,7 +198,7 @@ export default function ArchitecturePage() {
                 <span className={styles.stepIndex}>Step 3 · Response</span>
                 <span className={styles.stepLabel}>Webhook to Realtime</span>
                 <span className={styles.stepDetail}>
-                  My mobile reply triggers a verified serverless webhook that immediately broadcasts to the visitor's channel.
+                  My mobile reply triggers a verified serverless webhook that immediately broadcasts to the visitor&apos;s channel.
                 </span>
               </div>
             </div>
@@ -234,7 +234,7 @@ export default function ArchitecturePage() {
                 Most portfolio live chat widgets rely on third-party SaaS embeds (Intercom, Crisp) that inject hundreds of kilobytes of tracking scripts, damage Core Web Vitals, and incur monthly seat subscriptions.
               </p>
               <p>
-                I engineered a zero-polling relay: when a visitor sends a message, my serverless route relays it to a private <span className={styles.highlight}>Telegram Bot API</span> chat with instant push notifications on my phone. When I reply or tap a quick-reply button in Telegram, an authenticated webhook triggers a broadcast event over <span className={styles.highlight}>Supabase Realtime</span> directly into the visitor's active channel.
+                I engineered a zero-polling relay: when a visitor sends a message, my serverless route relays it to a private <span className={styles.highlight}>Telegram Bot API</span> chat with instant push notifications on my phone. When I reply or tap a quick-reply button in Telegram, an authenticated webhook triggers a broadcast event over <span className={styles.highlight}>Supabase Realtime</span> directly into the visitor&apos;s active channel.
               </p>
               <p>
                 The visitor gets instantaneous answers without long-polling or bulky third-party scripts, and I manage incoming communications from an application I already use daily.

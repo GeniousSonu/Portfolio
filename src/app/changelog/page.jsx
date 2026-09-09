@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { client } from '@/sanity/client';
@@ -101,9 +102,9 @@ export default async function ChangelogPage() {
             <p className={styles.emptyText}>
               Entries are configured in Sanity Studio. Once published, release notes and feature summaries will appear here in chronological order.
             </p>
-            <a href="/studio" className={styles.studioLink}>
+            <Link href="/studio" className={styles.studioLink}>
               Open Sanity Studio →
-            </a>
+            </Link>
           </div>
         )}
       </main>

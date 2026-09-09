@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
@@ -162,6 +162,11 @@ export default function Navbar() {
     };
   }, []);
 
+  const closeMobileNav = useCallback(() => {
+    closeOverlay('nav');
+    hamburgerBtnRef.current?.focus();
+  }, [closeOverlay]);
+
   // Handle focus trapping and keyboard shortcuts when mobile nav is open
   useEffect(() => {
     if (mobileOpen) {
@@ -211,12 +216,7 @@ export default function Navbar() {
         window.removeEventListener('keydown', handleKeyDown);
       };
     }
-  }, [mobileOpen]);
-
-  const closeMobileNav = () => {
-    closeOverlay('nav');
-    hamburgerBtnRef.current?.focus();
-  };
+  }, [mobileOpen, closeMobileNav]);
 
   const scrollToSectionWithOffset = (targetSelector) => {
     const target = document.querySelector(targetSelector);

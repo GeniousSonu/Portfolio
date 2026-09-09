@@ -1206,7 +1206,7 @@ export default function ChatbotWidget() {
                       <span className={styles.waitingNoticeIcon}>⏳</span>
                       <div>
                         <strong>Sent to Sonu · Waiting for reply...</strong>
-                        <div>Sonu isn't always online 24/7 — he'll get back to you as soon as he can!</div>
+                        <div>Sonu isn&apos;t always online 24/7 — he&apos;ll get back to you as soon as he can!</div>
                       </div>
                     </div>
                   )}
