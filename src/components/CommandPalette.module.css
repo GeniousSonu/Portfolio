@@ -90,22 +90,35 @@
 .list {
   max-height: 380px;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 0.5rem;
   overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(16, 185, 129, 0.4) rgba(255, 255, 255, 0.04);
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Custom Scrollbar */
 .list::-webkit-scrollbar {
-  width: 5px;
+  width: 7px;
 }
 
 .list::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 9999px;
+  margin: 4px 0;
 }
 
 .list::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 4px;
+  background: rgba(16, 185, 129, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.list::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.7);
+  border-color: rgba(16, 185, 129, 0.4);
 }
 
 .empty {

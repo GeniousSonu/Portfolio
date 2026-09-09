@@ -64,8 +64,36 @@ export default function CommandPalette() {
   const { activeOverlay, openOverlay, closeOverlay } = useOverlay();
   const [toastMessage, setToastMessage] = useState(null);
   const toastTimerRef = useRef(null);
+  const dialogRef = useRef(null);
+  const listRef = useRef(null);
 
   const isOpen = activeOverlay === 'palette';
+
+  // Allow seamless mouse scrolling anywhere over the Command Palette
+  useEffect(() => {
+    if (!isOpen) return;
+    const dialogEl = dialogRef.current;
+    if (!dialogEl) return;
+
+    const handleWheel = (e) => {
+      // Prevent wheel event from bubbling to window / Lenis virtual scroll
+      e.stopPropagation();
+
+      const listEl = listRef.current;
+      if (!listEl) return;
+
+      // If wheel occurs on the search bar or modal frame outside the scrollable list,
+      // forward the scroll amount to the results list
+      if (!listEl.contains(e.target)) {
+        listEl.scrollTop += e.deltaY;
+      }
+    };
+
+    dialogEl.addEventListener('wheel', handleWheel, { passive: true });
+    return () => {
+      dialogEl.removeEventListener('wheel', handleWheel);
+    };
+  }, [isOpen]);
 
   const showToast = useCallback((msg) => {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
@@ -166,15 +194,28 @@ export default function CommandPalette() {
   if (!isOpen) return null;
 
   return (
-    <div className={styles.backdrop} onClick={closePalette} role="presentation">
+    <div
+      className={styles.backdrop}
+      onClick={closePalette}
+      onWheel={(e) => {
+        e.stopPropagation();
+        if (listRef.current) {
+          listRef.current.scrollTop += e.deltaY;
+        }
+      }}
+      role="presentation"
+      data-lenis-prevent="true"
+    >
       <div
+        ref={dialogRef}
         className={styles.dialog}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-label="Command Palette"
+        data-lenis-prevent="true"
       >
-        <Command label="Global Command Palette">
+        <Command label="Global Command Palette" data-lenis-prevent="true">
           <div className={styles.inputWrapper}>
             <span className={styles.searchIcon} aria-hidden="true">
               <SearchIcon />
@@ -187,7 +228,11 @@ export default function CommandPalette() {
             <span className={styles.escBadge}>ESC</span>
           </div>
 
-          <Command.List className={styles.list}>
+          <Command.List
+            ref={listRef}
+            className={styles.list}
+            data-lenis-prevent="true"
+          >
             <Command.Empty className={styles.empty}>
               No matching commands or pages found.
             </Command.Empty>
