@@ -25,7 +25,7 @@ export default function BootPreloader() {
   const isPageReadyRef = useRef(false);
   const ceilingHitRef = useRef(false);
 
-  // Terminal line elements
+  // Line containers
   const line1Ref = useRef(null);
   const line2Ref = useRef(null);
   const line3Ref = useRef(null);
@@ -33,12 +33,18 @@ export default function BootPreloader() {
   const line5Ref = useRef(null);
   const line6Ref = useRef(null);
 
+  // Text target spans for real typewriter effect
+  const cmd1TextRef = useRef(null);
+  const cmd1CursorRef = useRef(null);
+  const cmd2TextRef = useRef(null);
+  const cmd2CursorRef = useRef(null);
+
   useEffect(() => {
     if (!active || hasBootedInSession) {
       return;
     }
 
-    // 1. bfcache check (mobile Safari / Chrome back-forward cache restore)
+    // 1. bfcache protection (mobile Safari / Chrome back-forward cache restore)
     const handlePageShow = (e) => {
       if (e.persisted) {
         hasBootedInSession = true;
@@ -69,7 +75,7 @@ export default function BootPreloader() {
       window.scrollTo(0, 0);
     }
 
-    // 4. Page readiness tracking
+    // 4. Page readiness tracking & 6s safety ceiling
     const markPageReady = () => {
       isPageReadyRef.current = true;
     };
@@ -83,7 +89,7 @@ export default function BootPreloader() {
 
     const ceilingTimer = setTimeout(() => {
       ceilingHitRef.current = true;
-    }, 4500);
+    }, 6000);
 
     // Helper: Final wipe-out and restore scroll / anchors
     const finishPreloader = (hash) => {
@@ -114,7 +120,7 @@ export default function BootPreloader() {
               window.scrollTo({ top, behavior: 'smooth' });
             }
           }
-        }, 50);
+        }, 60);
       }
 
       setActive(false);
@@ -141,126 +147,175 @@ export default function BootPreloader() {
       };
     }
 
-    // 6. GSAP Timeline inside gsap.context for React 18 Strict Mode safety
+    // 6. Master GSAP Timeline inside gsap.context for React 18 Strict Mode safety
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
         defaults: { ease: 'power2.out' },
       });
 
-      // Initial state: hide lines and hello container
-      gsap.set([line1Ref.current, line2Ref.current, line3Ref.current, line4Ref.current, line5Ref.current, line6Ref.current], {
+      // ─── INITIAL STATE SETUP (Guaranteed Zero Flash) ───
+      gsap.set(terminalRef.current, {
         autoAlpha: 0,
-        y: 4,
-      });
-      gsap.set(helloWrapRef.current, {
-        autoAlpha: 0,
-        scale: 0.94,
-        display: 'none',
+        scale: 0.84,
+        rotateX: 16,
+        y: 35,
+        transformPerspective: 900,
       });
 
-      // ─── ACT 1: Terminal Window 3D Perspective Fly-In & Settle (~0.45s) ───
-      tl.fromTo(
-        terminalRef.current,
+      gsap.set(
+        [line1Ref.current, line2Ref.current, line3Ref.current, line4Ref.current, line5Ref.current, line6Ref.current],
         {
           autoAlpha: 0,
-          scale: 0.82,
-          rotateX: 18,
-          y: 35,
-          transformPerspective: 900,
-        },
-        {
-          autoAlpha: 1,
-          scale: 1,
-          rotateX: 0,
-          y: 0,
-          duration: 0.45,
-          ease: 'power3.out',
+          y: 6,
         }
       );
 
-      // ─── ACT 2: Fast, Punchy Boot Sequence Typing (~1.1s) ───
-      // Line 1: $ whoami
-      tl.to(line1Ref.current, { autoAlpha: 1, y: 0, duration: 0.1 }, '+=0.04');
-
-      // Line 2: sahinur_islam
-      tl.to(line2Ref.current, { autoAlpha: 1, y: 0, duration: 0.08 }, '+=0.1');
-
-      // Line 3: $ ./init_portfolio.sh
-      tl.to(line3Ref.current, { autoAlpha: 1, y: 0, duration: 0.1 }, '+=0.1');
-
-      // Line 4: Loading modules... [OK]
-      tl.to(line4Ref.current, { autoAlpha: 1, y: 0, duration: 0.08 }, '+=0.14');
-
-      // Line 5: Establishing connection... [OK]
-      tl.to(line5Ref.current, { autoAlpha: 1, y: 0, duration: 0.08 }, '+=0.08');
-
-      // Line 6: Compiling experience.js... [OK]
-      tl.to(line6Ref.current, { autoAlpha: 1, y: 0, duration: 0.08 }, '+=0.08');
-
-      // Brief pause on compiled terminal state before dissolve
-      tl.to({}, { duration: 0.15 });
-
-      // ─── ACT 3: Terminal Dissolve & Multilingual Global Hello (~1.35s) ───
-      // Terminal dissolves / compiles out
-      tl.to(terminalRef.current, {
-        scale: 0.92,
+      gsap.set(helloWrapRef.current, {
+        display: 'none',
         autoAlpha: 0,
-        filter: 'blur(8px)',
-        duration: 0.22,
-        ease: 'power2.in',
+        scale: 0.92,
       });
 
-      // Global Hello scales up
-      tl.set(terminalRef.current, { display: 'none' })
-        .set(helloWrapRef.current, { display: 'flex' })
-        .to(helloWrapRef.current, {
-          autoAlpha: 1,
-          scale: 1,
-          duration: 0.18,
-          ease: 'power3.out',
-        });
+      // Hide all scripts initially
+      scriptRefs.current.forEach((el) => {
+        if (el) {
+          el.style.display = 'none';
+          el.style.opacity = '0';
+        }
+      });
 
-      // Script cycling: 5 foreign scripts × 150ms = 750ms
-      // 0: Bengali (সাহিনুর) is already visible initially
-      // 1: Hindi (साहिनुर)
-      tl.add(() => {
+      // Clear typed text initially
+      if (cmd1TextRef.current) cmd1TextRef.current.textContent = '';
+      if (cmd2TextRef.current) cmd2TextRef.current.textContent = '';
+
+      // ─── ACT 1: Cinematic Terminal 3D Perspective Fly-In & Settle (~0.6s) ───
+      tl.to(terminalRef.current, {
+        autoAlpha: 1,
+        scale: 1,
+        rotateX: 0,
+        y: 0,
+        duration: 0.6,
+        ease: 'power3.out',
+      });
+
+      // ─── ACT 2: Real Letter-by-Letter Typewriter Boot Sequence (~1.8s) ───
+      // Line 1: Show prompt and cursor
+      tl.to(line1Ref.current, { autoAlpha: 1, y: 0, duration: 0.15 }, '+=0.1');
+
+      // Type 'whoami' letter-by-letter on timeline
+      const cmd1Tracker = { count: 0 };
+      const cmd1Text = 'whoami';
+      tl.to(cmd1Tracker, {
+        count: cmd1Text.length,
+        duration: 0.38,
+        ease: 'none',
+        onUpdate: () => {
+          if (cmd1TextRef.current) {
+            cmd1TextRef.current.textContent = cmd1Text.slice(0, Math.round(cmd1Tracker.count));
+          }
+        },
+      });
+
+      // Hide line 1 cursor
+      tl.set(cmd1CursorRef.current, { display: 'none' }, '+=0.06');
+
+      // Line 2: Output drops in smoothly (sahinur_islam)
+      tl.to(line2Ref.current, { autoAlpha: 1, y: 0, duration: 0.22, ease: 'back.out(1.5)' }, '+=0.08');
+
+      // Line 3: Show prompt and cursor for script execution
+      tl.to(line3Ref.current, { autoAlpha: 1, y: 0, duration: 0.15 }, '+=0.18');
+
+      // Type './init_portfolio.sh' letter-by-letter on timeline
+      const cmd2Tracker = { count: 0 };
+      const cmd2Text = './init_portfolio.sh';
+      tl.to(cmd2Tracker, {
+        count: cmd2Text.length,
+        duration: 0.52,
+        ease: 'none',
+        onUpdate: () => {
+          if (cmd2TextRef.current) {
+            cmd2TextRef.current.textContent = cmd2Text.slice(0, Math.round(cmd2Tracker.count));
+          }
+        },
+      });
+
+      // Hide line 3 cursor
+      tl.set(cmd2CursorRef.current, { display: 'none' }, '+=0.06');
+
+      // Status lines 4, 5, 6 glide in smoothly
+      tl.to(line4Ref.current, { autoAlpha: 1, y: 0, duration: 0.2 }, '+=0.1');
+      tl.to(line5Ref.current, { autoAlpha: 1, y: 0, duration: 0.18 }, '+=0.12');
+      tl.to(line6Ref.current, { autoAlpha: 1, y: 0, duration: 0.18 }, '+=0.12');
+
+      // Pause on compiled terminal state so user can read it
+      tl.to({}, { duration: 0.4 });
+
+      // ─── ACT 3: Silky Dissolve & Multilingual Global Hello (~1.8s) ───
+      // Terminal compiles / dissolves with soft blur
+      tl.to(terminalRef.current, {
+        scale: 0.94,
+        y: -10,
+        autoAlpha: 0,
+        filter: 'blur(12px)',
+        duration: 0.42,
+        ease: 'power2.inOut',
+      });
+
+      // Helper to smoothly swap visible script frame with cross-fade
+      const showScriptFrame = (index) => {
         scriptRefs.current.forEach((el, i) => {
-          if (el) el.style.display = i === 1 ? 'inline-block' : 'none';
+          if (!el) return;
+          if (i === index) {
+            el.style.display = 'inline-block';
+            gsap.fromTo(el, { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.18, ease: 'power2.out', overwrite: true });
+          } else {
+            el.style.display = 'none';
+            el.style.opacity = '0';
+          }
         });
-      }, '+=0.15');
+      };
 
-      // 2: Japanese (サヒヌル)
+      // Activate Global Hello container and show first script (Bengali)
       tl.add(() => {
-        scriptRefs.current.forEach((el, i) => {
-          if (el) el.style.display = i === 2 ? 'inline-block' : 'none';
-        });
-      }, '+=0.15');
+        if (terminalRef.current) terminalRef.current.style.display = 'none';
+        if (helloWrapRef.current) {
+          helloWrapRef.current.style.display = 'flex';
+        }
+        showScriptFrame(0);
+      });
 
-      // 3: Russian (сахинур)
-      tl.add(() => {
-        scriptRefs.current.forEach((el, i) => {
-          if (el) el.style.display = i === 3 ? 'inline-block' : 'none';
-        });
-      }, '+=0.15');
+      // Hello container scales and clears blur
+      tl.fromTo(
+        helloWrapRef.current,
+        { autoAlpha: 0, scale: 0.92, filter: 'blur(10px)' },
+        { autoAlpha: 1, scale: 1, filter: 'blur(0px)', duration: 0.35, ease: 'power3.out' }
+      );
 
-      // 4: Arabic (ساهينور - dir="rtl", cursor hidden)
-      tl.add(() => {
-        scriptRefs.current.forEach((el, i) => {
-          if (el) el.style.display = i === 4 ? 'inline-block' : 'none';
-        });
-      }, '+=0.15');
+      // Frame 0: Bengali (সাহিনুর) displays for 240ms
+      tl.to({}, { duration: 0.24 });
 
-      // 5: Latin resting state (Sahinur _) with blinking cursor
-      tl.add(() => {
-        scriptRefs.current.forEach((el, i) => {
-          if (el) el.style.display = i === 5 ? 'inline-block' : 'none';
-        });
-      }, '+=0.15');
+      // Frame 1: Hindi (साहिनुर)
+      tl.add(() => showScriptFrame(1));
+      tl.to({}, { duration: 0.24 });
 
-      // Hold on final resting state for ~300ms
-      tl.to({}, { duration: 0.3 });
+      // Frame 2: Japanese (サヒヌル)
+      tl.add(() => showScriptFrame(2));
+      tl.to({}, { duration: 0.24 });
 
-      // ─── GATING LOGIC: Wait for page ready OR ceiling, then wipe-out ───
+      // Frame 3: Russian (сахинур)
+      tl.add(() => showScriptFrame(3));
+      tl.to({}, { duration: 0.24 });
+
+      // Frame 4: Arabic (ساهينور - dir="rtl", cursor hidden)
+      tl.add(() => showScriptFrame(4));
+      tl.to({}, { duration: 0.24 });
+
+      // Frame 5: Latin resting state (Sahinur _) with gold blinking cursor
+      tl.add(() => showScriptFrame(5));
+      // Hold on the Latin resting state for ~550ms
+      tl.to({}, { duration: 0.55 });
+
+      // ─── GATING LOGIC: Wait for page ready OR ceiling, then smooth wipe-out ───
       tl.add(() => {
         const executeWipeOut = () => {
           if (!preloaderRef.current) {
@@ -270,8 +325,9 @@ export default function BootPreloader() {
 
           gsap.to(preloaderRef.current, {
             autoAlpha: 0,
-            scale: 1.04,
-            duration: 0.35,
+            scale: 1.05,
+            filter: 'blur(8px)',
+            duration: 0.5,
             ease: 'power2.inOut',
             onComplete: () => {
               finishPreloader(targetHash);
@@ -282,7 +338,6 @@ export default function BootPreloader() {
         if (isPageReadyRef.current || ceilingHitRef.current) {
           executeWipeOut();
         } else {
-          // Keep resting state blinking until page load finishes or ceiling fires
           const checkInterval = setInterval(() => {
             if (isPageReadyRef.current || ceilingHitRef.current) {
               clearInterval(checkInterval);
@@ -318,7 +373,7 @@ export default function BootPreloader() {
 
       {/* Visual Animation Container */}
       <div className="boot-scene" aria-hidden="true">
-        {/* Subtle Ambient Radial Glow */}
+        {/* Ambient Glow */}
         <div className="boot-ambient-glow" />
 
         {/* 1. Terminal Window */}
@@ -336,7 +391,8 @@ export default function BootPreloader() {
             {/* Line 1: $ whoami */}
             <div className="boot-line" ref={line1Ref}>
               <span className="boot-prompt">$</span>
-              <span className="boot-cmd">whoami</span>
+              <span className="boot-cmd" ref={cmd1TextRef}></span>
+              <span className="boot-typing-cursor" ref={cmd1CursorRef}>▋</span>
             </div>
 
             {/* Line 2: sahinur_islam */}
@@ -347,7 +403,8 @@ export default function BootPreloader() {
             {/* Line 3: $ ./init_portfolio.sh */}
             <div className="boot-line" ref={line3Ref}>
               <span className="boot-prompt">$</span>
-              <span className="boot-cmd">./init_portfolio.sh</span>
+              <span className="boot-cmd" ref={cmd2TextRef}></span>
+              <span className="boot-typing-cursor" ref={cmd2CursorRef}>▋</span>
             </div>
 
             {/* Line 4: Loading modules... [OK] */}
@@ -370,17 +427,21 @@ export default function BootPreloader() {
           </div>
         </div>
 
-        {/* 2. Global Hello Display */}
-        <div className="boot-hello-wrap" ref={helloWrapRef}>
+        {/* 2. Global Hello Display - Guaranteed 100% hidden by default in CSS and inline style */}
+        <div
+          className="boot-hello-wrap"
+          ref={helloWrapRef}
+          style={{ display: 'none', opacity: 0, visibility: 'hidden' }}
+        >
           <div className="boot-hello-content">
             {HELLO_SCRIPTS.map((script, idx) => (
               <span
                 key={script.lang}
                 ref={(el) => (scriptRefs.current[idx] = el)}
-                className={`boot-hello-word ${idx === 0 ? 'active' : ''}`}
+                className="boot-hello-word"
                 dir={script.dir}
                 lang={script.lang}
-                style={{ display: idx === 0 ? 'inline-block' : 'none' }}
+                style={{ display: 'none', opacity: 0 }}
               >
                 {script.text}
                 {script.showCursor && (
