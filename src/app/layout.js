@@ -1,10 +1,17 @@
 import "./globals.css";
-import { Geist } from "next/font/google";
+import { Geist, Poppins } from "next/font/google";
 
 const geist = Geist({
   subsets: ["latin"],
   display: "swap",
   weight: ["300", "400", "500", "600", "700"],
+});
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-poppins",
 });
 
 export const viewport = {
@@ -220,7 +227,7 @@ export default function RootLayout({ children }) {
   const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
   return (
-    <html lang="en" className={`dark ${geist.className}`} suppressHydrationWarning>
+    <html lang="en" className={`dark ${geist.className} ${poppins.variable}`} suppressHydrationWarning>
       <head>
         <link rel="icon" href="/logo.svg" type="image/svg+xml" />
         <link rel="shortcut icon" href="/logo.svg" type="image/svg+xml" />
