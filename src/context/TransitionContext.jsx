@@ -10,18 +10,49 @@ export function TransitionProvider({ children }) {
   const pathname = usePathname();
   const [transitionStatus, setTransitionStatus] = useState('idle'); // 'idle' | 'transitioning' | 'completed'
 
+  // Ref to track active ViewTransition instance
+  const activeTransitionRef = useRef(null);
   // Ref to track active AbortController for in-flight transitions
   const activeControllerRef = useRef(null);
   // Ref to resolve the startViewTransition DOM update promise once pathname updates
   const transitionResolverRef = useRef(null);
+  // Ref to track active safety timeout
+  const activeTimeoutRef = useRef(null);
   // Ref to track destination pathname
   const targetPathRef = useRef(null);
+  // Deduplication ref to prevent duplicate triggers within same event cycle
+  const lastNavRef = useRef({ href: '', time: 0 });
+
+  // Suppress harmless ViewTransition AbortErrors in dev overlays (e.g. Next.js Turbopack)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleUnhandledRejection = (e) => {
+      const err = e.reason;
+      if (
+        err?.name === 'AbortError' ||
+        (typeof err?.message === 'string' &&
+          (err.message.includes('ViewTransition') || err.message.includes('transition')))
+      ) {
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    return () => {
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
+  }, []);
 
   // When pathname changes, settle the pending transition and notify shared context
   useEffect(() => {
     if (transitionResolverRef.current) {
       transitionResolverRef.current();
       transitionResolverRef.current = null;
+    }
+    if (activeTimeoutRef.current) {
+      clearTimeout(activeTimeoutRef.current);
+      activeTimeoutRef.current = null;
     }
     targetPathRef.current = null;
     setTransitionStatus('completed');
@@ -42,25 +73,54 @@ export function TransitionProvider({ children }) {
       return;
     }
 
+    const normalize = (p) => {
+      if (!p) return '/';
+      const clean = p.replace(/\/+$/, '');
+      return clean === '' ? '/' : clean;
+    };
+
     const currentPath = window.location.pathname;
     let targetPath = href;
     try {
       const targetUrl = new URL(href, window.location.href);
       targetPath = targetUrl.pathname;
       // Same-page hash navigation (e.g. /#contact when already on /)
-      if (targetPath === currentPath && targetUrl.hash) {
+      if (normalize(targetPath) === normalize(currentPath) && targetUrl.hash) {
         return;
       }
       // Same path without hash - no route transition needed
-      if (targetPath === currentPath && !targetUrl.hash) {
+      if (normalize(targetPath) === normalize(currentPath) && !targetUrl.hash) {
         return;
       }
     } catch {
       // Relative path fallback
-      if (href === currentPath) return;
+      if (normalize(href) === normalize(currentPath)) return;
     }
 
-    // 2. Rapid navigation interruption: cancel and abort prior in-flight transition
+    // Deduplication guard: ignore redundant triggers for same destination within 250ms
+    const now = Date.now();
+    if (lastNavRef.current.href === href && now - lastNavRef.current.time < 250) {
+      return;
+    }
+    lastNavRef.current = { href, time: now };
+
+    // 2. Rapid navigation interruption: cleanly abort prior in-flight transition
+    if (activeTimeoutRef.current) {
+      clearTimeout(activeTimeoutRef.current);
+      activeTimeoutRef.current = null;
+    }
+    if (transitionResolverRef.current) {
+      transitionResolverRef.current();
+      transitionResolverRef.current = null;
+    }
+    if (activeTransitionRef.current) {
+      try {
+        activeTransitionRef.current.skipTransition?.();
+      } catch {
+        // Safe ignore
+      }
+      activeTransitionRef.current = null;
+    }
     if (activeControllerRef.current) {
       activeControllerRef.current.abort();
       activeControllerRef.current = null;
@@ -113,6 +173,7 @@ export function TransitionProvider({ children }) {
         setTransitionStatus('completed');
       }
     }, 450);
+    activeTimeoutRef.current = timeoutId;
 
     controller.signal.addEventListener('abort', () => {
       clearTimeout(timeoutId);
@@ -128,16 +189,27 @@ export function TransitionProvider({ children }) {
         router.push(href);
         await transitionPromise;
       });
+      activeTransitionRef.current = transition;
+
+      // Explicitly catch all internal promises to handle browser AbortErrors cleanly
+      transition.ready?.catch(() => {});
+      transition.updateCallbackDone?.catch(() => {});
 
       transition.finished
-        .then(() => {
+        ?.then(() => {
           clearTimeout(timeoutId);
+          if (activeTransitionRef.current === transition) {
+            activeTransitionRef.current = null;
+          }
           if (!controller.signal.aborted) {
             setTransitionStatus('completed');
           }
         })
-        .catch(() => {
+        ?.catch(() => {
           clearTimeout(timeoutId);
+          if (activeTransitionRef.current === transition) {
+            activeTransitionRef.current = null;
+          }
           if (!controller.signal.aborted) {
             setTransitionStatus('completed');
           }
@@ -149,12 +221,12 @@ export function TransitionProvider({ children }) {
     }
   }, [router]);
 
-  // Global click interceptor for internal links to ensure full application coverage
+  // Global click interceptor for internal links in bubble phase
   useEffect(() => {
     if (typeof document === 'undefined') return;
 
     const handleGlobalLinkClick = (e) => {
-      // Ignore modified clicks (ctrl, cmd, shift, alt) or secondary clicks
+      // Ignore if event was already handled (e.g. by an explicit onClick), or modified clicks
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
         return;
       }
@@ -192,9 +264,9 @@ export function TransitionProvider({ children }) {
       }
     };
 
-    document.addEventListener('click', handleGlobalLinkClick, { capture: true });
+    document.addEventListener('click', handleGlobalLinkClick);
     return () => {
-      document.removeEventListener('click', handleGlobalLinkClick, { capture: true });
+      document.removeEventListener('click', handleGlobalLinkClick);
     };
   }, [transitionNavigate]);
 
