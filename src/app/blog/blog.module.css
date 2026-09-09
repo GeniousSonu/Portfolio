@@ -91,6 +91,7 @@
   color: #fff;
   font-size: 0.95rem;
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   transition: all 0.25s ease;
 }
 
@@ -153,6 +154,7 @@
   border-radius: 20px;
   overflow: hidden;
   backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   text-decoration: none;
@@ -282,6 +284,7 @@
   border-radius: 16px;
   overflow: hidden;
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   text-decoration: none;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }

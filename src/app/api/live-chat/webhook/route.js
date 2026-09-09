@@ -11,11 +11,8 @@ import { deleteSpaceEntry, broadcastToSpace } from '@/lib/sharedSpace';
 
 export async function POST(req) {
   try {
-    // 0. Temporary Raw Payload Debug Logging (per user request to inspect raw Telegram update)
+    // Parse incoming webhook payload
     const body = await req.json().catch(() => null);
-    console.log('====== [RAW TELEGRAM WEBHOOK INCOMING PAYLOAD] ======');
-    console.log(JSON.stringify(body, null, 2));
-    console.log('=====================================================');
 
     // 1. Verify Telegram Webhook Secret Token
     const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET;

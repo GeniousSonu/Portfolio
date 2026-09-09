@@ -1,8 +1,31 @@
 import { NextResponse } from 'next/server';
 import { resend } from '@/lib/resend';
+import { checkSpaceRateLimit } from '@/lib/sharedSpace';
+
+const MAX_NAME_LENGTH = 100;
+const MAX_EMAIL_LENGTH = 150;
+const MAX_MESSAGE_LENGTH = 5000;
+const CONTACT_RATE_LIMIT = 5;       // Max 5 messages
+const CONTACT_RATE_WINDOW = 600;    // per 10 minutes
 
 export async function POST(request) {
   try {
+    // 1. IP Rate Limiting (Supabase-backed counter)
+    const forwarded = request.headers.get('x-forwarded-for');
+    const clientIp = forwarded ? forwarded.split(',')[0].trim() : request.headers.get('x-real-ip') || '127.0.0.1';
+    const rateLimitKey = `contact:${clientIp}`;
+    const rateStatus = await checkSpaceRateLimit(rateLimitKey, CONTACT_RATE_LIMIT, CONTACT_RATE_WINDOW);
+
+    if (!rateStatus.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Too many contact messages sent from your IP. Please wait a few minutes before sending another message.',
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const { name, email, message } = body;
 
@@ -10,6 +33,27 @@ export async function POST(request) {
     if (!name?.trim() || !email?.trim() || !message?.trim()) {
       return NextResponse.json(
         { error: 'Name, email, and message are required fields.' },
+        { status: 400 }
+      );
+    }
+
+    if (name.length > MAX_NAME_LENGTH) {
+      return NextResponse.json(
+        { error: `Name exceeds maximum length of ${MAX_NAME_LENGTH} characters.` },
+        { status: 400 }
+      );
+    }
+
+    if (email.length > MAX_EMAIL_LENGTH) {
+      return NextResponse.json(
+        { error: `Email exceeds maximum length of ${MAX_EMAIL_LENGTH} characters.` },
+        { status: 400 }
+      );
+    }
+
+    if (message.length > MAX_MESSAGE_LENGTH) {
+      return NextResponse.json(
+        { error: `Message exceeds maximum length of ${MAX_MESSAGE_LENGTH} characters.` },
         { status: 400 }
       );
     }

@@ -28,23 +28,6 @@ export const supabase = createClient(
   }
 );
 
-/**
- * Server-only Supabase client with elevated service role privileges.
- * Use strictly in secure API routes / server actions (e.g. admin panel, bot control).
- */
-export const getServiceSupabase = () => {
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!serviceRoleKey) {
-    throw new Error('SUPABASE_SERVICE_ROLE_KEY is not defined in environment variables.');
-  }
-
-  return createClient(supabaseUrl || '', serviceRoleKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
-};
 
 export default supabase;
