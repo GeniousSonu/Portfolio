@@ -4,58 +4,71 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import styles from './space.module.css';
 
-const MAX_CHARS = 2000;
+const MAX_CHARS = 5000;
+const DEBOUNCE_DELAY_MS = 500;
 const TURNSTILE_SITE_KEY =
   process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA';
 
 export default function SpaceView() {
-  const [entries, setEntries] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [content, setContent] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [clearing, setClearing] = useState(false);
-  const [showClearModal, setShowClearModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [savingStatus, setSavingStatus] = useState('Synced'); // 'Synced' | 'Saving...' | 'Conflict'
+  const [viewerCount, setViewerCount] = useState(1);
   const [isConnected, setIsConnected] = useState(false);
-  const [toast, setToast] = useState(null); // { type: 'error'|'success', message }
-  const [copiedId, setCopiedId] = useState(null);
-  const [reportedIds, setReportedIds] = useState(new Set());
-  const [turnstileToken, setTurnstileToken] = useState('');
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
   const [dbError, setDbError] = useState(null);
+  const [conflictNotice, setConflictNotice] = useState(null); // { remoteContent, remoteUpdatedAt }
 
+  // Turnstile human verification state
+  const [sessionToken, setSessionToken] = useState(null);
+  const [isVerified, setIsVerified] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+
+  // References
+  const textareaRef = useRef(null);
   const turnstileContainerRef = useRef(null);
   const turnstileWidgetId = useRef(null);
-  const textareaRef = useRef(null);
+  const debounceTimerRef = useRef(null);
+  const isFocusedRef = useRef(false);
+  const pendingRemoteUpdateRef = useRef(null);
+  const lastKnownUpdatedAtRef = useRef(null);
+  const clientIdRef = useRef(null);
 
-  const showToast = useCallback((message, type = 'error') => {
-    setToast({ message, type });
-    setTimeout(() => {
-      setToast(null);
-    }, 4500);
-  }, []);
-
-  // ── Fetch Current Board Entries ──
-  const fetchEntries = useCallback(async () => {
-    try {
-      const res = await fetch('/api/space');
-      const data = await res.json();
-      if (res.ok && Array.isArray(data.entries)) {
-        setEntries(data.entries);
-        setDbError(null);
-      } else if (data.error && data.error.includes('shared_space_entries')) {
-        setDbError(data.error);
-      }
-    } catch (err) {
-      console.warn('[SpaceView] Sync error:', err.message);
-    } finally {
-      setLoading(false);
+  // Initialize unique clientId per tab
+  useEffect(() => {
+    if (!clientIdRef.current) {
+      clientIdRef.current =
+        typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `client-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     }
   }, []);
 
-  // ── Initialize Turnstile Widget ──
-  useEffect(() => {
-    let scriptLoaded = false;
+  // Auto-resize textarea height
+  const adjustTextareaHeight = useCallback(() => {
+    const el = textareaRef.current;
+    if (el) {
+      el.style.height = 'auto';
+      el.style.height = `${Math.max(380, el.scrollHeight)}px`;
+    }
+  }, []);
 
-    const renderTurnstile = () => {
+  // ── Session Verification (Turnstile) ──
+  useEffect(() => {
+    // Check if a valid session token exists in sessionStorage (survives tab refreshes)
+    const storedToken = sessionStorage.getItem('sks_space_session_token');
+    if (storedToken) {
+      setSessionToken(storedToken);
+      setIsVerified(true);
+    }
+  }, []);
+
+  // Initialize Turnstile widget when unverified
+  useEffect(() => {
+    if (isVerified) return;
+
+    const renderWidget = () => {
       if (
         window.turnstile &&
         turnstileContainerRef.current &&
@@ -66,33 +79,47 @@ export default function SpaceView() {
             turnstileContainerRef.current,
             {
               sitekey: TURNSTILE_SITE_KEY,
-              callback: (token) => setTurnstileToken(token),
-              'expired-callback': () => setTurnstileToken(''),
-              'error-callback': () => setTurnstileToken(''),
+              callback: async (token) => {
+                setIsVerifying(true);
+                try {
+                  const res = await fetch('/api/space/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ turnstileToken: token }),
+                  });
+                  const data = await res.json();
+                  if (res.ok && data.sessionToken) {
+                    sessionStorage.setItem('sks_space_session_token', data.sessionToken);
+                    setSessionToken(data.sessionToken);
+                    setIsVerified(true);
+                  }
+                } catch (e) {
+                  console.warn('[Space Turnstile] Verification notice:', e.message);
+                } finally {
+                  setIsVerifying(false);
+                }
+              },
+              'expired-callback': () => {},
+              'error-callback': () => {},
               theme: 'dark',
               size: 'flexible',
             }
           );
-        } catch (e) {
-          console.warn('[Turnstile] Render notice:', e.message);
-        }
+        } catch (e) {}
       }
     };
 
     if (window.turnstile) {
-      renderTurnstile();
+      renderWidget();
     } else {
-      const existingScript = document.getElementById('cf-turnstile-script');
-      if (!existingScript) {
+      const scriptId = 'cf-turnstile-script';
+      if (!document.getElementById(scriptId)) {
         const script = document.createElement('script');
-        script.id = 'cf-turnstile-script';
+        script.id = scriptId;
         script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
         script.async = true;
         script.defer = true;
-        script.onload = () => {
-          scriptLoaded = true;
-          renderTurnstile();
-        };
+        script.onload = renderWidget;
         document.head.appendChild(script);
       }
     }
@@ -105,202 +132,232 @@ export default function SpaceView() {
         } catch (e) {}
       }
     };
-  }, []);
+  }, [isVerified]);
 
-  const resetTurnstile = () => {
-    setTurnstileToken('');
-    if (window.turnstile && turnstileWidgetId.current) {
-      try {
-        window.turnstile.reset(turnstileWidgetId.current);
-      } catch (e) {}
+  // ── Fetch Initial Document ──
+  const fetchDocument = useCallback(async () => {
+    try {
+      const res = await fetch('/api/space');
+      const data = await res.json();
+      if (res.ok) {
+        setContent(data.content || '');
+        lastKnownUpdatedAtRef.current = data.updatedAt || null;
+        setDbError(null);
+        setTimeout(adjustTextareaHeight, 50);
+      } else if (data.error && data.error.includes('shared_space_document')) {
+        setDbError(data.error);
+      }
+    } catch (e) {
+      console.warn('[Space] Initial fetch warning:', e.message);
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [adjustTextareaHeight]);
 
-  // ── Supabase Realtime Subscription & Reconnect Catch-up ──
+  // ── Save Document (Debounced) ──
+  const saveDocument = useCallback(
+    async (textToSave) => {
+      const token = sessionStorage.getItem('sks_space_session_token') || sessionToken;
+      if (!token) return;
+
+      setSavingStatus('Saving...');
+      try {
+        const res = await fetch('/api/space', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-space-session-token': token,
+          },
+          body: JSON.stringify({
+            content: textToSave,
+            clientId: clientIdRef.current,
+            lastKnownUpdatedAt: lastKnownUpdatedAtRef.current,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (res.status === 409 && data.conflict) {
+          // Conflict detected: someone else saved while typing
+          setSavingStatus('Conflict');
+          setConflictNotice({
+            remoteContent: data.currentContent || '',
+            remoteUpdatedAt: data.updatedAt,
+          });
+          return;
+        }
+
+        if (res.status === 403 && data.code === 'TOKEN_EXPIRED') {
+          // Silent session renewal: prompt Turnstile without losing typed content
+          sessionStorage.removeItem('sks_space_session_token');
+          setSessionToken(null);
+          setIsVerified(false);
+          setSavingStatus('Verification needed');
+          return;
+        }
+
+        if (res.ok) {
+          lastKnownUpdatedAtRef.current = data.updatedAt;
+          setSavingStatus('Synced');
+          setConflictNotice(null);
+        } else {
+          setSavingStatus('Error');
+        }
+      } catch (err) {
+        console.warn('[Space] Save error:', err.message);
+        setSavingStatus('Error');
+      }
+    },
+    [sessionToken]
+  );
+
+  // ── Realtime Setup with Presence & Cursor Jump Protection ──
   useEffect(() => {
-    fetchEntries();
+    fetchDocument();
 
-    // 1. Private channel subscription for broadcast reception
     const channel = supabase.channel('shared-space', {
-      config: { private: true },
+      config: {
+        private: true,
+        presence: { key: clientIdRef.current || 'visitor' },
+      },
     });
 
-    channel
-      .on('broadcast', { event: 'new-entry' }, ({ payload }) => {
-        if (payload?.entry && payload.entry.id) {
-          setEntries((prev) => {
-            if (prev.some((e) => e.id === payload.entry.id)) return prev;
-            return [payload.entry, ...prev];
-          });
-        }
-      })
-      .on('broadcast', { event: 'entry_deleted' }, ({ payload }) => {
-        if (payload?.entryId) {
-          setEntries((prev) => prev.filter((e) => e.id !== payload.entryId));
-        }
-      })
-      .on('broadcast', { event: 'space_cleared' }, () => {
-        setEntries([]);
-      });
+    // 1. Listen for remote document updates
+    channel.on('broadcast', { event: 'document-update' }, ({ payload }) => {
+      if (!payload || payload.senderId === clientIdRef.current) {
+        return; // Ignore own typing echoes to prevent cursor resets
+      }
 
-    channel.subscribe((status) => {
+      // Cursor Stability Check:
+      // If user is currently focused/typing in textarea, DO NOT reset their cursor!
+      // Queue update and let conflict resolution evaluate upon typing pause.
+      if (isFocusedRef.current) {
+        pendingRemoteUpdateRef.current = payload;
+        return;
+      }
+
+      // Otherwise apply remote update cleanly
+      setContent(payload.content || '');
+      lastKnownUpdatedAtRef.current = payload.updatedAt || null;
+      setTimeout(adjustTextareaHeight, 30);
+    });
+
+    // 2. Listen for document cleared event
+    channel.on('broadcast', { event: 'document-cleared' }, ({ payload }) => {
+      if (payload && payload.senderId === clientIdRef.current) return;
+      setContent('');
+      lastKnownUpdatedAtRef.current = payload?.updatedAt || null;
+      setTimeout(adjustTextareaHeight, 30);
+    });
+
+    // 3. Track visitor presence
+    channel.on('presence', { event: 'sync' }, () => {
+      const state = channel.presenceState();
+      const count = Object.keys(state).length;
+      setViewerCount(Math.max(1, count));
+    });
+
+    channel.subscribe(async (status) => {
       if (status === 'SUBSCRIBED') {
         setIsConnected(true);
-        // Automatic catch-up when channel connects or recovers from drop
-        fetchEntries();
+        await channel.track({ online_at: new Date().toISOString() });
+        // Catch-up sync on connect
+        fetchDocument();
       } else {
         setIsConnected(false);
       }
     });
 
-    // 2. Event listeners for tab focus and network reconnection
-    const handleOnline = () => {
-      fetchEntries();
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        fetchEntries();
-      }
+    // 4. Tab visibility & online catch-up
+    const handleOnline = () => fetchDocument();
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') fetchDocument();
     };
 
     window.addEventListener('online', handleOnline);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
       window.removeEventListener('online', handleOnline);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('visibilitychange', handleVisibility);
       supabase.removeChannel(channel);
     };
-  }, [fetchEntries]);
+  }, [fetchDocument, adjustTextareaHeight]);
 
-  // ── Paste from Clipboard ──
-  const handlePasteClipboard = async () => {
-    try {
-      if (navigator.clipboard && navigator.clipboard.readText) {
-        const text = await navigator.clipboard.readText();
-        if (text) {
-          setContent((prev) => (prev ? `${prev}\n${text}` : text).slice(0, MAX_CHARS));
-          textareaRef.current?.focus();
+  // ── Typing Handler (Local update + Debounce) ──
+  const handleChange = (e) => {
+    const val = e.target.value.slice(0, MAX_CHARS);
+    setContent(val);
+    adjustTextareaHeight();
+
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    setSavingStatus('Saving...');
+    debounceTimerRef.current = setTimeout(() => {
+      // If a remote update arrived while actively typing, surface conflict notice
+      if (pendingRemoteUpdateRef.current) {
+        const pending = pendingRemoteUpdateRef.current;
+        pendingRemoteUpdateRef.current = null;
+        if (pending.content !== val) {
+          setConflictNotice({
+            remoteContent: pending.content,
+            remoteUpdatedAt: pending.updatedAt,
+          });
+          setSavingStatus('Conflict');
+          return;
         }
-      } else {
-        showToast('Clipboard read access is not supported on this browser.', 'error');
       }
-    } catch (e) {
-      showToast('Please paste manually or allow clipboard permission.', 'error');
+
+      saveDocument(val);
+    }, DEBOUNCE_DELAY_MS);
+  };
+
+  // ── Conflict Resolution Handlers ──
+  const handleApplyRemote = () => {
+    if (conflictNotice?.remoteContent !== undefined) {
+      setContent(conflictNotice.remoteContent);
+      lastKnownUpdatedAtRef.current = conflictNotice.remoteUpdatedAt;
+      setConflictNotice(null);
+      setSavingStatus('Synced');
+      setTimeout(adjustTextareaHeight, 50);
     }
   };
 
-  // ── Copy Individual Entry ──
-  const handleCopy = async (entry) => {
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(entry.content);
-        setCopiedId(entry.id);
-        setTimeout(() => setCopiedId(null), 2000);
-      }
-    } catch (e) {
-      showToast('Failed to copy text to clipboard.', 'error');
-    }
+  const handleKeepMine = () => {
+    setConflictNotice(null);
+    saveDocument(content);
   };
 
-  // ── Report Inappropriate Entry ──
-  const handleReport = async (entryId) => {
-    if (reportedIds.has(entryId)) return;
+  // ── Clear Scratchpad ──
+  const handleConfirmClear = async () => {
+    const token = sessionStorage.getItem('sks_space_session_token') || sessionToken;
+    if (!token) return;
 
-    try {
-      const res = await fetch('/api/space/report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ entryId, reason: 'Reported by community visitor' }),
-      });
-      const data = await res.json();
-
-      if (res.ok) {
-        setReportedIds((prev) => new Set(prev).add(entryId));
-        showToast('Entry reported for moderation review. Thank you!', 'success');
-      } else {
-        showToast(data.error || 'Failed to submit report.', 'error');
-      }
-    } catch (e) {
-      showToast('Network error while reporting.', 'error');
-    }
-  };
-
-  // ── Submit New Paste ──
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const clean = content.trim();
-
-    if (!clean) {
-      showToast('Please enter text to share.', 'error');
-      return;
-    }
-
-    if (clean.length > MAX_CHARS) {
-      showToast(`Content exceeds ${MAX_CHARS} characters.`, 'error');
-      return;
-    }
-
-    setSubmitting(true);
+    setIsClearing(true);
     try {
       const res = await fetch('/api/space', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content: clean,
-          turnstileToken,
-        }),
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-space-session-token': token,
+        },
+        body: JSON.stringify({ clientId: clientIdRef.current }),
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        showToast(data.error || 'Failed to post entry.', 'error');
-        resetTurnstile();
-      } else {
+      if (res.ok) {
+        const data = await res.json();
         setContent('');
-        resetTurnstile();
-        if (data.entry) {
-          setEntries((prev) => [data.entry, ...prev.filter((item) => item.id !== data.entry.id)]);
-        }
-        showToast('Shared to space!', 'success');
-      }
-    } catch (err) {
-      showToast('Network error while sharing to space.', 'error');
-      resetTurnstile();
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  // ── Confirm Clear All ──
-  const handleConfirmClear = async () => {
-    setClearing(true);
-    try {
-      const res = await fetch('/api/space', { method: 'DELETE' });
-      const data = await res.json();
-
-      if (!res.ok) {
-        showToast(data.error || 'Failed to clear shared space.', 'error');
-      } else {
-        setEntries([]);
-        setShowClearModal(false);
-        showToast('Shared space has been cleared.', 'success');
+        lastKnownUpdatedAtRef.current = data.updatedAt;
+        setShowClearConfirm(false);
+        setConflictNotice(null);
+        setTimeout(adjustTextareaHeight, 50);
       }
     } catch (e) {
-      showToast('Network error while clearing space.', 'error');
+      console.warn('[Space] Clear error:', e.message);
     } finally {
-      setClearing(false);
-    }
-  };
-
-  const formatTimestamp = (dateStr) => {
-    try {
-      const d = new Date(dateStr);
-      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    } catch (e) {
-      return '';
+      setIsClearing(false);
     }
   };
 
@@ -309,237 +366,150 @@ export default function SpaceView() {
       <div className={styles.inner}>
         {/* ─── Header ─── */}
         <header className={styles.header}>
-          <div className={styles.badgeRow}>
-            <span className={styles.badge}>Live Clipboard</span>
-            <div className={styles.connectionStatus}>
+          <h1 className={styles.title}>Space</h1>
+          <div className={styles.metaRow}>
+            <div className={styles.presenceBadge}>
               <span
-                className={`${styles.statusDot} ${
-                  !isConnected ? styles.statusDotDisconnected : ''
+                className={`${styles.presenceDot} ${
+                  !isConnected ? styles.presenceDotOffline : ''
                 }`}
+                aria-hidden="true"
               />
-              <span>{isConnected ? 'Realtime Connected' : 'Reconnecting...'}</span>
+              <span>{viewerCount} {viewerCount === 1 ? 'VIEWING' : 'VIEWING'}</span>
             </div>
           </div>
-          <h1 className={styles.title}>Shared Space</h1>
-          <p className={styles.subtitle}>
-            A real-time public clipboard. Anyone can paste, everyone currently viewing receives it
-            live without refreshing.
-          </p>
         </header>
 
-        {/* ─── Anonymous Public Disclaimer ─── */}
-        <aside className={styles.disclaimerBanner} role="alert">
-          <span className={styles.disclaimerIcon} aria-hidden="true">
-            ⚠️
-          </span>
-          <div>
-            <strong>Public &amp; Anonymous:</strong> Anything pasted here is immediately visible to
-            anyone viewing this page and can be cleared at any time. Never share passwords, API keys,
-            tokens, or private personal data. Pastes auto-expire after 24 hours.
-          </div>
-        </aside>
-
-        {/* ─── Database Setup Notice (If Migration Not Run Yet) ─── */}
+        {/* ─── Database Migration Notice (If Needed) ─── */}
         {dbError && (
-          <div className={styles.dbNoticeBanner} role="alert">
-            <span aria-hidden="true">💡</span>
-            <div>
-              <strong>Setup Notice:</strong> {dbError}
+          <div className={styles.noticeBanner} role="alert">
+            <span>⚠️ {dbError}</span>
+          </div>
+        )}
+
+        {/* ─── Conflict Notice Banner ─── */}
+        {conflictNotice && (
+          <div className={styles.noticeBanner} role="alert">
+            <span>Someone else made edits while you were typing.</span>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                type="button"
+                className={styles.noticeActionBtn}
+                onClick={handleApplyRemote}
+              >
+                Load latest
+              </button>
+              <button
+                type="button"
+                className={styles.noticeActionBtn}
+                onClick={handleKeepMine}
+              >
+                Keep mine
+              </button>
             </div>
           </div>
         )}
 
-        {/* ─── Toast Feedback ─── */}
-        {toast && (
-          <div
-            className={`${styles.toast} ${
-              toast.type === 'success' ? styles.toastSuccess : styles.toastError
-            }`}
-            role="status"
-          >
-            <span>{toast.type === 'success' ? '✅' : '⚠️'}</span>
-            <span>{toast.message}</span>
+        {/* ─── Turnstile Human Gating Gate ─── */}
+        {!isVerified && (
+          <div className={styles.turnstileGate}>
+            <p className={styles.gateText}>
+              {isVerifying ? 'Verifying session...' : 'Verify once to join the live collaborative scratchpad'}
+            </p>
+            <div ref={turnstileContainerRef} aria-label="Human verification challenge" />
           </div>
         )}
 
-        {/* ─── Composer Card ─── */}
-        <form className={styles.composerCard} onSubmit={handleSubmit}>
+        {/* ─── Collaborative Card Workspace ─── */}
+        <div className={styles.card}>
+          {/* Card Top Bar */}
+          <div className={styles.cardHeader}>
+            <span className={styles.cardLabel}>Live Scratchpad</span>
+            <div className={styles.cardActions}>
+              {showClearConfirm ? (
+                <div className={styles.inlineConfirm}>
+                  <span>Clear it?</span>
+                  <button
+                    type="button"
+                    className={styles.inlineConfirmBtn}
+                    onClick={handleConfirmClear}
+                    disabled={isClearing}
+                  >
+                    {isClearing ? 'clearing...' : 'confirm'}
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.inlineCancelBtn}
+                    onClick={() => setShowClearConfirm(false)}
+                    disabled={isClearing}
+                  >
+                    cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className={styles.clearIconBtn}
+                  onClick={() => setShowClearConfirm(true)}
+                  aria-label="Clear shared scratchpad"
+                  title="Clear scratchpad"
+                  disabled={!isVerified || !content}
+                >
+                  &times;
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Collaborative Textarea */}
           <textarea
             ref={textareaRef}
             className={styles.textarea}
             value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="Paste code, snippets, links, or notes to broadcast live to everyone viewing this page..."
-            rows={4}
+            onChange={handleChange}
+            onFocus={() => {
+              isFocusedRef.current = true;
+            }}
+            onBlur={() => {
+              isFocusedRef.current = false;
+              // If remote update arrived while focused, apply cleanly now
+              if (pendingRemoteUpdateRef.current) {
+                const pending = pendingRemoteUpdateRef.current;
+                pendingRemoteUpdateRef.current = null;
+                setContent(pending.content || '');
+                lastKnownUpdatedAtRef.current = pending.updatedAt || null;
+                setTimeout(adjustTextareaHeight, 30);
+              }
+            }}
+            placeholder={
+              loading
+                ? 'Loading shared document...'
+                : !isVerified
+                ? 'Verify above to type in the shared scratchpad...'
+                : 'Start typing... updates sync live for everyone on this page.'
+            }
+            disabled={!isVerified || loading}
             maxLength={MAX_CHARS}
-            disabled={submitting}
-            aria-label="Shared clipboard text content"
+            spellCheck="false"
+            aria-label="Shared collaborative scratchpad text area"
           />
 
-          <div className={styles.composerFooter}>
-            <div className={styles.leftControls}>
-              <button
-                type="button"
-                className={styles.pasteBtn}
-                onClick={handlePasteClipboard}
-                title="Paste from your device's clipboard"
-              >
-                📋 Paste Clipboard
-              </button>
-              <span
-                className={`${styles.charCount} ${
-                  content.length > 1800
-                    ? content.length >= MAX_CHARS
-                      ? styles.charCountError
-                      : styles.charCountWarn
-                    : ''
-                }`}
-              >
-                {content.length} / {MAX_CHARS}
+          {/* Card Bottom Bar */}
+          <div className={styles.cardFooter}>
+            <div className={styles.statusIndicator}>
+              <span className={savingStatus === 'Saving...' ? styles.savingText : ''}>
+                {savingStatus}
               </span>
             </div>
-
-            <div className={styles.rightControls}>
-              <div
-                ref={turnstileContainerRef}
-                className={styles.turnstileContainer}
-                aria-label="Bot verification"
-              />
-              <button
-                type="submit"
-                className={styles.submitBtn}
-                disabled={submitting || !content.trim()}
-              >
-                {submitting ? 'Sharing...' : 'Share to Space 🚀'}
-              </button>
-            </div>
-          </div>
-        </form>
-
-        {/* ─── Board Header Bar ─── */}
-        <div className={styles.boardHeader}>
-          <div className={styles.boardTitle}>
-            <span>Active Pastes</span>
-            <span className={styles.entryCountBadge}>{entries.length}</span>
-          </div>
-          {entries.length > 0 && (
-            <button
-              type="button"
-              className={styles.clearAllBtn}
-              onClick={() => setShowClearModal(true)}
-              disabled={clearing}
+            <div
+              className={`${styles.counter} ${
+                content.length > 4500 ? styles.counterWarn : ''
+              }`}
             >
-              🗑 Clear All
-            </button>
-          )}
-        </div>
-
-        {/* ─── Feed of Entries ─── */}
-        <section className={styles.feed} aria-label="Shared pastes list">
-          {loading ? (
-            <>
-              <div className={styles.skeletonCard}>
-                <div className={styles.skeletonLine} style={{ width: '30%' }} />
-                <div className={styles.skeletonLine} style={{ width: '90%' }} />
-                <div className={styles.skeletonLine} style={{ width: '60%' }} />
-              </div>
-              <div className={styles.skeletonCard}>
-                <div className={styles.skeletonLine} style={{ width: '25%' }} />
-                <div className={styles.skeletonLine} style={{ width: '85%' }} />
-              </div>
-            </>
-          ) : entries.length === 0 ? (
-            <div className={styles.emptyState}>
-              <span className={styles.emptyIcon} aria-hidden="true">
-                ✨
-              </span>
-              <h3 className={styles.emptyTitle}>Nothing here yet</h3>
-              <p className={styles.emptyDesc}>
-                The shared space is completely clean. Be the first to paste something above!
-              </p>
-            </div>
-          ) : (
-            entries.map((entry) => (
-              <article key={entry.id} className={styles.entryCard}>
-                <div className={styles.entryMeta}>
-                  <time className={styles.entryTimestamp} dateTime={entry.created_at}>
-                    🕒 {formatTimestamp(entry.created_at)}
-                  </time>
-                  <div className={styles.entryActions}>
-                    <button
-                      type="button"
-                      className={`${styles.actionIconBtn} ${
-                        copiedId === entry.id ? styles.actionIconBtnSuccess : ''
-                      }`}
-                      onClick={() => handleCopy(entry)}
-                      title="Copy to your clipboard"
-                    >
-                      {copiedId === entry.id ? '✓ Copied' : '📄 Copy'}
-                    </button>
-                    <button
-                      type="button"
-                      className={`${styles.actionIconBtn} ${
-                        reportedIds.has(entry.id) ? styles.actionIconBtnReported : ''
-                      }`}
-                      onClick={() => handleReport(entry.id)}
-                      disabled={reportedIds.has(entry.id)}
-                      title="Report inappropriate content to Sonu"
-                    >
-                      {reportedIds.has(entry.id) ? '🚩 Reported' : '🚩 Report'}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Strictly plain-text safe preformatted block */}
-                <pre className={styles.entryContent}>{entry.content}</pre>
-              </article>
-            ))
-          )}
-        </section>
-
-        {/* ─── Clear All Confirmation Modal ─── */}
-        {showClearModal && (
-          <div
-            className={styles.modalBackdrop}
-            onClick={() => !clearing && setShowClearModal(false)}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="modal-title"
-          >
-            <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
-              <div className={styles.modalHeader}>
-                <div className={styles.modalIcon} aria-hidden="true">
-                  🗑️
-                </div>
-                <h3 id="modal-title" className={styles.modalTitle}>
-                  Clear Entire Shared Space?
-                </h3>
-              </div>
-              <p className={styles.modalBody}>
-                This will permanently delete all {entries.length} pastes on the shared board for
-                everyone currently viewing this page. This action cannot be undone.
-              </p>
-              <div className={styles.modalActions}>
-                <button
-                  type="button"
-                  className={styles.modalCancelBtn}
-                  onClick={() => setShowClearModal(false)}
-                  disabled={clearing}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className={styles.modalConfirmBtn}
-                  onClick={handleConfirmClear}
-                  disabled={clearing}
-                >
-                  {clearing ? 'Clearing...' : 'Yes, Clear All'}
-                </button>
-              </div>
+              {content.length.toLocaleString()} / {MAX_CHARS.toLocaleString()}
             </div>
           </div>
-        )}
+        </div>
       </div>
     </main>
   );

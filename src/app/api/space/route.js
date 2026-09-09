@@ -1,21 +1,18 @@
 import { NextResponse } from 'next/server';
 import {
-  getSpaceEntries,
-  createSpaceEntry,
-  clearAllSpaceEntries,
+  getSpaceDocument,
+  updateSpaceDocument,
+  clearSpaceDocument,
   sanitizeSpaceContent,
-  verifyTurnstileToken,
+  verifySpaceSessionToken,
   checkSpaceRateLimit,
-  cleanupExpiredEntries,
-  cleanupExpiredRateLimits,
   broadcastToSpace,
-  notifyTelegramNewSpaceEntry,
 } from '@/lib/sharedSpace';
 
-const POST_RATE_LIMIT = 10;          // Max 10 posts
-const POST_RATE_WINDOW = 10 * 60;    // per 10 minutes
-const DELETE_RATE_LIMIT = 2;         // Max 2 clears
-const DELETE_RATE_WINDOW = 10 * 60;  // per 10 minutes
+const SAVE_RATE_LIMIT = 60;          // Max 60 saves per minute per IP (ample for 500ms debouncing)
+const SAVE_RATE_WINDOW = 60;         // 60 seconds
+const CLEAR_RATE_LIMIT = 6;          // Max 6 clears per 10 minutes
+const CLEAR_RATE_WINDOW = 10 * 60;
 
 function getClientIp(req) {
   const forwarded = req.headers.get('x-forwarded-for');
@@ -23,19 +20,23 @@ function getClientIp(req) {
   return forwarded ? forwarded.split(',')[0].trim() : realIp || '127.0.0.1';
 }
 
+function extractSessionToken(req, body) {
+  const headerToken = req.headers.get('x-space-session-token');
+  return headerToken || body?.sessionToken;
+}
+
 /**
  * GET /api/space
- * Returns current entries (most recent first, capped at 100).
- * Runs background 24-hour cleanup and rate-limit pruning.
+ * Returns current shared scratchpad content and timestamp.
  */
 export async function GET() {
   try {
-    // Non-blocking background pruning
-    cleanupExpiredEntries().catch(() => {});
-    cleanupExpiredRateLimits().catch(() => {});
-
-    const entries = await getSpaceEntries(100);
-    return NextResponse.json({ success: true, entries });
+    const doc = await getSpaceDocument();
+    return NextResponse.json({
+      success: true,
+      content: doc.content || '',
+      updatedAt: doc.updated_at,
+    });
   } catch (err) {
     console.error('[API Space GET] Error:', err.message);
     return NextResponse.json({ error: err.message }, { status: 500 });
@@ -44,30 +45,37 @@ export async function GET() {
 
 /**
  * POST /api/space
- * Accepts { content, turnstileToken }
- * Validates Turnstile, rate limits per-IP, sanitizes text, inserts, broadcasts, notifies Telegram.
+ * Accepts { content, clientId, lastKnownUpdatedAt, sessionToken }
+ * Validates session token, rate limits, performs conflict detection, sanitizes, and broadcasts.
  */
 export async function POST(req) {
   try {
     const clientIp = getClientIp(req);
     const body = await req.json().catch(() => ({}));
-    const { content, turnstileToken } = body;
+    const { content, clientId, lastKnownUpdatedAt } = body;
 
-    // 1. Validate Bot Challenge (Cloudflare Turnstile)
-    const turnstileCheck = await verifyTurnstileToken(turnstileToken, clientIp);
-    if (!turnstileCheck.success) {
+    // 1. Enforce Human Verification Session Token
+    const sessionToken = extractSessionToken(req, body);
+    const tokenStatus = verifySpaceSessionToken(sessionToken);
+    if (!tokenStatus.valid) {
+      if (tokenStatus.expired) {
+        return NextResponse.json(
+          { error: 'Your session has expired. Renewing verification...', code: 'TOKEN_EXPIRED' },
+          { status: 403 }
+        );
+      }
       return NextResponse.json(
-        { error: turnstileCheck.error || 'Bot verification failed. Please try again.' },
+        { error: 'Human verification required to edit.', code: 'UNVERIFIED' },
         { status: 403 }
       );
     }
 
-    // 2. Enforce IP Rate Limiting (10 posts per 10 minutes)
-    const rateLimitKey = `space:post:${clientIp}`;
-    const rateStatus = await checkSpaceRateLimit(rateLimitKey, POST_RATE_LIMIT, POST_RATE_WINDOW);
+    // 2. IP Rate Limiting for debounced typing saves
+    const rateLimitKey = `space:save:${clientIp}`;
+    const rateStatus = await checkSpaceRateLimit(rateLimitKey, SAVE_RATE_LIMIT, SAVE_RATE_WINDOW);
     if (!rateStatus.allowed) {
       return NextResponse.json(
-        { error: 'Rate limit reached. Maximum 10 pastes per 10 minutes are permitted.' },
+        { error: 'Typing too rapidly. Please pause for a moment.' },
         { status: 429 }
       );
     }
@@ -75,25 +83,52 @@ export async function POST(req) {
     // 3. Strict Server-Side Unicode / Anti-Abuse Sanitization
     let cleanText;
     try {
-      cleanText = sanitizeSpaceContent(content);
+      cleanText = sanitizeSpaceContent(content || '');
     } catch (valErr) {
       return NextResponse.json({ error: valErr.message }, { status: 400 });
     }
 
-    // 4. Save to Database using Privileged Service Role
-    const newEntry = await createSpaceEntry(cleanText);
+    // 4. Conflict Detection (Timestamp / Version Check)
+    const currentDoc = await getSpaceDocument();
+    if (
+      lastKnownUpdatedAt &&
+      currentDoc.updated_at &&
+      currentDoc.content !== cleanText
+    ) {
+      const serverTime = new Date(currentDoc.updated_at).getTime();
+      const clientSeenTime = new Date(lastKnownUpdatedAt).getTime();
 
-    // 5. Broadcast to connected visitors via Private Realtime Channel
-    broadcastToSpace('new-entry', { entry: newEntry }).catch((e) => {
-      console.warn('[API Space POST] Broadcast warning:', e.message);
+      // If server document was updated more than 400ms after what client saw
+      if (serverTime > clientSeenTime + 400) {
+        return NextResponse.json(
+          {
+            conflict: true,
+            currentContent: currentDoc.content,
+            updatedAt: currentDoc.updated_at,
+            message: 'Someone else edited this scratchpad while you were typing.',
+          },
+          { status: 409 }
+        );
+      }
+    }
+
+    // 5. Persist to Supabase single document row
+    const updated = await updateSpaceDocument(cleanText);
+
+    // 6. Broadcast update over private Realtime channel
+    broadcastToSpace('document-update', {
+      content: cleanText,
+      updatedAt: updated.updated_at,
+      senderId: clientId || null,
+    }).catch((e) => {
+      console.warn('[API Space POST] Broadcast error:', e.message);
     });
 
-    // 6. Notify Sonu's Telegram for moderation (with inline 1-tap delete button)
-    notifyTelegramNewSpaceEntry(newEntry, clientIp).catch((e) => {
-      console.warn('[API Space POST] Telegram notice error:', e.message);
+    return NextResponse.json({
+      success: true,
+      content: cleanText,
+      updatedAt: updated.updated_at,
     });
-
-    return NextResponse.json({ success: true, entry: newEntry });
   } catch (err) {
     console.error('[API Space POST] Error:', err.message);
     return NextResponse.json({ error: err.message }, { status: 500 });
@@ -102,33 +137,50 @@ export async function POST(req) {
 
 /**
  * DELETE /api/space
- * Clears all entries from the shared space board.
- * Stricter rate limit (2 clears per 10 mins).
- * Broadcasts space_cleared to all connected visitors.
+ * Clears the shared collaborative scratchpad.
  */
 export async function DELETE(req) {
   try {
     const clientIp = getClientIp(req);
+    const body = await req.json().catch(() => ({}));
+    const { clientId } = body;
 
-    // 1. Strict IP Rate Limiting for Destructive Action
-    const rateLimitKey = `space:delete:${clientIp}`;
-    const rateStatus = await checkSpaceRateLimit(rateLimitKey, DELETE_RATE_LIMIT, DELETE_RATE_WINDOW);
+    // 1. Enforce Human Verification Session Token
+    const sessionToken = extractSessionToken(req, body);
+    const tokenStatus = verifySpaceSessionToken(sessionToken);
+    if (!tokenStatus.valid) {
+      return NextResponse.json(
+        { error: 'Human verification required to clear.', code: 'UNVERIFIED' },
+        { status: 403 }
+      );
+    }
+
+    // 2. Rate limit clear action
+    const rateLimitKey = `space:clear:${clientIp}`;
+    const rateStatus = await checkSpaceRateLimit(rateLimitKey, CLEAR_RATE_LIMIT, CLEAR_RATE_WINDOW);
     if (!rateStatus.allowed) {
       return NextResponse.json(
-        { error: 'Rate limit reached. The board can only be cleared twice per 10 minutes per visitor.' },
+        { error: 'Clear limit reached. Please wait a few minutes before clearing again.' },
         { status: 429 }
       );
     }
 
-    // 2. Wipe Table
-    await clearAllSpaceEntries();
+    // 3. Clear document in Supabase
+    const cleared = await clearSpaceDocument();
 
-    // 3. Broadcast to all clients
-    broadcastToSpace('space_cleared', { timestamp: new Date().toISOString() }).catch((e) => {
+    // 4. Broadcast clear event
+    broadcastToSpace('document-cleared', {
+      updatedAt: cleared.updated_at,
+      senderId: clientId || null,
+    }).catch((e) => {
       console.warn('[API Space DELETE] Broadcast error:', e.message);
     });
 
-    return NextResponse.json({ success: true, message: 'Shared space cleared.' });
+    return NextResponse.json({
+      success: true,
+      message: 'Scratchpad cleared.',
+      updatedAt: cleared.updated_at,
+    });
   } catch (err) {
     console.error('[API Space DELETE] Error:', err.message);
     return NextResponse.json({ error: err.message }, { status: 500 });

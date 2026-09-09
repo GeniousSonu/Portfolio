@@ -165,8 +165,8 @@ export async function POST(req) {
             console.warn('[LiveChatWebhook] deleteSpaceEntry error:', err.message);
           });
 
-          // 2. Broadcast targeted entry_deleted event to all active visitors
-          await broadcastToSpace('entry_deleted', { entryId }).catch((err) => {
+          // 2. Broadcast document-cleared event to all active visitors
+          await broadcastToSpace('document-cleared', { clearedBy: 'sonu' }).catch((err) => {
             console.warn('[LiveChatWebhook] broadcastToSpace error:', err.message);
           });
 

@@ -217,7 +217,7 @@ export default function RootLayout({ children }) {
   const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
   return (
-    <html lang="en" className={`dark ${geist.className}`}>
+    <html lang="en" className={`dark ${geist.className}`} suppressHydrationWarning>
       <head>
         <link rel="icon" href="/logo.svg" type="image/svg+xml" />
         <link rel="shortcut icon" href="/logo.svg" type="image/svg+xml" />
@@ -270,7 +270,7 @@ export default function RootLayout({ children }) {
           />
         )}
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <SmoothScrollProvider />
         <PWARegistration />
         <UserPreferences />

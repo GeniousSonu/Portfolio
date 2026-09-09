@@ -1,82 +1,121 @@
 import 'server-only';
+import crypto from 'crypto';
 import { getServiceSupabase } from '@/lib/supabaseServer';
 
-const MAX_CONTENT_LENGTH = 2000;
-const MAX_UNBROKEN_TOKEN_LENGTH = 250;
-const ENTRY_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const MAX_CONTENT_LENGTH = 5000;
+const SESSION_TOKEN_TTL_MS = 2 * 60 * 60 * 1000; // 2 hours
+const HMAC_SECRET =
+  process.env.STUDIO_SESSION_SECRET ||
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  'sks-space-scratchpad-secure-key-2026';
 
 // In-memory rate limiting fallback cache in case DB table is being created
 const memoryRateLimitCache = new Map();
 
 /**
- * Strips HTML tags safely for Telegram/notification text preview.
- */
-function escapeHtml(text) {
-  return String(text || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
-
-/**
  * Server-side anti-abuse & Unicode sanitization.
- * Enforces plain-text safety, strips Zalgo spam, directional overrides, control chars,
- * and collapses excessive identical character flood.
+ * Enforces plain-text safety, collapses stacked Zalgo spam without corrupting
+ * legitimate international scripts (Bengali, Hindi, French, Arabic),
+ * strips null bytes, directional overrides, and collapses character floods.
  */
 export function sanitizeSpaceContent(rawText) {
   if (typeof rawText !== 'string') {
     throw new Error('Content must be a string.');
   }
 
-  let text = rawText.trim();
-  if (!text) {
-    throw new Error('Content cannot be empty.');
+  // Allow completely empty text (e.g. cleared scratchpad)
+  if (rawText.length === 0) {
+    return '';
   }
 
-  // 1. Strip null bytes and non-printable control characters (except newline, carriage return, and tab)
+  let text = rawText;
+
+  // 1. Strip null bytes and non-printable control characters (preserving \n, \r, \t)
   text = text.replace(/[\u0000-\u0008\u000B-\u000C\u000E-\u001F\u007F-\u009F]/g, '');
 
-  // 2. Strip Unicode combining diacritical marks (Zalgo text spam)
-  text = text.replace(/\p{M}/gu, '');
+  // 2. Targeted Zalgo stack suppression:
+  // Legitimate languages (like Bengali, Hindi, French, Arabic) use 1 or 2 combining marks per character.
+  // Zalgo attacks stack 4 to 30+ combining marks. We collapse 3+ stacked marks down to 2,
+  // neutralizing Zalgo visual explosions while keeping international languages 100% intact.
+  text = text.replace(/(\p{M}){3,}/gu, '$1$1');
 
-  // 3. Strip directional override characters (LTR/RTL spoofing / bidi manipulation)
+  // 3. Strip directional override characters (LTR/RTL spoofing)
   text = text.replace(/[\u202A-\u202E\u2066-\u2069\u200E\u200F\u061C]/g, '');
 
   // 4. Collapse excessive identical character flood (> 50 identical characters -> 10)
   text = text.replace(/(.)\1{49,}/gu, '$1$1$1$1$1$1$1$1$1$1');
 
-  text = text.trim();
-
   // 5. Length enforcement
-  if (text.length === 0) {
-    throw new Error('Content cannot be empty after sanitization.');
-  }
-
   if (text.length > MAX_CONTENT_LENGTH) {
     throw new Error(`Content exceeds maximum allowed limit of ${MAX_CONTENT_LENGTH} characters.`);
-  }
-
-  // 6. Check unbroken token length to prevent UI horizontal blowout
-  const tokens = text.split(/\s+/);
-  for (const token of tokens) {
-    if (token.length > MAX_UNBROKEN_TOKEN_LENGTH) {
-      throw new Error(
-        `Content contains an unbroken sequence longer than ${MAX_UNBROKEN_TOKEN_LENGTH} characters. Please add whitespace or line breaks.`
-      );
-    }
   }
 
   return text;
 }
 
 /**
+ * Signs a cryptographic session token after Turnstile verification.
+ * Does NOT bind to IP address, preventing cellular carrier IP rotation (CGNAT/Wi-Fi handoffs)
+ * from causing false 403 lockouts on mobile phones.
+ */
+export function signSpaceSessionToken() {
+  const payload = {
+    sessionId: crypto.randomUUID(),
+    exp: Date.now() + SESSION_TOKEN_TTL_MS,
+    iat: Date.now(),
+  };
+
+  const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const signature = crypto
+    .createHmac('sha256', HMAC_SECRET)
+    .update(encodedPayload)
+    .digest('base64url');
+
+  return `${encodedPayload}.${signature}`;
+}
+
+/**
+ * Validates a session token presented on save/clear calls.
+ * Returns { valid, expired, sessionId }.
+ */
+export function verifySpaceSessionToken(token) {
+  if (!token || typeof token !== 'string') {
+    return { valid: false, expired: false, error: 'Session token missing' };
+  }
+
+  const parts = token.split('.');
+  if (parts.length !== 2) {
+    return { valid: false, expired: false, error: 'Invalid token format' };
+  }
+
+  const [encodedPayload, signature] = parts;
+  const expectedSignature = crypto
+    .createHmac('sha256', HMAC_SECRET)
+    .update(encodedPayload)
+    .digest('base64url');
+
+  if (signature !== expectedSignature) {
+    return { valid: false, expired: false, error: 'Invalid token signature' };
+  }
+
+  try {
+    const payload = JSON.parse(Buffer.from(encodedPayload, 'base64url').toString('utf8'));
+    if (!payload.exp || Date.now() > payload.exp) {
+      return { valid: false, expired: true, error: 'Session token expired' };
+    }
+
+    return { valid: true, expired: false, sessionId: payload.sessionId };
+  } catch (e) {
+    return { valid: false, expired: false, error: 'Malformed token payload' };
+  }
+}
+
+/**
  * Verifies Cloudflare Turnstile token server-side.
- * Includes graceful development fallback when test keys are used.
  */
 export async function verifyTurnstileToken(token, clientIp) {
   const secretKey =
     process.env.TURNSTILE_SECRET_KEY || '1x0000000000000000000000000000000AA';
-
   const isTestingKey = secretKey === '1x0000000000000000000000000000000AA';
 
   // In local development or when using official testing keys, allow smooth bypass if token is omitted
@@ -109,8 +148,10 @@ export async function verifyTurnstileToken(token, clientIp) {
     const firstError = data['error-codes'] && data['error-codes'][0];
 
     // If Cloudflare flags secret key as invalid and user is using testing key, pass gracefully
-    if ((firstError === 'invalid-input-secret' || firstError === 'missing-input-response') && isTestingKey) {
-      console.warn('[SharedSpace Turnstile] Test secret bypass in development/testing mode.');
+    if (
+      (firstError === 'invalid-input-secret' || firstError === 'missing-input-response') &&
+      isTestingKey
+    ) {
       return { success: true };
     }
 
@@ -135,7 +176,6 @@ export async function verifyTurnstileToken(token, clientIp) {
 
 /**
  * Serverless rate limit checker using public.chatbot_rate_limits table.
- * Falls back to memory cache if table is not yet created.
  */
 export async function checkSpaceRateLimit(key, maxRequests, windowSeconds) {
   const now = Date.now();
@@ -191,125 +231,86 @@ export async function checkSpaceRateLimit(key, maxRequests, windowSeconds) {
 }
 
 /**
- * Background cleanup for expired space entries (> 24 hours).
+ * Retrieves the single shared document from Supabase.
+ * Fails with a clear error if the table hasn't been migrated yet.
  */
-export async function cleanupExpiredEntries() {
-  try {
-    const supabase = getServiceSupabase();
-    const cutoff = new Date(Date.now() - ENTRY_TTL_MS).toISOString();
-    await supabase.from('shared_space_entries').delete().lt('created_at', cutoff);
-  } catch (e) {
-    // Non-blocking background notice
-  }
-}
-
-/**
- * Background cleanup for expired rate limits (> 1 hour past reset).
- */
-export async function cleanupExpiredRateLimits() {
-  try {
-    const supabase = getServiceSupabase();
-    const cutoff = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-    await supabase.from('chatbot_rate_limits').delete().lt('reset_at', cutoff);
-  } catch (e) {
-    // Non-blocking background notice
-  }
-}
-
-/**
- * Retrieves the latest entries, capped at 100.
- */
-export async function getSpaceEntries(limit = 100) {
+export async function getSpaceDocument() {
   const supabase = getServiceSupabase();
   const { data, error } = await supabase
-    .from('shared_space_entries')
-    .select('id, content, created_at')
-    .order('created_at', { ascending: false })
-    .limit(limit);
+    .from('shared_space_document')
+    .select('id, content, updated_at')
+    .eq('id', 'default')
+    .maybeSingle();
 
   if (error) {
     if (error.code === 'PGRST205') {
       throw new Error(
-        "Database table 'shared_space_entries' has not been created yet. Please execute supabase/migrations/20260905_shared_space_entries.sql in your Supabase SQL Editor."
+        "Database table 'shared_space_document' has not been created yet. Please execute supabase/migrations/20260909_shared_space_document.sql in your Supabase SQL Editor."
       );
     }
-    throw new Error(`Failed to load space entries: ${error.message}`);
+    throw new Error(`Failed to load shared document: ${error.message}`);
   }
 
-  return data || [];
-}
+  if (!data) {
+    // Seed default document row
+    const nowIso = new Date().toISOString();
+    const { data: created, error: insertError } = await supabase
+      .from('shared_space_document')
+      .upsert({ id: 'default', content: '', updated_at: nowIso })
+      .select('id, content, updated_at')
+      .single();
 
-/**
- * Inserts a new entry using privileged service role client.
- */
-export async function createSpaceEntry(content) {
-  const supabase = getServiceSupabase();
-  const { data, error } = await supabase
-    .from('shared_space_entries')
-    .insert({ content })
-    .select('id, content, created_at')
-    .single();
-
-  if (error) {
-    if (error.code === 'PGRST205') {
-      throw new Error(
-        "Database table 'shared_space_entries' has not been created yet. Please execute supabase/migrations/20260905_shared_space_entries.sql in your Supabase SQL Editor."
-      );
+    if (insertError) {
+      throw new Error(`Failed to initialize shared space document: ${insertError.message}`);
     }
-    throw new Error(`Failed to save space entry: ${error.message}`);
+    return created;
   }
 
   return data;
 }
 
 /**
- * Deletes an individual entry by ID.
+ * Updates the shared space document content.
  */
-export async function deleteSpaceEntry(id) {
+export async function updateSpaceDocument(content) {
   const supabase = getServiceSupabase();
-  const { error } = await supabase.from('shared_space_entries').delete().eq('id', id);
+  const nowIso = new Date().toISOString();
 
-  if (error) {
-    throw new Error(`Failed to delete entry: ${error.message}`);
-  }
-}
-
-/**
- * Fetches an individual entry by ID (for moderation/reporting).
- */
-export async function getSpaceEntryById(id) {
-  const supabase = getServiceSupabase();
   const { data, error } = await supabase
-    .from('shared_space_entries')
-    .select('id, content, created_at')
-    .eq('id', id)
+    .from('shared_space_document')
+    .upsert({ id: 'default', content, updated_at: nowIso })
+    .select('id, content, updated_at')
     .single();
 
-  if (error && error.code !== 'PGRST116') {
-    throw error;
+  if (error) {
+    if (error.code === 'PGRST205') {
+      throw new Error(
+        "Database table 'shared_space_document' has not been created yet. Please execute supabase/migrations/20260909_shared_space_document.sql in your Supabase SQL Editor."
+      );
+    }
+    throw new Error(`Failed to save document: ${error.message}`);
   }
+
   return data;
 }
 
 /**
- * Wipes all entries from the shared space table.
+ * Clears the shared space document to empty string.
  */
-export async function clearAllSpaceEntries() {
-  const supabase = getServiceSupabase();
-  // In Supabase/PostgREST, delete without WHERE is rejected unless explicit neq or gt is used
-  const { error } = await supabase
-    .from('shared_space_entries')
-    .delete()
-    .neq('id', '00000000-0000-0000-0000-000000000000');
+export async function clearSpaceDocument() {
+  return updateSpaceDocument('');
+}
 
-  if (error) {
-    throw new Error(`Failed to clear space: ${error.message}`);
-  }
+/**
+ * Backwards-compatibility alias for Telegram webhook callbacks or legacy references.
+ */
+export async function deleteSpaceEntry(entryId) {
+  return clearSpaceDocument();
 }
 
 /**
  * Broadcasts an event to the private Realtime channel 'shared-space'.
- * Configured with private: true for infrastructure-level authorization.
+ * Enforces infrastructure-level authorization via private: true.
  */
 export async function broadcastToSpace(event, payload) {
   const supabase = getServiceSupabase();
@@ -355,116 +356,4 @@ export async function broadcastToSpace(event, payload) {
       }
     });
   });
-}
-
-/**
- * Forwards every newly pasted entry to Sonu's Telegram for moderation,
- * equipped with an instant inline "🗑 Delete Entry" button.
- */
-export async function notifyTelegramNewSpaceEntry(entry, clientIp = 'Unknown') {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
-  if (!botToken || !chatId || !entry) return;
-
-  const istTime = new Date(entry.created_at || Date.now()).toLocaleTimeString('en-US', {
-    timeZone: 'Asia/Kolkata',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
-
-  const previewSnippet =
-    entry.content.length > 400
-      ? entry.content.slice(0, 400) + '... [truncated]'
-      : entry.content;
-
-  const htmlMessage =
-    `📋 <b>New Shared Space Paste</b>\n` +
-    `<b>ID:</b> <code>${entry.id}</code>\n` +
-    `<b>Time:</b> ${istTime} IST\n` +
-    `<b>IP:</b> <code>${clientIp}</code>\n\n` +
-    `<b>Content:</b>\n<pre>${escapeHtml(previewSnippet)}</pre>\n\n` +
-    `<i>Tap below to instantly remove this paste from the live site:</i>`;
-
-  const inlineKeyboard = {
-    inline_keyboard: [
-      [
-        {
-          text: '🗑 Delete Entry',
-          callback_data: `space_del:${entry.id}`,
-        },
-      ],
-    ],
-  };
-
-  try {
-    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: htmlMessage,
-        parse_mode: 'HTML',
-        reply_markup: inlineKeyboard,
-      }),
-    });
-  } catch (e) {
-    console.warn('[SharedSpace Telegram] Notification error:', e.message);
-  }
-}
-
-/**
- * Forwards visitor reports to Sonu's Telegram with instant deletion action.
- */
-export async function notifyTelegramReportedEntry(entry, clientIp = 'Unknown', reason = 'Inappropriate content') {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
-  if (!botToken || !chatId || !entry) return;
-
-  const istTime = new Date().toLocaleTimeString('en-US', {
-    timeZone: 'Asia/Kolkata',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
-
-  const previewSnippet =
-    entry.content.length > 300
-      ? entry.content.slice(0, 300) + '... [truncated]'
-      : entry.content;
-
-  const htmlMessage =
-    `🚨 <b>Shared Space Entry Reported by Visitor!</b>\n` +
-    `<b>Entry ID:</b> <code>${entry.id}</code>\n` +
-    `<b>Reason:</b> ${escapeHtml(reason)}\n` +
-    `<b>Time:</b> ${istTime} IST\n` +
-    `<b>Reporter IP:</b> <code>${clientIp}</code>\n\n` +
-    `<b>Reported Content:</b>\n<pre>${escapeHtml(previewSnippet)}</pre>\n\n` +
-    `<i>Tap below to permanently delete this entry immediately:</i>`;
-
-  const inlineKeyboard = {
-    inline_keyboard: [
-      [
-        {
-          text: '🗑 Delete Reported Entry Immediately',
-          callback_data: `space_del:${entry.id}`,
-        },
-      ],
-    ],
-  };
-
-  try {
-    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: htmlMessage,
-        parse_mode: 'HTML',
-        reply_markup: inlineKeyboard,
-      }),
-    });
-  } catch (e) {
-    console.warn('[SharedSpace Telegram] Report alert error:', e.message);
-  }
 }
