@@ -374,6 +374,7 @@ export function generateRoomId() {
 
 /**
  * Creates a dedicated multi-device Instant Sync Room with collision retry and opportunistic cleanup.
+ * Falls back to 'shared_space_document' transparently if 'shared_space_rooms' has not been migrated yet.
  */
 export async function createSpaceRoom() {
   const supabase = getServiceSupabase();
@@ -383,6 +384,15 @@ export async function createSpaceRoom() {
     .from('shared_space_rooms')
     .delete()
     .lt('expires_at', new Date().toISOString())
+    .then(() => {})
+    .catch(() => {});
+
+  const cutoffIso = new Date(Date.now() - ROOM_TTL_HOURS * 60 * 60 * 1000).toISOString();
+  supabase
+    .from('shared_space_document')
+    .delete()
+    .like('id', 'room:%')
+    .lt('updated_at', cutoffIso)
     .then(() => {})
     .catch(() => {});
 
@@ -416,9 +426,23 @@ export async function createSpaceRoom() {
     }
 
     if (error && error.code === 'PGRST205') {
-      throw new Error(
-        "Database table 'shared_space_rooms' has not been created yet. Please execute supabase/migrations/20260909_shared_space_rooms.sql in your Supabase SQL Editor."
-      );
+      // Graceful fallback: table 'shared_space_rooms' not created yet.
+      // Store in existing verified 'shared_space_document' table under 'room:<id>'
+      const fallbackId = `room:${roomId}`;
+      const { data: fbData, error: fbError } = await supabase
+        .from('shared_space_document')
+        .upsert({
+          id: fallbackId,
+          content: '',
+          updated_at: nowIso,
+        })
+        .select('id, updated_at')
+        .single();
+
+      if (!fbError && fbData) {
+        return { roomId, expiresAt };
+      }
+      throw new Error(`Failed to initialize room: ${fbError?.message || error.message}`);
     }
 
     throw new Error(`Failed to create sync room: ${error.message}`);
@@ -445,16 +469,65 @@ export async function getSpaceRoom(roomId) {
     .eq('room_id', cleanId)
     .maybeSingle();
 
-  if (error) {
-    if (error.code === 'PGRST205') {
-      throw new Error(
-        "Database table 'shared_space_rooms' has not been created yet. Please execute supabase/migrations/20260909_shared_space_rooms.sql in your Supabase SQL Editor."
-      );
+  if (error && error.code === 'PGRST205') {
+    // Fallback store in shared_space_document
+    const fallbackId = `room:${cleanId}`;
+    const { data: fbData, error: fbError } = await supabase
+      .from('shared_space_document')
+      .select('id, content, updated_at')
+      .eq('id', fallbackId)
+      .maybeSingle();
+
+    if (fbError) {
+      throw new Error(`Failed to load room: ${fbError.message}`);
     }
+    if (!fbData) {
+      return { notFound: true };
+    }
+
+    const updatedAtMs = new Date(fbData.updated_at).getTime();
+    const expiresAtMs = updatedAtMs + ROOM_TTL_HOURS * 60 * 60 * 1000;
+    if (Date.now() > expiresAtMs) {
+      supabase.from('shared_space_document').delete().eq('id', fallbackId).then(() => {}).catch(() => {});
+      return { expired: true, roomId: cleanId };
+    }
+
+    return {
+      roomId: cleanId,
+      content: fbData.content || '',
+      updatedAt: fbData.updated_at,
+      expiresAt: new Date(expiresAtMs).toISOString(),
+    };
+  }
+
+  if (error) {
     throw new Error(`Failed to load room: ${error.message}`);
   }
 
   if (!data) {
+    // Check fallback store in case room was created prior to table migration
+    const fallbackId = `room:${cleanId}`;
+    const { data: fbData } = await supabase
+      .from('shared_space_document')
+      .select('id, content, updated_at')
+      .eq('id', fallbackId)
+      .maybeSingle();
+
+    if (fbData) {
+      const updatedAtMs = new Date(fbData.updated_at).getTime();
+      const expiresAtMs = updatedAtMs + ROOM_TTL_HOURS * 60 * 60 * 1000;
+      if (Date.now() > expiresAtMs) {
+        supabase.from('shared_space_document').delete().eq('id', fallbackId).then(() => {}).catch(() => {});
+        return { expired: true, roomId: cleanId };
+      }
+      return {
+        roomId: cleanId,
+        content: fbData.content || '',
+        updatedAt: fbData.updated_at,
+        expiresAt: new Date(expiresAtMs).toISOString(),
+      };
+    }
+
     return { notFound: true };
   }
 
@@ -496,13 +569,65 @@ export async function updateSpaceRoom(roomId, content) {
     .eq('room_id', cleanId)
     .gt('expires_at', nowIso) // Only update if not already expired
     .select('room_id, content, updated_at, expires_at')
-    .single();
+    .maybeSingle();
+
+  if (error && error.code === 'PGRST205') {
+    // Fallback store in shared_space_document
+    const fallbackId = `room:${cleanId}`;
+    const { data: fbData, error: fbError } = await supabase
+      .from('shared_space_document')
+      .update({
+        content: content || '',
+        updated_at: nowIso,
+      })
+      .eq('id', fallbackId)
+      .select('id, content, updated_at')
+      .maybeSingle();
+
+    if (fbError) {
+      throw new Error(`Failed to update room: ${fbError.message}`);
+    }
+    if (!fbData) {
+      return { expired: true, roomId: cleanId };
+    }
+    return {
+      roomId: cleanId,
+      content: fbData.content || '',
+      updatedAt: fbData.updated_at,
+      expiresAt: extendedExpiry,
+    };
+  }
 
   if (error) {
     if (error.code === 'PGRST116') {
       return { expired: true, roomId: cleanId };
     }
     throw new Error(`Failed to update room: ${error.message}`);
+  }
+
+  if (!data) {
+    // Try fallback store
+    const fallbackId = `room:${cleanId}`;
+    const { data: fbData } = await supabase
+      .from('shared_space_document')
+      .update({
+        content: content || '',
+        updated_at: nowIso,
+      })
+      .eq('id', fallbackId)
+      .select('id, content, updated_at')
+      .maybeSingle();
+
+    if (fbData) {
+      return {
+        roomId: cleanId,
+        content: fbData.content || '',
+        updatedAt: fbData.updated_at,
+        expiresAt: extendedExpiry,
+      };
+    }
+
+    return { expired: true, roomId: cleanId };
   }
 
   return data;
