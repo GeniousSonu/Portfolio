@@ -2053,16 +2053,191 @@ body.mobile-nav-active [class*="backdrop"] {
   }
 }
 
-/* ─── LOADING SCREEN ─── */
-#loader {
-  position: fixed; inset: 0; z-index: 9999;
-  background: var(--void); display: flex;
-  align-items: center; justify-content: center; flex-direction: column; gap: 1.5rem;
+/* ─── BOOT SEQUENCE PRELOADER ─── */
+html.preloader-locked,
+body.preloader-locked {
+  overflow: hidden !important;
+  height: 100% !important;
+  touch-action: none;
 }
-.loader-text { font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted); letter-spacing: 0.1em; }
-.loader-bar { width: 200px; height: 1px; background: var(--border); position: relative; overflow: hidden; }
-.loader-bar-fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--gold); width: 0; }
-.loader-logo { font-family: var(--font-mono); font-size: 1.2rem; color: var(--gold); letter-spacing: 0.1em; }
+
+#boot-preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #05070c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  perspective: 1000px;
+  user-select: none;
+  pointer-events: auto;
+  view-transition-name: none !important;
+}
+
+.boot-scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+}
+
+.boot-ambient-glow {
+  position: absolute;
+  width: min(600px, 90vw);
+  height: min(400px, 70vh);
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, rgba(5, 7, 12, 0) 70%);
+  pointer-events: none;
+  filter: blur(40px);
+}
+
+.boot-terminal {
+  position: relative;
+  width: min(520px, calc(100vw - 2.5rem));
+  background: rgba(13, 17, 23, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  overflow: hidden;
+  transform-style: preserve-3d;
+}
+
+.boot-terminal-header {
+  background: rgba(22, 27, 34, 0.9);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.65rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.boot-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.boot-title {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+.boot-terminal-body {
+  padding: 1.2rem 1.4rem;
+  font-family: var(--font-mono);
+  font-size: clamp(0.78rem, 1.8vw, 0.88rem);
+  line-height: 1.65;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-height: 175px;
+}
+
+.boot-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  white-space: nowrap;
+}
+
+.boot-prompt {
+  color: var(--red);
+  font-weight: 600;
+}
+
+.boot-cmd {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.boot-out-highlight {
+  padding-left: 1.1rem;
+}
+
+.boot-output {
+  color: var(--gold-bright);
+  font-weight: 600;
+}
+
+.boot-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 0.5rem;
+}
+
+.boot-dim {
+  color: var(--text-secondary);
+}
+
+.boot-ok {
+  color: var(--green);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+/* ── Global Hello Typography ── */
+.boot-hello-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+
+.boot-hello-content {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.15em;
+  padding: 0 1rem;
+}
+
+.boot-hello-word {
+  font-family: var(--font-poppins), 'Noto Sans Bengali', 'Bangla Sangam MN', 'Shonar Bangla', 'Vrinda', 'Noto Sans Devanagari', 'Mangal', 'Noto Sans JP', 'Hiragino Sans', 'Meiryo', 'Noto Sans', 'Noto Sans Arabic', 'Geeza Pro', 'Segoe UI', system-ui, sans-serif;
+  font-size: clamp(3.2rem, 9vw, 6.2rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  background: linear-gradient(135deg, #ffffff 40%, var(--gold-bright) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 40px rgba(16, 185, 129, 0.25);
+  font-feature-settings: 'tnum' 0;
+}
+
+.boot-cursor {
+  font-family: var(--font-mono);
+  font-size: clamp(2.8rem, 8vw, 5.5rem);
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1;
+  animation: bootCursorBlink 0.7s step-start infinite;
+}
+
+@keyframes bootCursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@media (max-width: 480px) {
+  .boot-terminal-body {
+    padding: 1rem;
+    font-size: 0.76rem;
+    min-height: 160px;
+  }
+}
 
 /* ─── TOOLTIP ─── */
 [data-tip] { position: relative; }

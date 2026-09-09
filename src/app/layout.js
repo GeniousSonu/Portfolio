@@ -223,6 +223,7 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import { OverlayProvider } from "@/context/OverlayContext";
 import { TransitionProvider } from "@/context/TransitionContext";
 import CommandPalette from "@/components/CommandPalette";
+import BootPreloader from "@/components/BootPreloader";
 
 export default function RootLayout({ children }) {
   const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
@@ -241,9 +242,14 @@ export default function RootLayout({ children }) {
         <meta name="apple-mobile-web-app-title" content="SONU" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png" />
-        <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png" />
         <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
         <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM Technical Summary" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@700;800&family=Noto+Sans+Bengali:wght@700;800&family=Noto+Sans+Devanagari:wght@700;800&family=Noto+Sans+JP:wght@700;900&display=swap"
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdGraph) }}
@@ -284,6 +290,7 @@ export default function RootLayout({ children }) {
       <body suppressHydrationWarning>
         <OverlayProvider>
           <TransitionProvider>
+            <BootPreloader />
             <SmoothScrollProvider />
             <PWARegistration />
             <UserPreferences />

@@ -104,6 +104,9 @@ export default function SmoothScrollProvider() {
     }
 
     const resetScrollAndTriggers = () => {
+      if (window.__preloaderActive) {
+        return;
+      }
       if (window.__lenis) {
         window.__lenis.start();
         window.__lenis.scrollTo(0, { immediate: true });

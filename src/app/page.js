@@ -4,7 +4,6 @@ import dynamic from 'next/dynamic';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-import Loader from '../components/Loader';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import About from '../components/About';
@@ -20,12 +19,7 @@ const GlobeConnect = dynamic(() => import('../components/GlobeConnect'), { ssr: 
 const HomeBlogSection = dynamic(() => import('../components/HomeBlogSection'), { ssr: false });
 
 export default function Home() {
-  const [loading, setLoading] = useState(true);
-  const handleLoaderComplete = useCallback(() => setLoading(false), []);
-
   useEffect(() => {
-    if (loading) return;
-    
     gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
@@ -89,20 +83,16 @@ export default function Home() {
       if (scrollTimer) clearTimeout(scrollTimer);
       ctx.revert();
     };
-  }, [loading]);
+  }, []);
 
   return (
     <>
-      {loading ? (
-        <Loader onComplete={handleLoaderComplete} />
-      ) : (
-        <>
-          <div id="grid-overlay" aria-hidden="true"></div>
-          <div id="scan-line" aria-hidden="true"></div>
-          
-          <Navbar />
-          
-          <main>
+      <div id="grid-overlay" aria-hidden="true"></div>
+      <div id="scan-line" aria-hidden="true"></div>
+      
+      <Navbar />
+      
+      <main>
             <Hero />
             
             <div className="site-container" style={{ position: 'relative', zIndex: 10 }}>
@@ -160,7 +150,5 @@ export default function Home() {
           
           <Footer />
         </>
-      )}
-    </>
   );
 }
