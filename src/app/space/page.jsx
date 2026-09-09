@@ -9,15 +9,15 @@ export const revalidate = 0;
 
 export async function generateMetadata({ searchParams }) {
   const { mode } = (await searchParams) || {};
-  const isLegacy = mode === 'legacy';
+  const isSyncLanding = mode === 'sync';
 
   return {
-    title: isLegacy
-      ? 'Global Scratchpad — Space — SK Sahinur Islam'
-      : 'Space — Instant Multi-Device Sync — SK Sahinur Islam',
-    description: isLegacy
-      ? 'Shared real-time collaborative scratchpad.'
-      : 'Instant ephemeral sync rooms for text and code across your phone and laptop with zero logins.',
+    title: isSyncLanding
+      ? 'Space — Instant Multi-Device Sync — SK Sahinur Islam'
+      : 'Space — Collaborative Scratchpad — SK Sahinur Islam',
+    description: isSyncLanding
+      ? 'Instant ephemeral sync rooms for text and code across your phone and laptop with zero logins.'
+      : 'Shared real-time collaborative scratchpad and instant multi-device sync rooms.',
     robots: {
       index: false,
       follow: false,
@@ -33,12 +33,12 @@ export async function generateMetadata({ searchParams }) {
 
 export default async function SpacePage({ searchParams }) {
   const { mode } = (await searchParams) || {};
-  const isLegacy = mode === 'legacy';
+  const isSyncLanding = mode === 'sync';
 
   return (
     <>
       <Navbar />
-      {isLegacy ? <SpaceView /> : <SpaceLanding />}
+      {isSyncLanding ? <SpaceLanding /> : <SpaceView />}
       <Footer />
     </>
   );

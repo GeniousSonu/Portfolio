@@ -1,8 +1,17 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import { QRCodeSVG } from 'qrcode.react';
+import {
+  getRoomHistory,
+  addOrUpdateRoomHistory,
+  removeRoomFromHistory,
+  checkRoomLimitStatus,
+  updateRoomPreview,
+  MAX_ACTIVE_ROOMS,
+} from '@/lib/spaceHistory';
 import styles from './space.module.css';
 
 const MAX_CHARS = 5000;
@@ -11,6 +20,7 @@ const TURNSTILE_SITE_KEY =
   process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA';
 
 export default function SpaceView({ roomId = null }) {
+  const router = useRouter();
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(true);
   const [savingStatus, setSavingStatus] = useState('Synced'); // 'Synced' | 'Saving...' | 'Conflict'
@@ -21,14 +31,26 @@ export default function SpaceView({ roomId = null }) {
   const [dbError, setDbError] = useState(null);
   const [conflictNotice, setConflictNotice] = useState(null); // { remoteContent, remoteUpdatedAt }
 
-  // Room states (for /space/[roomId])
+  // Room states & modal controls
   const [isNotFoundRoom, setIsNotFoundRoom] = useState(false);
   const [isExpiredRoom, setIsExpiredRoom] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [roomUrl, setRoomUrl] = useState('');
 
-  // Turnstile human verification state
+  // Room history & dropdown states
+  const [recentRooms, setRecentRooms] = useState([]);
+  const [showRoomsDropdown, setShowRoomsDropdown] = useState(false);
+  const [roomLimitAlert, setRoomLimitAlert] = useState(null);
+  const [isCreatingRoom, setIsCreatingRoom] = useState(false);
+
+  // Join by code modal state
+  const [showJoinModal, setShowJoinModal] = useState(false);
+  const [joinCodeInput, setJoinCodeInput] = useState('');
+  const [joinCodeError, setJoinCodeError] = useState(null);
+  const [isCheckingJoin, setIsCheckingJoin] = useState(false);
+
+  // Turnstile human verification state (enforced ONLY for global scratchpad)
   const [sessionToken, setSessionToken] = useState(null);
   const [isVerified, setIsVerified] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
@@ -42,6 +64,7 @@ export default function SpaceView({ roomId = null }) {
   const pendingRemoteUpdateRef = useRef(null);
   const lastKnownUpdatedAtRef = useRef(null);
   const clientIdRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   // Initialize unique clientId per tab
   useEffect(() => {
@@ -53,6 +76,26 @@ export default function SpaceView({ roomId = null }) {
     }
   }, []);
 
+  // Load visitor's recent room history from localStorage
+  useEffect(() => {
+    setRecentRooms(getRoomHistory());
+  }, [roomId]);
+
+  // Auto-close rooms dropdown on outside click
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowRoomsDropdown(false);
+      }
+    };
+    if (showRoomsDropdown) {
+      document.addEventListener('mousedown', handleOutsideClick);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, [showRoomsDropdown]);
+
   // Auto-resize textarea height
   const adjustTextareaHeight = useCallback(() => {
     const el = textareaRef.current;
@@ -62,19 +105,19 @@ export default function SpaceView({ roomId = null }) {
     }
   }, []);
 
-  // ── Session Verification (Turnstile) ──
+  // ── Session Verification (Turnstile) — Only active for Global Scratchpad ──
   useEffect(() => {
-    // Check if a valid session token exists in sessionStorage (survives tab refreshes)
+    if (roomId) return; // Dedicated rooms do not require Turnstile captcha
     const storedToken = sessionStorage.getItem('sks_space_session_token');
     if (storedToken) {
       setSessionToken(storedToken);
       setIsVerified(true);
     }
-  }, []);
+  }, [roomId]);
 
-  // Initialize Turnstile widget when unverified
+  // Initialize Turnstile widget when unverified on global scratchpad
   useEffect(() => {
-    if (isVerified) return;
+    if (roomId || isVerified) return;
 
     const renderWidget = () => {
       if (
@@ -102,7 +145,7 @@ export default function SpaceView({ roomId = null }) {
                     setIsVerified(true);
                   }
                 } catch (e) {
-                  console.warn('[Space Turnstile] Verification notice:', e.message);
+                  console.warn('[Space Turnstile] Notice:', e.message);
                 } finally {
                   setIsVerifying(false);
                 }
@@ -140,7 +183,7 @@ export default function SpaceView({ roomId = null }) {
         } catch (e) {}
       }
     };
-  }, [isVerified]);
+  }, [roomId, isVerified]);
 
   // Room URL & Copy Handler
   useEffect(() => {
@@ -173,16 +216,19 @@ export default function SpaceView({ roomId = null }) {
 
   // ── Fetch Initial Document ──
   const fetchDocument = useCallback(async () => {
+    setLoading(true);
+    setIsNotFoundRoom(false);
+    setIsExpiredRoom(false);
     try {
       const url = roomId ? `/api/space?roomId=${encodeURIComponent(roomId)}` : '/api/space';
       const res = await fetch(url);
       const data = await res.json();
 
-      if (res.status === 404 && data.notFound) {
+      if (res.status === 404 || data.notFound) {
         setIsNotFoundRoom(true);
         return;
       }
-      if (res.status === 410 && data.expired) {
+      if (res.status === 410 || data.expired) {
         setIsExpiredRoom(true);
         return;
       }
@@ -191,6 +237,11 @@ export default function SpaceView({ roomId = null }) {
         setContent(data.content || '');
         lastKnownUpdatedAtRef.current = data.updatedAt || null;
         setDbError(null);
+        if (roomId) {
+          // Record valid room visit in visitor's local history
+          addOrUpdateRoomHistory(roomId, data.content || '');
+          setRecentRooms(getRoomHistory());
+        }
         setTimeout(adjustTextareaHeight, 50);
       } else if (data.error && data.error.includes('shared_space_document')) {
         setDbError(data.error);
@@ -205,17 +256,24 @@ export default function SpaceView({ roomId = null }) {
   // ── Save Document (Debounced) ──
   const saveDocument = useCallback(
     async (textToSave) => {
+      const isRoomMode = Boolean(roomId);
       const token = sessionStorage.getItem('sks_space_session_token') || sessionToken;
-      if (!token) return;
+
+      // Global scratchpad requires Turnstile token; rooms are authenticated by existence & rate limit
+      if (!isRoomMode && !token) {
+        return;
+      }
 
       setSavingStatus('Saving...');
       try {
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) {
+          headers['x-space-session-token'] = token;
+        }
+
         const res = await fetch('/api/space', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-space-session-token': token,
-          },
+          headers,
           body: JSON.stringify({
             content: textToSave,
             clientId: clientIdRef.current,
@@ -225,6 +283,11 @@ export default function SpaceView({ roomId = null }) {
         });
 
         const data = await res.json();
+
+        if (res.status === 404 && data.notFound) {
+          setIsNotFoundRoom(true);
+          return;
+        }
 
         if (res.status === 409 && data.conflict) {
           // Conflict detected: someone else saved while typing
@@ -237,7 +300,6 @@ export default function SpaceView({ roomId = null }) {
         }
 
         if (res.status === 403 && data.code === 'TOKEN_EXPIRED') {
-          // Silent session renewal: prompt Turnstile without losing typed content
           sessionStorage.removeItem('sks_space_session_token');
           setSessionToken(null);
           setIsVerified(false);
@@ -249,6 +311,9 @@ export default function SpaceView({ roomId = null }) {
           lastKnownUpdatedAtRef.current = data.updatedAt;
           setSavingStatus('Synced');
           setConflictNotice(null);
+          if (roomId) {
+            updateRoomPreview(roomId, textToSave);
+          }
         } else {
           setSavingStatus('Error');
         }
@@ -260,8 +325,9 @@ export default function SpaceView({ roomId = null }) {
     [sessionToken, roomId]
   );
 
-  // ── Realtime Setup with Presence & Cursor Jump Protection ──
+  // ── Realtime Channel Lifecycle (Swaps cleanly without stacking) ──
   useEffect(() => {
+    let isSubscribed = true;
     fetchDocument();
 
     const channelName = roomId ? `space-room:${roomId}` : 'shared-space';
@@ -278,69 +344,72 @@ export default function SpaceView({ roomId = null }) {
       config: channelConfig,
     });
 
-    // 1. Listen for remote document updates
+    // 1. Remote document updates
     channel.on('broadcast', { event: 'document-update' }, ({ payload }) => {
-      if (!payload || payload.senderId === clientIdRef.current) {
-        return; // Ignore own typing echoes to prevent cursor resets
-      }
+      if (!isSubscribed) return;
+      if (!payload || payload.senderId === clientIdRef.current) return;
 
-      // Cursor Stability Check:
-      // If user is currently focused/typing in textarea, DO NOT reset their cursor!
-      // Queue update and let conflict resolution evaluate upon typing pause.
       if (isFocusedRef.current) {
         pendingRemoteUpdateRef.current = payload;
         return;
       }
 
-      // Otherwise apply remote update cleanly
       setContent(payload.content || '');
       lastKnownUpdatedAtRef.current = payload.updatedAt || null;
       setTimeout(adjustTextareaHeight, 30);
     });
 
-    // 2. Listen for document cleared event
+    // 2. Document cleared event
     channel.on('broadcast', { event: 'document-cleared' }, ({ payload }) => {
+      if (!isSubscribed) return;
       if (payload && payload.senderId === clientIdRef.current) return;
       setContent('');
       lastKnownUpdatedAtRef.current = payload?.updatedAt || null;
       setTimeout(adjustTextareaHeight, 30);
     });
 
-    // 3. Track visitor presence
+    // 3. Visitor presence count
     channel.on('presence', { event: 'sync' }, () => {
+      if (!isSubscribed) return;
       const state = channel.presenceState();
       const count = Object.keys(state).length;
       setViewerCount(Math.max(1, count));
     });
 
     channel.subscribe(async (status) => {
+      if (!isSubscribed) return;
       if (status === 'SUBSCRIBED') {
         setIsConnected(true);
         await channel.track({ online_at: new Date().toISOString() });
-        // Catch-up sync on connect
-        fetchDocument();
       } else {
         setIsConnected(false);
       }
     });
 
     // 4. Tab visibility & online catch-up
-    const handleOnline = () => fetchDocument();
+    const handleOnline = () => {
+      if (isSubscribed) fetchDocument();
+    };
     const handleVisibility = () => {
-      if (document.visibilityState === 'visible') fetchDocument();
+      if (document.visibilityState === 'visible' && isSubscribed) {
+        fetchDocument();
+      }
     };
 
     window.addEventListener('online', handleOnline);
     document.addEventListener('visibilitychange', handleVisibility);
 
+    // CLEANUP: Immediately unsubscribe and remove channel to prevent connection leaks
     return () => {
+      isSubscribed = false;
+      setIsConnected(false);
       window.removeEventListener('online', handleOnline);
       document.removeEventListener('visibilitychange', handleVisibility);
       supabase.removeChannel(channel);
     };
-  }, [fetchDocument, adjustTextareaHeight]);
+  }, [roomId, fetchDocument, adjustTextareaHeight]);
 
-  // ── Typing Handler (Local update + Debounce) ──
+  // ── Typing Handler ──
   const handleChange = (e) => {
     const val = e.target.value.slice(0, MAX_CHARS);
     setContent(val);
@@ -352,7 +421,6 @@ export default function SpaceView({ roomId = null }) {
 
     setSavingStatus('Saving...');
     debounceTimerRef.current = setTimeout(() => {
-      // If a remote update arrived while actively typing, surface conflict notice
       if (pendingRemoteUpdateRef.current) {
         const pending = pendingRemoteUpdateRef.current;
         pendingRemoteUpdateRef.current = null;
@@ -370,7 +438,7 @@ export default function SpaceView({ roomId = null }) {
     }, DEBOUNCE_DELAY_MS);
   };
 
-  // ── Conflict Resolution Handlers ──
+  // ── Conflict Resolution ──
   const handleApplyRemote = () => {
     if (conflictNotice?.remoteContent !== undefined) {
       setContent(conflictNotice.remoteContent);
@@ -388,17 +456,18 @@ export default function SpaceView({ roomId = null }) {
 
   // ── Clear Scratchpad ──
   const handleConfirmClear = async () => {
+    const isRoomMode = Boolean(roomId);
     const token = sessionStorage.getItem('sks_space_session_token') || sessionToken;
-    if (!token) return;
+    if (!isRoomMode && !token) return;
 
     setIsClearing(true);
     try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['x-space-session-token'] = token;
+
       const res = await fetch('/api/space', {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-space-session-token': token,
-        },
+        headers,
         body: JSON.stringify({
           clientId: clientIdRef.current,
           ...(roomId ? { roomId } : {}),
@@ -411,6 +480,9 @@ export default function SpaceView({ roomId = null }) {
         lastKnownUpdatedAtRef.current = data.updatedAt;
         setShowClearConfirm(false);
         setConflictNotice(null);
+        if (roomId) {
+          updateRoomPreview(roomId, '');
+        }
         setTimeout(adjustTextareaHeight, 50);
       }
     } catch (e) {
@@ -420,51 +492,347 @@ export default function SpaceView({ roomId = null }) {
     }
   };
 
-  // If room is expired or not found, render friendly card
-  if (isExpiredRoom || isNotFoundRoom) {
+  // ── Room Actions (Client-Side Transitions) ──
+  const handleCreateRoomFromView = async () => {
+    const limitStatus = checkRoomLimitStatus();
+    if (limitStatus.limitReached) {
+      setRoomLimitAlert(
+        `Active room limit reached (${MAX_ACTIVE_ROOMS}/${MAX_ACTIVE_ROOMS}). Please open or remove an existing room below.`
+      );
+      setShowRoomsDropdown(true);
+      return;
+    }
+
+    setIsCreatingRoom(true);
+    setRoomLimitAlert(null);
+    try {
+      const res = await fetch('/api/space/room', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await res.json();
+      if (res.ok && data.roomId) {
+        addOrUpdateRoomHistory(data.roomId, '');
+        setRecentRooms(getRoomHistory());
+        setShowRoomsDropdown(false);
+        // Soft client navigation — NO full page reload
+        router.push(`/space/${data.roomId}`);
+      } else {
+        alert(data.error || 'Failed to create room.');
+      }
+    } catch (e) {
+      console.warn('Room creation error:', e);
+    } finally {
+      setIsCreatingRoom(false);
+    }
+  };
+
+  const handleSwitchRoom = (targetRoomId) => {
+    setShowRoomsDropdown(false);
+    if (!targetRoomId) {
+      router.push('/space');
+    } else if (targetRoomId !== roomId) {
+      router.push(`/space/${targetRoomId}`);
+    }
+  };
+
+  const handleRemoveRoomFromDropdown = (e, targetRoomId) => {
+    e.stopPropagation();
+    const updated = removeRoomFromHistory(targetRoomId);
+    setRecentRooms(updated);
+    if (roomLimitAlert && updated.length < MAX_ACTIVE_ROOMS) {
+      setRoomLimitAlert(null);
+    }
+  };
+
+  // ── Join by Code Lookup (Validates existence before navigating) ──
+  const handleJoinCodeSubmit = async (e) => {
+    e.preventDefault();
+    setJoinCodeError(null);
+    const clean = joinCodeInput.trim().toLowerCase();
+    if (!clean) return;
+
+    if (!/^[a-z0-9_-]{4,16}$/.test(clean)) {
+      setJoinCodeError('Invalid code. Room codes are 8 alphanumeric characters.');
+      return;
+    }
+
+    setIsCheckingJoin(true);
+    try {
+      const res = await fetch(`/api/space/room?roomId=${encodeURIComponent(clean)}`);
+      const data = await res.json();
+
+      if (res.status === 404 || data.notFound) {
+        setJoinCodeError("This room doesn't exist.");
+        return;
+      }
+      if (res.status === 410 || data.expired) {
+        setJoinCodeError('This room has expired after 48 hours of inactivity.');
+        return;
+      }
+
+      if (res.ok && data.roomId) {
+        addOrUpdateRoomHistory(data.roomId, data.content || '');
+        setRecentRooms(getRoomHistory());
+        setShowJoinModal(false);
+        setJoinCodeInput('');
+        router.push(`/space/${data.roomId}`);
+      }
+    } catch (err) {
+      setJoinCodeError('Could not verify room. Please check your network.');
+    } finally {
+      setIsCheckingJoin(false);
+    }
+  };
+
+  // Helper for human-readable relative time
+  const formatTimeAgo = (timestamp) => {
+    if (!timestamp) return '';
+    const diffSec = Math.floor((Date.now() - timestamp) / 1000);
+    if (diffSec < 60) return 'just now';
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin}m ago`;
+    const diffHour = Math.floor(diffMin / 60);
+    if (diffHour < 24) return `${diffHour}h ago`;
+    return `${Math.floor(diffHour / 24)}d ago`;
+  };
+
+  // ── Render Loading State (Prevents flash before room check completes) ──
+  if (roomId && loading) {
     return (
       <main className={styles.container}>
         <div className={styles.inner}>
-          <div className={styles.expiredCard}>
-            <div className={styles.expiredIcon} aria-hidden="true">
-              {isExpiredRoom ? '⏳' : '🔍'}
-            </div>
-            <h2 className={styles.expiredTitle}>
-              {isExpiredRoom ? 'Sync Room Expired' : 'Room Not Found'}
-            </h2>
-            <p className={styles.expiredDesc}>
-              {isExpiredRoom
-                ? 'This sync room expired after 48 hours of inactivity to keep your shared data ephemeral and secure.'
-                : 'We could not find a sync room with this ID. It may have been cleared or the link is incorrect.'}
-            </p>
-            <a href="/space" className={styles.primaryCreateBtn}>
-              Create a New Sync Room
-            </a>
+          <div className={styles.roomLoadingSkeleton}>
+            <div className={styles.loadingSpinner} />
+            <span>Connecting to sync room &ldquo;{roomId}&rdquo;...</span>
           </div>
         </div>
       </main>
     );
   }
 
+  // ── Render 404 Not Found State ──
+  if (isNotFoundRoom) {
+    return (
+      <main className={styles.container}>
+        <div className={styles.inner}>
+          <div className={styles.expiredCard}>
+            <div className={styles.expiredIcon} aria-hidden="true">🔍</div>
+            <h2 className={styles.expiredTitle}>This room doesn&rsquo;t exist</h2>
+            <p className={styles.expiredDesc}>
+              We couldn&rsquo;t find an active sync room with code &ldquo;{roomId}&rdquo;. It may have expired or was typed incorrectly.
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <button
+                type="button"
+                className={styles.primaryCreateBtn}
+                onClick={handleCreateRoomFromView}
+                disabled={isCreatingRoom}
+              >
+                {isCreatingRoom ? 'Creating Room...' : 'Create a New Room Instead'}
+              </button>
+              <button
+                type="button"
+                className={styles.actionPillBtn}
+                onClick={() => router.push('/space')}
+              >
+                ← Return to Global Scratchpad
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // ── Render 410 Expired State ──
+  if (isExpiredRoom) {
+    return (
+      <main className={styles.container}>
+        <div className={styles.inner}>
+          <div className={styles.expiredCard}>
+            <div className={styles.expiredIcon} aria-hidden="true">⏳</div>
+            <h2 className={styles.expiredTitle}>Sync Room Expired</h2>
+            <p className={styles.expiredDesc}>
+              This sync room expired after 48 hours of inactivity to keep your shared data ephemeral and secure.
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <button
+                type="button"
+                className={styles.primaryCreateBtn}
+                onClick={handleCreateRoomFromView}
+                disabled={isCreatingRoom}
+              >
+                {isCreatingRoom ? 'Creating Room...' : 'Create a New Room Instead'}
+              </button>
+              <button
+                type="button"
+                className={styles.actionPillBtn}
+                onClick={() => router.push('/space')}
+              >
+                ← Return to Global Scratchpad
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  const isRoomMode = Boolean(roomId);
+
   return (
     <main className={styles.container}>
       <div className={styles.inner}>
+        {/* ─── Back Navigation (if in a room) ─── */}
+        {isRoomMode && (
+          <div>
+            <button
+              type="button"
+              className={styles.backNavBtn}
+              onClick={() => router.push('/space')}
+              aria-label="Back to Global Scratchpad"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+              Global Scratchpad
+            </button>
+          </div>
+        )}
+
         {/* ─── Header ─── */}
         <header className={styles.header}>
           <div>
             <h1 className={styles.title}>Space</h1>
-            {roomId && (
-              <div className={styles.roomBadgeGroup} style={{ marginTop: '0.4rem' }}>
+            {isRoomMode ? (
+              <div className={styles.roomBadgeGroup} style={{ marginTop: '0.35rem' }}>
                 <div className={styles.roomBadge}>
                   <span>ROOM</span>
                   <span className={styles.roomCode}>{roomId}</span>
                 </div>
                 <span className={styles.roomTtl}>• 48h auto-expire</span>
               </div>
+            ) : (
+              <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '0.2rem' }}>
+                Public Collaborative Scratchpad
+              </div>
             )}
           </div>
+
           <div className={styles.metaRow}>
-            {roomId && (
+            {/* Rooms Dropdown Switcher */}
+            <div className={styles.roomsDropdownContainer} ref={dropdownRef}>
+              <button
+                type="button"
+                className={`${styles.roomsToggleBtn} ${showRoomsDropdown ? styles.roomsToggleBtnActive : ''}`}
+                onClick={() => setShowRoomsDropdown(!showRoomsDropdown)}
+                aria-label="Toggle recent sync rooms"
+                aria-expanded={showRoomsDropdown}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="7" height="7" />
+                  <rect x="14" y="3" width="7" height="7" />
+                  <rect x="14" y="14" width="7" height="7" />
+                  <rect x="3" y="14" width="7" height="7" />
+                </svg>
+                <span>Rooms</span>
+                {recentRooms.length > 0 && (
+                  <span className={styles.roomsBadgeCount}>{recentRooms.length}</span>
+                )}
+              </button>
+
+              {showRoomsDropdown && (
+                <div className={styles.roomsDropdownMenu} role="menu">
+                  <div className={styles.roomsDropdownHeader}>
+                    <span className={styles.roomsDropdownTitle}>Your Sync Rooms</span>
+                    <span>{recentRooms.length}/{MAX_ACTIVE_ROOMS}</span>
+                  </div>
+
+                  {roomLimitAlert && (
+                    <div style={{ fontSize: '0.7rem', color: '#fef08a', padding: '0.3rem 0.4rem', background: 'rgba(234, 179, 8, 0.1)', borderRadius: '4px' }}>
+                      {roomLimitAlert}
+                    </div>
+                  )}
+
+                  <div className={styles.roomsList}>
+                    {recentRooms.length === 0 ? (
+                      <div className={styles.emptyRoomsNote}>
+                        No recent rooms. Create one below to sync across devices.
+                      </div>
+                    ) : (
+                      recentRooms.map((r) => {
+                        const isActive = roomId === r.roomId;
+                        return (
+                          <div
+                            key={r.roomId}
+                            className={`${styles.roomListItem} ${isActive ? styles.roomListItemActive : ''}`}
+                            onClick={() => handleSwitchRoom(r.roomId)}
+                            role="menuitem"
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleSwitchRoom(r.roomId);
+                            }}
+                          >
+                            <div className={styles.roomItemInfo}>
+                              <div className={styles.roomItemHeader}>
+                                <span className={styles.roomItemCode}>{r.roomId}</span>
+                                {isActive && <span className={styles.roomItemActiveDot} title="Current Room" />}
+                                <span className={styles.roomItemTime}>{formatTimeAgo(r.lastVisitedAt)}</span>
+                              </div>
+                              {r.preview && (
+                                <span className={styles.roomItemSnippet}>
+                                  &ldquo;{r.preview}&rdquo;
+                                </span>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              className={styles.roomItemDeleteBtn}
+                              onClick={(e) => handleRemoveRoomFromDropdown(e, r.roomId)}
+                              title="Forget room from list"
+                              aria-label={`Forget room ${r.roomId}`}
+                            >
+                              &times;
+                            </button>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+
+                  <div className={styles.roomsDropdownFooter}>
+                    <button
+                      type="button"
+                      className={styles.roomsFooterActionBtn}
+                      onClick={handleCreateRoomFromView}
+                      disabled={isCreatingRoom || recentRooms.length >= MAX_ACTIVE_ROOMS}
+                    >
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                      </svg>
+                      {isCreatingRoom ? 'Creating...' : recentRooms.length >= MAX_ACTIVE_ROOMS ? 'Room Limit (5/5) Reached' : '+ New Sync Room'}
+                    </button>
+
+                    {isRoomMode && (
+                      <button
+                        type="button"
+                        className={styles.roomsFooterActionBtn}
+                        onClick={() => handleSwitchRoom(null)}
+                        style={{ color: '#94a3b8' }}
+                      >
+                        Global Scratchpad
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Room Actions */}
+            {isRoomMode ? (
               <div className={styles.roomActions}>
                 <button
                   type="button"
@@ -494,7 +862,33 @@ export default function SpaceView({ roomId = null }) {
                   QR Code
                 </button>
               </div>
+            ) : (
+              <div className={styles.roomActions}>
+                <button
+                  type="button"
+                  className={styles.actionPillBtn}
+                  onClick={handleCreateRoomFromView}
+                  disabled={isCreatingRoom}
+                  style={{ color: '#10b981', borderColor: 'rgba(16, 185, 129, 0.3)' }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  + New Sync Room
+                </button>
+                <button
+                  type="button"
+                  className={styles.actionPillBtn}
+                  onClick={() => setShowJoinModal(true)}
+                  aria-label="Join room by code"
+                >
+                  Join Code
+                </button>
+              </div>
             )}
+
+            {/* Live Presence Indicator */}
             <div className={styles.presenceBadge}>
               <span
                 className={`${styles.presenceDot} ${
@@ -506,6 +900,80 @@ export default function SpaceView({ roomId = null }) {
             </div>
           </div>
         </header>
+
+        {/* ─── Join with Code Modal ─── */}
+        {showJoinModal && (
+          <div
+            className={styles.modalBackdrop}
+            onClick={() => setShowJoinModal(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Join sync room by code"
+          >
+            <div
+              className={styles.qrModalCard}
+              onClick={(e) => e.stopPropagation()}
+              style={{ maxWidth: '380px' }}
+            >
+              <button
+                type="button"
+                className={styles.qrModalClose}
+                onClick={() => setShowJoinModal(false)}
+                aria-label="Close modal"
+              >
+                &times;
+              </button>
+              <h3 className={styles.qrModalTitle}>Join a Sync Room</h3>
+              <p className={styles.qrModalSubtitle}>
+                Enter an existing 8-character room code to join its collaborative scratchpad.
+              </p>
+
+              <form onSubmit={handleJoinCodeSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <input
+                  type="text"
+                  value={joinCodeInput}
+                  onChange={(e) => {
+                    setJoinCodeInput(e.target.value);
+                    if (joinCodeError) setJoinCodeError(null);
+                  }}
+                  placeholder="e.g. wr62hgnm"
+                  maxLength={16}
+                  disabled={isCheckingJoin}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    border: joinCodeError ? '1px solid #ef4444' : '1px solid rgba(255, 255, 255, 0.12)',
+                    borderRadius: '8px',
+                    padding: '0.65rem 0.85rem',
+                    fontSize: '0.88rem',
+                    color: '#f8fafc',
+                    fontFamily: 'var(--font-mono, monospace)',
+                    outline: 'none',
+                    textAlign: 'center',
+                    textTransform: 'lowercase',
+                    letterSpacing: '0.08em',
+                  }}
+                  aria-label="Room code"
+                  autoFocus
+                />
+
+                {joinCodeError && (
+                  <div style={{ fontSize: '0.76rem', color: '#fca5a5', textAlign: 'center' }}>
+                    {joinCodeError}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className={styles.primaryCreateBtn}
+                  disabled={!joinCodeInput.trim() || isCheckingJoin}
+                  style={{ width: '100%', justifyContent: 'center' }}
+                >
+                  {isCheckingJoin ? 'Checking...' : 'Join Room →'}
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
 
         {/* ─── QR Code Modal ─── */}
         {showQrModal && (
@@ -587,8 +1055,8 @@ export default function SpaceView({ roomId = null }) {
           </div>
         )}
 
-        {/* ─── Turnstile Human Gating Gate ─── */}
-        {!isVerified && (
+        {/* ─── Turnstile Gate (ONLY for Global Scratchpad) ─── */}
+        {!isRoomMode && !isVerified && (
           <div className={styles.turnstileGate}>
             <p className={styles.gateText}>
               {isVerifying ? 'Verifying session...' : 'Verify once to join the live collaborative scratchpad'}
@@ -601,7 +1069,9 @@ export default function SpaceView({ roomId = null }) {
         <div className={styles.card}>
           {/* Card Top Bar */}
           <div className={styles.cardHeader}>
-            <span className={styles.cardLabel}>Live Scratchpad</span>
+            <span className={styles.cardLabel}>
+              {isRoomMode ? `Sync Room • ${roomId}` : 'Live Scratchpad'}
+            </span>
             <div className={styles.cardActions}>
               {showClearConfirm ? (
                 <div className={styles.inlineConfirm}>
@@ -630,7 +1100,7 @@ export default function SpaceView({ roomId = null }) {
                   onClick={() => setShowClearConfirm(true)}
                   aria-label="Clear shared scratchpad"
                   title="Clear scratchpad"
-                  disabled={!isVerified || !content}
+                  disabled={(!isRoomMode && !isVerified) || !content}
                 >
                   &times;
                 </button>
@@ -649,7 +1119,6 @@ export default function SpaceView({ roomId = null }) {
             }}
             onBlur={() => {
               isFocusedRef.current = false;
-              // If remote update arrived while focused, apply cleanly now
               if (pendingRemoteUpdateRef.current) {
                 const pending = pendingRemoteUpdateRef.current;
                 pendingRemoteUpdateRef.current = null;
@@ -660,12 +1129,14 @@ export default function SpaceView({ roomId = null }) {
             }}
             placeholder={
               loading
-                ? 'Loading shared document...'
-                : !isVerified
-                ? 'Verify above to type in the shared scratchpad...'
+                ? 'Loading document...'
+                : !isRoomMode && !isVerified
+                ? 'Verify above to type in the global scratchpad...'
+                : isRoomMode
+                ? `Start typing... updates sync live across all devices in room "${roomId}".`
                 : 'Start typing... updates sync live for everyone on this page.'
             }
-            disabled={!isVerified || loading}
+            disabled={!isRoomMode && !isVerified}
             maxLength={MAX_CHARS}
             spellCheck="false"
             aria-label="Shared collaborative scratchpad text area"

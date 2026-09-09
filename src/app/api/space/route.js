@@ -80,23 +80,7 @@ export async function POST(req) {
     const body = await req.json().catch(() => ({}));
     const { content, clientId, lastKnownUpdatedAt, roomId } = body;
 
-    // 1. Enforce Human Verification Session Token
-    const sessionToken = extractSessionToken(req, body);
-    const tokenStatus = verifySpaceSessionToken(sessionToken);
-    if (!tokenStatus.valid) {
-      if (tokenStatus.expired) {
-        return NextResponse.json(
-          { error: 'Your session has expired. Renewing verification...', code: 'TOKEN_EXPIRED' },
-          { status: 403 }
-        );
-      }
-      return NextResponse.json(
-        { error: 'Human verification required to edit.', code: 'UNVERIFIED' },
-        { status: 403 }
-      );
-    }
-
-    // 2. IP Rate Limiting for debounced typing saves
+    // 1. IP Rate Limiting for debounced typing saves
     const rateLimitKey = `space:save:${clientIp}`;
     const rateStatus = await checkSpaceRateLimit(rateLimitKey, SAVE_RATE_LIMIT, SAVE_RATE_WINDOW);
     if (!rateStatus.allowed) {
@@ -106,7 +90,7 @@ export async function POST(req) {
       );
     }
 
-    // 3. Strict Server-Side Unicode / Anti-Abuse Sanitization
+    // 2. Strict Server-Side Unicode / Anti-Abuse Sanitization
     let cleanText;
     try {
       cleanText = sanitizeSpaceContent(content || '');
@@ -114,14 +98,20 @@ export async function POST(req) {
       return NextResponse.json({ error: valErr.message }, { status: 400 });
     }
 
-    // ── Dedicated Room Path ──
+    // ── Dedicated Room Path (Exempt from Turnstile, strictly validated on DB existence) ──
     if (roomId) {
       const currentRoom = await getSpaceRoom(roomId);
       if (currentRoom.notFound) {
-        return NextResponse.json({ error: 'Room does not exist.', notFound: true }, { status: 404 });
+        return NextResponse.json(
+          { error: 'This room does not exist.', notFound: true },
+          { status: 404 }
+        );
       }
       if (currentRoom.expired) {
-        return NextResponse.json({ error: 'Room has expired.', expired: true }, { status: 410 });
+        return NextResponse.json(
+          { error: 'This room has expired after 48 hours of inactivity.', expired: true },
+          { status: 410 }
+        );
       }
 
       if (
@@ -162,8 +152,23 @@ export async function POST(req) {
       });
     }
 
-    // ── Single Document Legacy Path ──
-    // 4. Conflict Detection (Timestamp / Version Check)
+    // ── Single Document Legacy Path (Requires Turnstile Human Verification) ──
+    const sessionToken = extractSessionToken(req, body);
+    const tokenStatus = verifySpaceSessionToken(sessionToken);
+    if (!tokenStatus.valid) {
+      if (tokenStatus.expired) {
+        return NextResponse.json(
+          { error: 'Your session has expired. Renewing verification...', code: 'TOKEN_EXPIRED' },
+          { status: 403 }
+        );
+      }
+      return NextResponse.json(
+        { error: 'Human verification required to edit.', code: 'UNVERIFIED' },
+        { status: 403 }
+      );
+    }
+
+    // Conflict Detection (Timestamp / Version Check)
     const currentDoc = await getSpaceDocument();
     if (
       lastKnownUpdatedAt &&
@@ -187,10 +192,10 @@ export async function POST(req) {
       }
     }
 
-    // 5. Persist to Supabase single document row
+    // Persist to Supabase single document row
     const updated = await updateSpaceDocument(cleanText);
 
-    // 6. Broadcast update over private Realtime channel
+    // Broadcast update over private Realtime channel
     broadcastToSpace('document-update', {
       content: cleanText,
       updatedAt: updated.updated_at,
@@ -220,17 +225,7 @@ export async function DELETE(req) {
     const body = await req.json().catch(() => ({}));
     const { clientId, roomId } = body;
 
-    // 1. Enforce Human Verification Session Token
-    const sessionToken = extractSessionToken(req, body);
-    const tokenStatus = verifySpaceSessionToken(sessionToken);
-    if (!tokenStatus.valid) {
-      return NextResponse.json(
-        { error: 'Human verification required to clear.', code: 'UNVERIFIED' },
-        { status: 403 }
-      );
-    }
-
-    // 2. Rate limit clear action
+    // 1. Rate limit clear action
     const rateLimitKey = `space:clear:${clientIp}`;
     const rateStatus = await checkSpaceRateLimit(rateLimitKey, CLEAR_RATE_LIMIT, CLEAR_RATE_WINDOW);
     if (!rateStatus.allowed) {
@@ -240,8 +235,13 @@ export async function DELETE(req) {
       );
     }
 
-    // Room path clear
+    // Room path clear (strictly checks room existence)
     if (roomId) {
+      const currentRoom = await getSpaceRoom(roomId);
+      if (currentRoom.notFound) {
+        return NextResponse.json({ error: 'This room does not exist.', notFound: true }, { status: 404 });
+      }
+
       const cleared = await clearSpaceRoom(roomId);
       broadcastToRoom(roomId, 'document-cleared', {
         updatedAt: cleared.updated_at,
@@ -258,10 +258,20 @@ export async function DELETE(req) {
       });
     }
 
-    // 3. Clear single document in Supabase
+    // Single document path requires Turnstile verification
+    const sessionToken = extractSessionToken(req, body);
+    const tokenStatus = verifySpaceSessionToken(sessionToken);
+    if (!tokenStatus.valid) {
+      return NextResponse.json(
+        { error: 'Human verification required to clear.', code: 'UNVERIFIED' },
+        { status: 403 }
+      );
+    }
+
+    // 2. Clear single document in Supabase
     const cleared = await clearSpaceDocument();
 
-    // 4. Broadcast clear event
+    // 3. Broadcast clear event
     broadcastToSpace('document-cleared', {
       updatedAt: cleared.updated_at,
       senderId: clientId || null,
@@ -279,3 +289,4 @@ export async function DELETE(req) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
