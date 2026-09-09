@@ -2972,4 +2972,46 @@ html.reduce-motion .ambientGlow {
   }
 }
 
+/* ─── NATIVE VIEW TRANSITIONS & ROUTE TRANSITION SHELL ─────── */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.18s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
 
+/* Header remains pinned and stable during route transition */
+#nav {
+  view-transition-name: site-header;
+}
+
+/* Exclude full-screen overlays and floating widgets from page snapshot */
+#mobile-nav,
+#cmd-palette-backdrop,
+.chatbot-root,
+.cookie-banner-wrapper,
+#custom-cursor {
+  view-transition-name: none !important;
+}
+
+/* CSS fallback for browsers without View Transitions (Firefox, older Safari) */
+@keyframes routeFadeIn {
+  from { opacity: 0.88; }
+  to { opacity: 1; }
+}
+
+.page-transition-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  animation: routeFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Motion preference override: instant route transitions */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+  .page-transition-shell {
+    animation: none !important;
+  }
+}

@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { useTransitionRouter } from '@/context/TransitionContext';
 import styles from './ChatbotWidget.module.css';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -139,6 +140,7 @@ function SafeMessageContent({ content }) {
 export default function ChatbotWidget() {
   const pathname = usePathname();
   const router = useRouter();
+  const transitionRouter = useTransitionRouter();
 
   // Mode: 'ai' (AI Assistant) vs 'live' (Talk to Sonu via Telegram relay)
   const [chatMode, setChatMode] = useState('ai');
@@ -503,13 +505,13 @@ export default function ChatbotWidget() {
       }
       if (target.startsWith('#')) {
         if (pathname !== '/') {
-          router.push(`/${target}`);
+          transitionRouter.push(`/${target}`);
         } else {
           const el = document.querySelector(target);
           if (el) el.scrollIntoView({ behavior: 'smooth' });
         }
       } else {
-        router.push(target);
+        transitionRouter.push(target);
       }
     } else if (action.type === 'open') {
       window.open(action.target, '_blank', 'noopener,noreferrer');
@@ -1020,7 +1022,7 @@ export default function ChatbotWidget() {
                     window.__portfolioNavigatingToRoute = true;
                     window.dispatchEvent(new CustomEvent('portfolio-overlay-change', { detail: { active: 'none' } }));
                   }
-                  router.push('/space');
+                  transitionRouter.push('/space');
                 }}
                 aria-label="Navigate to Shared Space"
                 title="Public Real-time Shared Clipboard"

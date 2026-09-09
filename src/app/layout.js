@@ -221,6 +221,7 @@ import ChatbotWidget from "@/components/ChatbotWidget";
 import SiteVisitTracker from "@/components/SiteVisitTracker";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { OverlayProvider } from "@/context/OverlayContext";
+import { TransitionProvider } from "@/context/TransitionContext";
 import CommandPalette from "@/components/CommandPalette";
 
 export default function RootLayout({ children }) {
@@ -282,17 +283,21 @@ export default function RootLayout({ children }) {
       </head>
       <body suppressHydrationWarning>
         <OverlayProvider>
-          <SmoothScrollProvider />
-          <PWARegistration />
-          <UserPreferences />
-          <CustomCursor />
-          {children}
-          <ConsentAnalyticsGate />
-          <SiteVisitTracker />
-          <CookieConsentBanner />
-          <MobileBottomCTA />
-          <ChatbotWidget />
-          <CommandPalette />
+          <TransitionProvider>
+            <SmoothScrollProvider />
+            <PWARegistration />
+            <UserPreferences />
+            <CustomCursor />
+            <div className="page-transition-shell">
+              {children}
+            </div>
+            <ConsentAnalyticsGate />
+            <SiteVisitTracker />
+            <CookieConsentBanner />
+            <MobileBottomCTA />
+            <ChatbotWidget />
+            <CommandPalette />
+          </TransitionProvider>
         </OverlayProvider>
         {/* Google Tag (detected by Google Tag Assistant & Analytics on page load) */}
         {gaId && <GoogleAnalytics gaId={gaId} />}

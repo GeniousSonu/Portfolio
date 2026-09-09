@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTransitionRouter } from '@/context/TransitionContext';
 import Link from 'next/link';
 import {
   getRoomHistory,
@@ -14,6 +15,7 @@ import styles from './space.module.css';
 
 export default function SpaceLanding() {
   const router = useRouter();
+  const transitionRouter = useTransitionRouter();
   const [isCreating, setIsCreating] = useState(false);
   const [isCheckingCode, setIsCheckingCode] = useState(false);
   const [roomCodeInput, setRoomCodeInput] = useState('');
@@ -52,7 +54,7 @@ export default function SpaceLanding() {
         // Record into local room history
         addOrUpdateRoomHistory(data.roomId, '');
         // Client-side navigation without full page reload
-        router.push(data.url);
+        transitionRouter.push(data.url);
       } else {
         setErrorMsg(data.error || 'Failed to create room. Please try again.');
       }
@@ -98,7 +100,7 @@ export default function SpaceLanding() {
       if (res.ok && data.roomId) {
         // Room verified to exist in DB: add to history and navigate
         addOrUpdateRoomHistory(data.roomId, data.content || '');
-        router.push(`/space/${data.roomId}`);
+        transitionRouter.push(`/space/${data.roomId}`);
       } else {
         setJoinError(data.error || "Could not verify room. Please check the code.");
       }
@@ -253,7 +255,7 @@ export default function SpaceLanding() {
               {recentRooms.map((r) => (
                 <div
                   key={r.roomId}
-                  onClick={() => router.push(`/space/${r.roomId}`)}
+                  onClick={() => transitionRouter.push(`/space/${r.roomId}`)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -268,7 +270,7 @@ export default function SpaceLanding() {
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') router.push(`/space/${r.roomId}`);
+                    if (e.key === 'Enter') transitionRouter.push(`/space/${r.roomId}`);
                   }}
                 >
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', overflow: 'hidden' }}>

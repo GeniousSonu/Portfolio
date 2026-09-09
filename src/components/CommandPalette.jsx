@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Command } from 'cmdk';
 import { useOverlay } from '@/context/OverlayContext';
+import { useTransitionRouter } from '@/context/TransitionContext';
 import styles from './CommandPalette.module.css';
 
 // SVG Icons
@@ -60,6 +61,7 @@ const GitHubIcon = () => (
 
 export default function CommandPalette() {
   const router = useRouter();
+  const transitionRouter = useTransitionRouter();
   const pathname = usePathname();
   const { activeOverlay, openOverlay, closeOverlay } = useOverlay();
   const [toastMessage, setToastMessage] = useState(null);
@@ -155,15 +157,15 @@ export default function CommandPalette() {
         if (typeof sessionStorage !== 'undefined') {
           sessionStorage.setItem('portfolio_scroll_target', target);
         }
-        router.push('/' + target);
+        transitionRouter.push('/' + target);
       }
       return;
     }
 
     if (target.startsWith('/')) {
-      router.push(target);
+      transitionRouter.push(target);
     }
-  }, [closePalette, pathname, router, scrollToSectionWithOffset]);
+  }, [closePalette, pathname, transitionRouter, scrollToSectionWithOffset]);
 
   const handleOpenChatbot = useCallback(() => {
     closePalette();

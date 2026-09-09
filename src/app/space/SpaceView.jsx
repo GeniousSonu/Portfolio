@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTransitionRouter } from '@/context/TransitionContext';
 import { supabase } from '@/lib/supabaseClient';
 import { QRCodeSVG } from 'qrcode.react';
 import {
@@ -21,6 +22,7 @@ const TURNSTILE_SITE_KEY =
 
 export default function SpaceView({ roomId = null }) {
   const router = useRouter();
+  const transitionRouter = useTransitionRouter();
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(true);
   const [savingStatus, setSavingStatus] = useState('Synced'); // 'Synced' | 'Saving...' | 'Conflict'
@@ -516,7 +518,7 @@ export default function SpaceView({ roomId = null }) {
         setRecentRooms(getRoomHistory());
         setShowRoomsDropdown(false);
         // Soft client navigation — NO full page reload
-        router.push(`/space/${data.roomId}`);
+        transitionRouter.push(`/space/${data.roomId}`);
       } else {
         alert(data.error || 'Failed to create room.');
       }
@@ -530,9 +532,9 @@ export default function SpaceView({ roomId = null }) {
   const handleSwitchRoom = (targetRoomId) => {
     setShowRoomsDropdown(false);
     if (!targetRoomId) {
-      router.push('/space');
+      transitionRouter.push('/space');
     } else if (targetRoomId !== roomId) {
-      router.push(`/space/${targetRoomId}`);
+      transitionRouter.push(`/space/${targetRoomId}`);
     }
   };
 
@@ -576,7 +578,7 @@ export default function SpaceView({ roomId = null }) {
         setRecentRooms(getRoomHistory());
         setShowJoinModal(false);
         setJoinCodeInput('');
-        router.push(`/space/${data.roomId}`);
+        transitionRouter.push(`/space/${data.roomId}`);
       }
     } catch (err) {
       setJoinCodeError('Could not verify room. Please check your network.');
@@ -634,7 +636,7 @@ export default function SpaceView({ roomId = null }) {
               <button
                 type="button"
                 className={styles.actionPillBtn}
-                onClick={() => router.push('/space')}
+                onClick={() => transitionRouter.push('/space')}
               >
                 ← Return to Global Scratchpad
               </button>
@@ -668,7 +670,7 @@ export default function SpaceView({ roomId = null }) {
               <button
                 type="button"
                 className={styles.actionPillBtn}
-                onClick={() => router.push('/space')}
+                onClick={() => transitionRouter.push('/space')}
               >
                 ← Return to Global Scratchpad
               </button>
@@ -690,7 +692,7 @@ export default function SpaceView({ roomId = null }) {
             <button
               type="button"
               className={styles.backNavBtn}
-              onClick={() => router.push('/space')}
+              onClick={() => transitionRouter.push('/space')}
               aria-label="Back to Global Scratchpad"
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

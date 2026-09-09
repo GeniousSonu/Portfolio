@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
+import { useTransitionRouter } from '@/context/TransitionContext';
 import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -14,11 +15,12 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
  * - Respects prefers-reduced-motion.
  * - Perfectly synchronizes Lenis with GSAP ScrollTrigger ticker.
  * - Strict-mode safe: prevents double-init and cleans up completely on unmount.
- * - Resets scroll position and refreshes ScrollTrigger on Next.js client-side route changes.
+ * - Resets scroll position and refreshes ScrollTrigger on Next.js client-side route changes after transitions settle.
  * - Triggers ScrollTrigger.refresh() on window load to account for lazy-loaded images.
  */
 export default function SmoothScrollProvider() {
   const pathname = usePathname();
+  const { transitionStatus } = useTransitionRouter();
   const lenisRef = useRef(null);
   const tickerHandlerRef = useRef(null);
   const initializedRef = useRef(false);
@@ -92,25 +94,33 @@ export default function SmoothScrollProvider() {
     };
   }, []);
 
-  // 9. Route-change synchronization (reset scroll & recalculate trigger positions)
+  // 9. Route-change synchronization (reset scroll & recalculate trigger positions after transition settles)
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    if (window.__lenis) {
-      window.__lenis.start();
-      window.__lenis.scrollTo(0, { immediate: true });
-      window.__lenis.resize();
+    // If a view transition is actively running, wait until it finishes
+    if (transitionStatus === 'transitioning') {
+      return;
     }
+
+    const resetScrollAndTriggers = () => {
+      if (window.__lenis) {
+        window.__lenis.start();
+        window.__lenis.scrollTo(0, { immediate: true });
+        window.__lenis.resize();
+      } else {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      }
+      ScrollTrigger.refresh();
+    };
 
     // Small delay ensures DOM has swapped before recalculating trigger offsets
     const timer = setTimeout(() => {
-      window.__lenis?.start();
-      window.__lenis?.resize();
-      ScrollTrigger.refresh();
-    }, 80);
+      resetScrollAndTriggers();
+    }, 60);
 
     return () => clearTimeout(timer);
-  }, [pathname]);
+  }, [pathname, transitionStatus]);
 
   // 10. Refresh triggers when full window / lazy assets finish loading
   useEffect(() => {

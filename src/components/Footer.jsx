@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useTransitionRouter } from '@/context/TransitionContext';
 import gsap from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import { isConsentFullAccepted } from '@/lib/consent';
@@ -93,6 +94,7 @@ const NAV_LINKS = [
 export default function Footer() {
   const pathname = usePathname();
   const router = useRouter();
+  const transitionRouter = useTransitionRouter();
   const year = new Date().getFullYear();
   const [showCookieControl, setShowCookieControl] = useState(false);
 
@@ -128,13 +130,13 @@ export default function Footer() {
       if (pathname === '/') {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        router.push('/');
+        transitionRouter.push('/');
       }
       return;
     }
 
     if (targetId.startsWith('/')) {
-      router.push(targetId);
+      transitionRouter.push(targetId);
       return;
     }
 
@@ -145,7 +147,7 @@ export default function Footer() {
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     } else {
-      router.push('/' + hash);
+      transitionRouter.push('/' + hash);
     }
   };
 

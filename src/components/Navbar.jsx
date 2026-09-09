@@ -7,6 +7,7 @@ import gsap from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import InstallAppButton from './InstallAppButton';
 import { useOverlay } from '@/context/OverlayContext';
+import { useTransitionRouter } from '@/context/TransitionContext';
 
 /* ── Brand SVG Icons ── */
 const IconGitHub = () => (
@@ -109,6 +110,7 @@ const EXTRA_PAGES = [
 
 export default function Navbar() {
   const router = useRouter();
+  const transitionRouter = useTransitionRouter();
   const pathname = usePathname();
   const { activeOverlay, openOverlay, closeOverlay } = useOverlay();
   const mobileOpen = activeOverlay === 'nav';
@@ -173,7 +175,7 @@ export default function Navbar() {
       const handleKeyDown = (e) => {
         if (e.key === 'Escape') {
           e.preventDefault();
-          setMobileOpen(false);
+          closeMobileNav();
           hamburgerBtnRef.current?.focus();
           return;
         }
@@ -238,13 +240,13 @@ export default function Navbar() {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }, 50);
       } else {
-        router.push('/');
+        transitionRouter.push('/');
       }
       return;
     }
 
     if (targetId.startsWith('/')) {
-      router.push(targetId);
+      transitionRouter.push(targetId);
       return;
     }
 
@@ -258,7 +260,7 @@ export default function Navbar() {
         if (typeof sessionStorage !== 'undefined') {
           sessionStorage.setItem('portfolio_scroll_target', targetId);
         }
-        router.push('/' + targetId);
+        transitionRouter.push('/' + targetId);
       }
     }
   };
