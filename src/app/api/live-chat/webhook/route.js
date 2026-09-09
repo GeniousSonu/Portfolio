@@ -8,6 +8,7 @@ import {
   deleteSessionRecords,
 } from '@/lib/liveChatSessions';
 import { deleteSpaceEntry, broadcastToSpace } from '@/lib/sharedSpace';
+import { sendLiveChatPushNotification } from '@/lib/webPush';
 
 export async function POST(req) {
   try {
@@ -100,6 +101,11 @@ export async function POST(req) {
             sender: 'sonu',
             text: replyText,
             timestamp: new Date().toISOString(),
+          });
+
+          // 1b. Asynchronously dispatch Web Push Notification if visitor subscribed
+          sendLiveChatPushNotification(sessionId).catch((pushErr) => {
+            console.warn('[LiveChatWebhook] Push notification error on QR:', pushErr.message);
           });
 
           // 2. Send confirmation in Telegram chat so Sonu has a clean record
@@ -248,6 +254,11 @@ export async function POST(req) {
       sender: 'sonu',
       text: replyText.trim(),
       timestamp: new Date().toISOString(),
+    });
+
+    // 7b. Asynchronously dispatch Web Push Notification if visitor subscribed
+    sendLiveChatPushNotification(sessionId).catch((pushErr) => {
+      console.warn('[LiveChatWebhook] Push notification error on reply:', pushErr.message);
     });
 
     if (!broadcastResult.ok) {

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/supabaseServer';
 import { saveTelegramMessage, broadcastToSession } from '@/lib/liveChatSessions';
+import { signLiveChatSessionToken } from '@/lib/webPush';
 
 const MAX_MESSAGE_LENGTH = 500;
 const IP_WINDOW_SECONDS = 120; // 2-minute sliding window
@@ -230,6 +231,7 @@ export async function POST(req) {
     return NextResponse.json({
       success: true,
       telegramMessageId,
+      sessionToken: signLiveChatSessionToken(sessionId),
       timestamp: new Date().toISOString(),
     });
   } catch (err) {

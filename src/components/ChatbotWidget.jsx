@@ -41,6 +41,17 @@ function getSonuLocalTime() {
   });
 }
 
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = typeof window !== 'undefined' ? window.atob(base64) : Buffer.from(base64, 'base64').toString('binary');
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
 /**
  * Web Audio API synthesize chime.
  * Triggers a subtle, short 2-tone melodic notification chime when a reply
@@ -172,6 +183,12 @@ export default function ChatbotWidget() {
   const [lastVisitorMessageTime, setLastVisitorMessageTime] = useState(null);
   const [showOfflineSuggestion, setShowOfflineSuggestion] = useState(false);
 
+  // Web Push Notification states for Live Chat
+  const [showPushPrompt, setShowPushPrompt] = useState(false);
+  const [isSubscribingPush, setIsSubscribingPush] = useState(false);
+  const [pushTip, setPushTip] = useState(null);
+  const sessionTokenRef = useRef(null);
+
   const sessionIdRef = useRef(null);
   const sessionStartTimeRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -221,6 +238,9 @@ export default function ChatbotWidget() {
     setIsSessionExpired(false);
     setIsEndingChat(false);
     setShowOfflineSuggestion(false);
+    setShowPushPrompt(false);
+    setPushTip(null);
+    sessionTokenRef.current = null;
     sessionIdRef.current =
       typeof crypto !== 'undefined' && crypto.randomUUID
         ? crypto.randomUUID()
@@ -663,6 +683,23 @@ export default function ChatbotWidget() {
         setLiveMessages((prev) =>
           prev.map((m) => (m.id === msgId ? { ...m, status: 'delivered' } : m))
         );
+
+        // Store signed session token for verified subscription ownership
+        if (data?.sessionToken) {
+          sessionTokenRef.current = data.sessionToken;
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('live_chat_session_token_' + sid, data.sessionToken);
+          }
+        }
+
+        // Show push notification opt-in prompt if not previously dismissed or subscribed
+        if (typeof window !== 'undefined' && 'Notification' in window && 'serviceWorker' in navigator) {
+          const dismissed = sessionStorage.getItem('live_chat_push_dismissed_' + sid);
+          const subscribed = sessionStorage.getItem('live_chat_push_subscribed_' + sid);
+          if (!dismissed && !subscribed && Notification.permission === 'default') {
+            setShowPushPrompt(true);
+          }
+        }
       } catch (err) {
         console.error('[LiveChat] Send error:', err);
         // Mark message as failed with retry action
@@ -673,6 +710,89 @@ export default function ChatbotWidget() {
         setIsLiveSending(false);
         isSendingRef.current = false;
       }
+    }
+  };
+
+  const handleDismissPush = () => {
+    setShowPushPrompt(false);
+    const sid = sessionIdRef.current;
+    if (sid && typeof window !== 'undefined') {
+      sessionStorage.setItem('live_chat_push_dismissed_' + sid, 'true');
+    }
+  };
+
+  const handleEnablePush = async () => {
+    const sid = sessionIdRef.current;
+    if (!sid) return;
+
+    // Check iOS non-PWA condition
+    const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isStandalone = typeof window !== 'undefined' && (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone);
+
+    if (isIOS && !isStandalone) {
+      setPushTip('ℹ️ On iOS, tap Share → "Add to Home Screen" to receive lock-screen notifications.');
+      setTimeout(() => setPushTip(null), 8000);
+      setShowPushPrompt(false);
+      return;
+    }
+
+    setIsSubscribingPush(true);
+    try {
+      if (typeof Notification === 'undefined' || !('serviceWorker' in navigator)) {
+        setPushTip('Push notifications are not supported on this browser.');
+        setTimeout(() => setPushTip(null), 4000);
+        setShowPushPrompt(false);
+        return;
+      }
+
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        setShowPushPrompt(false);
+        return;
+      }
+
+      const reg = await navigator.serviceWorker.ready;
+      const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+      if (!vapidKey) {
+        console.warn('[Push] NEXT_PUBLIC_VAPID_PUBLIC_KEY not found in environment.');
+        setShowPushPrompt(false);
+        return;
+      }
+
+      const subscription = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidKey),
+      });
+
+      const token =
+        sessionTokenRef.current ||
+        (typeof window !== 'undefined' ? sessionStorage.getItem('live_chat_session_token_' + sid) : null);
+
+      const res = await fetch('/api/push/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: sid,
+          sessionToken: token,
+          subscription,
+        }),
+      });
+
+      if (res.ok) {
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('live_chat_push_subscribed_' + sid, 'true');
+        }
+        setShowPushPrompt(false);
+        setPushTip('🔔 Notifications enabled! You will be alerted when Sonu replies.');
+        setTimeout(() => setPushTip(null), 5000);
+      } else {
+        setShowPushPrompt(false);
+      }
+    } catch (err) {
+      console.warn('[LiveChatPush] Subscription notice:', err.message);
+      setShowPushPrompt(false);
+    } finally {
+      setIsSubscribingPush(false);
     }
   };
 
@@ -1101,6 +1221,43 @@ export default function ChatbotWidget() {
                         <strong>This conversation session has expired (6h limit).</strong>
                         <div>Send a new message below to start a fresh chat with Sonu.</div>
                       </div>
+                    </div>
+                  )}
+
+                  {/* Web Push Notification Pre-Prompt in Live Mode */}
+                  {chatMode === 'live' && showPushPrompt && (
+                    <div className={styles.pushPromptCard} role="region" aria-label="Notification opt-in">
+                      <div className={styles.pushPromptContent}>
+                        <span className={styles.pushPromptIcon}>🔔</span>
+                        <div className={styles.pushPromptText}>
+                          <strong>Want a notification when Sonu replies?</strong>
+                          <p>Get alerted on this device even if you close this tab.</p>
+                        </div>
+                      </div>
+                      <div className={styles.pushPromptActions}>
+                        <button
+                          type="button"
+                          className={styles.pushAllowBtn}
+                          onClick={handleEnablePush}
+                          disabled={isSubscribingPush}
+                        >
+                          {isSubscribingPush ? 'Enabling...' : 'Allow 🔔'}
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.pushDismissBtn}
+                          onClick={handleDismissPush}
+                        >
+                          No thanks
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Push Notification Tip Banner */}
+                  {pushTip && (
+                    <div className={styles.pushTipCard}>
+                      <span>{pushTip}</span>
                     </div>
                   )}
 

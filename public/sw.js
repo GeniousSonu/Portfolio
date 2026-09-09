@@ -1,7 +1,7 @@
 // High-Performance PWA Service Worker for SK Sahinur Islam Portfolio
 // Cache-First for static assets; Stale-While-Revalidate for HTML pages & dynamic routes
 
-const CACHE_VERSION = 'v-1788950730694';
+const CACHE_VERSION = 'v-1788951858625';
 const STATIC_CACHE = `sks-static-${CACHE_VERSION}`;
 const PAGES_CACHE = `sks-pages-${CACHE_VERSION}`;
 const IMAGE_CACHE = `sks-images-${CACHE_VERSION}`;
@@ -159,3 +159,62 @@ self.addEventListener('fetch', (event) => {
     fetch(request).catch(() => caches.match(request))
   );
 });
+
+// 4. Web Push Notification Handlers
+self.addEventListener('push', (event) => {
+  let data = {
+    title: 'SK Sahinur Islam (Sonu)',
+    body: 'You have a new reply in live chat 💬',
+    url: '/',
+    tag: 'live-chat-default',
+    icon: '/icon-192.png',
+    badge: '/icon-192.png',
+  };
+
+  if (event.data) {
+    try {
+      data = Object.assign(data, event.data.json());
+    } catch {
+      data.body = event.data.text() || data.body;
+    }
+  }
+
+  const options = {
+    body: data.body,
+    icon: data.icon || '/icon-192.png',
+    badge: data.badge || '/icon-192.png',
+    vibrate: [100, 50, 100],
+    data: {
+      url: data.url || '/',
+      dateOfArrival: Date.now(),
+    },
+    tag: data.tag || 'live-chat-notification',
+    renotify: true,
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = event.notification.data?.url || '/';
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // If a window is already open, focus it and navigate
+      for (const client of clientList) {
+        if ('focus' in client) {
+          client.navigate(targetUrl);
+          return client.focus();
+        }
+      }
+      // Otherwise open a new window
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(targetUrl);
+      }
+    })
+  );
+});
+

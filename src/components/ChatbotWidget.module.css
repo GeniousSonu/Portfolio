@@ -1195,4 +1195,109 @@
   border-color: var(--red, #e63946);
 }
 
+/* Push Notification Opt-in Prompt Banner */
+.pushPromptCard {
+  margin: 0.5rem 0.25rem 0.75rem 0.25rem;
+  padding: 0.75rem 0.9rem;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.pushPromptContent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.pushPromptIcon {
+  font-size: 1.25rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.pushPromptText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pushPromptText strong {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #e6edf3;
+  line-height: 1.3;
+}
+
+.pushPromptText p {
+  margin: 0;
+  font-size: 0.73rem;
+  color: #94a3b8;
+  line-height: 1.35;
+}
+
+.pushPromptActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.pushAllowBtn {
+  background: #10b981;
+  color: #05070c;
+  border: none;
+  font-size: 0.73rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.pushAllowBtn:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.pushAllowBtn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.pushDismissBtn {
+  background: transparent;
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pushDismissBtn:hover {
+  color: #e2e8f0;
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.pushTipCard {
+  margin: 0.4rem 0.25rem 0.6rem 0.25rem;
+  padding: 0.55rem 0.8rem;
+  background: rgba(30, 41, 59, 0.75);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  font-size: 0.74rem;
+  color: #e2e8f0;
+  line-height: 1.4;
+  animation: fadeIn 0.25s ease;
+}
+
+
 

@@ -3,6 +3,10 @@ import {
   getSpaceDocument,
   updateSpaceDocument,
   clearSpaceDocument,
+  getSpaceRoom,
+  updateSpaceRoom,
+  clearSpaceRoom,
+  broadcastToRoom,
   sanitizeSpaceContent,
   verifySpaceSessionToken,
   checkSpaceRateLimit,
@@ -28,9 +32,31 @@ function extractSessionToken(req, body) {
 /**
  * GET /api/space
  * Returns current shared scratchpad content and timestamp.
+ * If ?roomId=... is provided, loads the specific Instant Sync Room.
  */
-export async function GET() {
+export async function GET(req) {
   try {
+    const { searchParams } = new URL(req.url);
+    const roomId = searchParams.get('roomId');
+
+    if (roomId) {
+      const room = await getSpaceRoom(roomId);
+      if (room.notFound) {
+        return NextResponse.json({ error: 'Room does not exist.', notFound: true }, { status: 404 });
+      }
+      if (room.expired) {
+        return NextResponse.json({ error: 'Room has expired.', expired: true }, { status: 410 });
+      }
+      return NextResponse.json({
+        success: true,
+        roomId: room.roomId,
+        content: room.content || '',
+        updatedAt: room.updatedAt,
+        expiresAt: room.expiresAt,
+      });
+    }
+
+    // Default: Single shared document
     const doc = await getSpaceDocument();
     return NextResponse.json({
       success: true,
@@ -52,7 +78,7 @@ export async function POST(req) {
   try {
     const clientIp = getClientIp(req);
     const body = await req.json().catch(() => ({}));
-    const { content, clientId, lastKnownUpdatedAt } = body;
+    const { content, clientId, lastKnownUpdatedAt, roomId } = body;
 
     // 1. Enforce Human Verification Session Token
     const sessionToken = extractSessionToken(req, body);
@@ -88,6 +114,55 @@ export async function POST(req) {
       return NextResponse.json({ error: valErr.message }, { status: 400 });
     }
 
+    // ── Dedicated Room Path ──
+    if (roomId) {
+      const currentRoom = await getSpaceRoom(roomId);
+      if (currentRoom.notFound) {
+        return NextResponse.json({ error: 'Room does not exist.', notFound: true }, { status: 404 });
+      }
+      if (currentRoom.expired) {
+        return NextResponse.json({ error: 'Room has expired.', expired: true }, { status: 410 });
+      }
+
+      if (
+        lastKnownUpdatedAt &&
+        currentRoom.updatedAt &&
+        currentRoom.content !== cleanText
+      ) {
+        const serverTime = new Date(currentRoom.updatedAt).getTime();
+        const clientSeenTime = new Date(lastKnownUpdatedAt).getTime();
+        if (serverTime > clientSeenTime + 400) {
+          return NextResponse.json(
+            {
+              conflict: true,
+              currentContent: currentRoom.content,
+              updatedAt: currentRoom.updatedAt,
+              message: 'Someone else edited this room scratchpad while you were typing.',
+            },
+            { status: 409 }
+          );
+        }
+      }
+
+      const updated = await updateSpaceRoom(roomId, cleanText);
+      broadcastToRoom(roomId, 'document-update', {
+        content: cleanText,
+        updatedAt: updated.updated_at,
+        senderId: clientId || null,
+      }).catch((e) => {
+        console.warn('[API Space Room POST] Broadcast error:', e.message);
+      });
+
+      return NextResponse.json({
+        success: true,
+        roomId,
+        content: cleanText,
+        updatedAt: updated.updated_at,
+        expiresAt: updated.expires_at,
+      });
+    }
+
+    // ── Single Document Legacy Path ──
     // 4. Conflict Detection (Timestamp / Version Check)
     const currentDoc = await getSpaceDocument();
     if (
@@ -143,7 +218,7 @@ export async function DELETE(req) {
   try {
     const clientIp = getClientIp(req);
     const body = await req.json().catch(() => ({}));
-    const { clientId } = body;
+    const { clientId, roomId } = body;
 
     // 1. Enforce Human Verification Session Token
     const sessionToken = extractSessionToken(req, body);
@@ -165,7 +240,25 @@ export async function DELETE(req) {
       );
     }
 
-    // 3. Clear document in Supabase
+    // Room path clear
+    if (roomId) {
+      const cleared = await clearSpaceRoom(roomId);
+      broadcastToRoom(roomId, 'document-cleared', {
+        updatedAt: cleared.updated_at,
+        senderId: clientId || null,
+      }).catch((e) => {
+        console.warn('[API Space Room DELETE] Broadcast error:', e.message);
+      });
+
+      return NextResponse.json({
+        success: true,
+        roomId,
+        message: 'Room scratchpad cleared.',
+        updatedAt: cleared.updated_at,
+      });
+    }
+
+    // 3. Clear single document in Supabase
     const cleared = await clearSpaceDocument();
 
     // 4. Broadcast clear event

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { QRCodeSVG } from 'qrcode.react';
 import styles from './space.module.css';
 
 const MAX_CHARS = 5000;
@@ -9,7 +10,7 @@ const DEBOUNCE_DELAY_MS = 500;
 const TURNSTILE_SITE_KEY =
   process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA';
 
-export default function SpaceView() {
+export default function SpaceView({ roomId = null }) {
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(true);
   const [savingStatus, setSavingStatus] = useState('Synced'); // 'Synced' | 'Saving...' | 'Conflict'
@@ -19,6 +20,13 @@ export default function SpaceView() {
   const [isClearing, setIsClearing] = useState(false);
   const [dbError, setDbError] = useState(null);
   const [conflictNotice, setConflictNotice] = useState(null); // { remoteContent, remoteUpdatedAt }
+
+  // Room states (for /space/[roomId])
+  const [isNotFoundRoom, setIsNotFoundRoom] = useState(false);
+  const [isExpiredRoom, setIsExpiredRoom] = useState(false);
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [roomUrl, setRoomUrl] = useState('');
 
   // Turnstile human verification state
   const [sessionToken, setSessionToken] = useState(null);
@@ -134,11 +142,51 @@ export default function SpaceView() {
     };
   }, [isVerified]);
 
+  // Room URL & Copy Handler
+  useEffect(() => {
+    if (typeof window !== 'undefined' && roomId) {
+      setRoomUrl(`${window.location.origin}/space/${roomId}`);
+    }
+  }, [roomId]);
+
+  const handleCopyLink = async () => {
+    const urlToCopy =
+      roomUrl || (typeof window !== 'undefined' ? `${window.location.origin}/space/${roomId}` : '');
+    if (!urlToCopy) return;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(urlToCopy);
+      } else {
+        const el = document.createElement('textarea');
+        el.value = urlToCopy;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+      }
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+    } catch (err) {
+      console.warn('Copy link failed:', err);
+    }
+  };
+
   // ── Fetch Initial Document ──
   const fetchDocument = useCallback(async () => {
     try {
-      const res = await fetch('/api/space');
+      const url = roomId ? `/api/space?roomId=${encodeURIComponent(roomId)}` : '/api/space';
+      const res = await fetch(url);
       const data = await res.json();
+
+      if (res.status === 404 && data.notFound) {
+        setIsNotFoundRoom(true);
+        return;
+      }
+      if (res.status === 410 && data.expired) {
+        setIsExpiredRoom(true);
+        return;
+      }
+
       if (res.ok) {
         setContent(data.content || '');
         lastKnownUpdatedAtRef.current = data.updatedAt || null;
@@ -152,7 +200,7 @@ export default function SpaceView() {
     } finally {
       setLoading(false);
     }
-  }, [adjustTextareaHeight]);
+  }, [roomId, adjustTextareaHeight]);
 
   // ── Save Document (Debounced) ──
   const saveDocument = useCallback(
@@ -172,6 +220,7 @@ export default function SpaceView() {
             content: textToSave,
             clientId: clientIdRef.current,
             lastKnownUpdatedAt: lastKnownUpdatedAtRef.current,
+            ...(roomId ? { roomId } : {}),
           }),
         });
 
@@ -208,18 +257,25 @@ export default function SpaceView() {
         setSavingStatus('Error');
       }
     },
-    [sessionToken]
+    [sessionToken, roomId]
   );
 
   // ── Realtime Setup with Presence & Cursor Jump Protection ──
   useEffect(() => {
     fetchDocument();
 
-    const channel = supabase.channel('shared-space', {
-      config: {
-        private: true,
-        presence: { key: clientIdRef.current || 'visitor' },
-      },
+    const channelName = roomId ? `space-room:${roomId}` : 'shared-space';
+    const channelConfig = roomId
+      ? {
+          presence: { key: clientIdRef.current || 'visitor' },
+        }
+      : {
+          private: true,
+          presence: { key: clientIdRef.current || 'visitor' },
+        };
+
+    const channel = supabase.channel(channelName, {
+      config: channelConfig,
     });
 
     // 1. Listen for remote document updates
@@ -343,7 +399,10 @@ export default function SpaceView() {
           'Content-Type': 'application/json',
           'x-space-session-token': token,
         },
-        body: JSON.stringify({ clientId: clientIdRef.current }),
+        body: JSON.stringify({
+          clientId: clientIdRef.current,
+          ...(roomId ? { roomId } : {}),
+        }),
       });
 
       if (res.ok) {
@@ -361,13 +420,81 @@ export default function SpaceView() {
     }
   };
 
+  // If room is expired or not found, render friendly card
+  if (isExpiredRoom || isNotFoundRoom) {
+    return (
+      <main className={styles.container}>
+        <div className={styles.inner}>
+          <div className={styles.expiredCard}>
+            <div className={styles.expiredIcon} aria-hidden="true">
+              {isExpiredRoom ? '⏳' : '🔍'}
+            </div>
+            <h2 className={styles.expiredTitle}>
+              {isExpiredRoom ? 'Sync Room Expired' : 'Room Not Found'}
+            </h2>
+            <p className={styles.expiredDesc}>
+              {isExpiredRoom
+                ? 'This sync room expired after 48 hours of inactivity to keep your shared data ephemeral and secure.'
+                : 'We could not find a sync room with this ID. It may have been cleared or the link is incorrect.'}
+            </p>
+            <a href="/space" className={styles.primaryCreateBtn}>
+              Create a New Sync Room
+            </a>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className={styles.container}>
       <div className={styles.inner}>
         {/* ─── Header ─── */}
         <header className={styles.header}>
-          <h1 className={styles.title}>Space</h1>
+          <div>
+            <h1 className={styles.title}>Space</h1>
+            {roomId && (
+              <div className={styles.roomBadgeGroup} style={{ marginTop: '0.4rem' }}>
+                <div className={styles.roomBadge}>
+                  <span>ROOM</span>
+                  <span className={styles.roomCode}>{roomId}</span>
+                </div>
+                <span className={styles.roomTtl}>• 48h auto-expire</span>
+              </div>
+            )}
+          </div>
           <div className={styles.metaRow}>
+            {roomId && (
+              <div className={styles.roomActions}>
+                <button
+                  type="button"
+                  className={styles.actionPillBtn}
+                  onClick={handleCopyLink}
+                  aria-label="Copy room share link"
+                >
+                  {copiedLink ? (
+                    <>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                      Share Link
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  className={styles.actionPillBtn}
+                  onClick={() => setShowQrModal(true)}
+                  aria-label="Show QR code for phone scanning"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                  QR Code
+                </button>
+              </div>
+            )}
             <div className={styles.presenceBadge}>
               <span
                 className={`${styles.presenceDot} ${
@@ -379,6 +506,56 @@ export default function SpaceView() {
             </div>
           </div>
         </header>
+
+        {/* ─── QR Code Modal ─── */}
+        {showQrModal && (
+          <div
+            className={styles.modalBackdrop}
+            onClick={() => setShowQrModal(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Scan QR Code to join sync room"
+          >
+            <div
+              className={styles.qrModalCard}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                className={styles.qrModalClose}
+                onClick={() => setShowQrModal(false)}
+                aria-label="Close QR Modal"
+              >
+                &times;
+              </button>
+              <h3 className={styles.qrModalTitle}>Scan with Phone Camera</h3>
+              <p className={styles.qrModalSubtitle}>
+                Instantly opens this sync room on mobile — zero logins or apps needed.
+              </p>
+              <div className={styles.qrCodeWrapper}>
+                <QRCodeSVG
+                  value={roomUrl || (typeof window !== 'undefined' ? `${window.location.origin}/space/${roomId}` : '')}
+                  size={180}
+                  level="M"
+                  includeMargin={false}
+                />
+              </div>
+              <div className={styles.qrUrlBox}>
+                <span className={styles.qrUrlText}>
+                  {roomUrl || (typeof window !== 'undefined' ? `${window.location.origin}/space/${roomId}` : '')}
+                </span>
+                <button
+                  type="button"
+                  className={styles.actionPillBtn}
+                  onClick={handleCopyLink}
+                  style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem' }}
+                >
+                  {copiedLink ? 'Copied' : 'Copy'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ─── Database Migration Notice (If Needed) ─── */}
         {dbError && (

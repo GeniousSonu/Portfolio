@@ -357,3 +357,214 @@ export async function broadcastToSpace(event, payload) {
     });
   });
 }
+
+/* ─── Instant Sync Rooms (Multi-Device Space) ─── */
+
+const ROOM_ID_CHARSET = 'abcdefghjkmnpqrstuvwxyz23456789'; // URL-safe lowercase alphanumeric (no ambiguous 0,o,1,l)
+const ROOM_TTL_HOURS = 48;
+
+export function generateRoomId() {
+  let result = '';
+  const bytes = crypto.randomBytes(8);
+  for (let i = 0; i < 8; i++) {
+    result += ROOM_ID_CHARSET[bytes[i] % ROOM_ID_CHARSET.length];
+  }
+  return result;
+}
+
+/**
+ * Creates a dedicated multi-device Instant Sync Room with collision retry and opportunistic cleanup.
+ */
+export async function createSpaceRoom() {
+  const supabase = getServiceSupabase();
+
+  // Opportunistic cleanup of expired rooms (bounded best-effort)
+  supabase
+    .from('shared_space_rooms')
+    .delete()
+    .lt('expires_at', new Date().toISOString())
+    .then(() => {})
+    .catch(() => {});
+
+  let attempts = 0;
+  while (attempts < 3) {
+    attempts++;
+    const roomId = generateRoomId();
+    const nowIso = new Date().toISOString();
+    const expiresAt = new Date(Date.now() + ROOM_TTL_HOURS * 60 * 60 * 1000).toISOString();
+
+    const { data, error } = await supabase
+      .from('shared_space_rooms')
+      .insert({
+        room_id: roomId,
+        content: '',
+        created_at: nowIso,
+        updated_at: nowIso,
+        expires_at: expiresAt,
+      })
+      .select('room_id, created_at, updated_at, expires_at')
+      .single();
+
+    if (!error && data) {
+      return { roomId: data.room_id, expiresAt: data.expires_at };
+    }
+
+    if (error && error.code === '23505') {
+      // Primary key collision: retry with fresh random ID
+      console.warn(`[SharedSpace] Room ID collision on "${roomId}", retrying (${attempts}/3)...`);
+      continue;
+    }
+
+    if (error && error.code === 'PGRST205') {
+      throw new Error(
+        "Database table 'shared_space_rooms' has not been created yet. Please execute supabase/migrations/20260909_shared_space_rooms.sql in your Supabase SQL Editor."
+      );
+    }
+
+    throw new Error(`Failed to create sync room: ${error.message}`);
+  }
+
+  throw new Error('Failed to generate a unique room ID after multiple attempts. Please try again.');
+}
+
+/**
+ * Fetches an active Instant Sync Room.
+ * Checks for expiration and returns { expired: true } or { notFound: true }.
+ */
+export async function getSpaceRoom(roomId) {
+  if (!roomId || typeof roomId !== 'string') {
+    return { notFound: true };
+  }
+
+  const supabase = getServiceSupabase();
+  const cleanId = roomId.trim().toLowerCase();
+
+  const { data, error } = await supabase
+    .from('shared_space_rooms')
+    .select('room_id, content, updated_at, expires_at')
+    .eq('room_id', cleanId)
+    .maybeSingle();
+
+  if (error) {
+    if (error.code === 'PGRST205') {
+      throw new Error(
+        "Database table 'shared_space_rooms' has not been created yet. Please execute supabase/migrations/20260909_shared_space_rooms.sql in your Supabase SQL Editor."
+      );
+    }
+    throw new Error(`Failed to load room: ${error.message}`);
+  }
+
+  if (!data) {
+    return { notFound: true };
+  }
+
+  if (new Date(data.expires_at).getTime() < Date.now()) {
+    // Opportunistically remove expired room
+    supabase.from('shared_space_rooms').delete().eq('room_id', cleanId).then(() => {}).catch(() => {});
+    return { expired: true, roomId: cleanId };
+  }
+
+  return {
+    roomId: data.room_id,
+    content: data.content || '',
+    updatedAt: data.updated_at,
+    expiresAt: data.expires_at,
+  };
+}
+
+/**
+ * Updates content in an active Instant Sync Room and extends its 48h TTL.
+ */
+export async function updateSpaceRoom(roomId, content) {
+  if (!roomId || typeof roomId !== 'string') {
+    throw new Error('Valid roomId is required.');
+  }
+
+  const supabase = getServiceSupabase();
+  const cleanId = roomId.trim().toLowerCase();
+  const now = Date.now();
+  const nowIso = new Date(now).toISOString();
+  const extendedExpiry = new Date(now + ROOM_TTL_HOURS * 60 * 60 * 1000).toISOString();
+
+  const { data, error } = await supabase
+    .from('shared_space_rooms')
+    .update({
+      content: content || '',
+      updated_at: nowIso,
+      expires_at: extendedExpiry,
+    })
+    .eq('room_id', cleanId)
+    .gt('expires_at', nowIso) // Only update if not already expired
+    .select('room_id, content, updated_at, expires_at')
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      return { expired: true, roomId: cleanId };
+    }
+    throw new Error(`Failed to update room: ${error.message}`);
+  }
+
+  return data;
+}
+
+/**
+ * Clears room scratchpad.
+ */
+export async function clearSpaceRoom(roomId) {
+  return updateSpaceRoom(roomId, '');
+}
+
+/**
+ * Broadcasts an event to an Instant Sync Room's Realtime channel: space-room:${roomId}.
+ */
+export async function broadcastToRoom(roomId, event, payload) {
+  if (!roomId) return { ok: false, error: 'roomId required' };
+
+  const supabase = getServiceSupabase();
+  const cleanId = roomId.trim().toLowerCase();
+  const channelName = `space-room:${cleanId}`;
+
+  const channel = supabase.channel(channelName, {
+    config: {
+      broadcast: { ack: true },
+    },
+  });
+
+  return new Promise((resolve) => {
+    const timeout = setTimeout(async () => {
+      try {
+        await supabase.removeChannel(channel);
+      } catch (e) {}
+      resolve({ ok: false, error: 'Broadcast timed out waiting for room channel' });
+    }, 4500);
+
+    channel.subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        try {
+          const resp = await channel.send({
+            type: 'broadcast',
+            event,
+            payload,
+          });
+          clearTimeout(timeout);
+          await supabase.removeChannel(channel);
+          resolve({ ok: true, resp });
+        } catch (err) {
+          clearTimeout(timeout);
+          try {
+            await supabase.removeChannel(channel);
+          } catch (e) {}
+          resolve({ ok: false, error: err.message });
+        }
+      } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        clearTimeout(timeout);
+        try {
+          await supabase.removeChannel(channel);
+        } catch (e) {}
+        resolve({ ok: false, error: `Room channel status: ${status}` });
+      }
+    });
+  });
+}
+
