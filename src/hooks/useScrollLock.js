@@ -78,8 +78,15 @@ export function useScrollLock(isLocked) {
         document.body.style.width = previousStyles.width || '';
         document.body.style.touchAction = previousStyles.touchAction || '';
 
-        // Seamlessly restore scroll position without animation jump, unless an anchor navigation is active
-        if (typeof window !== 'undefined' && window.__portfolioNavigatingToAnchor) {
+        // Seamlessly restore scroll position without animation jump, unless an anchor or route navigation is active
+        if (typeof window !== 'undefined' && window.__portfolioNavigatingToRoute) {
+          window.__portfolioNavigatingToRoute = false;
+          window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'instant',
+          });
+        } else if (typeof window !== 'undefined' && window.__portfolioNavigatingToAnchor) {
           window.__portfolioNavigatingToAnchor = false;
         } else {
           window.scrollTo({
@@ -92,6 +99,7 @@ export function useScrollLock(isLocked) {
         // Safely resume Lenis
         if (typeof window !== 'undefined') {
           window.__lenis?.start();
+          window.__lenis?.resize();
         }
       }
     }
@@ -114,14 +122,24 @@ export function useScrollLock(isLocked) {
           document.body.style.width = previousStyles.width || '';
           document.body.style.touchAction = previousStyles.touchAction || '';
 
-          window.scrollTo({
-            top: scrollYToRestore,
-            left: 0,
-            behavior: 'instant',
-          });
+          if (typeof window !== 'undefined' && window.__portfolioNavigatingToRoute) {
+            window.__portfolioNavigatingToRoute = false;
+            window.scrollTo({
+              top: 0,
+              left: 0,
+              behavior: 'instant',
+            });
+          } else {
+            window.scrollTo({
+              top: scrollYToRestore,
+              left: 0,
+              behavior: 'instant',
+            });
+          }
 
           if (typeof window !== 'undefined') {
             window.__lenis?.start();
+            window.__lenis?.resize();
           }
         }
       }

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import useScrollLock from '@/hooks/useScrollLock';
 
 const OverlayContext = createContext({
@@ -13,6 +14,7 @@ const OverlayContext = createContext({
 
 export function OverlayProvider({ children }) {
   const [activeOverlay, setActiveOverlay] = useState('none');
+  const pathname = usePathname();
 
   // Unified body scroll lock: active whenever ANY overlay is open
   useScrollLock(activeOverlay !== 'none');
@@ -48,6 +50,11 @@ export function OverlayProvider({ children }) {
       window.dispatchEvent(new CustomEvent('mobile-nav-toggle', { detail: { open: false } }));
     }
   }, []);
+
+  // Automatically reset all overlays and release scroll lock on route change
+  useEffect(() => {
+    closeAll();
+  }, [pathname, closeAll]);
 
   const isOverlayOpen = useCallback((name) => activeOverlay === name, [activeOverlay]);
 

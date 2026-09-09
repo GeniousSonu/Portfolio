@@ -756,7 +756,7 @@ export default function SpaceView({ roomId = null }) {
                     </div>
                   )}
 
-                  <div className={styles.roomsList}>
+                  <div className={styles.roomsList} data-lenis-prevent="true">
                     {recentRooms.length === 0 ? (
                       <div className={styles.emptyRoomsNote}>
                         No recent rooms. Create one below to sync across devices.
@@ -914,6 +914,7 @@ export default function SpaceView({ roomId = null }) {
               className={styles.qrModalCard}
               onClick={(e) => e.stopPropagation()}
               style={{ maxWidth: '380px' }}
+              data-lenis-prevent="true"
             >
               <button
                 type="button"
@@ -987,6 +988,7 @@ export default function SpaceView({ roomId = null }) {
             <div
               className={styles.qrModalCard}
               onClick={(e) => e.stopPropagation()}
+              data-lenis-prevent="true"
             >
               <button
                 type="button"
@@ -1113,6 +1115,7 @@ export default function SpaceView({ roomId = null }) {
             ref={textareaRef}
             className={styles.textarea}
             value={content}
+            data-lenis-prevent="true"
             onChange={handleChange}
             onFocus={() => {
               isFocusedRef.current = true;

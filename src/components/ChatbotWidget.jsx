@@ -437,6 +437,12 @@ export default function ChatbotWidget() {
     };
   }, []);
 
+  // Ensure chatbot closes cleanly on any client-side page route change
+  useEffect(() => {
+    setIsOpen(false);
+    setIsClosing(false);
+  }, [pathname]);
+
   // Smooth auto-scroll to bottom of messages
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -489,6 +495,12 @@ export default function ChatbotWidget() {
   const handleActionClick = (action) => {
     if (action.type === 'nav') {
       const target = action.target;
+      setIsOpen(false);
+      setIsClosing(false);
+      if (typeof window !== 'undefined') {
+        window.__portfolioNavigatingToRoute = true;
+        window.dispatchEvent(new CustomEvent('portfolio-overlay-change', { detail: { active: 'none' } }));
+      }
       if (target.startsWith('#')) {
         if (pathname !== '/') {
           router.push(`/${target}`);
@@ -498,9 +510,6 @@ export default function ChatbotWidget() {
         }
       } else {
         router.push(target);
-      }
-      if (typeof window !== 'undefined' && window.innerWidth <= 768) {
-        handleClose();
       }
     } else if (action.type === 'open') {
       window.open(action.target, '_blank', 'noopener,noreferrer');
@@ -1006,6 +1015,11 @@ export default function ChatbotWidget() {
                 className={styles.modeTabBtn}
                 onClick={() => {
                   setIsOpen(false);
+                  setIsClosing(false);
+                  if (typeof window !== 'undefined') {
+                    window.__portfolioNavigatingToRoute = true;
+                    window.dispatchEvent(new CustomEvent('portfolio-overlay-change', { detail: { active: 'none' } }));
+                  }
                   router.push('/space');
                 }}
                 aria-label="Navigate to Shared Space"

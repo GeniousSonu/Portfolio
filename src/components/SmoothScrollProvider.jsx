@@ -97,11 +97,15 @@ export default function SmoothScrollProvider() {
     if (typeof window === 'undefined') return;
 
     if (window.__lenis) {
+      window.__lenis.start();
       window.__lenis.scrollTo(0, { immediate: true });
+      window.__lenis.resize();
     }
 
     // Small delay ensures DOM has swapped before recalculating trigger offsets
     const timer = setTimeout(() => {
+      window.__lenis?.start();
+      window.__lenis?.resize();
       ScrollTrigger.refresh();
     }, 80);
 
