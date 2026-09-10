@@ -6,7 +6,7 @@
 - **Current Primary Role**: Senior Web Application Developer at Ib Arts (Jul 2026 – Present), specializing in Backend Architecture & DevOps Infrastructure.
 - **Co-Founder**: WEFIK (Mar 2021 – Present), digital agency serving 30+ clients across 5+ countries.
 - **Freelance**: Top-Rated Full-Stack Developer on Upwork (Apr 2025 – Present).
-- **Previous Role**: Quality Assurance Trainee at ARC Document Solutions (Sep 2025 – Jun 2026).
+- **Previous Role**: QA Engineer at ARC Document Solutions (Sep 2025 – Jun 2026).
 - **Education**: B.Tech in Information Technology from Guru Nanak Institute of Technology (GNIT), Kolkata (2021–2025, CGPA 8.17).
 - **Patent Holder**: Patent No. 202531060002 A — Solar Powered IoT Vaccine Preservation System with MQTT Telemetry & Zone-wise Peltier Cooling (Granted Jul 4, 2025).
 
@@ -31,7 +31,7 @@
 ## Career History
 1. **Senior Web Application Developer at Ib Arts** (Jul 2026 – Present | Kolkata, India)
    - Backend architecture, RESTful API design, Docker containerization, CI/CD pipelines, high-availability server configurations.
-2. **Quality Assurance Trainee at ARC Document Solutions** (Sep 2025 – Jun 2026 | Kolkata, India)
+2. **QA Engineer at ARC Document Solutions** (Sep 2025 – Jun 2026 | Kolkata, India)
    - Quality assurance, document processing pipeline validation, technical test documentation, regression testing.
 3. **Co-Founder at WEFIK** (Mar 2021 – Present | Remote)
    - Led 30+ web and mobile solutions projects globally across 5+ countries.

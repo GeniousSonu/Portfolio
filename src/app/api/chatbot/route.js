@@ -31,6 +31,11 @@ const DEFAULT_FAQ_CONTEXT = [
     answer: 'Sahinur is currently a Senior Web Application Developer at Ib Arts, where he builds scalable enterprise systems, REST APIs, and automated cloud workflows.'
   },
   {
+    category: 'career',
+    question: 'Did Sahinur work at ARC Document Solutions?',
+    answer: 'Yes, Sahinur worked as a QA Engineer (Quality Assurance Engineer) at ARC Document Solutions from September 2025 to June 2026, validating document processing pipelines, output integrity, and software regression testing.'
+  },
+  {
     category: 'patent',
     question: 'What is Sahinur\'s IoT patent about?',
     answer: 'Sahinur holds an Indian Patent (Patent No. 544062) for an IoT-based system and method for real-time monitoring and alert generation for temperature-sensitive vaccine storage and cold-chain logistics.'

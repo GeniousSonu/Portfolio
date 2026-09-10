@@ -43,8 +43,8 @@ const PAST_ROLES = [
   {
     index: "01",
     company: "ARC Document Solutions",
-    type: "Internship · On-site",
-    role: "Quality Assurance Trainee",
+    type: "Full-time · On-site",
+    role: "QA Engineer",
     date: "Sep 2025 – Jun 2026",
     duration: "10 mos",
     logo: "/logo/ARC.png",
