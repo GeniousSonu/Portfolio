@@ -103,6 +103,7 @@ const NAV_ITEMS = [
 ];
 
 const EXTRA_PAGES = [
+  { id: '/lounge',       label: 'The Lounge' },
   { id: '/changelog',    label: 'Changelog' },
   { id: '/architecture', label: 'Architecture' },
   { id: '/uses',         label: 'Uses' },

@@ -365,6 +365,14 @@ export default function CommandPalette() {
                 <span className={styles.itemTag}>/space</span>
               </Command.Item>
 
+              <Command.Item onSelect={() => handleNavigate('/lounge')} className={styles.item}>
+                <div className={styles.itemContent}>
+                  <span className={styles.itemIcon}><PageIcon /></span>
+                  <span className={styles.itemLabel}>The Lounge (Watch &amp; Hangout)</span>
+                </div>
+                <span className={styles.itemTag}>/lounge</span>
+              </Command.Item>
+
               <Command.Item onSelect={() => handleNavigate('/changelog')} className={styles.item}>
                 <div className={styles.itemContent}>
                   <span className={styles.itemIcon}><PageIcon /></span>
