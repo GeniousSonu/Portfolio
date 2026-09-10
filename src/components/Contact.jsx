@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
+import Script from 'next/script';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -127,6 +128,42 @@ export default function Contact() {
   const [feedbackColor, setFeedbackColor] = useState('var(--green)');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Anti-Bot Telemetry (Honeypot, Form Timing, Turnstile)
+  const formMountedAt = useRef(Date.now());
+  const [honeypot, setHoneypot] = useState('');
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  const [turnstileToken, setTurnstileToken] = useState(null);
+  const turnstileContainerRef = useRef(null);
+  const turnstileWidgetId = useRef(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !turnstileSiteKey || !turnstileContainerRef.current) return;
+
+    const renderWidget = () => {
+      if (window.turnstile && turnstileWidgetId.current === null && turnstileContainerRef.current) {
+        try {
+          turnstileWidgetId.current = window.turnstile.render(turnstileContainerRef.current, {
+            sitekey: turnstileSiteKey,
+            theme: 'dark',
+            callback: (token) => setTurnstileToken(token),
+          });
+        } catch (e) {}
+      }
+    };
+
+    if (window.turnstile) {
+      renderWidget();
+    } else {
+      const interval = setInterval(() => {
+        if (window.turnstile) {
+          clearInterval(interval);
+          renderWidget();
+        }
+      }, 200);
+      return () => clearInterval(interval);
+    }
+  }, [turnstileSiteKey]);
+
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
 
@@ -200,11 +237,20 @@ export default function Contact() {
     setFeedbackColor('var(--gold, #f59e0b)');
     setFeedback('Sending message...');
 
+    const elapsedMs = Date.now() - formMountedAt.current;
+
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), email: email.trim(), message: message.trim() }),
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          message: message.trim(),
+          confirm_subject_ref: honeypot,
+          elapsedMs,
+          turnstileToken,
+        }),
       });
 
       let data = {};
@@ -220,6 +266,7 @@ export default function Contact() {
         setName('');
         setEmail('');
         setMessage('');
+        setHoneypot('');
       } else {
         setFeedbackColor('var(--red)');
         if (res.status === 400 && data.error) {
@@ -236,11 +283,26 @@ export default function Contact() {
       setFeedback('✕ Network error. Please check your connection and try again.');
     } finally {
       setIsSubmitting(false);
+      // Reset Turnstile token on completion to prevent token reuse
+      if (typeof window !== 'undefined' && window.turnstile && turnstileWidgetId.current !== null) {
+        try {
+          window.turnstile.reset(turnstileWidgetId.current);
+          setTurnstileToken(null);
+        } catch (e) {}
+      }
     }
   };
 
   return (
     <section id="contact" className="section" ref={containerRef}>
+      {/* Turnstile Script if key configured */}
+      {turnstileSiteKey && (
+        <Script
+          src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
+          strategy="lazyOnload"
+        />
+      )}
+
       <div className="site-container">
         <div className="contact-grid">
 
@@ -353,6 +415,32 @@ export default function Contact() {
               </div>
               <div className="sysinfo-body">
                 <form className="contact-form" onSubmit={handleFormSubmit}>
+                  {/* Off-screen Autofill-Safe Honeypot Trap */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: '-9999px',
+                      width: 0,
+                      height: 0,
+                      overflow: 'hidden',
+                      opacity: 0,
+                      pointerEvents: 'none',
+                      zIndex: -1,
+                    }}
+                    aria-hidden="true"
+                  >
+                    <label htmlFor="home_confirm_subject_ref">Leave empty</label>
+                    <input
+                      id="home_confirm_subject_ref"
+                      type="text"
+                      name="confirm_subject_ref"
+                      value={honeypot}
+                      onChange={(e) => setHoneypot(e.target.value)}
+                      tabIndex={-1}
+                      autoComplete="off"
+                    />
+                  </div>
+
                   <div className="form-group">
                     <label className="form-label" htmlFor="name-field">your_name</label>
                     <input type="text" id="name-field" className="form-input" placeholder="John Doe"
@@ -368,6 +456,13 @@ export default function Contact() {
                     <textarea id="msg-field" className="form-input" placeholder="Hi Sahinur, I need help with..."
                       value={message} onChange={(e) => setMessage(e.target.value)} />
                   </div>
+
+                  {turnstileSiteKey && (
+                    <div style={{ marginBottom: '0.75rem', display: 'flex', justifyContent: 'center' }}>
+                      <div ref={turnstileContainerRef} />
+                    </div>
+                  )}
+
                   <button
                     type="submit"
                     className="btn btn-gold"

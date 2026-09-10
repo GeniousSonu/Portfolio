@@ -20,6 +20,10 @@ export default function ContactView() {
   const [localTime, setLocalTime] = useState('');
   const [timeZone, setTimeZone] = useState('UTC');
 
+  // Anti-Bot Telemetry (Honeypot & Form Timing)
+  const formMountedAt = useRef(Date.now());
+  const [honeypotVal, setHoneypotVal] = useState('');
+
   // Logs stream
   const [logs, setLogs] = useState([
     { time: '00:00:01', tag: 'SYSTEM', msg: 'Kernel initialized. TLSv1.3 cryptographic handshake ready.' },
@@ -337,6 +341,8 @@ export default function ContactView() {
       token = turnstileToken;
     }
 
+    const elapsedMs = Date.now() - formMountedAt.current;
+
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
@@ -346,6 +352,8 @@ export default function ContactView() {
           email: replyAddress.trim(),
           message: payload.trim(),
           turnstileToken: token,
+          confirm_subject_ref: honeypotVal,
+          elapsedMs,
         }),
       });
 
@@ -366,6 +374,13 @@ export default function ContactView() {
       addLog('ERROR', 'Socket failure: Network route unreachable.');
     } finally {
       setIsSubmitting(false);
+      // Reset Turnstile token on completion to prevent token replay
+      if (typeof window !== 'undefined' && window.turnstile && turnstileWidgetId.current !== null) {
+        try {
+          window.turnstile.reset(turnstileWidgetId.current);
+          setTurnstileToken(null);
+        } catch (e) {}
+      }
     }
   };
 
@@ -462,6 +477,32 @@ export default function ContactView() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className={styles.terminalBody} noValidate>
+                {/* Off-screen Autofill-Safe Honeypot Trap */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: '-9999px',
+                    width: 0,
+                    height: 0,
+                    overflow: 'hidden',
+                    opacity: 0,
+                    pointerEvents: 'none',
+                    zIndex: -1,
+                  }}
+                  aria-hidden="true"
+                >
+                  <label htmlFor="contact_view_confirm_ref">Leave empty</label>
+                  <input
+                    id="contact_view_confirm_ref"
+                    type="text"
+                    name="confirm_subject_ref"
+                    value={honeypotVal}
+                    onChange={(e) => setHoneypotVal(e.target.value)}
+                    tabIndex={-1}
+                    autoComplete="off"
+                  />
+                </div>
+
                 {/* Identity Field */}
                 <div className={styles.formGroup}>
                   <label htmlFor="param-identity" className={styles.formLabel}>

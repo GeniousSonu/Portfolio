@@ -25,6 +25,7 @@
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "cmdk": "^1.1.1",
+    "disposable-email-domains": "^1.0.62",
     "emoji-picker-react": "^4.20.7",
     "firebase": "^12.19.0",
     "globe.gl": "^2.46.1",
