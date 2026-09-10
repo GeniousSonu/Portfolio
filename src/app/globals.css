@@ -2331,10 +2331,29 @@ body.preloader-locked {
   touch-action: none !important;
 }
 
+/* Strictly suppress any floating overlays from overlapping or cutting into the preloader */
+html.preloader-locked .cookie-banner-wrapper,
+body.preloader-locked .cookie-banner-wrapper,
+html.preloader-locked .loading-bar-container,
+body.preloader-locked .loading-bar-container,
+html.preloader-locked .mobile-bottom-cta,
+body.preloader-locked .mobile-bottom-cta,
+html.preloader-locked [class*="widgetWrapper"],
+body.preloader-locked [class*="widgetWrapper"] {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 #boot-preloader {
   position: fixed;
   inset: 0;
-  z-index: 99999;
+  width: 100vw;
+  width: 100dvw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 2147483640;
   background: #05070c;
   display: flex;
   align-items: center;
@@ -2344,6 +2363,7 @@ body.preloader-locked {
   user-select: none;
   pointer-events: auto;
   view-transition-name: none !important;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
 }
 
 .boot-scene {
@@ -2353,7 +2373,8 @@ body.preloader-locked {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: 1.5rem;
+  box-sizing: border-box;
 }
 
 .boot-ambient-glow {
@@ -2369,6 +2390,7 @@ body.preloader-locked {
 .boot-terminal {
   position: relative;
   width: min(500px, calc(100vw - 2rem));
+  max-height: calc(100dvh - 3rem);
   background: rgba(13, 17, 23, 0.96);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
@@ -2494,8 +2516,9 @@ body.preloader-locked {
   align-items: baseline;
   justify-content: center;
   gap: 0.12em;
-  padding: 0 1rem;
+  padding: 0.5rem 1rem;
   max-width: 100vw;
+  overflow: visible;
 }
 
 .boot-hello-word {
@@ -2503,7 +2526,8 @@ body.preloader-locked {
   font-size: clamp(2.3rem, 8.5vw, 5.4rem);
   font-weight: 800;
   letter-spacing: -0.04em;
-  line-height: 1.1;
+  line-height: 1.35;
+  padding: 0.25em 0.15em;
   background: linear-gradient(135deg, #ffffff 35%, var(--gold-bright) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -2513,6 +2537,7 @@ body.preloader-locked {
   white-space: nowrap;
   word-break: keep-all;
   display: none;
+  overflow: visible;
   will-change: transform, opacity;
 }
 
@@ -2521,7 +2546,7 @@ body.preloader-locked {
   font-size: clamp(2.0rem, 7.5vw, 4.8rem);
   font-weight: 700;
   color: var(--gold);
-  line-height: 1;
+  line-height: 1.35;
   animation: bootCursorBlink 0.65s step-start infinite;
 }
 

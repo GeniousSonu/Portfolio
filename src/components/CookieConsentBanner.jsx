@@ -14,11 +14,25 @@ export default function CookieConsentBanner() {
     const choice = getConsentChoice();
     const status = getConsentStatus();
     if (choice === "none" && status === "pending") {
-      // Small delay so it doesn't disrupt initial page entry animation
-      const timer = setTimeout(() => {
-        setVisible(true);
-      }, 1200);
-      return () => clearTimeout(timer);
+      // Small delay after preloader completes so it doesn't disrupt initial boot animation
+      const scheduleConsent = () => {
+        const timer = setTimeout(() => {
+          setVisible(true);
+        }, 1000);
+        return () => clearTimeout(timer);
+      };
+
+      if (typeof window !== "undefined" && (window.__preloaderActive || document.body.classList.contains("preloader-locked"))) {
+        const poll = setInterval(() => {
+          if (!window.__preloaderActive && !document.body.classList.contains("preloader-locked")) {
+            clearInterval(poll);
+            scheduleConsent();
+          }
+        }, 100);
+        return () => clearInterval(poll);
+      } else {
+        return scheduleConsent();
+      }
     } else {
       setAnalyticsEnabled(status === "granted");
     }
