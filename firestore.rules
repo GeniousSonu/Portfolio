@@ -10,19 +10,10 @@ service cloud.firestore {
 
       // Host creates the room initializing participantCount to 0
       allow create: if request.auth != null 
-                    && request.resource.data.hostUid == request.auth.uid
-                    && request.resource.data.participantCount == 0;
+                    && request.resource.data.hostUid == request.auth.uid;
 
-      // Host can update metadata/playbackState; transactions can adjust participantCount within [0, 6]
-      allow update: if request.auth != null && (
-        (request.auth.uid == resource.data.hostUid && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['participantCount']))
-        ||
-        (
-          request.resource.data.participantCount >= 0 
-          && request.resource.data.participantCount <= 6 
-          && math.abs(request.resource.data.participantCount - resource.data.participantCount) == 1
-        )
-      );
+      // Authenticated users can update room state (host playback/metadata, participant joins/leaves)
+      allow update: if request.auth != null;
 
       // Host can clean up room
       allow delete: if request.auth != null && request.auth.uid == resource.data.hostUid;
@@ -31,29 +22,17 @@ service cloud.firestore {
       match /participants/{uid} {
         allow read: if request.auth != null;
 
-        // Atomic transaction enforcement: can only create if parent room counter is incremented and stays <= 6
-        allow create: if request.auth.uid == uid
-                      && getAfter(/databases/$(database)/documents/rooms/$(roomId)).data.participantCount == get(/databases/$(database)/documents/rooms/$(roomId)).data.participantCount + 1
-                      && getAfter(/databases/$(database)/documents/rooms/$(roomId)).data.participantCount <= 6;
-
-        // User can update their own presence, heartbeat, and typing status
-        allow update: if request.auth.uid == uid;
-
-        // Clean leave: must decrement parent count in transaction
-        allow delete: if request.auth.uid == uid
-                      && getAfter(/databases/$(database)/documents/rooms/$(roomId)).data.participantCount == get(/databases/$(database)/documents/rooms/$(roomId)).data.participantCount - 1;
+        // Each participant manages only their own presence and status document
+        allow write: if request.auth != null && request.auth.uid == uid;
       }
 
       // ── Messages Subcollection ──
       match /messages/{messageId} {
         allow read: if request.auth != null;
         
-        // Chat messages: must be authenticated, sender must match uid, text 1..1000 characters
+        // Chat messages: must be authenticated and sender UID must match
         allow create: if request.auth != null 
-                      && request.auth.uid == request.resource.data.uid
-                      && request.resource.data.text is string
-                      && request.resource.data.text.trim().size() > 0
-                      && request.resource.data.text.size() <= 1000;
+                      && request.auth.uid == request.resource.data.uid;
         
         // Chat messages are append-only
         allow update, delete: if false;

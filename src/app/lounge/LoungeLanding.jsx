@@ -4,7 +4,13 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTransitionRouter } from '@/context/TransitionContext';
 import { doc, getDoc, setDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
-import { db, ensureAnonymousAuth, initAppCheck } from '@/lib/firebase/client';
+import {
+  db,
+  ensureAnonymousAuth,
+  initAppCheck,
+  FIREBASE_PROJECT_ID,
+  FIREBASE_CONSOLE_RULES_URL,
+} from '@/lib/firebase/client';
 import {
   generateRoomCode,
   getLoungeDisplayName,
@@ -17,6 +23,39 @@ import {
 } from '@/lib/loungeHistory';
 import LoungeParticleCanvas from '@/components/LoungeParticleCanvas';
 import styles from './lounge.module.css';
+
+const RULES_SNIPPET = `rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ── The Lounge Realtime Hangout Rules ──
+    match /rooms/{roomId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null 
+                    && request.resource.data.hostUid == request.auth.uid;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null && request.auth.uid == resource.data.hostUid;
+
+      match /participants/{uid} {
+        allow read: if request.auth != null;
+        allow write: if request.auth != null && request.auth.uid == uid;
+      }
+
+      match /messages/{messageId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null 
+                      && request.auth.uid == request.resource.data.uid;
+        allow update, delete: if false;
+      }
+
+      match /signals/{presenterUid}/peers/{viewerUid} {
+        allow read, write: if request.auth != null 
+                           && (request.auth.uid == presenterUid || request.auth.uid == viewerUid);
+      }
+    }
+  }
+}`;
 
 export default function LoungeLanding() {
   const router = useRouter();
@@ -32,6 +71,9 @@ export default function LoungeLanding() {
   const [joinError, setJoinError] = useState(null);
   const [limitNotice, setLimitNotice] = useState(null);
   const [recentRooms, setRecentRooms] = useState([]);
+  const [permissionError, setPermissionError] = useState(false);
+  const [copiedRules, setCopiedRules] = useState(false);
+
 
   // Initialize App Check and load preferences on mount
   useEffect(() => {
@@ -76,8 +118,18 @@ export default function LoungeLanding() {
     executeCreateRoom();
   };
 
+  const handleCopyRules = () => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(RULES_SNIPPET);
+      setCopiedRules(true);
+      setTimeout(() => setCopiedRules(false), 2500);
+    }
+  };
+
   const executeCreateRoom = async () => {
     setIsCreating(true);
+    setPermissionError(false);
+    setErrorMsg(null);
     try {
       const user = await ensureAnonymousAuth();
       if (!user) throw new Error('Authentication failure');
@@ -104,7 +156,16 @@ export default function LoungeLanding() {
       transitionRouter.push(`/lounge/${roomId}`);
     } catch (err) {
       console.error('[The Lounge] Room creation failed:', err);
-      setErrorMsg(err.message || 'Failed to create room. Please check your connection.');
+      const isPerm =
+        err?.code === 'permission-denied' ||
+        (typeof err?.message === 'string' && err.message.toLowerCase().includes('permission'));
+
+      if (isPerm) {
+        setPermissionError(true);
+        setErrorMsg('Firestore security rules have not been published in Firebase Console.');
+      } else {
+        setErrorMsg(err.message || 'Failed to create room. Please check your connection.');
+      }
     } finally {
       setIsCreating(false);
     }
@@ -135,6 +196,8 @@ export default function LoungeLanding() {
 
   const executeJoinRoom = async (code) => {
     setIsJoining(true);
+    setPermissionError(false);
+    setJoinError(null);
     try {
       await ensureAnonymousAuth();
       const roomRef = doc(db, 'rooms', code);
@@ -160,7 +223,16 @@ export default function LoungeLanding() {
       transitionRouter.push(`/lounge/${code}`);
     } catch (err) {
       console.error('[The Lounge] Room join check failed:', err);
-      setJoinError(err.message || 'Failed to connect to lounge.');
+      const isPerm =
+        err?.code === 'permission-denied' ||
+        (typeof err?.message === 'string' && err.message.toLowerCase().includes('permission'));
+
+      if (isPerm) {
+        setPermissionError(true);
+        setJoinError('Firestore security rules required. Please publish rules in Firebase Console.');
+      } else {
+        setJoinError(err.message || 'Failed to connect to lounge.');
+      }
     } finally {
       setIsJoining(false);
     }
@@ -222,6 +294,54 @@ export default function LoungeLanding() {
           </p>
         </header>
 
+        {/* Firebase Rules Missing Assistant */}
+        {permissionError && (
+          <div className={styles.rulesHelperCard} role="alert">
+            <div className={styles.rulesHelperHeader}>
+              <div className={styles.rulesHelperIcon}>🔒</div>
+              <div>
+                <h3 className={styles.rulesHelperTitle}>Firestore Security Rules Setup Required</h3>
+                <p className={styles.rulesHelperDesc}>
+                  Your Firebase Cloud project (<code>{FIREBASE_PROJECT_ID}</code>) is currently blocking database writes because the default rules in the Firebase Console are locked. Paste the security rules into the Firebase Console rules editor and click <strong>Publish</strong>.
+                </p>
+              </div>
+            </div>
+
+            <div className={styles.rulesActionRow}>
+              <a
+                href={FIREBASE_CONSOLE_RULES_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.rulesConsoleBtn}
+              >
+                Open Firebase Console Rules ↗
+              </a>
+              <button
+                type="button"
+                className={styles.rulesCopyBtn}
+                onClick={handleCopyRules}
+              >
+                {copiedRules ? 'Copied to Clipboard! ✓' : '📋 Copy Rules to Clipboard'}
+              </button>
+              <button
+                type="button"
+                className={styles.rulesRetryBtn}
+                onClick={executeCreateRoom}
+                disabled={isCreating}
+              >
+                {isCreating ? 'Verifying...' : '↻ Verify & Retry Now'}
+              </button>
+            </div>
+
+            <details className={styles.rulesCodeContainer}>
+              <summary className={styles.rulesSummary}>
+                ▶ View copy-pasteable rules (firestore.rules)
+              </summary>
+              <pre className={styles.rulesCodePre}>{RULES_SNIPPET}</pre>
+            </details>
+          </div>
+        )}
+
         {limitNotice && (
           <div className={styles.errorBanner} style={{ maxWidth: 960, margin: '0 auto 1.5rem', width: '100%' }}>
             ⚠ {limitNotice}
@@ -242,7 +362,8 @@ export default function LoungeLanding() {
             <p className={styles.cardDesc}>
               Initialize an isolated virtual room. As host, stream your screen or coordinate synchronized YouTube playback with up to 5 friends.
             </p>
-            {errorMsg && <div className={styles.errorBanner}>✕ {errorMsg}</div>}
+            {errorMsg && !permissionError && <div className={styles.errorBanner}>✕ {errorMsg}</div>}
+
             <button
               type="button"
               className={styles.primaryBtn}

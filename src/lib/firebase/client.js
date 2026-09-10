@@ -54,39 +54,42 @@ export async function initAppCheck() {
 }
 
 // Anonymous Auth Helper
-let authPromise = null;
-export function ensureAnonymousAuth() {
-  if (typeof window === 'undefined') return Promise.resolve(null);
+export async function ensureAnonymousAuth() {
+  if (typeof window === 'undefined') return null;
 
   if (auth.currentUser) {
-    return Promise.resolve(auth.currentUser);
+    return auth.currentUser;
   }
 
-  if (authPromise) return authPromise;
+  // Wait for Firebase to finish restoring persisted auth state
+  if (typeof auth.authStateReady === 'function') {
+    try {
+      await auth.authStateReady();
+    } catch {
+      // Ignore authStateReady failure and attempt sign-in
+    }
+  }
 
-  authPromise = new Promise((resolve, reject) => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        unsubscribe();
-        authPromise = null;
-        resolve(user);
-      } else {
-        try {
-          const cred = await signInAnonymously(auth);
-          unsubscribe();
-          authPromise = null;
-          resolve(cred.user);
-        } catch (err) {
-          unsubscribe();
-          authPromise = null;
-          console.error('[The Lounge] Anonymous auth error:', err);
-          reject(err);
-        }
-      }
-    });
-  });
+  if (auth.currentUser) {
+    return auth.currentUser;
+  }
 
-  return authPromise;
+  try {
+    const cred = await signInAnonymously(auth);
+    return cred.user;
+  } catch (err) {
+    console.error('[The Lounge] Anonymous auth error:', err);
+    if (err.code === 'auth/operation-not-allowed' || err.code === 'auth/admin-restricted-operation') {
+      throw new Error(
+        'Anonymous Authentication is not enabled in Firebase Console. Please enable it in Authentication > Sign-in method.'
+      );
+    }
+    throw err;
+  }
 }
 
+export const FIREBASE_PROJECT_ID = firebaseConfig.projectId;
+export const FIREBASE_CONSOLE_RULES_URL = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/firestore/rules`;
+
 export default app;
+

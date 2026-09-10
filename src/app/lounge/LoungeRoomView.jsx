@@ -13,7 +13,12 @@ import {
   serverTimestamp,
   Timestamp,
 } from 'firebase/firestore';
-import { db, ensureAnonymousAuth, initAppCheck } from '@/lib/firebase/client';
+import {
+  db,
+  ensureAnonymousAuth,
+  initAppCheck,
+  FIREBASE_CONSOLE_RULES_URL,
+} from '@/lib/firebase/client';
 import {
   getLoungeDisplayName,
   setLoungeDisplayName,
@@ -186,6 +191,14 @@ export default function LoungeRoomView({ roomId }) {
         } else if (err.message === 'EXPIRED') {
           setJoinStatus('error');
           setErrorMessage('This lounge session has expired.');
+        } else if (
+          err?.code === 'permission-denied' ||
+          (typeof err?.message === 'string' && err.message.toLowerCase().includes('permission'))
+        ) {
+          setJoinStatus('error');
+          setErrorMessage(
+            'Firestore Security Rules required. Please publish the project rules in Firebase Console.'
+          );
         } else {
           setJoinStatus('error');
           setErrorMessage(err.message || 'Error joining lounge.');
@@ -226,17 +239,32 @@ export default function LoungeRoomView({ roomId }) {
     if (!roomId) return;
 
     const roomRef = doc(db, 'rooms', roomId);
-    const unsubRoom = onSnapshot(roomRef, (snap) => {
-      if (snap.exists()) {
-        setRoomData({ id: snap.id, ...snap.data() });
-      } else if (joinStatus === 'joined') {
-        setJoinStatus('not_found');
-        setErrorMessage('The host closed this lounge.');
+    const unsubRoom = onSnapshot(
+      roomRef,
+      (snap) => {
+        if (snap.exists()) {
+          setRoomData({ id: snap.id, ...snap.data() });
+        } else if (joinStatus === 'joined') {
+          setJoinStatus('not_found');
+          setErrorMessage('The host closed this lounge.');
+        }
+      },
+      (err) => {
+        console.warn('[The Lounge] Room snapshot notice:', err);
+        if (err.code === 'permission-denied') {
+          setJoinStatus('error');
+          setErrorMessage(
+            'Firestore Security Rules required. Please publish the project rules in Firebase Console.'
+          );
+        }
       }
-    });
+    );
 
     const participantsCol = collection(db, 'rooms', roomId, 'participants');
-    const unsubParticipants = onSnapshot(participantsCol, (snap) => {
+    const unsubParticipants = onSnapshot(
+      participantsCol,
+      (snap) => {
+
       const now = Date.now();
       const list = [];
 
@@ -483,6 +511,24 @@ export default function LoungeRoomView({ roomId }) {
               {joinStatus === 'full' ? 'Lounge Full' : 'Connection Dropped'}
             </h2>
             <p className={styles.cardDesc}>{errorMessage}</p>
+            {errorMessage?.includes('Firestore Security Rules') && (
+              <a
+                href={FIREBASE_CONSOLE_RULES_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.secondaryBtn}
+                style={{
+                  marginBottom: '1rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  padding: '0.6rem 1.1rem',
+                  fontSize: '0.82rem',
+                }}
+              >
+                Open Firebase Console Rules ↗
+              </a>
+            )}
             <button
               type="button"
               className={styles.primaryBtn}
@@ -490,6 +536,7 @@ export default function LoungeRoomView({ roomId }) {
             >
               Return to Lounge Lobby
             </button>
+
           </div>
         </main>
       </div>
