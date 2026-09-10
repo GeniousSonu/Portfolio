@@ -24,7 +24,7 @@ import {
   setLoungeDisplayName,
   addOrUpdateRoomHistory,
 } from '@/lib/loungeHistory';
-import { PresenterManager, ViewerManager, VoiceMeshManager, AUDIO_CONSTRAINTS } from '@/lib/webrtcStar';
+import { PresenterManager, ViewerManager, VoiceMeshManager, AUDIO_CONSTRAINTS, getMicrophoneStream } from '@/lib/webrtcStar';
 import LoungeParticleCanvas from '@/components/LoungeParticleCanvas';
 import LoungeChat from '@/components/LoungeChat';
 import LoungeYouTubePlayer from '@/components/LoungeYouTubePlayer';
@@ -97,6 +97,7 @@ export default function LoungeRoomView({ roomId }) {
   const [speakingMap, setSpeakingMap] = useState({}); // uid -> boolean
   const [locallyMutedPeers, setLocallyMutedPeers] = useState({}); // peerUid -> boolean
   const [autoMutedNotice, setAutoMutedNotice] = useState(false);
+  const [isAutoplayBlocked, setIsAutoplayBlocked] = useState(false);
 
   const voiceMeshRef = useRef(null);
   const isVoiceActiveRef = useRef(false);
@@ -566,7 +567,7 @@ export default function LoungeRoomView({ roomId }) {
   const handleJoinVoice = async () => {
     if (!currentUser || !roomId) return;
     try {
-      const stream = await navigator.mediaDevices.getUserMedia(AUDIO_CONSTRAINTS);
+      const stream = await getMicrophoneStream();
       const voiceMgr = new VoiceMeshManager(roomId, currentUser.uid, stream, {
         onSpeakingChange: (uid, isSpeaking) => {
           setSpeakingMap((prev) => {
@@ -594,7 +595,13 @@ export default function LoungeRoomView({ roomId }) {
             };
           });
         },
+        onAutoplayBlocked: (blocked) => {
+          setIsAutoplayBlocked(blocked);
+        },
       });
+
+      // Resume AudioContext / audio elements on explicit user gesture
+      voiceMgr.resumeAudio();
 
       voiceMeshRef.current = voiceMgr;
       setInVoice(true);
@@ -603,6 +610,7 @@ export default function LoungeRoomView({ roomId }) {
       isMicMutedRef.current = false;
       setIsDeafened(false);
       setAutoMutedNotice(false);
+      setIsAutoplayBlocked(false);
 
       // Connect to any participants already in voice
       if (Array.isArray(participants)) {
@@ -638,6 +646,7 @@ export default function LoungeRoomView({ roomId }) {
     setSpeakingMap({});
     setPeerConnectionStates({});
     setAutoMutedNotice(false);
+    setIsAutoplayBlocked(false);
 
     if (currentUser && roomId) {
       const pRef = doc(db, 'rooms', roomId, 'participants', currentUser.uid);
@@ -1308,6 +1317,25 @@ export default function LoungeRoomView({ roomId }) {
               </div>
             )}
           </div>
+
+          {/* Autoplay Blocked Notification Banner */}
+          {isAutoplayBlocked && inVoice && (
+            <div className={styles.autoMutedBanner} role="status">
+              <span>🔊 Audio is muted by your browser autoplay policy.</span>
+              <button
+                type="button"
+                className={styles.autoMutedBannerBtn}
+                onClick={() => {
+                  if (voiceMeshRef.current) {
+                    voiceMeshRef.current.resumeAudio();
+                  }
+                  setIsAutoplayBlocked(false);
+                }}
+              >
+                Tap to Listen
+              </button>
+            </div>
+          )}
 
           {/* Background Auto-Muted Notification Banner */}
           {autoMutedNotice && inVoice && (

@@ -81,8 +81,26 @@ export const AUDIO_CONSTRAINTS = {
 };
 
 /**
+ * Microphone acquisition helper with automatic fallback to basic audio
+ * if advanced device constraints (echo cancellation, etc.) are rejected by hardware.
+ */
+export async function getMicrophoneStream() {
+  if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
+    throw new Error('getUserMedia is not supported on this device/browser');
+  }
+  try {
+    return await navigator.mediaDevices.getUserMedia(AUDIO_CONSTRAINTS);
+  } catch (err) {
+    console.warn('[The Lounge Voice] High-quality audio constraints rejected, falling back to basic audio:', err);
+    return await navigator.mediaDevices.getUserMedia({ audio: true });
+  }
+}
+
+/**
  * Creates an ICE candidate buffer that flushes writes to Firestore in batches
  * every 250ms, drastically reducing write quota consumption during negotiation.
+ * If the signal document does not exist yet (e.g. Callee flushes before Caller setDoc completes),
+ * the candidates are retained in buffer and retried on the next tick.
  */
 function createIceCandidateBuffer(docRef, fieldName) {
   let buffer = [];
@@ -97,7 +115,13 @@ function createIceCandidateBuffer(docRef, fieldName) {
     updateDoc(docRef, {
       [fieldName]: arrayUnion(...toFlush),
       updatedAt: serverTimestamp(),
-    }).catch(() => {});
+    }).catch((err) => {
+      // Retain candidates in buffer and retry after a short delay
+      buffer.unshift(...toFlush);
+      if (!timer) {
+        timer = setTimeout(flush, 400);
+      }
+    });
   };
 
   return {
@@ -114,8 +138,11 @@ function createIceCandidateBuffer(docRef, fieldName) {
       }
     },
     destroy() {
-      if (timer) clearTimeout(timer);
-      flush();
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
+      buffer = [];
     },
   };
 }
@@ -363,6 +390,25 @@ export class ViewerManager {
   }
 }
 
+function getOrCreateVoiceAudioContainer() {
+  if (typeof document === 'undefined') return null;
+  let container = document.getElementById('lounge-voice-audio-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'lounge-voice-audio-container';
+    container.style.position = 'fixed';
+    container.style.top = '-9999px';
+    container.style.left = '-9999px';
+    container.style.width = '1px';
+    container.style.height = '1px';
+    container.style.opacity = '0';
+    container.style.pointerEvents = 'none';
+    container.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(container);
+  }
+  return container;
+}
+
 /**
  * VOICE MESH: Full peer-to-peer audio mesh for up to 6 participants
  * with per-peer local mute, speaking detection, and background auto-mute.
@@ -376,6 +422,7 @@ export class VoiceMeshManager {
     this.onPeerLeft = callbacks.onPeerLeft || (() => {});
     this.onSpeakingChange = callbacks.onSpeakingChange || (() => {});
     this.onConnectionStateChange = callbacks.onConnectionStateChange || (() => {});
+    this.onAutoplayBlocked = callbacks.onAutoplayBlocked || (() => {});
 
     this.peerConnections = new Map(); // peerUid -> RTCPeerConnection
     this.unsubscribers = new Map(); // peerUid -> unsub function
@@ -417,11 +464,24 @@ export class VoiceMeshManager {
     }
   }
 
+  resumeAudio() {
+    if (this.audioContext && this.audioContext.state === 'suspended') {
+      this.audioContext.resume().catch(() => {});
+    }
+    this.audioElements.forEach((audioEl) => {
+      if (audioEl) {
+        audioEl.play().then(() => {
+          this.onAutoplayBlocked(false);
+        }).catch(() => {});
+      }
+    });
+  }
+
   attachRemoteAnalyser(peerUid, stream) {
     if (!this.audioContext) return;
     try {
       if (this.audioContext.state === 'suspended') {
-        this.audioContext.resume();
+        this.audioContext.resume().catch(() => {});
       }
       const source = this.audioContext.createMediaStreamSource(stream);
       const analyser = this.audioContext.createAnalyser();
@@ -533,22 +593,73 @@ export class VoiceMeshManager {
     };
 
     pc.ontrack = (event) => {
-      if (event.streams && event.streams[0]) {
-        const remoteStream = event.streams[0];
+      const stream =
+        (event.streams && event.streams[0]) ||
+        (event.track ? new MediaStream([event.track]) : null);
+
+      if (stream) {
+        const container = getOrCreateVoiceAudioContainer();
         let audioEl = this.audioElements.get(peerUid);
         if (!audioEl) {
-          audioEl = new Audio();
+          audioEl = document.createElement('audio');
+          audioEl.id = `lounge-voice-audio-${peerUid}`;
           audioEl.autoplay = true;
+          audioEl.playsInline = true;
+          if (container) {
+            container.appendChild(audioEl);
+          } else if (typeof document !== 'undefined') {
+            document.body.appendChild(audioEl);
+          }
           this.audioElements.set(peerUid, audioEl);
         }
-        audioEl.srcObject = remoteStream;
-        audioEl.muted = this.locallyMutedPeers.has(peerUid) || this.isDeafened;
-        audioEl.play().catch(() => {});
 
-        this.attachRemoteAnalyser(peerUid, remoteStream);
-        this.onPeerStream(peerUid, remoteStream);
+        audioEl.srcObject = stream;
+        audioEl.muted = this.locallyMutedPeers.has(peerUid) || this.isDeafened;
+
+        const playPromise = audioEl.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((err) => {
+            console.warn(`[The Lounge Voice] Autoplay blocked for peer ${peerUid}:`, err);
+            this.onAutoplayBlocked(true);
+
+            // Automatic one-click user interaction unlocker
+            const unlockAudio = () => {
+              audioEl.play().then(() => {
+                this.onAutoplayBlocked(false);
+              }).catch(() => {});
+              window.removeEventListener('click', unlockAudio);
+              window.removeEventListener('touchstart', unlockAudio);
+              window.removeEventListener('keydown', unlockAudio);
+            };
+
+            window.addEventListener('click', unlockAudio, { once: true });
+            window.addEventListener('touchstart', unlockAudio, { once: true });
+            window.addEventListener('keydown', unlockAudio, { once: true });
+          });
+        }
+
+        this.attachRemoteAnalyser(peerUid, stream);
+        this.onPeerStream(peerUid, stream);
       }
     };
+
+    // Queued candidate management to eliminate race conditions
+    const pendingCandidates = [];
+    const processedCandidates = new Set();
+
+    const drainPendingCandidates = async () => {
+      if (!pc || !pc.currentRemoteDescription) return;
+      while (pendingCandidates.length > 0) {
+        const cand = pendingCandidates.shift();
+        try {
+          await pc.addIceCandidate(new RTCIceCandidate(cand));
+        } catch (err) {
+          console.warn(`[WebRTC Voice] Failed to apply queued ICE candidate:`, err);
+        }
+      }
+    };
+
+    const sessionEpoch = Date.now();
 
     if (isCaller) {
       const offer = await pc.createOffer();
@@ -559,6 +670,7 @@ export class VoiceMeshManager {
         {
           callerUid,
           calleeUid,
+          sessionEpoch,
           offer: { type: offer.type, sdp: offer.sdp },
           answer: null,
           callerCandidates: [],
@@ -567,7 +679,7 @@ export class VoiceMeshManager {
           updatedAt: serverTimestamp(),
           expiresAt: Timestamp.fromMillis(Date.now() + 60 * 60 * 1000), // 1h TTL
         },
-        { merge: true }
+        { merge: false } // Fresh document, do not merge stale session data
       );
 
       const unsub = onSnapshot(signalDocRef, async (snap) => {
@@ -576,13 +688,22 @@ export class VoiceMeshManager {
 
         if (data.answer && !pc.currentRemoteDescription) {
           await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+          await drainPendingCandidates();
         }
 
-        if (Array.isArray(data.calleeCandidates) && data.calleeCandidates.length > 0) {
+        if (Array.isArray(data.calleeCandidates)) {
           for (const c of data.calleeCandidates) {
-            try {
-              await pc.addIceCandidate(new RTCIceCandidate(c));
-            } catch {}
+            if (!c || !c.candidate || processedCandidates.has(c.candidate)) continue;
+            processedCandidates.add(c.candidate);
+            if (!pc.currentRemoteDescription) {
+              pendingCandidates.push(c);
+            } else {
+              try {
+                await pc.addIceCandidate(new RTCIceCandidate(c));
+              } catch (err) {
+                console.warn(`[WebRTC Voice] Error adding callee candidate:`, err);
+              }
+            }
           }
         }
       });
@@ -596,6 +717,8 @@ export class VoiceMeshManager {
         if (data.offer && !pc.currentRemoteDescription && !hasAnswered) {
           hasAnswered = true;
           await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+          await drainPendingCandidates();
+
           const answer = await pc.createAnswer();
           await pc.setLocalDescription(answer);
 
@@ -605,11 +728,19 @@ export class VoiceMeshManager {
           });
         }
 
-        if (Array.isArray(data.callerCandidates) && data.callerCandidates.length > 0) {
+        if (Array.isArray(data.callerCandidates)) {
           for (const c of data.callerCandidates) {
-            try {
-              await pc.addIceCandidate(new RTCIceCandidate(c));
-            } catch {}
+            if (!c || !c.candidate || processedCandidates.has(c.candidate)) continue;
+            processedCandidates.add(c.candidate);
+            if (!pc.currentRemoteDescription) {
+              pendingCandidates.push(c);
+            } else {
+              try {
+                await pc.addIceCandidate(new RTCIceCandidate(c));
+              } catch (err) {
+                console.warn(`[WebRTC Voice] Error adding caller candidate:`, err);
+              }
+            }
           }
         }
       });
@@ -684,6 +815,9 @@ export class VoiceMeshManager {
     if (audioEl) {
       audioEl.pause();
       audioEl.srcObject = null;
+      try {
+        audioEl.remove();
+      } catch {}
       this.audioElements.delete(peerUid);
     }
 
@@ -692,6 +826,21 @@ export class VoiceMeshManager {
     this.onSpeakingChange(peerUid, false);
     this.onConnectionStateChange(peerUid, 'closed', 'closed');
     this.onPeerLeft(peerUid);
+
+    // Delete pairwise signaling document from Firestore
+    const isCaller = this.localUid < peerUid;
+    const callerUid = isCaller ? this.localUid : peerUid;
+    const calleeUid = isCaller ? peerUid : this.localUid;
+    const signalDocRef = doc(
+      db,
+      'rooms',
+      this.roomId,
+      'voiceSignals',
+      callerUid,
+      'peers',
+      calleeUid
+    );
+    deleteDoc(signalDocRef).catch(() => {});
   }
 
   destroy() {
@@ -714,6 +863,15 @@ export class VoiceMeshManager {
         this.audioContext.close();
       } catch {}
       this.audioContext = null;
+    }
+
+    if (typeof document !== 'undefined') {
+      const container = document.getElementById('lounge-voice-audio-container');
+      if (container && container.children.length === 0) {
+        try {
+          container.remove();
+        } catch {}
+      }
     }
   }
 }
