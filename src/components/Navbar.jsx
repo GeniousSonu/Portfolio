@@ -230,7 +230,9 @@ export default function Navbar() {
   };
 
   const handleLinkClick = (e, targetId) => {
+    console.log('[Navbar] handleLinkClick triggered for targetId:', targetId, 'at', performance.now());
     e.preventDefault();
+    console.log('[Navbar] Calling closeOverlay(nav) at', performance.now());
     closeOverlay('nav');
 
     if (targetId === '#') {
@@ -246,6 +248,7 @@ export default function Navbar() {
     }
 
     if (targetId.startsWith('/')) {
+      console.log('[Navbar] Calling transitionRouter.push for:', targetId, 'at', performance.now());
       transitionRouter.push(targetId);
       return;
     }
