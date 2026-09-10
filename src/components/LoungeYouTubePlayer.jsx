@@ -5,7 +5,7 @@ import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/client';
 import styles from '@/app/lounge/lounge.module.css';
 
-function extractYouTubeId(urlOrId) {
+export function extractYouTubeId(urlOrId) {
   if (!urlOrId) return '';
   const trimmed = urlOrId.trim();
   if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) {

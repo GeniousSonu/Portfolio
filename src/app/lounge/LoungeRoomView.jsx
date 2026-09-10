@@ -27,7 +27,7 @@ import {
 import { PresenterManager, ViewerManager, VoiceMeshManager, AUDIO_CONSTRAINTS, getMicrophoneStream } from '@/lib/webrtcStar';
 import LoungeParticleCanvas from '@/components/LoungeParticleCanvas';
 import LoungeChat from '@/components/LoungeChat';
-import LoungeYouTubePlayer from '@/components/LoungeYouTubePlayer';
+import LoungeYouTubePlayer, { extractYouTubeId } from '@/components/LoungeYouTubePlayer';
 import { useOverlay } from '@/context/OverlayContext';
 import styles from './lounge.module.css';
 
@@ -106,7 +106,9 @@ export default function LoungeRoomView({ roomId }) {
 
   // YouTube / Stage Mode
   const [stageMode, setStageMode] = useState('idle'); // 'idle' | 'screenshare' | 'youtube'
-  const [showYouTubeInput, setShowYouTubeInput] = useState(false);
+  const [showYouTubeModal, setShowYouTubeModal] = useState(false);
+  const [youTubeUrlInput, setYouTubeUrlInput] = useState('');
+  const [youTubeError, setYouTubeError] = useState('');
 
   // Chat & UI State
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -492,7 +494,11 @@ export default function LoungeRoomView({ roomId }) {
         stopScreenShare();
       };
     } catch (err) {
-      console.warn('[The Lounge] Screen capture cancelled or failed:', err);
+      if (err?.name === 'NotAllowedError' || err?.name === 'AbortError') {
+        console.log('[The Lounge] Screen capture was dismissed or cancelled by user.');
+      } else {
+        console.warn('[The Lounge] Screen capture error:', err);
+      }
       setIsSharingScreen(false);
     }
   };
@@ -965,6 +971,54 @@ export default function LoungeRoomView({ roomId }) {
     updateDoc(pRef, { displayName: clean }).catch(() => {});
   };
 
+  // YouTube Watch Party Broadcast
+  const handleBroadcastYouTube = async (e) => {
+    e.preventDefault();
+    if (!roomId) return;
+    const id = extractYouTubeId(youTubeUrlInput);
+    if (!id) {
+      setYouTubeError('Please enter a valid YouTube URL or 11-character video ID.');
+      return;
+    }
+    try {
+      const roomRef = doc(db, 'rooms', roomId);
+      await updateDoc(roomRef, {
+        playbackState: {
+          videoId: id,
+          isPlaying: true,
+          positionSeconds: 0,
+          updatedAt: serverTimestamp(),
+        },
+      });
+      setShowYouTubeModal(false);
+      setYouTubeUrlInput('');
+      setYouTubeError('');
+    } catch (err) {
+      console.error('[The Lounge] Failed to broadcast YouTube video:', err);
+      setYouTubeError('Failed to start broadcast. Please check your connection.');
+    }
+  };
+
+  const handleStopYouTubeParty = async () => {
+    if (!roomId) return;
+    try {
+      const roomRef = doc(db, 'rooms', roomId);
+      await updateDoc(roomRef, {
+        playbackState: {
+          videoId: '',
+          isPlaying: false,
+          positionSeconds: 0,
+          updatedAt: serverTimestamp(),
+        },
+      });
+      setShowYouTubeModal(false);
+      setYouTubeUrlInput('');
+      setYouTubeError('');
+    } catch (err) {
+      console.error('[The Lounge] Failed to stop YouTube watch party:', err);
+    }
+  };
+
   // Render Duplicate Tab State
   if (joinStatus === 'duplicate_tab') {
     return (
@@ -1095,6 +1149,107 @@ export default function LoungeRoomView({ roomId }) {
                   type="button"
                   className={styles.secondaryBtn}
                   onClick={() => setShowNameModal(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* YouTube Watch Party Link Share Modal */}
+      {showYouTubeModal && (
+        <div className={styles.modalBackdrop} role="dialog" aria-modal="true">
+          <div className={styles.modalCard} style={{ maxWidth: 480 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
+              <h3 className={styles.modalTitle} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ color: '#ef4444' }}>▶</span> YouTube Watch Party
+              </h3>
+              <button
+                type="button"
+                className={styles.userEditBtn}
+                onClick={() => setShowYouTubeModal(false)}
+                aria-label="Close modal"
+              >
+                ✕
+              </button>
+            </div>
+            <p className={styles.cardDesc} style={{ fontSize: '0.82rem', marginBottom: '1rem', textAlign: 'left' }}>
+              Paste any YouTube video or music link to synchronize and broadcast it across the virtual stage for all participants.
+            </p>
+
+            <form onSubmit={handleBroadcastYouTube} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <input
+                type="text"
+                className={styles.inputCode}
+                placeholder="https://www.youtube.com/watch?v=... or Video ID"
+                value={youTubeUrlInput}
+                onChange={(e) => {
+                  setYouTubeUrlInput(e.target.value);
+                  setYouTubeError('');
+                }}
+                style={{ fontSize: '0.85rem', padding: '0.75rem 0.9rem', textAlign: 'left', letterSpacing: 'normal' }}
+                autoFocus
+              />
+
+              {youTubeError && (
+                <span style={{ color: '#f87171', fontSize: '0.75rem', fontFamily: 'var(--font-mono, monospace)' }}>
+                  ⚠ {youTubeError}
+                </span>
+              )}
+
+              {/* Quick Presets */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontFamily: 'var(--font-mono, monospace)' }}>
+                  QUICK PRESETS:
+                </span>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                  <button
+                    type="button"
+                    className={styles.secondaryBtn}
+                    style={{ fontSize: '0.72rem', padding: '0.3rem 0.65rem' }}
+                    onClick={() => setYouTubeUrlInput('https://www.youtube.com/watch?v=jfKfPfyJRdk')}
+                  >
+                    🎵 Lofi Synth Ambient
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.secondaryBtn}
+                    style={{ fontSize: '0.72rem', padding: '0.3rem 0.65rem' }}
+                    onClick={() => setYouTubeUrlInput('https://www.youtube.com/watch?v=5qap5aO4i9A')}
+                  >
+                    ☕ Lofi Hip Hop Radio
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.secondaryBtn}
+                    style={{ fontSize: '0.72rem', padding: '0.3rem 0.65rem' }}
+                    onClick={() => setYouTubeUrlInput('https://www.youtube.com/watch?v=DWcJFNfaw9c')}
+                  >
+                    🌌 Cyberpunk Synthwave
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.6rem', marginTop: '0.5rem' }}>
+                <button type="submit" className={styles.primaryBtn} style={{ flex: 1 }}>
+                  {roomData?.playbackState?.videoId ? 'Update Broadcast' : 'Start Watch Party'}
+                </button>
+                {roomData?.playbackState?.videoId && (
+                  <button
+                    type="button"
+                    className={styles.leaveBtn}
+                    onClick={handleStopYouTubeParty}
+                    title="Stop YouTube playback and return stage to idle"
+                  >
+                    End Party
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className={styles.secondaryBtn}
+                  onClick={() => setShowYouTubeModal(false)}
                 >
                   Cancel
                 </button>
@@ -1493,35 +1648,19 @@ export default function LoungeRoomView({ roomId }) {
               </button>
             )}
 
-            {/* YouTube Watch Party Toggle (Host controls) */}
-            {isHost && (
-              <button
-                type="button"
-                className={`${styles.discordBtn} ${stageMode === 'youtube' ? styles.discordBtnActive : ''}`}
-                onClick={() => {
-                  if (stageMode === 'youtube') {
-                    // Reset YouTube video
-                    const roomRef = doc(db, 'rooms', roomId);
-                    updateDoc(roomRef, {
-                      playbackState: { videoId: '', isPlaying: false, positionSeconds: 0, updatedAt: serverTimestamp() },
-                    }).catch(() => {});
-                  } else {
-                    // Prompt host with a sample music session
-                    const roomRef = doc(db, 'rooms', roomId);
-                    updateDoc(roomRef, {
-                      playbackState: { videoId: 'jfKfPfyJRdk', isPlaying: true, positionSeconds: 0, updatedAt: serverTimestamp() },
-                    }).catch(() => {});
-                  }
-                }}
-                title={stageMode === 'youtube' ? 'Close YouTube' : 'YouTube Watch Party'}
-                aria-label={stageMode === 'youtube' ? 'Close YouTube party' : 'YouTube party'}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                  <polygon points="5 3 19 12 5 21 5 3" />
-                </svg>
-                <span className={styles.dockLabel}>{stageMode === 'youtube' ? 'Close Party' : 'Watch Party'}</span>
-              </button>
-            )}
+            {/* YouTube Watch Party Button (Accessible to all participants) */}
+            <button
+              type="button"
+              className={`${styles.discordBtn} ${stageMode === 'youtube' ? styles.discordBtnActive : ''}`}
+              onClick={() => setShowYouTubeModal(true)}
+              title={stageMode === 'youtube' ? 'YouTube Watch Party Active (Click to change or stop)' : 'YouTube Watch Party'}
+              aria-label={stageMode === 'youtube' ? 'YouTube Watch Party Active' : 'YouTube Watch Party'}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+              <span className={styles.dockLabel}>{stageMode === 'youtube' ? 'Watch Party (Live)' : 'Watch Party'}</span>
+            </button>
 
             {/* Chat Drawer Toggle */}
             <button
