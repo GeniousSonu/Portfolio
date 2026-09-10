@@ -116,7 +116,7 @@ export default function BotPrivacyPolicyPage() {
         {/* Page Header */}
         <header className={styles.header}>
           <div className={styles.badge}>
-            <span>ai.agent</span>
+            <span>ai.assistant</span>
             <span>--policy=bot_privacy_protection</span>
           </div>
           <h1 className={styles.title}>Genious Bot Privacy Policy</h1>
@@ -176,7 +176,7 @@ export default function BotPrivacyPolicyPage() {
               <span className={styles.sectionNumber}>01.</span> Purpose &amp; Architectural Overview
             </h2>
             <p className={styles.paragraph}>
-              The <span className={styles.highlightText}>Genious AI Assistant</span> (&quot;Genious Bot&quot;) is an interactive conversational agent integrated into <span className={styles.highlightText}>genioussonu.me</span>. Its sole purpose is to provide visitors, recruiters, prospective clients, and fellow engineers with rapid, intelligent answers regarding:
+              The <span className={styles.highlightText}>Genious AI Assistant</span> (&quot;Genious Bot&quot;) is an interactive conversational assistant integrated into <span className={styles.highlightText}>genioussonu.me</span>. Its sole purpose is to provide visitors, recruiters, prospective clients, and fellow engineers with rapid, intelligent answers regarding:
             </p>
             <ul className={styles.bulletList}>
               <li className={styles.bulletItem}>SK Sahinur Islam&apos;s full-stack software development experience, tech stack, and background.</li>

@@ -284,7 +284,7 @@ export default function TermsPage() {
               <span className={styles.sectionNumber}>06.</span> Interactive AI &amp; Bot Usage Conditions
             </h2>
             <p className={styles.paragraph}>
-              The interactive conversational agent (&quot;Genious Bot&quot;) is supplied solely to assist visitors with rapid navigation, technical inquiries, and project consultation. When interacting with the bot:
+              The interactive conversational assistant (&quot;Genious Bot&quot;) is supplied solely to assist visitors with rapid navigation, technical inquiries, and project consultation. When interacting with the bot:
             </p>
             <ul className={styles.bulletList}>
               <li className={styles.bulletItem}>You agree not to attempt adversarial prompt injection, jailbreaking, or automated prompt extraction attacks.</li>

@@ -53,7 +53,7 @@ export default async function UsesPage() {
 
   const staticDevTools = [
     {
-      name: 'Visual Studio Code & Cursor IDE',
+      name: 'Visual Studio Code',
       desc: 'Configured with custom dark system themes, minimal status bars, and strict ESLint/Prettier automation on save.',
       tag: 'Editor',
     },
