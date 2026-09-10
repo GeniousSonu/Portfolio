@@ -32,7 +32,7 @@ export const RATE_LIMIT_CONFIG = {
 };
 
 export const GENERIC_CLIENT_ERROR =
-  "We couldn't process your message. Please check your details and try again.";
+  "We couldn't process your message. Please check details you Put and try again.";
 
 export const FAKE_SUCCESS_RESPONSE = {
   success: true,
