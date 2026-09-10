@@ -24,14 +24,15 @@ export function getRtcConfig() {
   const customTurnCredential = process.env.NEXT_PUBLIC_TURN_CREDENTIAL;
 
   const iceServers = [
-    // 1. Google Public STUN servers (primary for direct peer reflection)
+    // Google Public STUN servers (primary for direct peer reflection)
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
     { urls: 'stun:stun2.l.google.com:19302' },
-    { urls: 'stun:stun.relay.metered.ca:80' },
+    { urls: 'stun:stun3.l.google.com:19302' },
+    { urls: 'stun:stun4.l.google.com:19302' },
   ];
 
-  // If custom Cloudflare or other TURN service is specified in environment
+  // If custom TURN relay (e.g. Cloudflare Calls, Twilio, Metered with API key, coturn) is provided in environment
   if (customTurnUrl) {
     iceServers.push({
       urls: customTurnUrl.split(',').map((u) => u.trim()),
@@ -39,25 +40,6 @@ export function getRtcConfig() {
       credential: customTurnCredential || undefined,
     });
   }
-
-  // 2. Metered Open Relay Project TURN Fallback (Free, high-availability public relay)
-  // Supports UDP and TCP transports across standard HTTP/HTTPS ports 80 & 443
-  iceServers.push(
-    {
-      urls: [
-        'turn:relay.metered.ca:80',
-        'turn:relay.metered.ca:443',
-        'turn:relay.metered.ca:443?transport=tcp',
-      ],
-      username: 'openrelayproject',
-      credential: 'openrelayproject',
-    },
-    {
-      urls: 'turns:relay.metered.ca:443?transport=tcp',
-      username: 'openrelayproject',
-      credential: 'openrelayproject',
-    }
-  );
 
   return {
     iceServers,
@@ -88,12 +70,16 @@ export async function getMicrophoneStream() {
   if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
     throw new Error('getUserMedia is not supported on this device/browser');
   }
+  let stream;
   try {
-    return await navigator.mediaDevices.getUserMedia(AUDIO_CONSTRAINTS);
+    stream = await navigator.mediaDevices.getUserMedia(AUDIO_CONSTRAINTS);
   } catch (err) {
     console.warn('[The Lounge Voice] High-quality audio constraints rejected, falling back to basic audio:', err);
-    return await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   }
+  const track = stream.getAudioTracks()[0];
+  console.log(`[The Lounge Voice] Microphone active: trackId=${track?.id}, readyState=${track?.readyState}`);
+  return stream;
 }
 
 /**
@@ -439,6 +425,9 @@ export class VoiceMeshManager {
     this.meterInterval = null;
 
     this.initAudioAnalyser();
+    if (typeof window !== 'undefined') {
+      window.__loungeVoiceMesh = this;
+    }
   }
 
   initAudioAnalyser() {
@@ -554,7 +543,7 @@ export class VoiceMeshManager {
       db,
       'rooms',
       this.roomId,
-      'voiceSignals',
+      'signals',
       callerUid,
       'peers',
       calleeUid
@@ -579,10 +568,16 @@ export class VoiceMeshManager {
 
     // Add local mic track
     if (this.localStream) {
-      this.localStream.getTracks().forEach((track) => pc.addTrack(track, this.localStream));
+      this.localStream.getTracks().forEach((track) => {
+        try {
+          pc.addTrack(track, this.localStream);
+        } catch (addErr) {
+          console.error(`[The Lounge Voice] Failed to add track for peer ${peerUid}:`, addErr);
+        }
+      });
     }
 
-    const candidateField = isCaller ? 'callerCandidates' : 'calleeCandidates';
+    const candidateField = isCaller ? 'voiceCallerCandidates' : 'voiceCalleeCandidates';
     const iceBuffer = createIceCandidateBuffer(signalDocRef, candidateField);
     this.candidateBuffers.set(peerUid, iceBuffer);
 
@@ -593,6 +588,7 @@ export class VoiceMeshManager {
     };
 
     pc.ontrack = (event) => {
+      console.log(`[The Lounge Voice] Remote track received from peer ${peerUid}: trackId=${event.track?.id}`);
       const stream =
         (event.streams && event.streams[0]) ||
         (event.track ? new MediaStream([event.track]) : null);
@@ -618,24 +614,28 @@ export class VoiceMeshManager {
 
         const playPromise = audioEl.play();
         if (playPromise !== undefined) {
-          playPromise.catch((err) => {
-            console.warn(`[The Lounge Voice] Autoplay blocked for peer ${peerUid}:`, err);
-            this.onAutoplayBlocked(true);
+          playPromise
+            .then(() => {
+              console.log(`[The Lounge Voice] Audio playback started for peer ${peerUid}`);
+            })
+            .catch((err) => {
+              console.warn(`[The Lounge Voice] Autoplay blocked for peer ${peerUid}:`, err);
+              this.onAutoplayBlocked(true);
 
-            // Automatic one-click user interaction unlocker
-            const unlockAudio = () => {
-              audioEl.play().then(() => {
-                this.onAutoplayBlocked(false);
-              }).catch(() => {});
-              window.removeEventListener('click', unlockAudio);
-              window.removeEventListener('touchstart', unlockAudio);
-              window.removeEventListener('keydown', unlockAudio);
-            };
+              // Automatic one-click user interaction unlocker
+              const unlockAudio = () => {
+                audioEl.play().then(() => {
+                  this.onAutoplayBlocked(false);
+                }).catch(() => {});
+                window.removeEventListener('click', unlockAudio);
+                window.removeEventListener('touchstart', unlockAudio);
+                window.removeEventListener('keydown', unlockAudio);
+              };
 
-            window.addEventListener('click', unlockAudio, { once: true });
-            window.addEventListener('touchstart', unlockAudio, { once: true });
-            window.addEventListener('keydown', unlockAudio, { once: true });
-          });
+              window.addEventListener('click', unlockAudio, { once: true });
+              window.addEventListener('touchstart', unlockAudio, { once: true });
+              window.addEventListener('keydown', unlockAudio, { once: true });
+            });
         }
 
         this.attachRemoteAnalyser(peerUid, stream);
@@ -670,29 +670,28 @@ export class VoiceMeshManager {
         {
           callerUid,
           calleeUid,
-          sessionEpoch,
-          offer: { type: offer.type, sdp: offer.sdp },
-          answer: null,
-          callerCandidates: [],
-          calleeCandidates: [],
-          createdAt: serverTimestamp(),
+          voiceSessionEpoch: sessionEpoch,
+          voiceOffer: { type: offer.type, sdp: offer.sdp },
+          voiceAnswer: null,
+          voiceCallerCandidates: [],
+          voiceCalleeCandidates: [],
           updatedAt: serverTimestamp(),
           expiresAt: Timestamp.fromMillis(Date.now() + 60 * 60 * 1000), // 1h TTL
         },
-        { merge: false } // Fresh document, do not merge stale session data
+        { merge: true } // Merge to preserve any concurrent screen-share fields
       );
 
       const unsub = onSnapshot(signalDocRef, async (snap) => {
         if (!snap.exists()) return;
         const data = snap.data();
 
-        if (data.answer && !pc.currentRemoteDescription) {
-          await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+        if (data.voiceAnswer && !pc.currentRemoteDescription) {
+          await pc.setRemoteDescription(new RTCSessionDescription(data.voiceAnswer));
           await drainPendingCandidates();
         }
 
-        if (Array.isArray(data.calleeCandidates)) {
-          for (const c of data.calleeCandidates) {
+        if (Array.isArray(data.voiceCalleeCandidates)) {
+          for (const c of data.voiceCalleeCandidates) {
             if (!c || !c.candidate || processedCandidates.has(c.candidate)) continue;
             processedCandidates.add(c.candidate);
             if (!pc.currentRemoteDescription) {
@@ -714,22 +713,22 @@ export class VoiceMeshManager {
         if (!snap.exists()) return;
         const data = snap.data();
 
-        if (data.offer && !pc.currentRemoteDescription && !hasAnswered) {
+        if (data.voiceOffer && !pc.currentRemoteDescription && !hasAnswered) {
           hasAnswered = true;
-          await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+          await pc.setRemoteDescription(new RTCSessionDescription(data.voiceOffer));
           await drainPendingCandidates();
 
           const answer = await pc.createAnswer();
           await pc.setLocalDescription(answer);
 
           await updateDoc(signalDocRef, {
-            answer: { type: answer.type, sdp: answer.sdp },
+            voiceAnswer: { type: answer.type, sdp: answer.sdp },
             updatedAt: serverTimestamp(),
           });
         }
 
-        if (Array.isArray(data.callerCandidates)) {
-          for (const c of data.callerCandidates) {
+        if (Array.isArray(data.voiceCallerCandidates)) {
+          for (const c of data.voiceCallerCandidates) {
             if (!c || !c.candidate || processedCandidates.has(c.candidate)) continue;
             processedCandidates.add(c.candidate);
             if (!pc.currentRemoteDescription) {
@@ -827,7 +826,7 @@ export class VoiceMeshManager {
     this.onConnectionStateChange(peerUid, 'closed', 'closed');
     this.onPeerLeft(peerUid);
 
-    // Delete pairwise signaling document from Firestore
+    // Clear pairwise voice signaling from Firestore
     const isCaller = this.localUid < peerUid;
     const callerUid = isCaller ? this.localUid : peerUid;
     const calleeUid = isCaller ? peerUid : this.localUid;
@@ -835,12 +834,18 @@ export class VoiceMeshManager {
       db,
       'rooms',
       this.roomId,
-      'voiceSignals',
+      'signals',
       callerUid,
       'peers',
       calleeUid
     );
-    deleteDoc(signalDocRef).catch(() => {});
+    updateDoc(signalDocRef, {
+      voiceOffer: null,
+      voiceAnswer: null,
+      voiceCallerCandidates: [],
+      voiceCalleeCandidates: [],
+      updatedAt: serverTimestamp(),
+    }).catch(() => {});
   }
 
   destroy() {

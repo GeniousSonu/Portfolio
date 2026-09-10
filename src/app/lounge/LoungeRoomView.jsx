@@ -1360,13 +1360,14 @@ export default function LoungeRoomView({ roomId }) {
                 className={styles.dockBtn}
                 onClick={handleJoinVoice}
                 title="Join real-time voice chat with room participants"
+                aria-label="Join Voice"
               >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                   <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
                   <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
                   <line x1="12" y1="19" x2="12" y2="22" />
                 </svg>
-                <span>Join Voice</span>
+                <span className={styles.dockLabel}>Join Voice</span>
               </button>
             ) : (
               <>
@@ -1374,10 +1375,11 @@ export default function LoungeRoomView({ roomId }) {
                 <div
                   className={`${styles.dockBtn} ${styles.dockVoiceActive}`}
                   title="Voice mesh active"
+                  aria-label="Voice mesh active"
                   style={{ cursor: 'default' }}
                 >
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
-                  <span>Voice</span>
+                  <span className={styles.dockVoiceIndicator} aria-hidden="true" />
+                  <span className={styles.dockLabel}>Voice</span>
                 </div>
 
                 {/* Mic Mute / Unmute */}
@@ -1388,7 +1390,7 @@ export default function LoungeRoomView({ roomId }) {
                   title={isMicMuted ? 'Unmute microphone' : 'Mute microphone'}
                   aria-label={isMicMuted ? 'Unmute microphone' : 'Mute microphone'}
                 >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                     {isMicMuted ? (
                       <>
                         <line x1="2" y1="2" x2="22" y2="22" />
@@ -1406,7 +1408,7 @@ export default function LoungeRoomView({ roomId }) {
                       </>
                     )}
                   </svg>
-                  <span>{isMicMuted ? 'Muted' : 'Mute'}</span>
+                  <span className={styles.dockLabel}>{isMicMuted ? 'Muted' : 'Mute'}</span>
                 </button>
 
                 {/* Deafen Toggle */}
@@ -1417,12 +1419,12 @@ export default function LoungeRoomView({ roomId }) {
                   title={isDeafened ? 'Undeafen (resume audio)' : 'Deafen (mute incoming audio)'}
                   aria-label={isDeafened ? 'Undeafen' : 'Deafen'}
                 >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                     <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
                     <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
                     {isDeafened && <line x1="2" y1="2" x2="22" y2="22" stroke="currentColor" strokeWidth="2.5" />}
                   </svg>
-                  <span>{isDeafened ? 'Deafened' : 'Deafen'}</span>
+                  <span className={styles.dockLabel}>{isDeafened ? 'Deafened' : 'Deafen'}</span>
                 </button>
 
                 {/* Leave Voice */}
@@ -1433,11 +1435,11 @@ export default function LoungeRoomView({ roomId }) {
                   title="Disconnect from voice chat"
                   aria-label="Disconnect voice"
                 >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                     <path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-6-6 19.8 19.8 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91" />
                     <line x1="23" y1="1" x2="1" y2="23" />
                   </svg>
-                  <span>Disconnect</span>
+                  <span className={styles.dockLabel}>Disconnect</span>
                 </button>
               </>
             )}
@@ -1455,13 +1457,14 @@ export default function LoungeRoomView({ roomId }) {
                     ? 'Stop screen sharing'
                     : 'Share your screen with room'
                 }
+                aria-label={isSharingScreen ? 'Stop screen sharing' : 'Share screen'}
               >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                   <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
                   <line x1="8" y1="21" x2="16" y2="21" />
                   <line x1="12" y1="17" x2="12" y2="21" />
                 </svg>
-                <span>{isSharingScreen ? 'Stop Sharing' : 'Share Screen'}</span>
+                <span className={styles.dockLabel}>{isSharingScreen ? 'Stop Sharing' : 'Share Screen'}</span>
               </button>
             )}
 
@@ -1485,11 +1488,13 @@ export default function LoungeRoomView({ roomId }) {
                     }).catch(() => {});
                   }
                 }}
+                title={stageMode === 'youtube' ? 'Close YouTube' : 'YouTube Party'}
+                aria-label={stageMode === 'youtube' ? 'Close YouTube party' : 'YouTube party'}
               >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                   <polygon points="5 3 19 12 5 21 5 3" />
                 </svg>
-                <span>{stageMode === 'youtube' ? 'Close YouTube' : 'YouTube Party'}</span>
+                <span className={styles.dockLabel}>{stageMode === 'youtube' ? 'Close YouTube' : 'YouTube Party'}</span>
               </button>
             )}
 
@@ -1501,13 +1506,15 @@ export default function LoungeRoomView({ roomId }) {
                 setIsChatOpen(!isChatOpen);
                 setUnreadChatCount(0);
               }}
+              title="Toggle chat panel"
+              aria-label="Toggle chat panel"
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
-              <span>Chat</span>
+              <span className={styles.dockLabel}>Chat</span>
               {unreadChatCount > 0 && (
-                <span style={{ background: '#10b981', color: '#000', borderRadius: '50%', padding: '1px 5px', fontSize: '0.65rem' }}>
+                <span className={styles.dockBadge} aria-label={`${unreadChatCount} unread messages`}>
                   {unreadChatCount}
                 </span>
               )}
@@ -1518,12 +1525,14 @@ export default function LoungeRoomView({ roomId }) {
               type="button"
               className={styles.dockBtn}
               onClick={handleCopyInvite}
+              title={copiedInvite ? 'Invite link copied' : 'Copy invite link'}
+              aria-label={copiedInvite ? 'Invite link copied' : 'Copy invite link'}
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                 <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
               </svg>
-              <span>{copiedInvite ? 'Copied!' : 'Copy Invite'}</span>
+              <span className={styles.dockLabel}>{copiedInvite ? 'Copied!' : 'Copy Invite'}</span>
             </button>
           </nav>
         </section>
