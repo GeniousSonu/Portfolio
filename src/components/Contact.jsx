@@ -254,6 +254,29 @@ export default function Contact() {
               involves a Linux terminal and a network diagram — I&apos;m here.
             </p>
 
+            <div style={{ marginTop: '0.9rem', marginBottom: '1.25rem' }}>
+              <a
+                href="/contact"
+                className="btn btn-outline"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  fontSize: '0.78rem',
+                  fontFamily: 'var(--font-mono)',
+                  padding: '0.45rem 0.9rem',
+                  borderColor: 'rgba(16, 185, 129, 0.35)',
+                  color: '#34d399',
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                  background: 'rgba(16, 185, 129, 0.05)',
+                }}
+              >
+                <span>⚡ Establish Direct Connection Terminal</span>
+                <span>→</span>
+              </a>
+            </div>
+
             {/* Main contact links */}
             <div className="contact-links">
               {CONTACT_LINKS.map(({ href, Icon, iconBg, iconBorder, iconColor, label, value, external }) => {
@@ -377,6 +400,23 @@ export default function Contact() {
               <div className="ssh-line ssh-out">64 bytes: icmp_seq=0 ttl=64 time=12ms</div>
               <div className="ssh-line ssh-out" style={{ color: 'var(--green)' }}>
                 ✓ 1 packet transmitted, 1 received, 0% packet loss
+              </div>
+              <div className="ssh-line" style={{ marginTop: '0.5rem', paddingTop: '0.45rem', borderTop: '1px dashed rgba(255, 255, 255, 0.1)' }}>
+                <a
+                  href="/contact"
+                  style={{
+                    color: 'var(--gold-bright, #34d399)',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.74rem',
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                  }}
+                >
+                  <span>&gt; launch_terminal_page --fullscreen</span>
+                  <span>→</span>
+                </a>
               </div>
             </div>
           </div>

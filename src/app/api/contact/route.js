@@ -27,7 +27,33 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    const { name, email, message } = body;
+    const { name, email, message, turnstileToken } = body;
+
+    // Optional Cloudflare Turnstile verification (graceful degradation)
+    if (process.env.TURNSTILE_SECRET_KEY && turnstileToken) {
+      try {
+        const formData = new URLSearchParams();
+        formData.append('secret', process.env.TURNSTILE_SECRET_KEY);
+        formData.append('response', turnstileToken);
+        formData.append('remoteip', clientIp);
+
+        const cfRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+          method: 'POST',
+          body: formData,
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        });
+
+        const cfData = await cfRes.json();
+        if (!cfData.success) {
+          return NextResponse.json(
+            { success: false, error: 'Human verification failed. Please try again.' },
+            { status: 403 }
+          );
+        }
+      } catch (cfErr) {
+        console.warn('[Contact API] Turnstile verification network error, bypassing:', cfErr);
+      }
+    }
 
     // Validation
     if (!name?.trim() || !email?.trim() || !message?.trim()) {

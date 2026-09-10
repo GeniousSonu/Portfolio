@@ -224,6 +224,7 @@ import { OverlayProvider } from "@/context/OverlayContext";
 import { TransitionProvider } from "@/context/TransitionContext";
 import CommandPalette from "@/components/CommandPalette";
 import BootPreloader from "@/components/BootPreloader";
+import LoadingBar from "@/components/LoadingBar";
 
 export default function RootLayout({ children }) {
   const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
@@ -290,6 +291,7 @@ export default function RootLayout({ children }) {
       <body suppressHydrationWarning>
         <OverlayProvider>
           <TransitionProvider>
+            <LoadingBar />
             <BootPreloader />
             <SmoothScrollProvider />
             <PWARegistration />

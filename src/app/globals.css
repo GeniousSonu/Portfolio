@@ -1829,6 +1829,11 @@ footer {
 .mnav-link:hover, .mnav-link:focus-visible { color: var(--gold-bright); }
 .mnav-link:hover .mnav-link-text, .mnav-link:focus-visible .mnav-link-text { color: var(--gold-bright); }
 .mnav-link:hover .mnav-link-arrow, .mnav-link:focus-visible .mnav-link-arrow { opacity: 1; transform: translateX(4px); }
+.mnav-link.mnav-link--tapped {
+  transform: scale(0.97) !important;
+  opacity: 0.85 !important;
+  transition: transform 0.08s ease, opacity 0.08s ease !important;
+}
 
 .mnav-link-num {
   font-family: var(--font-mono);
@@ -3219,3 +3224,42 @@ html.reduce-motion .ambientGlow {
     animation: none !important;
   }
 }
+
+/* ─── Top Route Transition Loading Bar ─── */
+.loading-bar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 100000;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.loading-bar-container.active {
+  opacity: 1;
+}
+
+.loading-bar-progress {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #10B981, #34D399, #60A5FA, #10B981);
+  background-size: 200% 100%;
+  animation: loading-bar-anim 1.1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes loading-bar-anim {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
