@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useTransitionRouter } from '@/context/TransitionContext';
 import styles from './ChatbotWidget.module.css';
 import { supabase } from '@/lib/supabaseClient';
+import navState from '@/lib/navState';
 
 const MAX_CHAR_COUNT = 500;
 const SESSION_EXPIRY_MS = 6 * 60 * 60 * 1000; // 6 hours
@@ -500,7 +501,7 @@ export default function ChatbotWidget() {
       setIsOpen(false);
       setIsClosing(false);
       if (typeof window !== 'undefined') {
-        window.__portfolioNavigatingToRoute = true;
+        navState.startRouteNav();
         window.dispatchEvent(new CustomEvent('portfolio-overlay-change', { detail: { active: 'none' } }));
       }
       if (target.startsWith('#')) {
@@ -1019,7 +1020,7 @@ export default function ChatbotWidget() {
                   setIsOpen(false);
                   setIsClosing(false);
                   if (typeof window !== 'undefined') {
-                    window.__portfolioNavigatingToRoute = true;
+                    navState.startRouteNav();
                     window.dispatchEvent(new CustomEvent('portfolio-overlay-change', { detail: { active: 'none' } }));
                   }
                   transitionRouter.push('/space');

@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { useTransitionRouter } from '@/context/TransitionContext';
 import Lenis from 'lenis';
+import navState from '@/lib/navState';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -41,7 +42,7 @@ export default function SmoothScrollProvider() {
     }
 
     // 3. React 18/19 Strict Mode Guard: Prevent double-initialization
-    if (initializedRef.current || window.__lenis) {
+    if (initializedRef.current || navState.lenis) {
       return;
     }
     initializedRef.current = true;
@@ -72,7 +73,7 @@ export default function SmoothScrollProvider() {
     gsap.ticker.add(tickerHandler);
     gsap.ticker.lagSmoothing(0);
 
-    window.__lenis = lenis;
+    navState.lenis = lenis;
     lenisRef.current = lenis;
     tickerHandlerRef.current = tickerHandler;
 
@@ -89,7 +90,7 @@ export default function SmoothScrollProvider() {
         lenisRef.current.destroy();
         lenisRef.current = null;
       }
-      window.__lenis = null;
+      navState.lenis = null;
       initializedRef.current = false;
     };
   }, []);
@@ -107,10 +108,10 @@ export default function SmoothScrollProvider() {
       if (window.__preloaderActive) {
         return;
       }
-      if (window.__lenis) {
-        window.__lenis.start();
-        window.__lenis.scrollTo(0, { immediate: true });
-        window.__lenis.resize();
+      if (navState.lenis) {
+        navState.lenis.start();
+        navState.lenis.scrollTo(0, { immediate: true });
+        navState.lenis.resize();
       } else {
         window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
       }

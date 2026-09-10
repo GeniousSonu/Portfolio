@@ -148,7 +148,6 @@ export function TransitionProvider({ children }) {
       return;
     }
 
-    console.log('[TransitionContext] transitionNavigate called for href:', href, 'current pathname:', pathname, 'at', performance.now());
     // 5. Native View Transition with AbortController & 450ms safety timeout
     setTransitionStatus('transitioning');
 
@@ -158,7 +157,6 @@ export function TransitionProvider({ children }) {
     const transitionPromise = new Promise((resolve) => {
       finishPromiseResolve = resolve;
       transitionResolverRef.current = () => {
-        console.log('[TransitionContext] transitionResolverRef called at', performance.now());
         if (!isSettled && !controller.signal.aborted) {
           isSettled = true;
           resolve();
@@ -168,7 +166,6 @@ export function TransitionProvider({ children }) {
 
     // 450ms timeout guard: ensures transition NEVER hangs or blocks interactivity
     const timeoutId = setTimeout(() => {
-      console.log('[TransitionContext] 450ms safety timeout FIRED! isSettled:', isSettled, 'at', performance.now());
       if (!isSettled) {
         isSettled = true;
         transitionResolverRef.current = null;
@@ -179,7 +176,6 @@ export function TransitionProvider({ children }) {
     activeTimeoutRef.current = timeoutId;
 
     controller.signal.addEventListener('abort', () => {
-      console.log('[TransitionContext] controller aborted at', performance.now());
       clearTimeout(timeoutId);
       if (!isSettled) {
         isSettled = true;
@@ -189,25 +185,20 @@ export function TransitionProvider({ children }) {
     });
 
     try {
-      console.log('[TransitionContext] Calling document.startViewTransition at', performance.now());
       const transition = document.startViewTransition(async () => {
-        console.log('[TransitionContext] startViewTransition callback started. Calling router.push for:', href, 'at', performance.now());
         router.push(href);
-        console.log('[TransitionContext] Waiting for transitionPromise at', performance.now());
         await transitionPromise;
-        console.log('[TransitionContext] transitionPromise resolved at', performance.now());
       });
       activeTransitionRef.current = transition;
 
       transition.ready?.then(() => {
-        console.log('[TransitionContext] transition.ready resolved at', performance.now());
-      }).catch((e) => {
-        console.log('[TransitionContext] transition.ready rejected:', e?.message, 'at', performance.now());
+        // ViewTransition ready
+      }).catch(() => {
+        // ViewTransition ready rejected (non-fatal)
       });
 
       transition.finished
         ?.then(() => {
-          console.log('[TransitionContext] transition.finished resolved at', performance.now());
           clearTimeout(timeoutId);
           if (activeTransitionRef.current === transition) {
             activeTransitionRef.current = null;
@@ -216,8 +207,7 @@ export function TransitionProvider({ children }) {
             setTransitionStatus('completed');
           }
         })
-        ?.catch((e) => {
-          console.log('[TransitionContext] transition.finished rejected:', e?.message, 'at', performance.now());
+        ?.catch(() => {
           clearTimeout(timeoutId);
           if (activeTransitionRef.current === transition) {
             activeTransitionRef.current = null;

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import navState from '@/lib/navState';
 
 // Global tracking variables across all component instances
 let lockCount = 0;
@@ -50,10 +51,8 @@ export function useScrollLock(isLocked) {
         document.body.style.right = '0';
         document.body.style.width = '100%';
 
-        // Safely stop Lenis if active on desktop (optional chaining prevents throws on mobile)
-        if (typeof window !== 'undefined') {
-          window.__lenis?.stop();
-        }
+        // Safely stop Lenis if active on desktop
+        navState.lenis?.stop();
       }
 
       lockCount += 1;
@@ -74,16 +73,16 @@ export function useScrollLock(isLocked) {
         document.body.style.right = previousStyles.right || '';
         document.body.style.width = previousStyles.width || '';
 
-        // Seamlessly restore scroll position without animation jump, unless an anchor or route navigation is active
-        if (typeof window !== 'undefined' && window.__portfolioNavigatingToRoute) {
-          window.__portfolioNavigatingToRoute = false;
+        // Seamlessly restore scroll position based on navigation intent
+        const intent = navState.consumeIntent();
+        if (intent === 'route') {
           window.scrollTo({
             top: 0,
             left: 0,
             behavior: 'instant',
           });
-        } else if (typeof window !== 'undefined' && window.__portfolioNavigatingToAnchor) {
-          window.__portfolioNavigatingToAnchor = false;
+        } else if (intent === 'anchor') {
+          // Anchor navigation: don't restore scroll — the anchor handler will scroll
         } else {
           window.scrollTo({
             top: scrollYToRestore,
@@ -93,10 +92,8 @@ export function useScrollLock(isLocked) {
         }
 
         // Safely resume Lenis
-        if (typeof window !== 'undefined') {
-          window.__lenis?.start();
-          window.__lenis?.resize();
-        }
+        navState.lenis?.start();
+        navState.lenis?.resize();
       }
     }
 
@@ -117,8 +114,8 @@ export function useScrollLock(isLocked) {
           document.body.style.right = previousStyles.right || '';
           document.body.style.width = previousStyles.width || '';
 
-          if (typeof window !== 'undefined' && window.__portfolioNavigatingToRoute) {
-            window.__portfolioNavigatingToRoute = false;
+          const intent = navState.consumeIntent();
+          if (intent === 'route') {
             window.scrollTo({
               top: 0,
               left: 0,
@@ -132,10 +129,8 @@ export function useScrollLock(isLocked) {
             });
           }
 
-          if (typeof window !== 'undefined') {
-            window.__lenis?.start();
-            window.__lenis?.resize();
-          }
+          navState.lenis?.start();
+          navState.lenis?.resize();
         }
       }
     };

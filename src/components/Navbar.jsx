@@ -8,6 +8,7 @@ import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import InstallAppButton from './InstallAppButton';
 import { useOverlay } from '@/context/OverlayContext';
 import { useTransitionRouter } from '@/context/TransitionContext';
+import navState from '@/lib/navState';
 
 /* ── Brand SVG Icons ── */
 const IconGitHub = () => (
@@ -98,7 +99,7 @@ const NAV_ITEMS = [
   { id: '/blog',       label: 'Blog' },
   { id: '/store',      label: 'Store' },
   { id: '/space',      label: 'Space' },
-  { id: '#contact',    label: 'Contact' },
+  { id: '/contact',    label: 'Contact' },
 ];
 
 const EXTRA_PAGES = [
@@ -218,6 +219,20 @@ export default function Navbar() {
     }
   }, [mobileOpen, closeMobileNav]);
 
+  // Prefetch routes when mobile menu opens (150ms debounce to avoid wasted fetches on accidental taps)
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const timer = setTimeout(() => {
+      const routeItems = [...NAV_ITEMS, ...EXTRA_PAGES]
+        .filter(({ id }) => id.startsWith('/'))
+        .map(({ id }) => id);
+      routeItems.forEach((href) => {
+        try { router.prefetch(href); } catch {}
+      });
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [mobileOpen, router]);
+
   const scrollToSectionWithOffset = (targetSelector) => {
     const target = document.querySelector(targetSelector);
     if (!target) return;
@@ -230,14 +245,12 @@ export default function Navbar() {
   };
 
   const handleLinkClick = (e, targetId) => {
-    console.log('[Navbar] handleLinkClick triggered for targetId:', targetId, 'at', performance.now());
     e.preventDefault();
-    console.log('[Navbar] Calling closeOverlay(nav) at', performance.now());
     closeOverlay('nav');
 
     if (targetId === '#') {
       if (pathname === '/') {
-        if (typeof window !== 'undefined') window.__portfolioNavigatingToAnchor = true;
+        navState.startAnchorNav();
         setTimeout(() => {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }, 50);
@@ -248,14 +261,14 @@ export default function Navbar() {
     }
 
     if (targetId.startsWith('/')) {
-      console.log('[Navbar] Calling transitionRouter.push for:', targetId, 'at', performance.now());
+      navState.startRouteNav();
       transitionRouter.push(targetId);
       return;
     }
 
     if (targetId.startsWith('#')) {
       if (pathname === '/') {
-        if (typeof window !== 'undefined') window.__portfolioNavigatingToAnchor = true;
+        navState.startAnchorNav();
         setTimeout(() => {
           scrollToSectionWithOffset(targetId);
         }, 60);
@@ -300,8 +313,8 @@ export default function Navbar() {
             {NAV_ITEMS.map(({ id, label }) => (
               <li key={id}>
                 <a href={id} onClick={(e) => handleLinkClick(e, id)}
-                   className={id === '#contact' ? 'nav-cta' : ''}>
-                  {label}{id === '#contact' ? ' →' : ''}
+                   className={id === '/contact' ? 'nav-cta' : ''}>
+                  {label}{id === '/contact' ? ' →' : ''}
                 </a>
               </li>
             ))}
@@ -403,7 +416,11 @@ export default function Navbar() {
               href={id}
               className="mnav-link"
               style={{ '--delay': `${0.05 + i * 0.06}s` }}
-              onClick={(e) => handleLinkClick(e, id)}
+              onClick={(e) => {
+                // Add instant tap feedback
+                e.currentTarget.classList.add('mnav-link--tapped');
+                handleLinkClick(e, id);
+              }}
               tabIndex={mobileOpen ? 0 : -1}
             >
               <span className="mnav-link-num">0{i + 1}</span>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
+import navState from '@/lib/navState';
 
 // Module-level session flag: once booted in this browsing session, never replay on soft navigations
 let hasBootedInSession = false;
@@ -60,9 +61,9 @@ export default function BootPreloader() {
     window.__preloaderActive = true;
     document.documentElement.classList.add('preloader-locked');
     document.body.classList.add('preloader-locked');
-    if (window.__lenis) {
+    if (navState.lenis) {
       try {
-        window.__lenis.stop();
+        navState.lenis.stop();
       } catch {}
     }
 
@@ -102,17 +103,17 @@ export default function BootPreloader() {
         window.history.scrollRestoration = 'auto';
       }
 
-      if (window.__lenis) {
+      if (navState.lenis) {
         try {
-          window.__lenis.start();
-          window.__lenis.resize();
+          navState.lenis.start();
+          navState.lenis.resize();
         } catch {}
       }
 
       if (hash) {
         setTimeout(() => {
-          if (window.__lenis) {
-            window.__lenis.scrollTo(hash, { offset: -75, duration: 1.0 });
+          if (navState.lenis) {
+            navState.lenis.scrollTo(hash, { offset: -75, duration: 1.0 });
           } else {
             const el = document.querySelector(hash);
             if (el) {
