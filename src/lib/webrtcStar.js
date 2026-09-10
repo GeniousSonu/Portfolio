@@ -24,15 +24,18 @@ export function getRtcConfig() {
   const customTurnCredential = process.env.NEXT_PUBLIC_TURN_CREDENTIAL;
 
   const iceServers = [
-    // Google Public STUN servers (primary for direct peer reflection)
+    // Multi-provider high-reliability public STUN servers
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
     { urls: 'stun:stun2.l.google.com:19302' },
     { urls: 'stun:stun3.l.google.com:19302' },
     { urls: 'stun:stun4.l.google.com:19302' },
+    { urls: 'stun:stun.cloudflare.com:3478' },
+    { urls: 'stun:stun.nextcloud.com:443' },
+    { urls: 'stun:global.stun.twilio.com:3478' },
   ];
 
-  // If custom TURN relay (e.g. Cloudflare Calls, Twilio, Metered with API key, coturn) is provided in environment
+  // If custom TURN relay is provided in environment
   if (customTurnUrl) {
     iceServers.push({
       urls: customTurnUrl.split(',').map((u) => u.trim()),
@@ -67,6 +70,11 @@ export const AUDIO_CONSTRAINTS = {
  * if advanced device constraints (echo cancellation, etc.) are rejected by hardware.
  */
 export async function getMicrophoneStream() {
+  if (typeof window !== 'undefined' && window.isSecureContext === false) {
+    throw new Error(
+      'INSECURE_CONTEXT: WebRTC microphone requires HTTPS or localhost. Modern browsers completely block audio capture over plain HTTP on local network addresses.'
+    );
+  }
   if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
     throw new Error('getUserMedia is not supported on this device/browser');
   }
@@ -188,18 +196,22 @@ export class PresenterManager {
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
 
-    // Initialize pairwise signaling document
-    await setDoc(signalDocRef, {
-      presenterUid: this.presenterUid,
-      viewerUid,
-      offer: { type: offer.type, sdp: offer.sdp },
-      answer: null,
-      presenterCandidates: [],
-      viewerCandidates: [],
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-      expiresAt: Timestamp.fromMillis(Date.now() + 60 * 60 * 1000), // 1h TTL
-    });
+    // Initialize pairwise signaling document (with merge: true so voice signaling is preserved)
+    await setDoc(
+      signalDocRef,
+      {
+        presenterUid: this.presenterUid,
+        viewerUid,
+        offer: { type: offer.type, sdp: offer.sdp },
+        answer: null,
+        presenterCandidates: [],
+        viewerCandidates: [],
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        expiresAt: Timestamp.fromMillis(Date.now() + 60 * 60 * 1000), // 1h TTL
+      },
+      { merge: true }
+    );
 
     // Listen for viewer answer and candidates
     const unsub = onSnapshot(signalDocRef, async (snap) => {
@@ -208,7 +220,11 @@ export class PresenterManager {
 
       // Handle viewer answer
       if (data.answer && !pc.currentRemoteDescription) {
-        await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+        try {
+          await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+        } catch (err) {
+          console.warn('[WebRTC Presenter] Error setting remote answer:', err);
+        }
       }
 
       // Handle viewer ICE candidates
@@ -255,7 +271,14 @@ export class PresenterManager {
       'peers',
       viewerUid
     );
-    deleteDoc(signalDocRef).catch(() => {});
+    // Clear screenshare fields without deleting doc to preserve any active voice signaling
+    updateDoc(signalDocRef, {
+      offer: null,
+      answer: null,
+      presenterCandidates: [],
+      viewerCandidates: [],
+      updatedAt: serverTimestamp(),
+    }).catch(() => {});
   }
 
   /**
@@ -372,7 +395,12 @@ export class ViewerManager {
       'peers',
       this.viewerUid
     );
-    deleteDoc(signalDocRef).catch(() => {});
+    // Clear screenshare answer without deleting document
+    updateDoc(signalDocRef, {
+      answer: null,
+      viewerCandidates: [],
+      updatedAt: serverTimestamp(),
+    }).catch(() => {});
   }
 }
 
@@ -557,6 +585,14 @@ export class VoiceMeshManager {
       const connState = pc.connectionState;
       console.log(`[WebRTC Voice ICE] Peer ${peerUid} ICE state: ${iceState} (connection: ${connState})`);
       this.onConnectionStateChange(peerUid, iceState, connState);
+
+      if (iceState === 'failed' && typeof pc.restartIce === 'function' && !pc._iceRestarted) {
+        pc._iceRestarted = true;
+        console.log(`[WebRTC Voice] Attempting ICE restart for peer ${peerUid}`);
+        try {
+          pc.restartIce();
+        } catch {}
+      }
     };
 
     pc.onconnectionstatechange = () => {
@@ -685,9 +721,18 @@ export class VoiceMeshManager {
         if (!snap.exists()) return;
         const data = snap.data();
 
+        // Check session epoch so we only process answers belonging to THIS session
+        if (data.voiceSessionEpoch && data.voiceSessionEpoch !== sessionEpoch) {
+          return;
+        }
+
         if (data.voiceAnswer && !pc.currentRemoteDescription) {
-          await pc.setRemoteDescription(new RTCSessionDescription(data.voiceAnswer));
-          await drainPendingCandidates();
+          try {
+            await pc.setRemoteDescription(new RTCSessionDescription(data.voiceAnswer));
+            await drainPendingCandidates();
+          } catch (err) {
+            console.warn('[WebRTC Voice] Error setting remote answer:', err);
+          }
         }
 
         if (Array.isArray(data.voiceCalleeCandidates)) {
@@ -714,17 +759,23 @@ export class VoiceMeshManager {
         const data = snap.data();
 
         if (data.voiceOffer && !pc.currentRemoteDescription && !hasAnswered) {
-          hasAnswered = true;
-          await pc.setRemoteDescription(new RTCSessionDescription(data.voiceOffer));
-          await drainPendingCandidates();
+          try {
+            hasAnswered = true;
+            await pc.setRemoteDescription(new RTCSessionDescription(data.voiceOffer));
+            await drainPendingCandidates();
 
-          const answer = await pc.createAnswer();
-          await pc.setLocalDescription(answer);
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
 
-          await updateDoc(signalDocRef, {
-            voiceAnswer: { type: answer.type, sdp: answer.sdp },
-            updatedAt: serverTimestamp(),
-          });
+            await updateDoc(signalDocRef, {
+              voiceAnswer: { type: answer.type, sdp: answer.sdp },
+              voiceSessionEpoch: data.voiceSessionEpoch || null,
+              updatedAt: serverTimestamp(),
+            });
+          } catch (err) {
+            console.warn('[WebRTC Voice] Error creating answer for offer:', err);
+            hasAnswered = false;
+          }
         }
 
         if (Array.isArray(data.voiceCallerCandidates)) {

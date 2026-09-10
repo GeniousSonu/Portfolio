@@ -83,7 +83,8 @@ export default function LoungeRoomView({ roomId }) {
 
   // WebRTC Screen Share State (Star Topology)
   const [isSharingScreen, setIsSharingScreen] = useState(false);
-  const [canScreenShare, setCanScreenShare] = useState(false);
+  const [canScreenShare, setCanScreenShare] = useState(true);
+  const [isInsecureContext, setIsInsecureContext] = useState(false);
   const [remoteStream, setRemoteStream] = useState(null);
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
@@ -121,13 +122,17 @@ export default function LoungeRoomView({ roomId }) {
   const isJoinedRef = useRef(false);
   const joinInProgressRef = useRef(false);
 
-  // Check displayMedia capability (desktop only)
+  // Check displayMedia capability and secure context
   useEffect(() => {
-    if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
-      const hasGetDisplayMedia =
-        navigator.mediaDevices && typeof navigator.mediaDevices.getDisplayMedia === 'function';
-      const isTouchOnly = !window.matchMedia('(pointer: fine)').matches;
-      setCanScreenShare(hasGetDisplayMedia && !isTouchOnly);
+    if (typeof window !== 'undefined') {
+      if (window.isSecureContext === false) {
+        setIsInsecureContext(true);
+      }
+      const hasGetDisplayMedia = Boolean(
+        navigator?.mediaDevices && typeof navigator.mediaDevices.getDisplayMedia === 'function'
+      );
+      // Keep screen sharing accessible on all platforms; unsupported browsers provide helpful fallback
+      setCanScreenShare(hasGetDisplayMedia || true);
     }
   }, []);
 
@@ -446,7 +451,14 @@ export default function LoungeRoomView({ roomId }) {
 
   // 5. Presenter Star WebRTC Lifecycle
   const startScreenShare = async () => {
-    if (!canScreenShare || !currentUser || !roomId || isSharingScreen) return;
+    if (!currentUser || !roomId || isSharingScreen) return;
+
+    if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getDisplayMedia) {
+      alert(
+        'Screen sharing is not supported by this browser (e.g. iOS Safari restricts display capture). Use Chrome on Android or a desktop browser to broadcast your screen.'
+      );
+      return;
+    }
 
     try {
       const stream = await navigator.mediaDevices.getDisplayMedia({
@@ -554,14 +566,14 @@ export default function LoungeRoomView({ roomId }) {
 
   // Determine Central Stage Display Mode
   useEffect(() => {
-    if (isSharingScreen || (activePresenter && remoteStream)) {
+    if (isSharingScreen || activePresenter) {
       setStageMode('screenshare');
     } else if (roomData?.playbackState?.videoId) {
       setStageMode('youtube');
     } else {
       setStageMode('idle');
     }
-  }, [isSharingScreen, activePresenter, remoteStream, roomData?.playbackState?.videoId]);
+  }, [isSharingScreen, activePresenter, roomData?.playbackState?.videoId]);
 
   // ── Voice Chat System (Mesh, Auto-Mute, Peer Mute, Speaking Glow) ──
   const handleJoinVoice = async () => {
@@ -629,7 +641,13 @@ export default function LoungeRoomView({ roomId }) {
       }).catch(() => {});
     } catch (err) {
       console.error('[The Lounge Voice] Error accessing microphone:', err);
-      alert('Microphone permission is required to join voice chat.');
+      if (err?.message?.includes('INSECURE_CONTEXT')) {
+        alert(
+          'WebRTC microphone requires a secure context (HTTPS or localhost). Modern mobile browsers block microphone over plain HTTP on LAN IPs (e.g. 192.168.x.x). Please test using HTTPS or localhost.'
+        );
+      } else {
+        alert('Microphone permission is required to join voice chat. Please grant microphone access in your browser settings.');
+      }
     }
   };
 
@@ -1154,6 +1172,14 @@ export default function LoungeRoomView({ roomId }) {
           </div>
         )}
 
+        {/* Insecure LAN HTTP Notice */}
+        {isInsecureContext && (
+          <div className={styles.insecureContextNotice} role="alert">
+            <span>⚠️ <strong>Insecure HTTP Context:</strong> Mobile browsers restrict microphone and screen sharing over plain HTTP on LAN IPs (e.g. 192.168.x.x). Please test over HTTPS or localhost.</span>
+            <button type="button" onClick={() => setIsInsecureContext(false)} aria-label="Dismiss notice">✕</button>
+          </div>
+        )}
+
         {/* Central Stage Arena */}
         <section className={styles.stageArena}>
           {/* Glowing Participant Orbs Ring */}
@@ -1253,45 +1279,36 @@ export default function LoungeRoomView({ roomId }) {
           {/* Central Stage Display */}
           <div className={styles.centralStageDisplay}>
             {stageMode === 'screenshare' ? (
-              <div style={{ width: '100%', height: '100%', position: 'relative', background: '#000' }}>
+              <div className={styles.screenShareStageWrap}>
                 {isSharingScreen ? (
                   <video
                     ref={localVideoRef}
                     autoPlay
                     playsInline
                     muted
-                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                    className={styles.screenShareVideo}
                   />
-                ) : (
+                ) : remoteStream ? (
                   <video
                     ref={remoteVideoRef}
                     autoPlay
                     playsInline
-                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                    className={styles.screenShareVideo}
                   />
+                ) : (
+                  <div className={styles.streamConnectingState}>
+                    <div className={styles.streamConnectingPill}>
+                      <span className={styles.streamConnectingSpinner} />
+                      <span>Connecting to {activePresenter?.displayName || 'Peer'}'s stream...</span>
+                    </div>
+                  </div>
                 )}
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 12,
-                    left: 12,
-                    background: 'rgba(0, 0, 0, 0.75)',
-                    padding: '0.3rem 0.65rem',
-                    borderRadius: 6,
-                    fontFamily: 'var(--font-mono, monospace)',
-                    fontSize: '0.74rem',
-                    color: '#60a5fa',
-                    border: '1px solid rgba(96, 165, 250, 0.3)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                  }}
-                >
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#60a5fa' }} />
+                <div className={styles.screenShareBadge}>
+                  <span className={styles.screenShareDot} />
                   <span>
                     {isSharingScreen
                       ? 'BROADCASTING YOUR SCREEN'
-                      : `STREAMING: ${activePresenter?.displayName || 'Peer'}`}
+                      : `LIVE: ${activePresenter?.displayName || 'Peer'}`}
                   </span>
                 </div>
               </div>
@@ -1303,13 +1320,17 @@ export default function LoungeRoomView({ roomId }) {
               />
             ) : (
               <div className={styles.waitingStageVisual}>
-                <div className={styles.waitingIcon}>
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polygon points="5 3 19 12 5 21 5 3" />
-                  </svg>
+                <div className={styles.stageRadarBeacon}>
+                  <span className={styles.radarRing1} />
+                  <span className={styles.radarRing2} />
+                  <div className={styles.waitingIcon}>
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                  </div>
                 </div>
                 <h3 className={styles.stageHeading}>Virtual Stage Idle</h3>
-                <p style={{ maxWidth: 460, fontSize: '0.85rem', lineHeight: 1.55 }}>
+                <p className={styles.stageDescription}>
                   {isHost
                     ? 'You are the stage host. Stream your screen to all participants, start voice chat, or load a synchronized YouTube listening session below.'
                     : 'Awaiting host broadcast. Relax, chat with participants, or join voice chat.'}
@@ -1351,18 +1372,18 @@ export default function LoungeRoomView({ roomId }) {
             </div>
           )}
 
-          {/* Floating Action Dock */}
+          {/* Floating Action Dock (Discord Style) */}
           <nav className={styles.floatingDock} aria-label="Stage actions">
             {/* Voice Chat Controls */}
             {!inVoice ? (
               <button
                 type="button"
-                className={styles.dockBtn}
+                className={`${styles.discordBtn} ${styles.discordBtnJoin}`}
                 onClick={handleJoinVoice}
                 title="Join real-time voice chat with room participants"
                 aria-label="Join Voice"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                   <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
                   <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
                   <line x1="12" y1="19" x2="12" y2="22" />
@@ -1371,29 +1392,32 @@ export default function LoungeRoomView({ roomId }) {
               </button>
             ) : (
               <>
-                {/* Voice Connected Pill */}
+                {/* Discord Voice Connected Pill */}
                 <div
-                  className={`${styles.dockBtn} ${styles.dockVoiceActive}`}
-                  title="Voice mesh active"
-                  aria-label="Voice mesh active"
-                  style={{ cursor: 'default' }}
+                  className={styles.discordVoiceStatus}
+                  title="Voice connected"
+                  aria-label="Voice connected"
                 >
-                  <span className={styles.dockVoiceIndicator} aria-hidden="true" />
-                  <span className={styles.dockLabel}>Voice</span>
+                  <span className={styles.discordVoiceWave} aria-hidden="true">
+                    <span className={styles.waveBar} />
+                    <span className={styles.waveBar} />
+                    <span className={styles.waveBar} />
+                  </span>
+                  <span className={styles.discordVoiceText}>Voice</span>
                 </div>
 
                 {/* Mic Mute / Unmute */}
                 <button
                   type="button"
-                  className={`${styles.dockBtn} ${isMicMuted ? styles.dockVoiceMuted : ''}`}
+                  className={`${styles.discordBtn} ${isMicMuted ? styles.discordBtnMuted : ''}`}
                   onClick={handleToggleMic}
                   title={isMicMuted ? 'Unmute microphone' : 'Mute microphone'}
                   aria-label={isMicMuted ? 'Unmute microphone' : 'Mute microphone'}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                     {isMicMuted ? (
                       <>
-                        <line x1="2" y1="2" x2="22" y2="22" />
+                        <line x1="2" y1="2" x2="22" y2="22" stroke="currentColor" strokeWidth="2.5" />
                         <path d="M18.89 13.23A7.12 7.12 0 0 0 19 12v-2" />
                         <path d="M5 10v2a7 7 0 0 0 12 5" />
                         <path d="M15 9.34V5a3 3 0 0 0-5.68-1.33" />
@@ -1414,12 +1438,12 @@ export default function LoungeRoomView({ roomId }) {
                 {/* Deafen Toggle */}
                 <button
                   type="button"
-                  className={`${styles.dockBtn} ${isDeafened ? styles.dockVoiceDeafened : ''}`}
+                  className={`${styles.discordBtn} ${isDeafened ? styles.discordBtnDeafened : ''}`}
                   onClick={handleToggleDeafen}
                   title={isDeafened ? 'Undeafen (resume audio)' : 'Deafen (mute incoming audio)'}
                   aria-label={isDeafened ? 'Undeafen' : 'Deafen'}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                     <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
                     <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
                     {isDeafened && <line x1="2" y1="2" x2="22" y2="22" stroke="currentColor" strokeWidth="2.5" />}
@@ -1427,27 +1451,28 @@ export default function LoungeRoomView({ roomId }) {
                   <span className={styles.dockLabel}>{isDeafened ? 'Deafened' : 'Deafen'}</span>
                 </button>
 
-                {/* Leave Voice */}
+                {/* Disconnect Voice (Discord Red Phone Hangup) */}
                 <button
                   type="button"
-                  className={`${styles.dockBtn} ${styles.dockVoiceLeave}`}
+                  className={`${styles.discordBtn} ${styles.discordBtnDisconnect}`}
                   onClick={handleLeaveVoice}
                   title="Disconnect from voice chat"
                   aria-label="Disconnect voice"
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                     <path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-6-6 19.8 19.8 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91" />
-                    <line x1="23" y1="1" x2="1" y2="23" />
+                    <line x1="23" y1="1" x2="1" y2="23" stroke="currentColor" strokeWidth="2.5" />
                   </svg>
                   <span className={styles.dockLabel}>Disconnect</span>
                 </button>
               </>
             )}
-            {/* Screen Share Button (Desktop-only, gracefully hidden on mobile) */}
+
+            {/* Screen Share Button */}
             {canScreenShare && (
               <button
                 type="button"
-                className={`${styles.dockBtn} ${isSharingScreen ? styles.dockBtnActive : ''}`}
+                className={`${styles.discordBtn} ${isSharingScreen ? styles.discordBtnBlurple : ''}`}
                 onClick={isSharingScreen ? stopScreenShare : startScreenShare}
                 disabled={activePresenter && activePresenter.uid !== currentUser?.uid}
                 title={
@@ -1459,12 +1484,12 @@ export default function LoungeRoomView({ roomId }) {
                 }
                 aria-label={isSharingScreen ? 'Stop screen sharing' : 'Share screen'}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                   <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
                   <line x1="8" y1="21" x2="16" y2="21" />
                   <line x1="12" y1="17" x2="12" y2="21" />
                 </svg>
-                <span className={styles.dockLabel}>{isSharingScreen ? 'Stop Sharing' : 'Share Screen'}</span>
+                <span className={styles.dockLabel}>{isSharingScreen ? 'Stop Share' : 'Share Screen'}</span>
               </button>
             )}
 
@@ -1472,7 +1497,7 @@ export default function LoungeRoomView({ roomId }) {
             {isHost && (
               <button
                 type="button"
-                className={`${styles.dockBtn} ${stageMode === 'youtube' ? styles.dockBtnActive : ''}`}
+                className={`${styles.discordBtn} ${stageMode === 'youtube' ? styles.discordBtnActive : ''}`}
                 onClick={() => {
                   if (stageMode === 'youtube') {
                     // Reset YouTube video
@@ -1484,24 +1509,24 @@ export default function LoungeRoomView({ roomId }) {
                     // Prompt host with a sample music session
                     const roomRef = doc(db, 'rooms', roomId);
                     updateDoc(roomRef, {
-                      playbackState: { videoId: 'jfKfPfyJRdk', isPlaying: true, positionSeconds: 0, updatedAt: serverTimestamp() }, // Lofi synth ambient
+                      playbackState: { videoId: 'jfKfPfyJRdk', isPlaying: true, positionSeconds: 0, updatedAt: serverTimestamp() },
                     }).catch(() => {});
                   }
                 }}
-                title={stageMode === 'youtube' ? 'Close YouTube' : 'YouTube Party'}
+                title={stageMode === 'youtube' ? 'Close YouTube' : 'YouTube Watch Party'}
                 aria-label={stageMode === 'youtube' ? 'Close YouTube party' : 'YouTube party'}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                   <polygon points="5 3 19 12 5 21 5 3" />
                 </svg>
-                <span className={styles.dockLabel}>{stageMode === 'youtube' ? 'Close YouTube' : 'YouTube Party'}</span>
+                <span className={styles.dockLabel}>{stageMode === 'youtube' ? 'Close Party' : 'Watch Party'}</span>
               </button>
             )}
 
             {/* Chat Drawer Toggle */}
             <button
               type="button"
-              className={`${styles.dockBtn} ${isChatOpen ? styles.dockBtnActive : ''}`}
+              className={`${styles.discordBtn} ${isChatOpen ? styles.discordBtnActive : ''}`}
               onClick={() => {
                 setIsChatOpen(!isChatOpen);
                 setUnreadChatCount(0);
@@ -1509,12 +1534,12 @@ export default function LoungeRoomView({ roomId }) {
               title="Toggle chat panel"
               aria-label="Toggle chat panel"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
               <span className={styles.dockLabel}>Chat</span>
               {unreadChatCount > 0 && (
-                <span className={styles.dockBadge} aria-label={`${unreadChatCount} unread messages`}>
+                <span className={styles.discordBadge} aria-label={`${unreadChatCount} unread messages`}>
                   {unreadChatCount}
                 </span>
               )}
@@ -1523,16 +1548,16 @@ export default function LoungeRoomView({ roomId }) {
             {/* Copy Invite Code */}
             <button
               type="button"
-              className={styles.dockBtn}
+              className={styles.discordBtn}
               onClick={handleCopyInvite}
               title={copiedInvite ? 'Invite link copied' : 'Copy invite link'}
               aria-label={copiedInvite ? 'Invite link copied' : 'Copy invite link'}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                 <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
               </svg>
-              <span className={styles.dockLabel}>{copiedInvite ? 'Copied!' : 'Copy Invite'}</span>
+              <span className={styles.dockLabel}>{copiedInvite ? 'Copied!' : 'Invite'}</span>
             </button>
           </nav>
         </section>
