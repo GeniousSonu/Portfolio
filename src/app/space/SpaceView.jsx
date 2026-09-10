@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTransitionRouter } from '@/context/TransitionContext';
+import { useOverlay } from '@/context/OverlayContext';
+import { computePosition, flip, shift, offset, autoUpdate } from '@floating-ui/dom';
 import { supabase } from '@/lib/supabaseClient';
 import { QRCodeSVG } from 'qrcode.react';
 import {
@@ -23,6 +25,13 @@ const TURNSTILE_SITE_KEY =
 export default function SpaceView({ roomId = null }) {
   const router = useRouter();
   const transitionRouter = useTransitionRouter();
+  const { activeOverlay, openOverlay, closeOverlay, closeAll } = useOverlay();
+
+  // Overlay-coordinated modal visibilities
+  const showRoomsDropdown = activeOverlay === 'space-rooms';
+  const showJoinModal = activeOverlay === 'space-join';
+  const showQrModal = activeOverlay === 'space-qr';
+
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(true);
   const [savingStatus, setSavingStatus] = useState('Synced'); // 'Synced' | 'Saving...' | 'Conflict'
@@ -36,18 +45,15 @@ export default function SpaceView({ roomId = null }) {
   // Room states & modal controls
   const [isNotFoundRoom, setIsNotFoundRoom] = useState(false);
   const [isExpiredRoom, setIsExpiredRoom] = useState(false);
-  const [showQrModal, setShowQrModal] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [roomUrl, setRoomUrl] = useState('');
 
-  // Room history & dropdown states
+  // Room history & creation states
   const [recentRooms, setRecentRooms] = useState([]);
-  const [showRoomsDropdown, setShowRoomsDropdown] = useState(false);
   const [roomLimitAlert, setRoomLimitAlert] = useState(null);
   const [isCreatingRoom, setIsCreatingRoom] = useState(false);
 
   // Join by code modal state
-  const [showJoinModal, setShowJoinModal] = useState(false);
   const [joinCodeInput, setJoinCodeInput] = useState('');
   const [joinCodeError, setJoinCodeError] = useState(null);
   const [isCheckingJoin, setIsCheckingJoin] = useState(false);
@@ -56,6 +62,9 @@ export default function SpaceView({ roomId = null }) {
   const [sessionToken, setSessionToken] = useState(null);
   const [isVerified, setIsVerified] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+
+  // Responsive device viewport state (mobile: <= 640px)
+  const [isMobile, setIsMobile] = useState(false);
 
   // References
   const textareaRef = useRef(null);
@@ -66,7 +75,18 @@ export default function SpaceView({ roomId = null }) {
   const pendingRemoteUpdateRef = useRef(null);
   const lastKnownUpdatedAtRef = useRef(null);
   const clientIdRef = useRef(null);
-  const dropdownRef = useRef(null);
+  const roomsBtnRef = useRef(null);
+  const dropdownMenuRef = useRef(null);
+
+  // Detect mobile screen width
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 640);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Initialize unique clientId per tab
   useEffect(() => {
@@ -83,20 +103,45 @@ export default function SpaceView({ roomId = null }) {
     setRecentRooms(getRoomHistory());
   }, [roomId]);
 
-  // Auto-close rooms dropdown on outside click
+  // Floating-UI popover positioning on desktop / tablet (> 640px)
   useEffect(() => {
+    if (!showRoomsDropdown || isMobile || !roomsBtnRef.current || !dropdownMenuRef.current) return;
+    const cleanup = autoUpdate(roomsBtnRef.current, dropdownMenuRef.current, () => {
+      computePosition(roomsBtnRef.current, dropdownMenuRef.current, {
+        placement: 'bottom-end',
+        middleware: [
+          offset(6),
+          flip({ fallbackPlacements: ['bottom-start', 'top-end', 'top-start'] }),
+          shift({ padding: 12 }),
+        ],
+      }).then(({ x, y }) => {
+        if (dropdownMenuRef.current) {
+          Object.assign(dropdownMenuRef.current.style, {
+            position: 'fixed',
+            left: `${Math.round(x)}px`,
+            top: `${Math.round(y)}px`,
+          });
+        }
+      });
+    });
+    return cleanup;
+  }, [showRoomsDropdown, isMobile]);
+
+  // Auto-close rooms dropdown on outside click (desktop/tablet only)
+  useEffect(() => {
+    if (!showRoomsDropdown || isMobile) return;
     const handleOutsideClick = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setShowRoomsDropdown(false);
+      if (
+        roomsBtnRef.current?.contains(e.target) ||
+        dropdownMenuRef.current?.contains(e.target)
+      ) {
+        return;
       }
+      closeOverlay('space-rooms');
     };
-    if (showRoomsDropdown) {
-      document.addEventListener('mousedown', handleOutsideClick);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleOutsideClick);
-    };
-  }, [showRoomsDropdown]);
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [showRoomsDropdown, isMobile, closeOverlay]);
 
   // Auto-resize textarea height
   const adjustTextareaHeight = useCallback(() => {
@@ -501,7 +546,7 @@ export default function SpaceView({ roomId = null }) {
       setRoomLimitAlert(
         `Active room limit reached (${MAX_ACTIVE_ROOMS}/${MAX_ACTIVE_ROOMS}). Please open or remove an existing room below.`
       );
-      setShowRoomsDropdown(true);
+      openOverlay('space-rooms');
       return;
     }
 
@@ -516,7 +561,7 @@ export default function SpaceView({ roomId = null }) {
       if (res.ok && data.roomId) {
         addOrUpdateRoomHistory(data.roomId, '');
         setRecentRooms(getRoomHistory());
-        setShowRoomsDropdown(false);
+        closeOverlay('space-rooms');
         // Soft client navigation — NO full page reload
         transitionRouter.push(`/space/${data.roomId}`);
       } else {
@@ -530,7 +575,7 @@ export default function SpaceView({ roomId = null }) {
   };
 
   const handleSwitchRoom = (targetRoomId) => {
-    setShowRoomsDropdown(false);
+    closeOverlay('space-rooms');
     if (!targetRoomId) {
       transitionRouter.push('/space');
     } else if (targetRoomId !== roomId) {
@@ -576,7 +621,7 @@ export default function SpaceView({ roomId = null }) {
       if (res.ok && data.roomId) {
         addOrUpdateRoomHistory(data.roomId, data.content || '');
         setRecentRooms(getRoomHistory());
-        setShowJoinModal(false);
+        closeOverlay('space-join');
         setJoinCodeInput('');
         transitionRouter.push(`/space/${data.roomId}`);
       }
@@ -706,34 +751,54 @@ export default function SpaceView({ roomId = null }) {
 
         {/* ─── Header ─── */}
         <header className={styles.header}>
-          <div>
-            <h1 className={styles.title}>Space</h1>
-            {isRoomMode ? (
-              <div className={styles.roomBadgeGroup} style={{ marginTop: '0.35rem' }}>
-                <div className={styles.roomBadge}>
-                  <span>ROOM</span>
-                  <span className={styles.roomCode}>{roomId}</span>
+          <div className={styles.headerTop}>
+            <div className={styles.headerIdentity}>
+              <h1 className={styles.title}>Space</h1>
+              {isRoomMode ? (
+                <div className={styles.roomBadgeGroup}>
+                  <div className={styles.roomBadge}>
+                    <span>ROOM</span>
+                    <span className={styles.roomCode}>{roomId}</span>
+                  </div>
+                  <span className={styles.roomTtl}>• 48h auto-expire</span>
                 </div>
-                <span className={styles.roomTtl}>• 48h auto-expire</span>
-              </div>
-            ) : (
-              <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '0.2rem' }}>
-                Public Collaborative Scratchpad
-              </div>
-            )}
+              ) : (
+                <p className={styles.subtitle}>
+                  Public Collaborative Scratchpad
+                </p>
+              )}
+            </div>
+
+            {/* Live Presence Indicator — quiet, small, and pinned in header top */}
+            <div className={styles.presenceBadge}>
+              <span
+                className={`${styles.presenceDot} ${
+                  !isConnected ? styles.presenceDotOffline : ''
+                }`}
+                aria-hidden="true"
+              />
+              <span>{viewerCount} {viewerCount === 1 ? 'VIEWING' : 'VIEWING'}</span>
+            </div>
           </div>
 
-          <div className={styles.metaRow}>
-            {/* Rooms Dropdown Switcher */}
-            <div className={styles.roomsDropdownContainer} ref={dropdownRef}>
+          <div className={styles.headerActionsBar}>
+            {/* Rooms Switcher Button & Desktop Popover */}
+            <div className={styles.roomsDropdownContainer}>
               <button
+                ref={roomsBtnRef}
                 type="button"
                 className={`${styles.roomsToggleBtn} ${showRoomsDropdown ? styles.roomsToggleBtnActive : ''}`}
-                onClick={() => setShowRoomsDropdown(!showRoomsDropdown)}
+                onClick={() => {
+                  if (showRoomsDropdown) {
+                    closeOverlay('space-rooms');
+                  } else {
+                    openOverlay('space-rooms');
+                  }
+                }}
                 aria-label="Toggle recent sync rooms"
                 aria-expanded={showRoomsDropdown}
               >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="3" width="7" height="7" />
                   <rect x="14" y="3" width="7" height="7" />
                   <rect x="14" y="14" width="7" height="7" />
@@ -745,15 +810,22 @@ export default function SpaceView({ roomId = null }) {
                 )}
               </button>
 
-              {showRoomsDropdown && (
-                <div className={styles.roomsDropdownMenu} role="menu">
+              {/* Desktop / Tablet Anchored Dropdown with @floating-ui/dom boundary detection */}
+              {showRoomsDropdown && !isMobile && (
+                <div
+                  ref={dropdownMenuRef}
+                  className={styles.roomsDropdownMenu}
+                  role="menu"
+                  aria-label="Your Sync Rooms"
+                  data-lenis-prevent="true"
+                >
                   <div className={styles.roomsDropdownHeader}>
                     <span className={styles.roomsDropdownTitle}>Your Sync Rooms</span>
                     <span>{recentRooms.length}/{MAX_ACTIVE_ROOMS}</span>
                   </div>
 
                   {roomLimitAlert && (
-                    <div style={{ fontSize: '0.7rem', color: '#fef08a', padding: '0.3rem 0.4rem', background: 'rgba(234, 179, 8, 0.1)', borderRadius: '4px' }}>
+                    <div className={styles.roomLimitAlertBox}>
                       {roomLimitAlert}
                     </div>
                   )}
@@ -844,70 +916,171 @@ export default function SpaceView({ roomId = null }) {
                 >
                   {copiedLink ? (
                     <>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                      Copied!
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      <span>Copied!</span>
                     </>
                   ) : (
                     <>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                      Share Link
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                      <span>Share Link</span>
                     </>
                   )}
                 </button>
                 <button
                   type="button"
                   className={styles.actionPillBtn}
-                  onClick={() => setShowQrModal(true)}
+                  onClick={() => openOverlay('space-qr')}
                   aria-label="Show QR code for phone scanning"
                 >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                  QR Code
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                  <span>QR Code</span>
                 </button>
               </div>
             ) : (
               <div className={styles.roomActions}>
                 <button
                   type="button"
-                  className={styles.actionPillBtn}
+                  className={styles.primaryNewRoomBtn}
                   onClick={handleCreateRoomFromView}
                   disabled={isCreatingRoom}
-                  style={{ color: '#10b981', borderColor: 'rgba(16, 185, 129, 0.3)' }}
                 >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19" />
                     <line x1="5" y1="12" x2="19" y2="12" />
                   </svg>
-                  + New Sync Room
+                  <span>{isCreatingRoom ? 'Creating...' : '+ New Sync Room'}</span>
                 </button>
                 <button
                   type="button"
-                  className={styles.actionPillBtn}
-                  onClick={() => setShowJoinModal(true)}
+                  className={styles.secondaryJoinBtn}
+                  onClick={() => openOverlay('space-join')}
                   aria-label="Join room by code"
                 >
                   Join Code
                 </button>
               </div>
             )}
-
-            {/* Live Presence Indicator */}
-            <div className={styles.presenceBadge}>
-              <span
-                className={`${styles.presenceDot} ${
-                  !isConnected ? styles.presenceDotOffline : ''
-                }`}
-                aria-hidden="true"
-              />
-              <span>{viewerCount} {viewerCount === 1 ? 'VIEWING' : 'VIEWING'}</span>
-            </div>
           </div>
         </header>
+
+        {/* ─── Mobile Bottom Sheet Modal for Rooms List (<= 640px) ─── */}
+        {showRoomsDropdown && isMobile && (
+          <div
+            className={styles.sheetBackdrop}
+            onClick={() => closeOverlay('space-rooms')}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Your Sync Rooms"
+          >
+            <div
+              className={styles.sheetContainer}
+              onClick={(e) => e.stopPropagation()}
+              data-lenis-prevent="true"
+            >
+              <div className={styles.sheetHandleBar} aria-hidden="true">
+                <span className={styles.sheetHandle} />
+              </div>
+
+              <div className={styles.sheetHeader}>
+                <div className={styles.sheetTitleGroup}>
+                  <span className={styles.sheetTitle}>Your Sync Rooms</span>
+                  <span className={styles.sheetBadge}>{recentRooms.length}/{MAX_ACTIVE_ROOMS}</span>
+                </div>
+                <button
+                  type="button"
+                  className={styles.sheetCloseBtn}
+                  onClick={() => closeOverlay('space-rooms')}
+                  aria-label="Close rooms panel"
+                >
+                  &times;
+                </button>
+              </div>
+
+              {roomLimitAlert && (
+                <div className={styles.roomLimitAlertBox}>
+                  {roomLimitAlert}
+                </div>
+              )}
+
+              <div className={styles.sheetList} data-lenis-prevent="true">
+                {recentRooms.length === 0 ? (
+                  <div className={styles.emptyRoomsNote}>
+                    No recent rooms. Create one below to sync across devices.
+                  </div>
+                ) : (
+                  recentRooms.map((r) => {
+                    const isActive = roomId === r.roomId;
+                    return (
+                      <div
+                        key={r.roomId}
+                        className={`${styles.roomListItem} ${isActive ? styles.roomListItemActive : ''}`}
+                        onClick={() => handleSwitchRoom(r.roomId)}
+                        role="menuitem"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleSwitchRoom(r.roomId);
+                        }}
+                      >
+                        <div className={styles.roomItemInfo}>
+                          <div className={styles.roomItemHeader}>
+                            <span className={styles.roomItemCode}>{r.roomId}</span>
+                            {isActive && <span className={styles.roomItemActiveDot} title="Current Room" />}
+                            <span className={styles.roomItemTime}>{formatTimeAgo(r.lastVisitedAt)}</span>
+                          </div>
+                          {r.preview && (
+                            <span className={styles.roomItemSnippet}>
+                              &ldquo;{r.preview}&rdquo;
+                            </span>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          className={styles.roomItemDeleteBtn}
+                          onClick={(e) => handleRemoveRoomFromDropdown(e, r.roomId)}
+                          title="Forget room from list"
+                          aria-label={`Forget room ${r.roomId}`}
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              <div className={styles.sheetFooter}>
+                <button
+                  type="button"
+                  className={styles.sheetActionPrimaryBtn}
+                  onClick={handleCreateRoomFromView}
+                  disabled={isCreatingRoom || recentRooms.length >= MAX_ACTIVE_ROOMS}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  {isCreatingRoom ? 'Creating Room...' : recentRooms.length >= MAX_ACTIVE_ROOMS ? 'Room Limit (5/5) Reached' : '+ New Sync Room'}
+                </button>
+
+                {isRoomMode && (
+                  <button
+                    type="button"
+                    className={styles.sheetActionSecondaryBtn}
+                    onClick={() => handleSwitchRoom(null)}
+                  >
+                    Global Scratchpad
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ─── Join with Code Modal ─── */}
         {showJoinModal && (
           <div
             className={styles.modalBackdrop}
-            onClick={() => setShowJoinModal(false)}
+            onClick={() => closeOverlay('space-join')}
             role="dialog"
             aria-modal="true"
             aria-label="Join sync room by code"
@@ -921,7 +1094,7 @@ export default function SpaceView({ roomId = null }) {
               <button
                 type="button"
                 className={styles.qrModalClose}
-                onClick={() => setShowJoinModal(false)}
+                onClick={() => closeOverlay('space-join')}
                 aria-label="Close modal"
               >
                 &times;
@@ -942,19 +1115,7 @@ export default function SpaceView({ roomId = null }) {
                   placeholder="e.g. wr62hgnm"
                   maxLength={16}
                   disabled={isCheckingJoin}
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.04)',
-                    border: joinCodeError ? '1px solid #ef4444' : '1px solid rgba(255, 255, 255, 0.12)',
-                    borderRadius: '8px',
-                    padding: '0.65rem 0.85rem',
-                    fontSize: '0.88rem',
-                    color: '#f8fafc',
-                    fontFamily: 'var(--font-mono, monospace)',
-                    outline: 'none',
-                    textAlign: 'center',
-                    textTransform: 'lowercase',
-                    letterSpacing: '0.08em',
-                  }}
+                  className={`${styles.joinCodeInput} ${joinCodeError ? styles.joinCodeInputError : ''}`}
                   aria-label="Room code"
                   autoFocus
                 />
@@ -982,7 +1143,7 @@ export default function SpaceView({ roomId = null }) {
         {showQrModal && (
           <div
             className={styles.modalBackdrop}
-            onClick={() => setShowQrModal(false)}
+            onClick={() => closeOverlay('space-qr')}
             role="dialog"
             aria-modal="true"
             aria-label="Scan QR Code to join sync room"
@@ -995,7 +1156,7 @@ export default function SpaceView({ roomId = null }) {
               <button
                 type="button"
                 className={styles.qrModalClose}
-                onClick={() => setShowQrModal(false)}
+                onClick={() => closeOverlay('space-qr')}
                 aria-label="Close QR Modal"
               >
                 &times;
@@ -1020,7 +1181,7 @@ export default function SpaceView({ roomId = null }) {
                   type="button"
                   className={styles.actionPillBtn}
                   onClick={handleCopyLink}
-                  style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem' }}
+                  style={{ padding: '0.3rem 0.65rem', fontSize: '0.74rem', minHeight: '38px' }}
                 >
                   {copiedLink ? 'Copied' : 'Copy'}
                 </button>
