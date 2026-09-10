@@ -1011,7 +1011,8 @@
 }
 
 /* Discord Style Action Buttons */
-.discordBtn {
+.discordBtn,
+.dockBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1036,14 +1037,16 @@
   white-space: nowrap;
 }
 
-.discordBtn:hover {
+.discordBtn:hover,
+.dockBtn:hover {
   background: #35373c;
   color: #ffffff;
   border-color: rgba(255, 255, 255, 0.12);
   transform: translateY(-1px);
 }
 
-.discordBtn:active {
+.discordBtn:active,
+.dockBtn:active {
   transform: translateY(0) scale(0.97);
 }
 
@@ -1062,7 +1065,8 @@
 }
 
 /* Discord Voice Connected Status Pill */
-.discordVoiceStatus {
+.discordVoiceStatus,
+.dockVoiceActive {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -1106,36 +1110,42 @@
 }
 
 /* Discord Muted (Red) */
-.discordBtnMuted {
+.discordBtnMuted,
+.dockVoiceMuted {
   background: #da373c !important;
   border-color: #da373c !important;
   color: #ffffff !important;
 }
 
-.discordBtnMuted:hover {
+.discordBtnMuted:hover,
+.dockVoiceMuted:hover {
   background: #c03135 !important;
 }
 
 /* Discord Deafened (Red) */
-.discordBtnDeafened {
+.discordBtnDeafened,
+.dockVoiceDeafened {
   background: #da373c !important;
   border-color: #da373c !important;
   color: #ffffff !important;
 }
 
-.discordBtnDeafened:hover {
+.discordBtnDeafened:hover,
+.dockVoiceDeafened:hover {
   background: #c03135 !important;
 }
 
 /* Discord Disconnect Button (Red with phone hangup icon) */
-.discordBtnDisconnect {
+.discordBtnDisconnect,
+.dockVoiceLeave {
   background: #da373c;
   border-color: #da373c;
   color: #ffffff;
   font-weight: 600;
 }
 
-.discordBtnDisconnect:hover {
+.discordBtnDisconnect:hover,
+.dockVoiceLeave:hover {
   background: #c03135;
   border-color: #c03135;
   color: #ffffff;
@@ -1152,13 +1162,15 @@
   background: #4752c4 !important;
 }
 
-.discordBtnActive {
+.discordBtnActive,
+.dockBtnActive {
   background: #35373c;
   border-color: #5865F2;
   color: #ffffff;
 }
 
-.discordBadge {
+.discordBadge,
+.dockBadge {
   position: absolute;
   top: -4px;
   right: -4px;
@@ -1176,31 +1188,6 @@
   border: 2px solid #1e1f22;
 }
 
-/* Legacy aliases for backward compatibility */
-.dockBtn {
-  composes: discordBtn;
-}
-
-.dockBtnActive {
-  composes: discordBtnActive;
-}
-
-.dockVoiceActive {
-  composes: discordVoiceStatus;
-}
-
-.dockVoiceMuted {
-  composes: discordBtnMuted;
-}
-
-.dockVoiceDeafened {
-  composes: discordBtnDeafened;
-}
-
-.dockVoiceLeave {
-  composes: discordBtnDisconnect;
-}
-
 .dockVoiceIndicator {
   width: 8px;
   height: 8px;
@@ -1209,10 +1196,6 @@
   display: inline-block;
   box-shadow: 0 0 8px #23a55a;
   flex-shrink: 0;
-}
-
-.dockBadge {
-  composes: discordBadge;
 }
 
 @media (max-width: 640px) {
