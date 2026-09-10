@@ -28,6 +28,7 @@ import { PresenterManager, ViewerManager, VoiceMeshManager, AUDIO_CONSTRAINTS } 
 import LoungeParticleCanvas from '@/components/LoungeParticleCanvas';
 import LoungeChat from '@/components/LoungeChat';
 import LoungeYouTubePlayer from '@/components/LoungeYouTubePlayer';
+import { useOverlay } from '@/context/OverlayContext';
 import styles from './lounge.module.css';
 
 const ORB_COLORS = [
@@ -42,6 +43,30 @@ const ORB_COLORS = [
 export default function LoungeRoomView({ roomId }) {
   const router = useRouter();
   const transitionRouter = useTransitionRouter();
+  const { activeOverlay } = useOverlay();
+
+  // Duplicate Tab Prevention (BroadcastChannel)
+  const myTabId = useRef(
+    typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `tab_${Math.random().toString(36).substring(2, 9)}_${Date.now()}`
+  ).current;
+  const [isDuplicateTab, setIsDuplicateTab] = useState(false);
+  const [activeTabId, setActiveTabId] = useState(null);
+  const activeTabIdRef = useRef(null);
+  useEffect(() => {
+    activeTabIdRef.current = activeTabId;
+  }, [activeTabId]);
+  const [duplicateProbeDone, setDuplicateProbeDone] = useState(false);
+  const [switchFocusNotice, setSwitchFocusNotice] = useState(false);
+  const isDuplicateTabRef = useRef(false);
+  const broadcastChannelRef = useRef(null);
+
+  // Connection State tracking for voice peers
+  const [peerConnectionStates, setPeerConnectionStates] = useState({});
+
+  // First-time Shortcut Hint Banner
+  const [showShortcutHint, setShowShortcutHint] = useState(false);
 
   // Auth & Identity
   const [currentUser, setCurrentUser] = useState(null);
@@ -52,7 +77,7 @@ export default function LoungeRoomView({ roomId }) {
   // Room State
   const [roomData, setRoomData] = useState(null);
   const [participants, setParticipants] = useState([]);
-  const [joinStatus, setJoinStatus] = useState('connecting'); // 'connecting' | 'joined' | 'full' | 'error' | 'not_found'
+  const [joinStatus, setJoinStatus] = useState('connecting'); // 'connecting' | 'joined' | 'duplicate_tab' | 'full' | 'error' | 'not_found'
   const [errorMessage, setErrorMessage] = useState('');
   const [copiedInvite, setCopiedInvite] = useState(false);
 
@@ -132,6 +157,93 @@ export default function LoungeRoomView({ roomId }) {
       isMounted = false;
     };
   }, []);
+
+  // BroadcastChannel duplicate join detection scoped to lounge-room-${roomId}
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('BroadcastChannel' in window) || !roomId) {
+      setDuplicateProbeDone(true);
+      return;
+    }
+
+    const channelName = `lounge-room-${roomId}`;
+    const channel = new BroadcastChannel(channelName);
+    broadcastChannelRef.current = channel;
+
+    channel.onmessage = (event) => {
+      const data = event.data;
+      if (!data || typeof data !== 'object') return;
+
+      // Case 1: Another tab asks if there is an active session in this room
+      if (data.type === 'CHECK_EXISTING_SESSION') {
+        if (data.tabId !== myTabId && (isJoinedRef.current || joinInProgressRef.current)) {
+          channel.postMessage({
+            type: 'SESSION_ACTIVE',
+            targetTabId: data.tabId,
+            activeTabId: myTabId,
+          });
+        }
+      }
+
+      // Case 2: We probed and another tab answered that it is already active
+      if (data.type === 'SESSION_ACTIVE' && data.targetTabId === myTabId) {
+        console.log('[The Lounge] Duplicate tab session detected in room:', roomId);
+        isDuplicateTabRef.current = true;
+        joinInProgressRef.current = false;
+        setIsDuplicateTab(true);
+        setActiveTabId(data.activeTabId);
+        setJoinStatus('duplicate_tab');
+      }
+
+      // Case 3: A duplicate tab requested this active tab to focus
+      if (data.type === 'REQUEST_FOCUS' && data.targetTabId === myTabId) {
+        if (typeof window !== 'undefined') {
+          window.focus();
+        }
+      }
+
+      // Case 4: An active tab closed/left
+      if (data.type === 'SESSION_LEFT' && data.senderTabId === activeTabIdRef.current) {
+        setActiveTabId(null);
+      }
+    };
+
+    // Probe for existing session
+    channel.postMessage({ type: 'CHECK_EXISTING_SESSION', tabId: myTabId });
+
+    // Allow 300ms for active tab to respond before proceeding to join
+    const probeTimer = setTimeout(() => {
+      setDuplicateProbeDone(true);
+    }, 300);
+
+    return () => {
+      clearTimeout(probeTimer);
+      if (isJoinedRef.current) {
+        channel.postMessage({ type: 'SESSION_LEFT', senderTabId: myTabId });
+      }
+      try {
+        channel.close();
+      } catch {}
+      broadcastChannelRef.current = null;
+    };
+  }, [roomId, myTabId]);
+
+  const handleSwitchToExistingTab = () => {
+    if (broadcastChannelRef.current && activeTabId) {
+      broadcastChannelRef.current.postMessage({
+        type: 'REQUEST_FOCUS',
+        targetTabId: activeTabId,
+      });
+    }
+    setSwitchFocusNotice(true);
+    setTimeout(() => setSwitchFocusNotice(false), 3500);
+  };
+
+  const handleRetryJoin = () => {
+    isDuplicateTabRef.current = false;
+    setIsDuplicateTab(false);
+    setActiveTabId(null);
+    setJoinStatus('connecting');
+  };
 
   // 2. Atomic Join Transaction & Room Verification
   const performJoinTransaction = useCallback(
@@ -230,12 +342,20 @@ export default function LoungeRoomView({ roomId }) {
     [roomId]
   );
 
-  // Run join once user and displayName are ready
+  // Run join once user and displayName are ready and duplicate check passed
   useEffect(() => {
-    if (currentUser && displayName && joinStatus === 'connecting' && !isJoinedRef.current && !joinInProgressRef.current) {
+    if (
+      currentUser &&
+      displayName &&
+      joinStatus === 'connecting' &&
+      duplicateProbeDone &&
+      !isJoinedRef.current &&
+      !joinInProgressRef.current &&
+      !isDuplicateTabRef.current
+    ) {
       performJoinTransaction(currentUser, displayName);
     }
-  }, [currentUser, displayName, joinStatus, performJoinTransaction]);
+  }, [currentUser, displayName, joinStatus, duplicateProbeDone, performJoinTransaction]);
 
 
   // 3. 50-Second Heartbeat Loop (Quota-efficient)
@@ -259,7 +379,7 @@ export default function LoungeRoomView({ roomId }) {
 
   // 4. Room & Participants Subscriptions
   useEffect(() => {
-    if (!roomId) return;
+    if (!roomId || !currentUser || joinStatus === 'duplicate_tab') return;
 
     const roomRef = doc(db, 'rooms', roomId);
     const unsubRoom = onSnapshot(
@@ -316,7 +436,7 @@ export default function LoungeRoomView({ roomId }) {
       unsubRoom();
       unsubParticipants();
     };
-  }, [roomId, joinStatus, roomData?.hostUid]);
+  }, [roomId, currentUser, joinStatus, roomData?.hostUid]);
 
   // Active online participants & presenter detection
   const activeParticipants = participants.filter((p) => p.isOnline);
@@ -461,6 +581,19 @@ export default function LoungeRoomView({ roomId }) {
             return next;
           });
         },
+        onConnectionStateChange: (peerUid, iceState, connState) => {
+          setPeerConnectionStates((prev) => {
+            if (iceState === 'closed' && connState === 'closed') {
+              const next = { ...prev };
+              delete next[peerUid];
+              return next;
+            }
+            return {
+              ...prev,
+              [peerUid]: { iceState, connState },
+            };
+          });
+        },
       });
 
       voiceMeshRef.current = voiceMgr;
@@ -503,6 +636,7 @@ export default function LoungeRoomView({ roomId }) {
     isMicMutedRef.current = false;
     setIsDeafened(false);
     setSpeakingMap({});
+    setPeerConnectionStates({});
     setAutoMutedNotice(false);
 
     if (currentUser && roomId) {
@@ -515,7 +649,7 @@ export default function LoungeRoomView({ roomId }) {
     }
   }, [currentUser, roomId]);
 
-  const handleToggleMic = () => {
+  const handleToggleMic = useCallback(() => {
     if (!voiceMeshRef.current) return;
     const nextMuted = !isMicMuted;
     voiceMeshRef.current.setLocalMuted(nextMuted);
@@ -529,9 +663,9 @@ export default function LoungeRoomView({ roomId }) {
       const pRef = doc(db, 'rooms', roomId, 'participants', currentUser.uid);
       updateDoc(pRef, { isMuted: nextMuted }).catch(() => {});
     }
-  };
+  }, [isMicMuted, currentUser, roomId]);
 
-  const handleToggleDeafen = () => {
+  const handleToggleDeafen = useCallback(() => {
     if (!voiceMeshRef.current) return;
     const nextDeafened = !isDeafened;
     voiceMeshRef.current.setDeafened(nextDeafened);
@@ -548,7 +682,7 @@ export default function LoungeRoomView({ roomId }) {
         isMuted: nextDeafened ? true : isMicMuted,
       }).catch(() => {});
     }
-  };
+  }, [isDeafened, isMicMuted, currentUser, roomId]);
 
   const handleTogglePeerMute = (peerUid) => {
     if (!voiceMeshRef.current) return;
@@ -560,6 +694,91 @@ export default function LoungeRoomView({ roomId }) {
       [peerUid]: nextMuted,
     }));
   };
+
+  // One-time Keyboard Shortcut Hint Discovery Banner
+  useEffect(() => {
+    if (joinStatus === 'joined' && typeof window !== 'undefined') {
+      const dismissed = localStorage.getItem('lounge_shortcuts_hint_dismissed');
+      if (!dismissed) {
+        setShowShortcutHint(true);
+      }
+    }
+  }, [joinStatus]);
+
+  const handleDismissShortcutHint = () => {
+    setShowShortcutHint(false);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('lounge_shortcuts_hint_dismissed', 'true');
+    }
+  };
+
+  // Global Keyboard Shortcuts (K = chat, M = mute, D = deafen, Escape = close)
+  useEffect(() => {
+    if (joinStatus !== 'joined') return;
+
+    const handleKeyDown = (e) => {
+      // Do NOT intercept if Command Palette is active or modifier keys (Cmd, Ctrl, Alt) are pressed
+      if (activeOverlay === 'palette' || e.metaKey || e.ctrlKey || e.altKey) {
+        return;
+      }
+
+      // Escape key: close chat or modal
+      if (e.key === 'Escape') {
+        if (isChatOpen) {
+          e.preventDefault();
+          document.activeElement?.blur?.();
+          setIsChatOpen(false);
+          return;
+        }
+        if (showNameModal) {
+          e.preventDefault();
+          document.activeElement?.blur?.();
+          setShowNameModal(false);
+          return;
+        }
+        return;
+      }
+
+      // Ignore if user is currently typing in an input, textarea, or contenteditable field
+      const activeTag = document.activeElement?.tagName?.toUpperCase();
+      const isTyping =
+        activeTag === 'INPUT' ||
+        activeTag === 'TEXTAREA' ||
+        document.activeElement?.isContentEditable;
+      if (isTyping) return;
+
+      const key = e.key.toLowerCase();
+
+      // K -> Toggle Lounge Chat
+      if (key === 'k') {
+        e.preventDefault();
+        setIsChatOpen((prev) => !prev);
+        setUnreadChatCount(0);
+        return;
+      }
+
+      // M -> Toggle Mic Mute (while in voice)
+      if (key === 'm') {
+        e.preventDefault();
+        if (inVoice) {
+          handleToggleMic();
+        }
+        return;
+      }
+
+      // D -> Toggle Deafen (while in voice)
+      if (key === 'd') {
+        e.preventDefault();
+        if (inVoice) {
+          handleToggleDeafen();
+        }
+        return;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [joinStatus, activeOverlay, isChatOpen, showNameModal, inVoice, handleToggleMic, handleToggleDeafen]);
 
   // Visibilitychange listener: Automatically auto-mute mic when tab is backgrounded
   // Re-enabling ONLY happens upon return and explicit user unmute action
@@ -719,6 +938,61 @@ export default function LoungeRoomView({ roomId }) {
     updateDoc(pRef, { displayName: clean }).catch(() => {});
   };
 
+  // Render Duplicate Tab State
+  if (joinStatus === 'duplicate_tab') {
+    return (
+      <div className={styles.pageContainer}>
+        <LoungeParticleCanvas />
+        <main className={styles.landingMain} style={{ justifyContent: 'center', alignItems: 'center' }}>
+          <div className={styles.duplicateTabCard}>
+            <div className={styles.duplicateTabIcon}>📑</div>
+            <h2 className={styles.cardTitle}>You're Already in this Room</h2>
+            <p className={styles.cardDesc}>
+              Another tab in this browser already has an active session in <strong>Stage {roomId}</strong>. Duplicate joins from the same browser profile are blocked to prevent audio loopback and duplicate presence.
+            </p>
+            {switchFocusNotice && (
+              <div
+                style={{
+                  background: 'rgba(59, 130, 246, 0.15)',
+                  border: '1px solid rgba(59, 130, 246, 0.35)',
+                  borderRadius: '8px',
+                  padding: '0.5rem 0.85rem',
+                  fontSize: '0.78rem',
+                  color: '#93c5fd',
+                  fontFamily: 'var(--font-mono, monospace)',
+                }}
+              >
+                Focus signal sent! If your browser prevented automatic tab switching, please click your other open tab.
+              </div>
+            )}
+            <div className={styles.duplicateActions}>
+              <button
+                type="button"
+                className={styles.primaryBtn}
+                onClick={handleSwitchToExistingTab}
+              >
+                Switch to Active Tab
+              </button>
+              <button
+                type="button"
+                className={styles.secondaryBtn}
+                onClick={() => transitionRouter.push('/lounge')}
+              >
+                Return to Lounge Lobby
+              </button>
+            </div>
+            <p className={styles.duplicateHint}>
+              Closed the other tab?{' '}
+              <button type="button" className={styles.textBtn} onClick={handleRetryJoin}>
+                Join from this tab
+              </button>
+            </p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   // Render Error / Full State
   if (joinStatus === 'error' || joinStatus === 'not_found' || joinStatus === 'full') {
     return (
@@ -847,6 +1121,30 @@ export default function LoungeRoomView({ roomId }) {
           </div>
         </header>
 
+        {/* First-Time Keyboard Shortcuts Hint */}
+        {showShortcutHint && (
+          <div className={styles.shortcutHintBar} role="note" aria-label="Keyboard Shortcuts Tip">
+            <div className={styles.shortcutKeysWrap}>
+              <span>💡 Tip:</span>
+              <span><kbd className={styles.shortcutKeyBadge}>K</kbd> Chat</span>
+              <span>·</span>
+              <span><kbd className={styles.shortcutKeyBadge}>M</kbd> Mute</span>
+              <span>·</span>
+              <span><kbd className={styles.shortcutKeyBadge}>D</kbd> Deafen</span>
+              <span>·</span>
+              <span><kbd className={styles.shortcutKeyBadge}>Esc</kbd> Close</span>
+            </div>
+            <button
+              type="button"
+              className={styles.shortcutDismissBtn}
+              onClick={handleDismissShortcutHint}
+              aria-label="Dismiss shortcut tip"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         {/* Central Stage Arena */}
         <section className={styles.stageArena}>
           {/* Glowing Participant Orbs Ring */}
@@ -859,6 +1157,16 @@ export default function LoungeRoomView({ roomId }) {
               const isPeerInVoice = !!p.inVoice;
               const isPeerMicMuted = !!p.isMuted;
               const isLocallyMuted = !!locallyMutedPeers[p.uid];
+              const peerConnInfo = peerConnectionStates[p.uid];
+              const isPeerConnFailed =
+                inVoice &&
+                isPeerInVoice &&
+                !isMe &&
+                peerConnInfo &&
+                (peerConnInfo.iceState === 'failed' ||
+                  peerConnInfo.iceState === 'disconnected' ||
+                  peerConnInfo.connState === 'failed' ||
+                  peerConnInfo.connState === 'disconnected');
 
               return (
                 <div key={p.id} className={styles.orbWrapper}>
@@ -874,19 +1182,35 @@ export default function LoungeRoomView({ roomId }) {
                     }}
                     title={`${p.displayName} ${isRoomHost ? '(Host)' : ''} ${
                       p.isScreenSharing ? '(Presenting)' : ''
-                    } ${isPeerInVoice ? (isPeerMicMuted ? '(Voice Muted)' : '(Speaking in Voice)') : ''} ${
-                      !p.isOnline ? '(Away)' : ''
-                    }`}
+                    } ${
+                      isPeerInVoice
+                        ? isPeerConnFailed
+                          ? `(Audio connection ${peerConnInfo?.iceState || peerConnInfo?.connState || 'issue'})`
+                          : isPeerMicMuted
+                          ? '(Voice Muted)'
+                          : '(Speaking in Voice)'
+                        : ''
+                    } ${!p.isOnline ? '(Away)' : ''}`}
                   >
                     {/* Voice mic status badge on orb */}
                     {isPeerInVoice && (
                       <div
                         className={`${styles.orbVoiceBadge} ${
-                          isPeerMicMuted ? styles.orbVoiceBadgeMuted : styles.orbVoiceBadgeActive
+                          isPeerConnFailed
+                            ? styles.orbVoiceBadgeFailed
+                            : isPeerMicMuted
+                            ? styles.orbVoiceBadgeMuted
+                            : styles.orbVoiceBadgeActive
                         }`}
-                        title={isPeerMicMuted ? 'Mic Muted' : 'Mic Active'}
+                        title={
+                          isPeerConnFailed
+                            ? `Audio connection issue (${peerConnInfo?.iceState || peerConnInfo?.connState || 'disconnected'})`
+                            : isPeerMicMuted
+                            ? 'Mic Muted'
+                            : 'Mic Active'
+                        }
                       >
-                        {isPeerMicMuted ? '✕' : '🎙'}
+                        {isPeerConnFailed ? '⚠️' : isPeerMicMuted ? '✕' : '🎙'}
                       </div>
                     )}
                     <span>{initial}</span>

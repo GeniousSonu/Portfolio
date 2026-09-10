@@ -51,12 +51,40 @@ export default function LoungeChat({
   const typingTimerRef = useRef(null);
   const lastTypingWriteRef = useRef(0);
   const chatDrawerRef = useRef(null);
+  const inputRef = useRef(null);
 
   const isFirstSnapshotRef = useRef(true);
   const onNewMessageRef = useRef(onNewMessage);
   useEffect(() => {
     onNewMessageRef.current = onNewMessage;
   }, [onNewMessage]);
+
+  // Focus input when chat opens
+  useEffect(() => {
+    if (isOpen) {
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
+  // Escape key handling inside chat drawer
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        if (showEmojiPicker || showStickerTray) {
+          setShowEmojiPicker(false);
+          setShowStickerTray(false);
+        } else {
+          inputRef.current?.blur();
+          onClose?.();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, showEmojiPicker, showStickerTray, onClose]);
 
   // Close popovers if clicking outside
   useEffect(() => {
@@ -72,7 +100,7 @@ export default function LoungeChat({
 
   // Subscribe to room messages (last 60 messages)
   useEffect(() => {
-    if (!roomId) return;
+    if (!roomId || !currentUser) return;
     isFirstSnapshotRef.current = true;
 
     const messagesCol = collection(db, 'rooms', roomId, 'messages');
@@ -108,7 +136,7 @@ export default function LoungeChat({
     );
 
     return () => unsubscribe();
-  }, [roomId, isOpen]);
+  }, [roomId, currentUser, isOpen]);
 
   // Scroll to bottom on messages update
   useEffect(() => {
@@ -218,7 +246,10 @@ export default function LoungeChat({
         </div>
         <button
           type="button"
-          onClick={onClose}
+          onClick={() => {
+            inputRef.current?.blur();
+            onClose?.();
+          }}
           className={styles.chatCloseBtn}
           aria-label="Close Chat"
         >
@@ -239,7 +270,12 @@ export default function LoungeChat({
               : '--:--';
 
             return (
-              <div key={msg.id} className={styles.chatMessageItem}>
+              <div
+                key={msg.id}
+                className={`${styles.chatMessageItem} ${
+                  isMe ? styles.chatMessageItemMe : styles.chatMessageItemOther
+                }`}
+              >
                 <div className={styles.chatSenderRow}>
                   <span className={styles.chatSenderName} style={{ color: isMe ? '#34d399' : '#60a5fa' }}>
                     {msg.displayName} {isMe && '(you)'}
@@ -352,6 +388,7 @@ export default function LoungeChat({
           </button>
 
           <input
+            ref={inputRef}
             type="text"
             className={styles.chatInputField}
             placeholder="Type a message... (max 1000)"

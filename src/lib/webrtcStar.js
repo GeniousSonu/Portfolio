@@ -12,12 +12,61 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase/client';
 
-const RTC_CONFIG = {
-  iceServers: [
+/**
+ * WebRTC ICE Configuration:
+ * Configures both primary STUN servers for direct peer-to-peer reflection and
+ * TURN relay fallback servers (Metered Open Relay project + custom Cloudflare Realtime TURN if provided)
+ * for symmetric NAT, mobile CGNAT, and restricted network environments.
+ */
+export function getRtcConfig() {
+  const customTurnUrl = process.env.NEXT_PUBLIC_TURN_URL;
+  const customTurnUsername = process.env.NEXT_PUBLIC_TURN_USERNAME;
+  const customTurnCredential = process.env.NEXT_PUBLIC_TURN_CREDENTIAL;
+
+  const iceServers = [
+    // 1. Google Public STUN servers (primary for direct peer reflection)
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
-  ],
-};
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun.relay.metered.ca:80' },
+  ];
+
+  // If custom Cloudflare or other TURN service is specified in environment
+  if (customTurnUrl) {
+    iceServers.push({
+      urls: customTurnUrl.split(',').map((u) => u.trim()),
+      username: customTurnUsername || undefined,
+      credential: customTurnCredential || undefined,
+    });
+  }
+
+  // 2. Metered Open Relay Project TURN Fallback (Free, high-availability public relay)
+  // Supports UDP and TCP transports across standard HTTP/HTTPS ports 80 & 443
+  iceServers.push(
+    {
+      urls: [
+        'turn:relay.metered.ca:80',
+        'turn:relay.metered.ca:443',
+        'turn:relay.metered.ca:443?transport=tcp',
+      ],
+      username: 'openrelayproject',
+      credential: 'openrelayproject',
+    },
+    {
+      urls: 'turns:relay.metered.ca:443?transport=tcp',
+      username: 'openrelayproject',
+      credential: 'openrelayproject',
+    }
+  );
+
+  return {
+    iceServers,
+    iceCandidatePoolSize: 10,
+  };
+}
+
+export const RTC_CONFIG = getRtcConfig();
+
 
 /**
  * High-quality audio constraints for Discord-style real-time voice chat
@@ -92,6 +141,13 @@ export class PresenterManager {
 
     const pc = new RTCPeerConnection(RTC_CONFIG);
     this.peerConnections.set(viewerUid, pc);
+
+    pc.oniceconnectionstatechange = () => {
+      console.log(`[WebRTC Presenter ICE] Viewer ${viewerUid} ICE state: ${pc.iceConnectionState}`);
+    };
+    pc.onconnectionstatechange = () => {
+      console.log(`[WebRTC Presenter Conn] Viewer ${viewerUid} connection state: ${pc.connectionState}`);
+    };
 
     // Add local screen-share tracks to peer connection
     this.stream.getTracks().forEach((track) => pc.addTrack(track, this.stream));
@@ -231,6 +287,13 @@ export class ViewerManager {
     this.pc = new RTCPeerConnection(RTC_CONFIG);
     this.iceBuffer = createIceCandidateBuffer(signalDocRef, 'viewerCandidates');
 
+    this.pc.oniceconnectionstatechange = () => {
+      console.log(`[WebRTC Viewer ICE] Presenter ${this.presenterUid} ICE state: ${this.pc?.iceConnectionState}`);
+    };
+    this.pc.onconnectionstatechange = () => {
+      console.log(`[WebRTC Viewer Conn] Presenter ${this.presenterUid} connection state: ${this.pc?.connectionState}`);
+    };
+
     this.pc.onicecandidate = (event) => {
       if (event.candidate) {
         this.iceBuffer.add(event.candidate);
@@ -312,6 +375,7 @@ export class VoiceMeshManager {
     this.onPeerStream = callbacks.onPeerStream || (() => {});
     this.onPeerLeft = callbacks.onPeerLeft || (() => {});
     this.onSpeakingChange = callbacks.onSpeakingChange || (() => {});
+    this.onConnectionStateChange = callbacks.onConnectionStateChange || (() => {});
 
     this.peerConnections = new Map(); // peerUid -> RTCPeerConnection
     this.unsubscribers = new Map(); // peerUid -> unsub function
@@ -438,6 +502,20 @@ export class VoiceMeshManager {
 
     const pc = new RTCPeerConnection(RTC_CONFIG);
     this.peerConnections.set(peerUid, pc);
+
+    pc.oniceconnectionstatechange = () => {
+      const iceState = pc.iceConnectionState;
+      const connState = pc.connectionState;
+      console.log(`[WebRTC Voice ICE] Peer ${peerUid} ICE state: ${iceState} (connection: ${connState})`);
+      this.onConnectionStateChange(peerUid, iceState, connState);
+    };
+
+    pc.onconnectionstatechange = () => {
+      const iceState = pc.iceConnectionState;
+      const connState = pc.connectionState;
+      console.log(`[WebRTC Voice Conn] Peer ${peerUid} connection state: ${connState} (ICE: ${iceState})`);
+      this.onConnectionStateChange(peerUid, iceState, connState);
+    };
 
     // Add local mic track
     if (this.localStream) {
@@ -612,6 +690,7 @@ export class VoiceMeshManager {
     this.analysers.delete(peerUid);
     this.speakingStates.delete(peerUid);
     this.onSpeakingChange(peerUid, false);
+    this.onConnectionStateChange(peerUid, 'closed', 'closed');
     this.onPeerLeft(peerUid);
   }
 
