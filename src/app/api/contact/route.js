@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { resend } from '@/lib/resend';
+import { resend, getResendApiKey } from '@/lib/resend';
 import {
   extractClientIp,
   validateHoneypot,
@@ -91,7 +91,8 @@ export async function POST(request) {
   }
 
   // 9. Check Email Service API Credentials
-  if (!process.env.RESEND_API_KEY) {
+  const resendApiKey = getResendApiKey();
+  if (!resendApiKey) {
     console.error('[Contact API] Missing RESEND_API_KEY environment variable.');
     return NextResponse.json(
       {

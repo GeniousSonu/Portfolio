@@ -1,6 +1,34 @@
 import { Resend } from 'resend';
+import fs from 'node:fs';
+import path from 'node:path';
 
 let _resendInstance = null;
+
+/**
+ * Retrieves the RESEND_API_KEY from process.env or falls back to reading .env.local dynamically.
+ * This prevents runtime failures when a developer adds/updates credentials without restarting `next dev`.
+ */
+export function getResendApiKey() {
+  if (process.env.RESEND_API_KEY) {
+    return process.env.RESEND_API_KEY;
+  }
+
+  // Hot-reload fallback: dynamically inspect .env.local if dev server wasn't rebooted
+  try {
+    const envPath = path.resolve(process.cwd(), '.env.local');
+    if (fs.existsSync(envPath)) {
+      const content = fs.readFileSync(envPath, 'utf8');
+      const match = content.match(/^\s*RESEND_API_KEY\s*=\s*(.+?)\s*$/m);
+      if (match && match[1]) {
+        const val = match[1].trim().replace(/^["']|["']$/g, '');
+        process.env.RESEND_API_KEY = val;
+        return val;
+      }
+    }
+  } catch {}
+
+  return null;
+}
 
 /**
  * Lazy-initialized Resend client.
@@ -9,17 +37,17 @@ let _resendInstance = null;
  * The client is only instantiated on first use inside a request handler.
  */
 export function getResend() {
-  if (_resendInstance) return _resendInstance;
-
-  const key = process.env.RESEND_API_KEY;
+  const key = getResendApiKey();
   if (!key) {
     throw new Error(
       'Missing RESEND_API_KEY environment variable. ' +
-      'Add it to your Vercel Environment Variables dashboard.'
+      'Add it to your Vercel Environment Variables dashboard or .env.local.'
     );
   }
 
-  _resendInstance = new Resend(key);
+  if (!_resendInstance) {
+    _resendInstance = new Resend(key);
+  }
   return _resendInstance;
 }
 
