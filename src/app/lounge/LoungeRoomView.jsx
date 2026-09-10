@@ -24,7 +24,7 @@ import {
   setLoungeDisplayName,
   addOrUpdateRoomHistory,
 } from '@/lib/loungeHistory';
-import { PresenterManager, ViewerManager } from '@/lib/webrtcStar';
+import { PresenterManager, ViewerManager, VoiceMeshManager, AUDIO_CONSTRAINTS } from '@/lib/webrtcStar';
 import LoungeParticleCanvas from '@/components/LoungeParticleCanvas';
 import LoungeChat from '@/components/LoungeChat';
 import LoungeYouTubePlayer from '@/components/LoungeYouTubePlayer';
@@ -65,6 +65,18 @@ export default function LoungeRoomView({ roomId }) {
   const presenterManagerRef = useRef(null);
   const viewerManagerRef = useRef(null);
 
+  // WebRTC Voice Chat State (Mesh Topology with Speaking Glow & Per-Peer Moderation)
+  const [inVoice, setInVoice] = useState(false);
+  const [isMicMuted, setIsMicMuted] = useState(false);
+  const [isDeafened, setIsDeafened] = useState(false);
+  const [speakingMap, setSpeakingMap] = useState({}); // uid -> boolean
+  const [locallyMutedPeers, setLocallyMutedPeers] = useState({}); // peerUid -> boolean
+  const [autoMutedNotice, setAutoMutedNotice] = useState(false);
+
+  const voiceMeshRef = useRef(null);
+  const isVoiceActiveRef = useRef(false);
+  const isMicMutedRef = useRef(false);
+
   // YouTube / Stage Mode
   const [stageMode, setStageMode] = useState('idle'); // 'idle' | 'screenshare' | 'youtube'
   const [showYouTubeInput, setShowYouTubeInput] = useState(false);
@@ -73,8 +85,15 @@ export default function LoungeRoomView({ roomId }) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [unreadChatCount, setUnreadChatCount] = useState(0);
 
+  const handleNewMessage = useCallback(() => {
+    if (!isChatOpen) {
+      setUnreadChatCount((prev) => prev + 1);
+    }
+  }, [isChatOpen]);
+
   const heartbeatTimerRef = useRef(null);
   const isJoinedRef = useRef(false);
+  const joinInProgressRef = useRef(false);
 
   // Check displayMedia capability (desktop only)
   useEffect(() => {
@@ -117,7 +136,9 @@ export default function LoungeRoomView({ roomId }) {
   // 2. Atomic Join Transaction & Room Verification
   const performJoinTransaction = useCallback(
     async (user, currentName) => {
-      if (!roomId || !user) return;
+      if (!roomId || !user || isJoinedRef.current || joinInProgressRef.current) return;
+      joinInProgressRef.current = true;
+      console.log('[COUNTER_DEBUG] Attempting join transaction for UID:', user.uid);
 
       try {
         const roomRef = doc(db, 'rooms', roomId);
@@ -141,7 +162,7 @@ export default function LoungeRoomView({ roomId }) {
 
           const currentCount = rData.participantCount || 0;
 
-          // If already in room, refresh presence
+          // If already in room, refresh presence without incrementing
           if (participantSnap.exists()) {
             transaction.update(participantRef, {
               displayName: currentName,
@@ -151,15 +172,14 @@ export default function LoungeRoomView({ roomId }) {
             return;
           }
 
-          // Enforce 6-participant cap
+          // Strict server-side cap: max 6 participants
           if (currentCount >= 6) {
             throw new Error('ROOM_FULL');
           }
 
-          // Assign deterministic color based on count
           const color = ORB_COLORS[currentCount % ORB_COLORS.length];
 
-          // Increment parent counter & write participant document
+          console.log('[COUNTER_DEBUG] Incrementing participantCount from', currentCount, 'to', currentCount + 1);
           transaction.update(roomRef, {
             participantCount: currentCount + 1,
             updatedAt: serverTimestamp(),
@@ -178,9 +198,11 @@ export default function LoungeRoomView({ roomId }) {
         });
 
         isJoinedRef.current = true;
+        joinInProgressRef.current = false;
         setJoinStatus('joined');
         addOrUpdateRoomHistory(roomId, 'Active');
       } catch (err) {
+        joinInProgressRef.current = false;
         console.error('[The Lounge] Join transaction error:', err);
         if (err.message === 'NOT_FOUND') {
           setJoinStatus('not_found');
@@ -210,10 +232,11 @@ export default function LoungeRoomView({ roomId }) {
 
   // Run join once user and displayName are ready
   useEffect(() => {
-    if (currentUser && displayName && joinStatus === 'connecting') {
+    if (currentUser && displayName && joinStatus === 'connecting' && !isJoinedRef.current && !joinInProgressRef.current) {
       performJoinTransaction(currentUser, displayName);
     }
   }, [currentUser, displayName, joinStatus, performJoinTransaction]);
+
 
   // 3. 50-Second Heartbeat Loop (Quota-efficient)
   useEffect(() => {
@@ -419,30 +442,179 @@ export default function LoungeRoomView({ roomId }) {
     }
   }, [isSharingScreen, activePresenter, remoteStream, roomData?.playbackState?.videoId]);
 
-  // 7. Clean Leave Action
+  // ── Voice Chat System (Mesh, Auto-Mute, Peer Mute, Speaking Glow) ──
+  const handleJoinVoice = async () => {
+    if (!currentUser || !roomId) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia(AUDIO_CONSTRAINTS);
+      const voiceMgr = new VoiceMeshManager(roomId, currentUser.uid, stream, {
+        onSpeakingChange: (uid, isSpeaking) => {
+          setSpeakingMap((prev) => {
+            if (prev[uid] === isSpeaking) return prev;
+            return { ...prev, [uid]: isSpeaking };
+          });
+        },
+        onPeerLeft: (peerUid) => {
+          setSpeakingMap((prev) => {
+            const next = { ...prev };
+            delete next[peerUid];
+            return next;
+          });
+        },
+      });
+
+      voiceMeshRef.current = voiceMgr;
+      setInVoice(true);
+      isVoiceActiveRef.current = true;
+      setIsMicMuted(false);
+      isMicMutedRef.current = false;
+      setIsDeafened(false);
+      setAutoMutedNotice(false);
+
+      // Connect to any participants already in voice
+      if (Array.isArray(participants)) {
+        const voicePeers = participants
+          .filter((p) => p.inVoice && p.uid !== currentUser.uid)
+          .map((p) => p.uid);
+        voiceMgr.syncVoiceParticipants(voicePeers);
+      }
+
+      // Update Firestore participant presence doc
+      const pRef = doc(db, 'rooms', roomId, 'participants', currentUser.uid);
+      updateDoc(pRef, {
+        inVoice: true,
+        isMuted: false,
+        isDeafened: false,
+      }).catch(() => {});
+    } catch (err) {
+      console.error('[The Lounge Voice] Error accessing microphone:', err);
+      alert('Microphone permission is required to join voice chat.');
+    }
+  };
+
+  const handleLeaveVoice = useCallback(() => {
+    if (voiceMeshRef.current) {
+      voiceMeshRef.current.destroy();
+      voiceMeshRef.current = null;
+    }
+    setInVoice(false);
+    isVoiceActiveRef.current = false;
+    setIsMicMuted(false);
+    isMicMutedRef.current = false;
+    setIsDeafened(false);
+    setSpeakingMap({});
+    setAutoMutedNotice(false);
+
+    if (currentUser && roomId) {
+      const pRef = doc(db, 'rooms', roomId, 'participants', currentUser.uid);
+      updateDoc(pRef, {
+        inVoice: false,
+        isMuted: false,
+        isDeafened: false,
+      }).catch(() => {});
+    }
+  }, [currentUser, roomId]);
+
+  const handleToggleMic = () => {
+    if (!voiceMeshRef.current) return;
+    const nextMuted = !isMicMuted;
+    voiceMeshRef.current.setLocalMuted(nextMuted);
+    setIsMicMuted(nextMuted);
+    isMicMutedRef.current = nextMuted;
+    if (!nextMuted) {
+      setAutoMutedNotice(false);
+    }
+
+    if (currentUser && roomId) {
+      const pRef = doc(db, 'rooms', roomId, 'participants', currentUser.uid);
+      updateDoc(pRef, { isMuted: nextMuted }).catch(() => {});
+    }
+  };
+
+  const handleToggleDeafen = () => {
+    if (!voiceMeshRef.current) return;
+    const nextDeafened = !isDeafened;
+    voiceMeshRef.current.setDeafened(nextDeafened);
+    setIsDeafened(nextDeafened);
+    if (nextDeafened) {
+      setIsMicMuted(true);
+      isMicMutedRef.current = true;
+    }
+
+    if (currentUser && roomId) {
+      const pRef = doc(db, 'rooms', roomId, 'participants', currentUser.uid);
+      updateDoc(pRef, {
+        isDeafened: nextDeafened,
+        isMuted: nextDeafened ? true : isMicMuted,
+      }).catch(() => {});
+    }
+  };
+
+  const handleTogglePeerMute = (peerUid) => {
+    if (!voiceMeshRef.current) return;
+    const currentMuted = !!locallyMutedPeers[peerUid];
+    const nextMuted = !currentMuted;
+    voiceMeshRef.current.setPeerLocallyMuted(peerUid, nextMuted);
+    setLocallyMutedPeers((prev) => ({
+      ...prev,
+      [peerUid]: nextMuted,
+    }));
+  };
+
+  // Visibilitychange listener: Automatically auto-mute mic when tab is backgrounded
+  // Re-enabling ONLY happens upon return and explicit user unmute action
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        if (isVoiceActiveRef.current && voiceMeshRef.current && !isMicMutedRef.current) {
+          voiceMeshRef.current.setLocalMuted(true);
+          setIsMicMuted(true);
+          isMicMutedRef.current = true;
+          setAutoMutedNotice(true);
+
+          if (currentUser && roomId) {
+            const pRef = doc(db, 'rooms', roomId, 'participants', currentUser.uid);
+            updateDoc(pRef, { isMuted: true }).catch(() => {});
+          }
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [currentUser, roomId]);
+
+  // Sync voice peer mesh when participants change
+  useEffect(() => {
+    if (inVoice && voiceMeshRef.current && Array.isArray(participants)) {
+      const voicePeers = participants
+        .filter((p) => p.inVoice && p.uid !== currentUser?.uid)
+        .map((p) => p.uid);
+      voiceMeshRef.current.syncVoiceParticipants(voicePeers);
+    }
+  }, [inVoice, participants, currentUser]);
+
+  // Explicit Leave Room
   const handleLeaveLounge = async () => {
-    if (isSharingScreen) {
-      await stopScreenShare();
-    }
-
-    if (viewerManagerRef.current) {
-      viewerManagerRef.current.destroy();
-      viewerManagerRef.current = null;
-    }
-
     if (!currentUser || !roomId) {
       transitionRouter.push('/lounge');
       return;
     }
 
-    try {
-      const roomRef = doc(db, 'rooms', roomId);
-      const participantRef = doc(db, 'rooms', roomId, 'participants', currentUser.uid);
+    handleLeaveVoice();
+    if (isSharingScreen) {
+      stopScreenShare();
+    }
 
+    const roomRef = doc(db, 'rooms', roomId);
+    const participantRef = doc(db, 'rooms', roomId, 'participants', currentUser.uid);
+
+    try {
       await runTransaction(db, async (transaction) => {
         const roomSnap = await transaction.get(roomRef);
         const currentCount = roomSnap.exists() ? roomSnap.data().participantCount || 1 : 1;
-
         transaction.update(roomRef, {
           participantCount: Math.max(0, currentCount - 1),
           updatedAt: serverTimestamp(),
@@ -458,9 +630,54 @@ export default function LoungeRoomView({ roomId }) {
     }
   };
 
-  // Best-effort beforeunload cleanup
+  // Cleanup on component unmount (e.g. Next.js router transitions)
   useEffect(() => {
-    const handleBeforeUnload = () => {
+    return () => {
+      handleLeaveVoice();
+      if (isJoinedRef.current && currentUser && roomId) {
+        isJoinedRef.current = false;
+        console.log('[COUNTER_DEBUG] Unmounting component, decrementing participantCount for UID:', currentUser.uid);
+        const roomRef = doc(db, 'rooms', roomId);
+        const participantRef = doc(db, 'rooms', roomId, 'participants', currentUser.uid);
+
+        runTransaction(db, async (tx) => {
+          const roomSnap = await tx.get(roomRef);
+          if (roomSnap.exists()) {
+            const count = roomSnap.data().participantCount || 1;
+            console.log('[COUNTER_DEBUG] Decrementing participantCount from', count, 'to', Math.max(0, count - 1));
+            tx.update(roomRef, {
+              participantCount: Math.max(0, count - 1),
+              updatedAt: serverTimestamp(),
+            });
+          }
+          tx.delete(participantRef);
+        }).catch((err) => {
+          console.warn('[The Lounge] Unmount decrement fallback:', err);
+          deleteDoc(participantRef).catch(() => {});
+        });
+      }
+    };
+  }, [currentUser, roomId, handleLeaveVoice]);
+
+  // Host self-healing: automatically reconciles room participantCount if it drifts from live active participants
+  useEffect(() => {
+    if (currentUser && roomData?.hostUid === currentUser.uid && Array.isArray(participants)) {
+      const activeCount = participants.filter((p) => p.isOnline).length;
+      if (typeof roomData.participantCount === 'number' && roomData.participantCount !== activeCount && isJoinedRef.current) {
+        console.log('[COUNTER_DEBUG] Host reconciling count. Stored:', roomData.participantCount, 'Actual active:', activeCount);
+        const roomRef = doc(db, 'rooms', roomId);
+        updateDoc(roomRef, {
+          participantCount: activeCount,
+          updatedAt: serverTimestamp(),
+        }).catch(() => {});
+      }
+    }
+  }, [currentUser, roomData?.hostUid, roomData?.participantCount, participants, roomId]);
+
+  // Best-effort beforeunload & pagehide cleanup for tab/window close
+  useEffect(() => {
+    const handleUnloadCleanup = () => {
+      handleLeaveVoice();
       if (isJoinedRef.current && currentUser && roomId) {
         if (isSharingScreen) {
           stopScreenShare();
@@ -469,9 +686,13 @@ export default function LoungeRoomView({ roomId }) {
       }
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [currentUser, roomId, isSharingScreen, stopScreenShare]);
+    window.addEventListener('beforeunload', handleUnloadCleanup);
+    window.addEventListener('pagehide', handleUnloadCleanup);
+    return () => {
+      window.removeEventListener('beforeunload', handleUnloadCleanup);
+      window.removeEventListener('pagehide', handleUnloadCleanup);
+    };
+  }, [currentUser, roomId, isSharingScreen, stopScreenShare, handleLeaveVoice]);
 
   // Copy Invite Link
   const handleCopyInvite = () => {
@@ -482,6 +703,7 @@ export default function LoungeRoomView({ roomId }) {
       setTimeout(() => setCopiedInvite(false), 2000);
     });
   };
+
 
   // Update Display Name
   const handleSaveName = (e) => {
@@ -633,6 +855,10 @@ export default function LoungeRoomView({ roomId }) {
               const initial = (p.displayName || 'G')[0].toUpperCase();
               const isRoomHost = p.uid === roomData?.hostUid;
               const isMe = p.uid === currentUser?.uid;
+              const isPeerSpeaking = !!speakingMap[p.uid];
+              const isPeerInVoice = !!p.inVoice;
+              const isPeerMicMuted = !!p.isMuted;
+              const isLocallyMuted = !!locallyMutedPeers[p.uid];
 
               return (
                 <div key={p.id} className={styles.orbWrapper}>
@@ -640,20 +866,50 @@ export default function LoungeRoomView({ roomId }) {
                     className={`${styles.participantOrb} ${
                       p.isTyping ? styles.orbTyping : ''
                     } ${p.isScreenSharing ? styles.orbPresenting : ''} ${
-                      !p.isOnline ? styles.orbOffline : ''
-                    }`}
+                      isPeerSpeaking ? styles.orbSpeakingGlow : ''
+                    } ${!p.isOnline ? styles.orbOffline : ''}`}
                     style={{
                       borderColor: p.color || '#10b981',
                       boxShadow: p.isOnline ? `0 0 22px ${p.color || '#10b981'}44` : 'none',
                     }}
-                    title={`${p.displayName} ${isRoomHost ? '(Host)' : ''} ${p.isScreenSharing ? '(Presenting)' : ''} ${!p.isOnline ? '(Away)' : ''}`}
+                    title={`${p.displayName} ${isRoomHost ? '(Host)' : ''} ${
+                      p.isScreenSharing ? '(Presenting)' : ''
+                    } ${isPeerInVoice ? (isPeerMicMuted ? '(Voice Muted)' : '(Speaking in Voice)') : ''} ${
+                      !p.isOnline ? '(Away)' : ''
+                    }`}
                   >
+                    {/* Voice mic status badge on orb */}
+                    {isPeerInVoice && (
+                      <div
+                        className={`${styles.orbVoiceBadge} ${
+                          isPeerMicMuted ? styles.orbVoiceBadgeMuted : styles.orbVoiceBadgeActive
+                        }`}
+                        title={isPeerMicMuted ? 'Mic Muted' : 'Mic Active'}
+                      >
+                        {isPeerMicMuted ? '✕' : '🎙'}
+                      </div>
+                    )}
                     <span>{initial}</span>
                   </div>
 
                   <div className={styles.orbLabel}>
                     {p.displayName} {isMe && '(you)'}
                   </div>
+
+                  {/* Local "Mute for me" toggle for remote peers in voice */}
+                  {inVoice && isPeerInVoice && !isMe && (
+                    <button
+                      type="button"
+                      className={`${styles.orbPeerMuteBtn} ${
+                        isLocallyMuted ? styles.orbPeerMuteBtnMuted : ''
+                      }`}
+                      onClick={() => handleTogglePeerMute(p.uid)}
+                      title={isLocallyMuted ? 'Muted for you (click to unmute)' : 'Mute this participant for you'}
+                      aria-label={isLocallyMuted ? 'Unmute for me' : 'Mute for me'}
+                    >
+                      {isLocallyMuted ? '🔇 Muted' : '🔊 Mute'}
+                    </button>
+                  )}
 
                   {isRoomHost && <span className={styles.orbHostTag}>HOST</span>}
                 </div>
@@ -722,15 +978,117 @@ export default function LoungeRoomView({ roomId }) {
                 <h3 className={styles.stageHeading}>Virtual Stage Idle</h3>
                 <p style={{ maxWidth: 460, fontSize: '0.85rem', lineHeight: 1.55 }}>
                   {isHost
-                    ? 'You are the stage host. Stream your screen to all participants or load a synchronized YouTube listening session below.'
-                    : 'Awaiting host broadcast. Relax, chat with participants, or explore the stage.'}
+                    ? 'You are the stage host. Stream your screen to all participants, start voice chat, or load a synchronized YouTube listening session below.'
+                    : 'Awaiting host broadcast. Relax, chat with participants, or join voice chat.'}
                 </p>
               </div>
             )}
           </div>
 
+          {/* Background Auto-Muted Notification Banner */}
+          {autoMutedNotice && inVoice && (
+            <div className={styles.autoMutedBanner} role="status">
+              <span>🎙️ Microphone was auto-muted while tab was backgrounded.</span>
+              <button
+                type="button"
+                className={styles.autoMutedBannerBtn}
+                onClick={handleToggleMic}
+              >
+                Unmute Now
+              </button>
+            </div>
+          )}
+
           {/* Floating Action Dock */}
           <nav className={styles.floatingDock} aria-label="Stage actions">
+            {/* Voice Chat Controls */}
+            {!inVoice ? (
+              <button
+                type="button"
+                className={styles.dockBtn}
+                onClick={handleJoinVoice}
+                title="Join real-time voice chat with room participants"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                  <line x1="12" y1="19" x2="12" y2="22" />
+                </svg>
+                <span>Join Voice</span>
+              </button>
+            ) : (
+              <>
+                {/* Voice Connected Pill */}
+                <div
+                  className={`${styles.dockBtn} ${styles.dockVoiceActive}`}
+                  title="Voice mesh active"
+                  style={{ cursor: 'default' }}
+                >
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
+                  <span>Voice</span>
+                </div>
+
+                {/* Mic Mute / Unmute */}
+                <button
+                  type="button"
+                  className={`${styles.dockBtn} ${isMicMuted ? styles.dockVoiceMuted : ''}`}
+                  onClick={handleToggleMic}
+                  title={isMicMuted ? 'Unmute microphone' : 'Mute microphone'}
+                  aria-label={isMicMuted ? 'Unmute microphone' : 'Mute microphone'}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    {isMicMuted ? (
+                      <>
+                        <line x1="2" y1="2" x2="22" y2="22" />
+                        <path d="M18.89 13.23A7.12 7.12 0 0 0 19 12v-2" />
+                        <path d="M5 10v2a7 7 0 0 0 12 5" />
+                        <path d="M15 9.34V5a3 3 0 0 0-5.68-1.33" />
+                        <path d="M9 9v3a3 3 0 0 0 5.12 2.12" />
+                        <line x1="12" y1="19" x2="12" y2="22" />
+                      </>
+                    ) : (
+                      <>
+                        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                        <line x1="12" y1="19" x2="12" y2="22" />
+                      </>
+                    )}
+                  </svg>
+                  <span>{isMicMuted ? 'Muted' : 'Mute'}</span>
+                </button>
+
+                {/* Deafen Toggle */}
+                <button
+                  type="button"
+                  className={`${styles.dockBtn} ${isDeafened ? styles.dockVoiceDeafened : ''}`}
+                  onClick={handleToggleDeafen}
+                  title={isDeafened ? 'Undeafen (resume audio)' : 'Deafen (mute incoming audio)'}
+                  aria-label={isDeafened ? 'Undeafen' : 'Deafen'}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+                    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+                    {isDeafened && <line x1="2" y1="2" x2="22" y2="22" stroke="currentColor" strokeWidth="2.5" />}
+                  </svg>
+                  <span>{isDeafened ? 'Deafened' : 'Deafen'}</span>
+                </button>
+
+                {/* Leave Voice */}
+                <button
+                  type="button"
+                  className={`${styles.dockBtn} ${styles.dockVoiceLeave}`}
+                  onClick={handleLeaveVoice}
+                  title="Disconnect from voice chat"
+                  aria-label="Disconnect voice"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-6-6 19.8 19.8 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91" />
+                    <line x1="23" y1="1" x2="1" y2="23" />
+                  </svg>
+                  <span>Disconnect</span>
+                </button>
+              </>
+            )}
             {/* Screen Share Button (Desktop-only, gracefully hidden on mobile) */}
             {canScreenShare && (
               <button
@@ -827,12 +1185,9 @@ export default function LoungeRoomView({ roomId }) {
         participants={participants}
         isOpen={isChatOpen}
         onClose={() => setIsChatOpen(false)}
-        onNewMessage={() => {
-          if (!isChatOpen) {
-            setUnreadChatCount((prev) => prev + 1);
-          }
-        }}
+        onNewMessage={handleNewMessage}
       />
+
     </div>
   );
 }

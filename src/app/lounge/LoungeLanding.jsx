@@ -45,13 +45,31 @@ service cloud.firestore {
       match /messages/{messageId} {
         allow read: if request.auth != null;
         allow create: if request.auth != null 
-                      && request.auth.uid == request.resource.data.uid;
+                      && request.auth.uid == request.resource.data.uid
+                      && request.resource.data.type in ['text', 'sticker']
+                      && (
+                        (request.resource.data.type == 'text'
+                         && request.resource.data.text is string
+                         && request.resource.data.text.trim().size() > 0
+                         && request.resource.data.text.size() <= 1000)
+                        ||
+                        (request.resource.data.type == 'sticker'
+                         && request.resource.data.stickerId in [
+                           'cyber-rocket', 'fire-vibe', 'party-popper',
+                           'cool-sunglasses', 'dj-headphones', 'glowing-heart'
+                         ])
+                      );
         allow update, delete: if false;
       }
 
-      match /signals/{presenterUid}/peers/{viewerUid} {
+      match /signals/{peerA}/peers/{peerB} {
         allow read, write: if request.auth != null 
-                           && (request.auth.uid == presenterUid || request.auth.uid == viewerUid);
+                           && (request.auth.uid == peerA || request.auth.uid == peerB);
+      }
+
+      match /voiceSignals/{peerA}/peers/{peerB} {
+        allow read, write: if request.auth != null 
+                           && (request.auth.uid == peerA || request.auth.uid == peerB);
       }
     }
   }
@@ -75,9 +93,12 @@ export default function LoungeLanding() {
   const [copiedRules, setCopiedRules] = useState(false);
 
 
-  // Initialize App Check and load preferences on mount
+  // Initialize App Check, tab-isolated anonymous auth, and load preferences on mount
   useEffect(() => {
     initAppCheck();
+    ensureAnonymousAuth().catch((err) => {
+      console.warn('[The Lounge] Pre-auth notice:', err);
+    });
     const storedName = getLoungeDisplayName();
     setDisplayName(storedName);
     setRecentRooms(getRoomHistory());

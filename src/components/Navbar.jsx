@@ -90,20 +90,66 @@ const MOBILE_SOCIALS = [
   { href: 'https://www.youtube.com/@GeniousSonu', Icon: IconYouTube, label: 'YouTube', color: '#FF0000' },
 ];
 
+const EXPLORE_ITEMS = [
+  {
+    id: '/lounge',
+    label: 'The Lounge',
+    desc: 'Real-time watch party & voice hangout',
+    badge: 'NEW',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+        <line x1="12" y1="19" x2="12" y2="22" />
+      </svg>
+    ),
+  },
+  {
+    id: '/blog',
+    label: 'Blog',
+    desc: 'Engineering articles, QA & system insights',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+      </svg>
+    ),
+  },
+  {
+    id: '/space',
+    label: 'Space',
+    desc: 'Interactive 3D sandbox & audio synth',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+        <path d="M2 12h20" />
+      </svg>
+    ),
+  },
+  {
+    id: '/store',
+    label: 'Store',
+    desc: 'Developer tools, templates & digital assets',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+        <path d="M3 6h18" />
+        <path d="M16 10a4 4 0 0 1-8 0" />
+      </svg>
+    ),
+  },
+];
+
 const NAV_ITEMS = [
   { id: '#about',      label: 'About' },
   { id: '#experience', label: 'Experience' },
   { id: '#projects',   label: 'Projects' },
   { id: '#skills',     label: 'Skills' },
   { id: '#certs',      label: 'Certs' },
-  { id: '/blog',       label: 'Blog' },
-  { id: '/store',      label: 'Store' },
-  { id: '/space',      label: 'Space' },
-  { id: '/contact',    label: 'Contact' },
 ];
 
 const EXTRA_PAGES = [
-  { id: '/lounge',       label: 'The Lounge' },
   { id: '/changelog',    label: 'Changelog' },
   { id: '/architecture', label: 'Architecture' },
   { id: '/uses',         label: 'Uses' },
@@ -118,8 +164,66 @@ export default function Navbar() {
   const mobileOpen = activeOverlay === 'nav';
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
+  const [exploreOpen, setExploreOpen] = useState(false);
+  const exploreRef = useRef(null);
+  const closeTimerRef = useRef(null);
   const hamburgerBtnRef = useRef(null);
   const mobileNavRef = useRef(null);
+
+  const isExploreActive = ['/lounge', '/blog', '/space', '/store'].some((p) => pathname.startsWith(p));
+
+  // Close explore on route change
+  useEffect(() => {
+    setExploreOpen(false);
+  }, [pathname]);
+
+  // Click / tap handler (PRIMARY interaction)
+  const handleExploreToggle = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    setExploreOpen((prev) => !prev);
+  };
+
+  // Hover enhancement (Desktop only)
+  const handleMouseEnter = () => {
+    if (typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+      setExploreOpen(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      closeTimerRef.current = setTimeout(() => {
+        setExploreOpen(false);
+      }, 220);
+    }
+  };
+
+  // Outside pointerdown handler
+  useEffect(() => {
+    const handlePointerDown = (e) => {
+      if (exploreRef.current && !exploreRef.current.contains(e.target)) {
+        setExploreOpen(false);
+      }
+    };
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    };
+  }, []);
+
+  // Keyboard navigation on trigger
+  const handleExploreKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      setExploreOpen(true);
+    } else if (e.key === 'Escape') {
+      setExploreOpen(false);
+    }
+  };
 
   // Sync body class for mobile nav active styles
   useEffect(() => {
@@ -224,9 +328,11 @@ export default function Navbar() {
   useEffect(() => {
     if (!mobileOpen) return;
     const timer = setTimeout(() => {
-      const routeItems = [...NAV_ITEMS, ...EXTRA_PAGES]
-        .filter(({ id }) => id.startsWith('/'))
-        .map(({ id }) => id);
+      const routeItems = [
+        ...EXPLORE_ITEMS.map((item) => item.id),
+        ...EXTRA_PAGES.map((item) => item.id),
+        '/contact',
+      ];
       routeItems.forEach((href) => {
         try { router.prefetch(href); } catch {}
       });
@@ -313,12 +419,88 @@ export default function Navbar() {
           <ul className="nav-links" role="list">
             {NAV_ITEMS.map(({ id, label }) => (
               <li key={id}>
-                <a href={id} onClick={(e) => handleLinkClick(e, id)}
-                   className={id === '/contact' ? 'nav-cta' : ''}>
-                  {label}{id === '/contact' ? ' →' : ''}
+                <a href={id} onClick={(e) => handleLinkClick(e, id)}>
+                  {label}
                 </a>
               </li>
             ))}
+
+            {/* Explore Dropdown (Click-first primary, hover-enhanced on desktop) */}
+            <li
+              className="nav-dropdown-wrapper"
+              ref={exploreRef}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
+              <button
+                type="button"
+                className={`nav-dropdown-trigger ${isExploreActive ? 'active' : ''}`}
+                aria-expanded={exploreOpen}
+                aria-haspopup="true"
+                aria-label="Explore menu"
+                onClick={handleExploreToggle}
+                onKeyDown={handleExploreKeyDown}
+              >
+                <span>Explore</span>
+                <svg
+                  className="nav-dropdown-caret"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+
+              {exploreOpen && (
+                <div
+                  className="nav-dropdown-menu"
+                  role="menu"
+                  aria-label="Explore pages"
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
+                >
+                  {EXPLORE_ITEMS.map((item) => (
+                    <a
+                      key={item.id}
+                      href={item.id}
+                      role="menuitem"
+                      className="nav-dropdown-item"
+                      onClick={(e) => {
+                        setExploreOpen(false);
+                        handleLinkClick(e, item.id);
+                      }}
+                    >
+                      <div className="nav-dropdown-item-icon">{item.icon}</div>
+                      <div className="nav-dropdown-item-info">
+                        <div className="nav-dropdown-item-top">
+                          <span className="nav-dropdown-item-title">{item.label}</span>
+                          {item.badge && <span className="nav-dropdown-badge">{item.badge}</span>}
+                        </div>
+                        <span className="nav-dropdown-item-desc">{item.desc}</span>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              )}
+            </li>
+
+            {/* Contact CTA */}
+            <li>
+              <a
+                href="/contact"
+                onClick={(e) => handleLinkClick(e, '/contact')}
+                className="nav-cta"
+              >
+                Contact →
+              </a>
+            </li>
           </ul>
 
           {/* Command Palette Trigger */}
@@ -411,12 +593,12 @@ export default function Navbar() {
 
         {/* Main link list */}
         <nav className="mnav-links" aria-label="Mobile navigation">
-          {NAV_ITEMS.map(({ id, label }, i) => (
+          {[...NAV_ITEMS, { id: '/contact', label: 'Contact' }].map(({ id, label }, i) => (
             <a
               key={id}
               href={id}
               className="mnav-link"
-              style={{ '--delay': `${0.05 + i * 0.06}s` }}
+              style={{ '--delay': `${0.04 + i * 0.05}s` }}
               onClick={(e) => {
                 // Add instant tap feedback
                 e.currentTarget.classList.add('mnav-link--tapped');
@@ -430,6 +612,31 @@ export default function Navbar() {
             </a>
           ))}
         </nav>
+
+        {/* Mobile Explore Section */}
+        <div className="mnav-explore-section">
+          <div className="mnav-explore-label">
+            <span>Explore Creations</span>
+          </div>
+          <div className="mnav-explore-grid">
+            {EXPLORE_ITEMS.map((item) => (
+              <a
+                key={item.id}
+                href={item.id}
+                className="mnav-explore-card"
+                onClick={(e) => handleLinkClick(e, item.id)}
+                tabIndex={mobileOpen ? 0 : -1}
+              >
+                <div className="mnav-explore-card-top">
+                  <span className="mnav-explore-card-icon">{item.icon}</span>
+                  {item.badge && <span className="nav-dropdown-badge">{item.badge}</span>}
+                </div>
+                <span className="mnav-explore-card-title">{item.label}</span>
+                <span className="mnav-explore-card-desc">{item.desc}</span>
+              </a>
+            ))}
+          </div>
+        </div>
 
         {/* Secondary pages pills */}
         <div className="mnav-sublinks" aria-label="Additional pages">

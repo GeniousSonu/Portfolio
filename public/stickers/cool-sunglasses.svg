@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="faceGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+  </defs>
+  <!-- Smiley Face Base -->
+  <circle cx="50" cy="50" r="44" fill="url(#faceGrad)" stroke="#d97706" stroke-width="2"/>
+  <!-- Smile -->
+  <path d="M34 64 C40 76, 60 76, 66 64" fill="none" stroke="#78350f" stroke-width="4.5" stroke-linecap="round"/>
+  <!-- Sunglasses Frame -->
+  <path d="M14 44 C18 42, 28 42, 50 43 C72 42, 82 42, 86 44 C88 47, 86 60, 68 62 C54 62, 52 50, 50 50 C48 50, 46 62, 32 62 C14 60, 12 47, 14 44 Z" fill="url(#glassGrad)" stroke="#0f172a" stroke-width="2"/>
+  <!-- Glare reflections on sunglasses -->
+  <polygon points="20,47 28,47 22,57 16,57" fill="#ffffff" opacity="0.45"/>
+  <polygon points="56,47 64,47 58,57 52,57" fill="#ffffff" opacity="0.45"/>
+</svg>

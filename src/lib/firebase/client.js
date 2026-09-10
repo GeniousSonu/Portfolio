@@ -1,7 +1,12 @@
 'use client';
 
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import {
+  getAuth,
+  signInAnonymously,
+  setPersistence,
+  browserSessionPersistence,
+} from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -53,15 +58,38 @@ export async function initAppCheck() {
   }
 }
 
-// Anonymous Auth Helper
+// Anonymous Auth Helper (Strictly tab-isolated session persistence)
 export async function ensureAnonymousAuth() {
   if (typeof window === 'undefined') return null;
 
+  try {
+    if (typeof browserSessionPersistence !== 'undefined') {
+      await setPersistence(auth, browserSessionPersistence);
+    }
+  } catch (pErr) {
+    console.warn('[The Lounge] Session persistence notice:', pErr);
+  }
+
+  // To guarantee that each tab gets a distinct anonymous identity (and does not
+  // inherit a shared IndexedDB identity from default browserLocalPersistence):
+  const isTabInitialized = sessionStorage.getItem('lounge_tab_session_active');
+  if (!isTabInitialized) {
+    if (auth.currentUser) {
+      try {
+        await auth.signOut();
+      } catch {
+        // Ignore signout errors
+      }
+    }
+  }
+
   if (auth.currentUser) {
+    sessionStorage.setItem('lounge_tab_session_active', 'true');
+    console.log('[Lounge Auth] Restored tab session UID:', auth.currentUser.uid);
     return auth.currentUser;
   }
 
-  // Wait for Firebase to finish restoring persisted auth state
+  // Wait for Firebase to finish restoring persisted auth state in this tab session
   if (typeof auth.authStateReady === 'function') {
     try {
       await auth.authStateReady();
@@ -70,12 +98,15 @@ export async function ensureAnonymousAuth() {
     }
   }
 
-  if (auth.currentUser) {
+  if (auth.currentUser && isTabInitialized) {
+    console.log('[Lounge Auth] Active tab session UID:', auth.currentUser.uid);
     return auth.currentUser;
   }
 
   try {
     const cred = await signInAnonymously(auth);
+    sessionStorage.setItem('lounge_tab_session_active', 'true');
+    console.log('[Lounge Auth] New independent tab session UID:', cred.user.uid);
     return cred.user;
   } catch (err) {
     console.error('[The Lounge] Anonymous auth error:', err);
@@ -87,6 +118,7 @@ export async function ensureAnonymousAuth() {
     throw err;
   }
 }
+
 
 export const FIREBASE_PROJECT_ID = firebaseConfig.projectId;
 export const FIREBASE_CONSOLE_RULES_URL = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/firestore/rules`;

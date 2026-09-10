@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import {
   collection,
   query,
@@ -16,6 +17,21 @@ import {
 import { db } from '@/lib/firebase/client';
 import styles from '@/app/lounge/lounge.module.css';
 
+// Dynamically import EmojiPicker to keep initial bundle light
+const EmojiPicker = dynamic(() => import('emoji-picker-react'), {
+  ssr: false,
+  loading: () => <div style={{ padding: '1rem', color: '#94a3b8' }}>Loading Emojis...</div>,
+});
+
+const STATIC_STICKERS = [
+  { id: 'cyber-rocket', name: 'Rocket', src: '/stickers/cyber-rocket.svg' },
+  { id: 'fire-vibe', name: 'Fire', src: '/stickers/fire-vibe.svg' },
+  { id: 'party-popper', name: 'Party', src: '/stickers/party-popper.svg' },
+  { id: 'cool-sunglasses', name: 'Cool', src: '/stickers/cool-sunglasses.svg' },
+  { id: 'dj-headphones', name: 'DJ', src: '/stickers/dj-headphones.svg' },
+  { id: 'glowing-heart', name: 'Heart', src: '/stickers/glowing-heart.svg' },
+];
+
 export default function LoungeChat({
   roomId,
   currentUser,
@@ -28,36 +44,71 @@ export default function LoungeChat({
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showStickerTray, setShowStickerTray] = useState(false);
+
   const messagesEndRef = useRef(null);
   const typingTimerRef = useRef(null);
   const lastTypingWriteRef = useRef(0);
+  const chatDrawerRef = useRef(null);
+
+  const isFirstSnapshotRef = useRef(true);
+  const onNewMessageRef = useRef(onNewMessage);
+  useEffect(() => {
+    onNewMessageRef.current = onNewMessage;
+  }, [onNewMessage]);
+
+  // Close popovers if clicking outside
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (chatDrawerRef.current && !chatDrawerRef.current.contains(e.target)) {
+        setShowEmojiPicker(false);
+        setShowStickerTray(false);
+      }
+    };
+    document.addEventListener('pointerdown', handleOutsideClick);
+    return () => document.removeEventListener('pointerdown', handleOutsideClick);
+  }, []);
 
   // Subscribe to room messages (last 60 messages)
   useEffect(() => {
     if (!roomId) return;
+    isFirstSnapshotRef.current = true;
 
     const messagesCol = collection(db, 'rooms', roomId, 'messages');
     const q = query(messagesCol, orderBy('createdAt', 'asc'), limit(60));
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const msgs = [];
-      snapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        msgs.push({
-          id: docSnap.id,
-          ...data,
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const msgs = [];
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          msgs.push({
+            id: docSnap.id,
+            ...data,
+          });
         });
-      });
 
-      setMessages(msgs);
+        setMessages(msgs);
 
-      if (!isOpen && snapshot.docChanges().some((change) => change.type === 'added')) {
-        onNewMessage?.();
+        // Don't fire unread badge notifications on the initial load of existing history
+        if (isFirstSnapshotRef.current) {
+          isFirstSnapshotRef.current = false;
+          return;
+        }
+
+        if (!isOpen && snapshot.docChanges().some((change) => change.type === 'added')) {
+          onNewMessageRef.current?.();
+        }
+      },
+      (err) => {
+        console.warn('[The Lounge] Chat snapshot notice:', err);
       }
-    });
+    );
 
     return () => unsubscribe();
-  }, [roomId, isOpen, onNewMessage]);
+  }, [roomId, isOpen]);
 
   // Scroll to bottom on messages update
   useEffect(() => {
@@ -87,12 +138,14 @@ export default function LoungeChat({
   }, [currentUser, roomId]);
 
   const handleSendMessage = async (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     const clean = inputText.trim().slice(0, 1000);
     if (!clean || isSending || !currentUser) return;
 
     setIsSending(true);
     setInputText('');
+    setShowEmojiPicker(false);
+    setShowStickerTray(false);
 
     if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
     const pRef = doc(db, 'rooms', roomId, 'participants', currentUser.uid);
@@ -103,6 +156,7 @@ export default function LoungeChat({
       await addDoc(messagesCol, {
         uid: currentUser.uid,
         displayName: displayName || 'Anonymous Guest',
+        type: 'text',
         text: clean,
         createdAt: serverTimestamp(),
         expiresAt: Timestamp.fromMillis(Date.now() + 24 * 60 * 60 * 1000), // 24h TTL
@@ -114,6 +168,38 @@ export default function LoungeChat({
     }
   };
 
+  const handleSendSticker = async (stickerId) => {
+    if (!currentUser || isSending) return;
+    const valid = STATIC_STICKERS.find((s) => s.id === stickerId);
+    if (!valid) return;
+
+    setIsSending(true);
+    setShowStickerTray(false);
+    setShowEmojiPicker(false);
+
+    try {
+      const messagesCol = collection(db, 'rooms', roomId, 'messages');
+      await addDoc(messagesCol, {
+        uid: currentUser.uid,
+        displayName: displayName || 'Anonymous Guest',
+        type: 'sticker',
+        stickerId: valid.id,
+        text: `[Sticker: ${valid.name}]`,
+        createdAt: serverTimestamp(),
+        expiresAt: Timestamp.fromMillis(Date.now() + 24 * 60 * 60 * 1000), // 24h TTL
+      });
+    } catch (err) {
+      console.error('[The Lounge] Sticker send error:', err);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const onEmojiClick = (emojiData) => {
+    if (!emojiData?.emoji) return;
+    setInputText((prev) => (prev + emojiData.emoji).slice(0, 1000));
+  };
+
   // Find other participants who are currently typing
   const typingUsers = (participants || []).filter(
     (p) => p.uid !== currentUser?.uid && p.isTyping && p.isOnline
@@ -121,6 +207,7 @@ export default function LoungeChat({
 
   return (
     <aside
+      ref={chatDrawerRef}
       className={`${styles.chatDrawer} ${isOpen ? styles.chatDrawerOpen : ''}`}
       aria-label="Lounge Chat"
     >
@@ -159,8 +246,22 @@ export default function LoungeChat({
                   </span>
                   <span className={styles.chatTime}>{timeStr}</span>
                 </div>
-                {/* Safe plain text rendering - zero HTML injection */}
-                <div className={styles.chatText}>{msg.text}</div>
+
+                {/* Render Sticker or Plain Text */}
+                {msg.type === 'sticker' && msg.stickerId ? (
+                  <div className={styles.stickerMessageWrap}>
+                    <img
+                      src={`/stickers/${msg.stickerId}.svg`}
+                      alt={msg.text || 'Sticker'}
+                      width={72}
+                      height={72}
+                      className={styles.stickerImg}
+                      loading="lazy"
+                    />
+                  </div>
+                ) : (
+                  <div className={styles.chatText}>{msg.text}</div>
+                )}
               </div>
             );
           })
@@ -177,8 +278,79 @@ export default function LoungeChat({
         )}
       </div>
 
-      <form onSubmit={handleSendMessage} className={styles.chatInputForm}>
+      <form onSubmit={handleSendMessage} className={styles.chatInputForm} style={{ position: 'relative' }}>
+        {/* Emoji Picker Popover */}
+        {showEmojiPicker && (
+          <div className={styles.emojiPickerPopover}>
+            <EmojiPicker
+              onEmojiClick={onEmojiClick}
+              theme="dark"
+              searchPlaceHolder="Search emojis..."
+              width={300}
+              height={360}
+            />
+          </div>
+        )}
+
+        {/* Static Stickers Popover */}
+        {showStickerTray && (
+          <div className={styles.stickerTrayPopover}>
+            <div className={styles.stickerTrayHeader}>
+              <span>Curated Stickers</span>
+              <button
+                type="button"
+                onClick={() => setShowStickerTray(false)}
+                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.9rem' }}
+              >
+                ✕
+              </button>
+            </div>
+            <div className={styles.stickerTrayGrid}>
+              {STATIC_STICKERS.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => handleSendSticker(s.id)}
+                  className={styles.stickerTrayItem}
+                  title={`Send ${s.name} sticker`}
+                >
+                  <img src={s.src} alt={s.name} width={44} height={44} className={styles.stickerTrayImg} />
+                  <span className={styles.stickerTrayName}>{s.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className={styles.chatInputRow}>
+          {/* Emoji Toggle Button */}
+          <button
+            type="button"
+            className={`${styles.chatMediaBtn} ${showEmojiPicker ? styles.chatMediaBtnActive : ''}`}
+            onClick={() => {
+              setShowEmojiPicker((prev) => !prev);
+              setShowStickerTray(false);
+            }}
+            title="Add emoji"
+            aria-label="Toggle emoji picker"
+          >
+            😊
+          </button>
+
+          {/* Sticker Tray Toggle Button */}
+          <button
+            type="button"
+            className={`${styles.chatMediaBtn} ${showStickerTray ? styles.chatMediaBtnActive : ''}`}
+            onClick={() => {
+              setShowStickerTray((prev) => !prev);
+              setShowEmojiPicker(false);
+            }}
+            title="Send sticker"
+            aria-label="Toggle sticker tray"
+          >
+            🏷️
+          </button>
+
           <input
             type="text"
             className={styles.chatInputField}
@@ -204,3 +376,4 @@ export default function LoungeChat({
     </aside>
   );
 }
+

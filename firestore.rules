@@ -30,20 +30,38 @@ service cloud.firestore {
       match /messages/{messageId} {
         allow read: if request.auth != null;
         
-        // Chat messages: must be authenticated and sender UID must match
+        // Chat messages: sender UID match, strict type check ('text' or 'sticker'), and sticker allowlist
         allow create: if request.auth != null 
-                      && request.auth.uid == request.resource.data.uid;
+                      && request.auth.uid == request.resource.data.uid
+                      && request.resource.data.type in ['text', 'sticker']
+                      && (
+                        (request.resource.data.type == 'text'
+                         && request.resource.data.text is string
+                         && request.resource.data.text.trim().size() > 0
+                         && request.resource.data.text.size() <= 1000)
+                        ||
+                        (request.resource.data.type == 'sticker'
+                         && request.resource.data.stickerId in [
+                           'cyber-rocket', 'fire-vibe', 'party-popper',
+                           'cool-sunglasses', 'dj-headphones', 'glowing-heart'
+                         ])
+                      );
         
         // Chat messages are append-only
         allow update, delete: if false;
       }
 
-      // ── Star-Topology WebRTC Signaling Subcollection ──
-      // Isolated pairwise documents: rooms/{roomId}/signals/{presenterUid}/peers/{viewerUid}
-      match /signals/{presenterUid}/peers/{viewerUid} {
-        // Only the presenter and the specific viewer have read/write access to their pairwise negotiation doc
+
+      // ── WebRTC Signaling Subcollections (Screenshare Star & Voice Mesh) ──
+      // Pairwise isolated documents: rooms/{roomId}/signals/{peerA}/peers/{peerB}
+      match /signals/{peerA}/peers/{peerB} {
         allow read, write: if request.auth != null 
-                           && (request.auth.uid == presenterUid || request.auth.uid == viewerUid);
+                           && (request.auth.uid == peerA || request.auth.uid == peerB);
+      }
+
+      match /voiceSignals/{peerA}/peers/{peerB} {
+        allow read, write: if request.auth != null 
+                           && (request.auth.uid == peerA || request.auth.uid == peerB);
       }
     }
   }
