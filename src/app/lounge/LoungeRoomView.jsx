@@ -46,11 +46,11 @@ export default function LoungeRoomView({ roomId }) {
   const { activeOverlay } = useOverlay();
 
   // Duplicate Tab Prevention (BroadcastChannel)
-  const myTabId = useRef(
+  const [myTabId] = useState(() =>
     typeof crypto !== 'undefined' && crypto.randomUUID
       ? crypto.randomUUID()
       : `tab_${Math.random().toString(36).substring(2, 9)}_${Date.now()}`
-  ).current;
+  );
   const [isDuplicateTab, setIsDuplicateTab] = useState(false);
   const [activeTabId, setActiveTabId] = useState(null);
   const activeTabIdRef = useRef(null);
@@ -1027,7 +1027,7 @@ export default function LoungeRoomView({ roomId }) {
         <main className={styles.landingMain} style={{ justifyContent: 'center', alignItems: 'center' }}>
           <div className={styles.duplicateTabCard}>
             <div className={styles.duplicateTabIcon}>📑</div>
-            <h2 className={styles.cardTitle}>You're Already in this Room</h2>
+            <h2 className={styles.cardTitle}>You&apos;re Already in this Room</h2>
             <p className={styles.cardDesc}>
               Another tab in this browser already has an active session in <strong>Stage {roomId}</strong>. Duplicate joins from the same browser profile are blocked to prevent audio loopback and duplicate presence.
             </p>
@@ -1454,7 +1454,7 @@ export default function LoungeRoomView({ roomId }) {
                   <div className={styles.streamConnectingState}>
                     <div className={styles.streamConnectingPill}>
                       <span className={styles.streamConnectingSpinner} />
-                      <span>Connecting to {activePresenter?.displayName || 'Peer'}'s stream...</span>
+                    <span>Connecting to {activePresenter?.displayName || 'Peer'}&apos;s stream...</span>
                     </div>
                   </div>
                 )}
