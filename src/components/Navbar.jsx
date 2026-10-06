@@ -155,6 +155,12 @@ const EXTRA_PAGES = [
   { id: '/architecture', label: 'Architecture' },
   { id: '/uses',         label: 'Uses' },
   { id: '/status',       label: 'Status' },
+  { id: '/wefik',        label: 'WEFIK' },
+  { id: '/vault',        label: 'The Vault' },
+  { id: '/tools',        label: 'Tools' },
+  { id: '/wiki',         label: 'Wiki' },
+  { id: '/confession',   label: 'Secret Notes' },
+  { id: '/play',         label: 'Play With Me' },
 ];
 
 export default function Navbar() {
