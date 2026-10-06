@@ -222,6 +222,7 @@ import SiteVisitTracker from "@/components/SiteVisitTracker";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { OverlayProvider } from "@/context/OverlayContext";
 import { TransitionProvider } from "@/context/TransitionContext";
+import { PlaygroundProvider } from "@/context/PlaygroundContext";
 import CommandPalette from "@/components/CommandPalette";
 import BootPreloader from "@/components/BootPreloader";
 import LoadingBar from "@/components/LoadingBar";
@@ -291,6 +292,7 @@ export default function RootLayout({ children }) {
       <body suppressHydrationWarning>
         <OverlayProvider>
           <TransitionProvider>
+            <PlaygroundProvider>
             <LoadingBar />
             <BootPreloader />
             <SmoothScrollProvider />
@@ -306,6 +308,7 @@ export default function RootLayout({ children }) {
             <MobileBottomCTA />
             <ChatbotWidget />
             <CommandPalette />
+            </PlaygroundProvider>
           </TransitionProvider>
         </OverlayProvider>
         {/* Google Tag (detected by Google Tag Assistant & Analytics on page load) */}
