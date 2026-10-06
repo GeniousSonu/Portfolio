@@ -4,6 +4,7 @@ import gsap from 'gsap';
 import { TextPlugin } from 'gsap/TextPlugin';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
+import { PlayableElement, EditableText } from './PlaygroundWrappers';
 
 export default function Hero() {
   const eyebrowRef = useRef(null);
@@ -157,19 +158,26 @@ export default function Hero() {
               <span>Open to Global Roles · IST (UTC+5:30)</span>
             </div>
 
-            <h1 className="hero-name" aria-label="SK Sahinur Islam (Genious Sonu) — Full Stack Developer & IT Engineer" ref={nameRef}>
-              <span className="hero-name-line"><span>SK</span></span>
-              <span className="hero-name-line"><span>Sahinur</span></span>
-              <span className="hero-name-line"><span>Islam</span></span>
-              <span className="sr-only"> (Genious Sonu) — Full Stack Developer &amp; IT Engineer</span>
-            </h1>
+            <PlayableElement>
+              <h1 className="hero-name" aria-label="SK Sahinur Islam (Genious Sonu) — Full Stack Developer & IT Engineer" ref={nameRef}>
+                <span className="hero-name-line"><span><EditableText>SK</EditableText></span></span>
+                <span className="hero-name-line"><span><EditableText>Sahinur</EditableText></span></span>
+                <span className="hero-name-line"><span><EditableText>Islam</EditableText></span></span>
+                <span className="sr-only"> (Genious Sonu) — Full Stack Developer &amp; IT Engineer</span>
+              </h1>
+            </PlayableElement>
 
-            <p className="hero-role" id="hero-role" ref={roleRef}>Full Stack Developer &amp; IT Engineer</p>
+            <PlayableElement>
+              <p className="hero-role" id="hero-role" ref={roleRef}><EditableText>Full Stack Developer &amp; IT Engineer</EditableText></p>
+            </PlayableElement>
 
-            <p className="hero-desc" id="hero-desc" ref={descRef}>
-              I build systems that don&apos;t fail at 3 AM. From MERN stack web apps to patented IoT cold chains,
-              I engineer at the intersection of <span className="gold">web, infrastructure, and security.</span>
-            </p>
+            <PlayableElement>
+              <p className="hero-desc" id="hero-desc" ref={descRef}>
+                <EditableText>I build systems that don&apos;t fail at 3 AM. From MERN stack web apps to patented IoT cold chains,</EditableText>
+                <br />
+                <EditableText>I engineer at the intersection of</EditableText> <span className="gold"><EditableText>web, infrastructure, and security.</EditableText></span>
+              </p>
+            </PlayableElement>
 
             <div className="hero-actions" id="hero-actions" ref={actionsRef}>
               <a
@@ -209,6 +217,7 @@ export default function Hero() {
           </div>
 
           {/* Hero Terminal */}
+          <PlayableElement>
           <div className="hero-terminal" id="hero-terminal" ref={terminalRef}>
             <div className="terminal-window">
               <div className="terminal-header">
@@ -234,6 +243,7 @@ export default function Hero() {
               </div>
             </div>
           </div>
+          </PlayableElement>
         </div>
       </div>
     </section>

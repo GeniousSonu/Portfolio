@@ -8,6 +8,7 @@ import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import InstallAppButton from './InstallAppButton';
 import { useOverlay } from '@/context/OverlayContext';
 import { useTransitionRouter } from '@/context/TransitionContext';
+import { usePlayground } from '@/context/PlaygroundContext';
 import navState from '@/lib/navState';
 
 /* ── Brand SVG Icons ── */
@@ -161,6 +162,7 @@ export default function Navbar() {
   const transitionRouter = useTransitionRouter();
   const pathname = usePathname();
   const { activeOverlay, openOverlay, closeOverlay } = useOverlay();
+  const { isPlaygroundActive, togglePlayground, isDesktop } = usePlayground();
   const mobileOpen = activeOverlay === 'nav';
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
@@ -502,6 +504,20 @@ export default function Navbar() {
               </a>
             </li>
           </ul>
+
+          {/* Playground Toggle */}
+          {isDesktop && (
+            <button
+              className={`nav-cmdk-btn ${isPlaygroundActive ? 'ring-2 ring-emerald-500 text-emerald-400' : ''}`}
+              onClick={togglePlayground}
+              aria-label="Toggle Playground Mode"
+              title="Playground Mode (Editable & Draggable)"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+            </button>
+          )}
 
           {/* Command Palette Trigger */}
           <button
