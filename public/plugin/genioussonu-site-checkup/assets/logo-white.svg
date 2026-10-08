@@ -1,0 +1,29 @@
+<svg width="320" height="48" viewBox="0 0 320 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Symbol: Open inspection ring with verification check (40x40) -->
+  <g transform="translate(2, 4)">
+    <path
+      d="M20 4 A16 16 0 1 0 35 20"
+      fill="none"
+      stroke="#3B82F6"
+      stroke-width="4.5"
+      stroke-linecap="round"/>
+    <path
+      d="M12 21 L18 27 L28 15"
+      fill="none"
+      stroke="#14B8A6"
+      stroke-width="4.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"/>
+    <circle cx="35" cy="20" r="2.2" fill="#3B82F6"/>
+  </g>
+
+  <!-- Wordmark in White/Light Colors -->
+  <g transform="translate(52, 0)">
+    <text x="0" y="26" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="700" letter-spacing="-0.5" fill="#FFFFFF">
+      Site Checkup <tspan fill="#60A5FA">Pro</tspan>
+    </text>
+    <text x="0" y="41" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="600" letter-spacing="0.8" fill="#94A3B8">
+      SECURITY SOP &amp; RUNTIME HARDENING
+    </text>
+  </g>
+</svg>

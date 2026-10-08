@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="20" height="20" fill="none" role="img" aria-hidden="true">
+  <!-- Transparent canvas: open inspection ring with integrated verification check -->
+  <path
+    d="M128 24 A104 104 0 1 0 224 128"
+    fill="none"
+    stroke="#3B82F6"
+    stroke-width="28"
+    stroke-linecap="round"/>
+  <path
+    d="M76 137 L113 174 L181 95"
+    fill="none"
+    stroke="#14B8A6"
+    stroke-width="28"
+    stroke-linecap="round"
+    stroke-linejoin="round"/>
+  <circle cx="224" cy="128" r="14" fill="#3B82F6"/>
+</svg>

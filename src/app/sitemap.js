@@ -1,4 +1,6 @@
 import { client } from '@/sanity/client';
+import { PLUGIN_CONFIG } from '@/config/plugin';
+import { DOCS_TOPICS } from '@/data/pluginDocs';
 
 export const revalidate = 3600; // Cache sitemap for 1 hour
 
@@ -78,6 +80,55 @@ export default async function sitemap() {
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.5,
+    },
+    // WordPress Plugin Showcase Routes
+    {
+      url: `${baseUrl}/plugin`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/plugin/${PLUGIN_CONFIG.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/plugin/${PLUGIN_CONFIG.slug}/docs`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    ...DOCS_TOPICS.map((topic) => ({
+      url: `${baseUrl}/plugin/${PLUGIN_CONFIG.slug}/docs/${topic.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    })),
+    {
+      url: `${baseUrl}/plugin/${PLUGIN_CONFIG.slug}/changelog`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/plugin/${PLUGIN_CONFIG.slug}/support`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/plugin/${PLUGIN_CONFIG.slug}/privacy-policy`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/plugin/${PLUGIN_CONFIG.slug}/terms`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.6,
     },
   ];
 
