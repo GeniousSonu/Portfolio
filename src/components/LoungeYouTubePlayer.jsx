@@ -114,7 +114,7 @@ export default function LoungeYouTubePlayer({
         playerRef.current.loadVideoById(videoId);
       }
     }
-  }, [apiReady, playbackState?.videoId, isHost, broadcastPlaybackState]);
+  }, [apiReady, playbackState?.videoId, playbackState?.isPlaying, isHost, broadcastPlaybackState]);
 
   // 3. Guest Sync Loop (Mirrors Host with 2-Second Drift Tolerance)
   useEffect(() => {

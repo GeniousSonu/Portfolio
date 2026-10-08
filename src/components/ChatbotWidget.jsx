@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTransitionRouter } from '@/context/TransitionContext';
 import styles from './ChatbotWidget.module.css';
@@ -472,7 +472,7 @@ export default function ChatbotWidget() {
     }
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     if (isClosing) return;
     setIsClosing(true);
     setTimeout(() => {
@@ -482,7 +482,7 @@ export default function ChatbotWidget() {
         window.dispatchEvent(new CustomEvent('portfolio-overlay-change', { detail: { active: 'none' } }));
       }
     }, 220);
-  };
+  }, [isClosing]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -493,7 +493,7 @@ export default function ChatbotWidget() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen]);
+  }, [isOpen, handleClose]);
 
   const handleActionClick = (action) => {
     if (action.type === 'nav') {
