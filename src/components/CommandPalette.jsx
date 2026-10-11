@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Command } from 'cmdk';
 import { useOverlay } from '@/context/OverlayContext';
 import { useTransitionRouter } from '@/context/TransitionContext';
+import { NAVIGATION_ITEMS, FOOTER_LEGAL_ITEMS } from '@/config/navigation';
 import styles from './CommandPalette.module.css';
 
 // SVG Icons
@@ -78,14 +79,9 @@ export default function CommandPalette() {
     if (!dialogEl) return;
 
     const handleWheel = (e) => {
-      // Prevent wheel event from bubbling to window / Lenis virtual scroll
       e.stopPropagation();
-
       const listEl = listRef.current;
       if (!listEl) return;
-
-      // If wheel occurs on the search bar or modal frame outside the scrollable list,
-      // forward the scroll amount to the results list
       if (!listEl.contains(e.target)) {
         listEl.scrollTop += e.deltaY;
       }
@@ -108,7 +104,6 @@ export default function CommandPalette() {
   // Global shortcut listener (Cmd+K / Ctrl+K)
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Don't trigger if user is inside a regular input/textarea unless it's the shortcut
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         if (isOpen) {
@@ -123,7 +118,6 @@ export default function CommandPalette() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, openOverlay, closeOverlay]);
 
-  // Clean up timer on unmount
   useEffect(() => {
     return () => {
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
@@ -145,25 +139,49 @@ export default function CommandPalette() {
     });
   }, []);
 
-  const handleNavigate = useCallback((target) => {
+  const handleNavigate = useCallback((targetHref) => {
     closePalette();
 
-    if (target.startsWith('#')) {
+    if (targetHref === '#' || targetHref === '/') {
       if (pathname === '/') {
-        setTimeout(() => {
-          scrollToSectionWithOffset(target);
-        }, 60);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        if (typeof sessionStorage !== 'undefined') {
-          sessionStorage.setItem('portfolio_scroll_target', target);
-        }
-        transitionRouter.push('/' + target);
+        transitionRouter.push('/');
       }
       return;
     }
 
-    if (target.startsWith('/')) {
-      transitionRouter.push(target);
+    if (targetHref.startsWith('/#')) {
+      const anchor = targetHref.replace('/', '');
+      if (pathname === '/') {
+        setTimeout(() => {
+          scrollToSectionWithOffset(anchor);
+        }, 60);
+      } else {
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.setItem('portfolio_scroll_target', anchor);
+        }
+        transitionRouter.push(targetHref);
+      }
+      return;
+    }
+
+    if (targetHref.startsWith('#')) {
+      if (pathname === '/') {
+        setTimeout(() => {
+          scrollToSectionWithOffset(targetHref);
+        }, 60);
+      } else {
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.setItem('portfolio_scroll_target', targetHref);
+        }
+        transitionRouter.push('/' + targetHref);
+      }
+      return;
+    }
+
+    if (targetHref.startsWith('/')) {
+      transitionRouter.push(targetHref);
     }
   }, [closePalette, pathname, transitionRouter, scrollToSectionWithOffset]);
 
@@ -180,11 +198,10 @@ export default function CommandPalette() {
       navigator.clipboard?.writeText(email).then(() => {
         showToast(`Email copied: ${email}`);
       }).catch(() => {
-        handleNavigate('#contact');
+        handleNavigate('/contact');
       });
     } else {
-      // If contact email is not explicitly configured via env, navigate to contact form
-      handleNavigate('#contact');
+      handleNavigate('/contact');
     }
   }, [handleNavigate, showToast]);
 
@@ -194,6 +211,10 @@ export default function CommandPalette() {
   }, [closePalette]);
 
   if (!isOpen) return null;
+
+  // Filter items by type from single source of truth
+  const anchorItems = NAVIGATION_ITEMS.filter((item) => item.type === 'anchor');
+  const pageItems = NAVIGATION_ITEMS.filter((item) => item.type === 'page');
 
   return (
     <div
@@ -253,14 +274,14 @@ export default function CommandPalette() {
               </Command.Item>
 
               <Command.Item
-                onSelect={() => handleNavigate('#contact')}
+                onSelect={() => handleNavigate('/contact')}
                 className={styles.item}
               >
                 <div className={styles.itemContent}>
                   <span className={styles.itemIcon}><MailIcon /></span>
                   <span className={styles.itemLabel}>Open Contact Form</span>
                 </div>
-                <span className={styles.itemTag}>Section</span>
+                <span className={styles.itemTag}>Page</span>
               </Command.Item>
 
               <Command.Item
@@ -288,122 +309,58 @@ export default function CommandPalette() {
               </Command.Item>
             </Command.Group>
 
-            {/* Navigation — Sections */}
+            {/* Navigation — Homepage Sections (from navigation.js) */}
             <Command.Group heading="Homepage Sections" className={styles.group}>
-              <Command.Item onSelect={() => handleNavigate('#about')} className={styles.item}>
-                <div className={styles.itemContent}>
-                  <span className={styles.itemIcon}><SectionIcon /></span>
-                  <span className={styles.itemLabel}>About & Background</span>
-                </div>
-                <span className={styles.itemTag}>#about</span>
-              </Command.Item>
-
-              <Command.Item onSelect={() => handleNavigate('#experience')} className={styles.item}>
-                <div className={styles.itemContent}>
-                  <span className={styles.itemIcon}><SectionIcon /></span>
-                  <span className={styles.itemLabel}>Experience & Career</span>
-                </div>
-                <span className={styles.itemTag}>#experience</span>
-              </Command.Item>
-
-              <Command.Item onSelect={() => handleNavigate('#projects')} className={styles.item}>
-                <div className={styles.itemContent}>
-                  <span className={styles.itemIcon}><SectionIcon /></span>
-                  <span className={styles.itemLabel}>Engineering Projects</span>
-                </div>
-                <span className={styles.itemTag}>#projects</span>
-              </Command.Item>
-
-              <Command.Item onSelect={() => handleNavigate('#skills')} className={styles.item}>
-                <div className={styles.itemContent}>
-                  <span className={styles.itemIcon}><SectionIcon /></span>
-                  <span className={styles.itemLabel}>Technical Skills</span>
-                </div>
-                <span className={styles.itemTag}>#skills</span>
-              </Command.Item>
-
-              <Command.Item onSelect={() => handleNavigate('#certs')} className={styles.item}>
-                <div className={styles.itemContent}>
-                  <span className={styles.itemIcon}><SectionIcon /></span>
-                  <span className={styles.itemLabel}>Certifications & IoT Patent</span>
-                </div>
-                <span className={styles.itemTag}>#certs</span>
-              </Command.Item>
-
-              <Command.Item onSelect={() => handleNavigate('#contact')} className={styles.item}>
-                <div className={styles.itemContent}>
-                  <span className={styles.itemIcon}><SectionIcon /></span>
-                  <span className={styles.itemLabel}>Direct Contact</span>
-                </div>
-                <span className={styles.itemTag}>#contact</span>
-              </Command.Item>
+              {anchorItems.map((item) => (
+                <Command.Item
+                  key={item.id}
+                  value={`${item.label} ${item.keywords.join(' ')} ${item.description}`}
+                  onSelect={() => handleNavigate(item.href)}
+                  className={styles.item}
+                >
+                  <div className={styles.itemContent}>
+                    <span className={styles.itemIcon}><SectionIcon /></span>
+                    <span className={styles.itemLabel}>{item.label} — {item.description}</span>
+                  </div>
+                  <span className={styles.itemTag}>{item.href.replace('/', '')}</span>
+                </Command.Item>
+              ))}
             </Command.Group>
 
-            {/* Navigation — Pages */}
-            <Command.Group heading="Pages" className={styles.group}>
-              <Command.Item onSelect={() => handleNavigate('/blog')} className={styles.item}>
-                <div className={styles.itemContent}>
-                  <span className={styles.itemIcon}><PageIcon /></span>
-                  <span className={styles.itemLabel}>Engineering Blog</span>
-                </div>
-                <span className={styles.itemTag}>/blog</span>
-              </Command.Item>
+            {/* Navigation — Pages (from navigation.js) */}
+            <Command.Group heading="Pages & Modules" className={styles.group}>
+              {pageItems.map((item) => (
+                <Command.Item
+                  key={item.id}
+                  value={`${item.label} ${item.keywords.join(' ')} ${item.description}`}
+                  onSelect={() => handleNavigate(item.href)}
+                  className={styles.item}
+                >
+                  <div className={styles.itemContent}>
+                    <span className={styles.itemIcon}><PageIcon /></span>
+                    <span className={styles.itemLabel}>{item.label} — {item.description}</span>
+                  </div>
+                  <span className={styles.itemTag}>
+                    {item.status === 'stub' ? 'STUB' : item.href}
+                  </span>
+                </Command.Item>
+              ))}
 
-              <Command.Item onSelect={() => handleNavigate('/store')} className={styles.item}>
-                <div className={styles.itemContent}>
-                  <span className={styles.itemIcon}><PageIcon /></span>
-                  <span className={styles.itemLabel}>Curated Store</span>
-                </div>
-                <span className={styles.itemTag}>/store</span>
-              </Command.Item>
-
-              <Command.Item onSelect={() => handleNavigate('/space')} className={styles.item}>
-                <div className={styles.itemContent}>
-                  <span className={styles.itemIcon}><PageIcon /></span>
-                  <span className={styles.itemLabel}>Shared Real-Time Space</span>
-                </div>
-                <span className={styles.itemTag}>/space</span>
-              </Command.Item>
-
-              <Command.Item onSelect={() => handleNavigate('/lounge')} className={styles.item}>
-                <div className={styles.itemContent}>
-                  <span className={styles.itemIcon}><PageIcon /></span>
-                  <span className={styles.itemLabel}>The Lounge (Watch &amp; Hangout)</span>
-                </div>
-                <span className={styles.itemTag}>/lounge</span>
-              </Command.Item>
-
-              <Command.Item onSelect={() => handleNavigate('/changelog')} className={styles.item}>
-                <div className={styles.itemContent}>
-                  <span className={styles.itemIcon}><PageIcon /></span>
-                  <span className={styles.itemLabel}>Public Changelog</span>
-                </div>
-                <span className={styles.itemTag}>/changelog</span>
-              </Command.Item>
-
-              <Command.Item onSelect={() => handleNavigate('/architecture')} className={styles.item}>
-                <div className={styles.itemContent}>
-                  <span className={styles.itemIcon}><PageIcon /></span>
-                  <span className={styles.itemLabel}>System Architecture</span>
-                </div>
-                <span className={styles.itemTag}>/architecture</span>
-              </Command.Item>
-
-              <Command.Item onSelect={() => handleNavigate('/uses')} className={styles.item}>
-                <div className={styles.itemContent}>
-                  <span className={styles.itemIcon}><PageIcon /></span>
-                  <span className={styles.itemLabel}>Uses & Toolchain</span>
-                </div>
-                <span className={styles.itemTag}>/uses</span>
-              </Command.Item>
-
-              <Command.Item onSelect={() => handleNavigate('/status')} className={styles.item}>
-                <div className={styles.itemContent}>
-                  <span className={styles.itemIcon}><PageIcon /></span>
-                  <span className={styles.itemLabel}>System Health Status</span>
-                </div>
-                <span className={styles.itemTag}>/status</span>
-              </Command.Item>
+              {/* Legal Pages */}
+              {FOOTER_LEGAL_ITEMS.map((item) => (
+                <Command.Item
+                  key={item.id}
+                  value={`${item.label} legal privacy terms`}
+                  onSelect={() => handleNavigate(item.href)}
+                  className={styles.item}
+                >
+                  <div className={styles.itemContent}>
+                    <span className={styles.itemIcon}><PageIcon /></span>
+                    <span className={styles.itemLabel}>{item.label} — {item.description}</span>
+                  </div>
+                  <span className={styles.itemTag}>{item.href}</span>
+                </Command.Item>
+              ))}
             </Command.Group>
           </Command.List>
 

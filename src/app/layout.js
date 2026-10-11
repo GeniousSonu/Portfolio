@@ -1,19 +1,6 @@
 import "./globals.css";
 import "./tailwind.css";
-import { Geist, Poppins } from "next/font/google";
 
-const geist = Geist({
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["300", "400", "500", "600", "700"],
-});
-
-const poppins = Poppins({
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-poppins",
-});
 
 export const viewport = {
   width: "device-width",
@@ -225,6 +212,7 @@ import { OverlayProvider } from "@/context/OverlayContext";
 import { TransitionProvider } from "@/context/TransitionContext";
 import { PlaygroundProvider } from "@/context/PlaygroundContext";
 import CommandPalette from "@/components/CommandPalette";
+import SiteMenuModal from "@/components/SiteMenuModal";
 import BootPreloader from "@/components/BootPreloader";
 import LoadingBar from "@/components/LoadingBar";
 
@@ -232,7 +220,7 @@ export default function RootLayout({ children }) {
   const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
   return (
-    <html lang="en" className={`dark ${geist.className} ${poppins.variable}`} suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/logo.svg" type="image/svg+xml" />
         <link rel="shortcut icon" href="/logo.svg" type="image/svg+xml" />
@@ -251,7 +239,7 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@700;800&family=Noto+Sans+Bengali:wght@700;800&family=Noto+Sans+Devanagari:wght@700;800&family=Noto+Sans+JP:wght@700;900&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@700;800&family=Noto+Sans+Bengali:wght@700;800&family=Noto+Sans+Devanagari:wght@700;800&family=Noto+Sans+JP:wght@700;900&display=swap"
         />
         <script
           type="application/ld+json"
@@ -309,6 +297,7 @@ export default function RootLayout({ children }) {
             <MobileBottomCTA />
             <ChatbotWidget />
             <CommandPalette />
+            <SiteMenuModal />
             </PlaygroundProvider>
           </TransitionProvider>
         </OverlayProvider>

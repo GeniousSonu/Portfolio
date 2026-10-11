@@ -57,12 +57,22 @@
 - **Decision**: Avoid TailwindCSS entirely. Implement custom CSS design tokens in `globals.css` alongside CSS Modules for component encapsulation.
 - **Consequence**: Sub-millisecond CSS parsing, zero class bloat, complete control over complex glassmorphism, responsive clamping, and GSAP animation targets.
 
+### ADR-05: Cloudinary for Global Media CDN & Dynamic Visual Transformations
+
+- **Context**: High-resolution project covers, branding assets, and product catalog images require responsive formats, automatic compression, and fast global delivery without slowing down Next.js server resources.
+- **Decision**: Adopt Cloudinary for all rich media assets. Enforce Next.js remote patterns (`res.cloudinary.com`), client URL builders (`buildCloudinaryUrl`, `buildCloudinarySrcSet`) with `f_auto,q_auto`, and restrict API secrets (`CLOUDINARY_API_SECRET`) strictly to server-only routes (`src/lib/cloudinary.js` and `/api/upload`).
+- **Consequence**: Automatic AVIF/WebP delivery, lightning-fast edge cache, zero secret leaks to client bundles, and seamless image management for store items and project covers.
+
 ---
 
 ## 3. Environment Variables Reference
 
 | Variable Name | Environment | Purpose |
 | :--- | :--- | :--- |
+| `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` | Client / Server | Cloudinary Cloud Name (`uvflwz6x`) |
+| `CLOUDINARY_API_KEY` | Server-only | Cloudinary API Key for administrative & upload routes |
+| `CLOUDINARY_API_SECRET` | Server-only | Cloudinary API Secret (strictly protected, never sent to browser) |
+| `CLOUDINARY_URL` | Server-only | Cloudinary unified connection URI |
 | `NEXT_PUBLIC_SANITY_PROJECT_ID` | Client / Server | Sanity CMS Project ID |
 | `NEXT_PUBLIC_SANITY_DATASET` | Client / Server | Sanity dataset (`production`) |
 | `NEXT_PUBLIC_SANITY_API_VERSION` | Client / Server | API date string (`2026-02-01`) |

@@ -1,7 +1,9 @@
 "use client";
 import React, { useEffect, useRef } from 'react';
+import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { buildCloudinaryUrl } from '@/lib/cloudinaryClient';
 
 /* ── Brand & Action SVG Icons ──────────────────────────────── */
 const IconGitHub = () => (
@@ -34,6 +36,7 @@ const PROJECTS = [
     category: '2024 · AI/ML',
     dotColor: '#A78BFA',
     desc: 'AI-powered tutoring platform that profiles users, adapts content difficulty in real-time, and uses NLP for contextual feedback. Built on MERN + Python ML microservices.',
+    coverImage: 'portfolio/projects/learnai',
     stack: ['React', 'Node.js', 'MongoDB', 'Python', 'scikit-learn', 'OpenAI API', 'FastAPI'],
     metrics: [
       { val: '87%', label: 'Accuracy' },
@@ -52,6 +55,7 @@ const PROJECTS = [
     patentRibbon: 'OFFICIALLY GRANTED PATENT · JUL 2025',
     patentNumber: 'Patent #202531060002 A',
     desc: 'Patented solar-powered IoT cold chain system replacing expensive RFID stickers. NodeMCU + ESP8266, MQTT telemetry, DS18B20 sensors, zone-wise Peltier cooling for off-grid healthcare.',
+    coverImage: 'portfolio/projects/solar-iot-patent',
     stack: ['ESP8266', 'NodeMCU', 'MQTT', 'C++', 'Solar PV', 'Python'],
     metrics: [
       { val: '40%', label: 'Power Save' },
@@ -67,6 +71,7 @@ const PROJECTS = [
     category: '2024 · Web',
     dotColor: '#059669',
     desc: 'Fourth complete rewrite of my personal site. Gatsby + GraphQL + MDX, Lighthouse 100 across all metrics, GSAP scroll animations, terminal-inspired dark theme.',
+    coverImage: 'portfolio/projects/v4-gatsby',
     stack: ['Gatsby', 'React', 'GraphQL', 'GSAP', 'MDX', 'CI/CD'],
     metrics: [
       { val: '100', label: 'Lighthouse' },
@@ -81,6 +86,7 @@ const PROJECTS = [
     category: '2021 · Web · SaaS',
     dotColor: '#60A5FA',
     desc: 'Internal business platform for WEFIK — client portal, real-time project tracking, invoice generation, team management. MERN stack with WebSocket notifications and RBAC.',
+    coverImage: 'portfolio/projects/wefik-platform',
     stack: ['React', 'Node.js', 'MongoDB', 'Socket.io', 'Redis', 'AWS S3'],
     metrics: [
       { val: '5+', label: 'Countries' },
@@ -95,6 +101,7 @@ const PROJECTS = [
     category: '2024 · Full Stack · Web',
     dotColor: '#e34c26',
     desc: 'A hotel booking web application built with HTML, CSS, JavaScript, Node.js, Express.js, MongoDB, and Bootstrap, offering a seamless user experience and secure payment integration.',
+    coverImage: 'portfolio/projects/stay-hotel-booking',
     stack: ['Node.js', 'Express.js', 'MongoDB', 'JavaScript', 'Bootstrap', 'HTML/CSS'],
     metrics: [
       { val: '99.9%', label: 'Uptime' },
@@ -110,6 +117,7 @@ const PROJECTS = [
     category: '2024 · Web · Portal',
     dotColor: '#f1e05a',
     desc: 'A job search and recruitment management portal featuring job postings, user profiles, applicant tracking, and recruiter dashboards built with MERN stack.',
+    coverImage: 'portfolio/projects/jobhunt-portal',
     stack: ['React', 'Node.js', 'MongoDB', 'Express.js', 'Tailwind CSS'],
     metrics: [
       { val: '500+', label: 'Active Users' },
@@ -233,6 +241,20 @@ export default function Projects() {
               {project.isPatent && (
                 <div className="patent-badge">
                   ⊕ {project.patentNumber} · Granted Jul 2025
+                </div>
+              )}
+
+              {/* Optional Cloudinary Project Cover */}
+              {project.coverImage && (
+                <div className="project-cover">
+                  <Image
+                    src={buildCloudinaryUrl(project.coverImage, { width: 800, height: 450, crop: 'fill' })}
+                    alt={project.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="project-cover-img"
+                    loading="lazy"
+                  />
                 </div>
               )}
 

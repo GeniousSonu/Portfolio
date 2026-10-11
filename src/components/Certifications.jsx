@@ -221,7 +221,8 @@ export default function Certifications() {
   }, []);
 
   return (
-    <section id="certs" className="section" ref={containerRef}>
+    <section id="certifications" className="section" ref={containerRef}>
+      <div id="certs" aria-hidden="true" style={{ position: 'absolute', top: 0 }} />
       <div className="site-container">
         <div style={{ marginBottom: '2.5rem' }} className="reveal">
           <div className="s-label">Credentials</div>

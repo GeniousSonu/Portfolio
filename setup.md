@@ -125,3 +125,10 @@ Total Usable Workstation Storage: 6 TB across 4 Physical Drives
 - **API Development**: Postman, Thunder Client, and curl scripts with automated JSON pretty-printing.
 - **Design & Prototyping**: Figma for design tokens, SVG vector preparation, and UI layout drafts.
 - **Knowledge & Documentation**: Obsidian (Local-first Markdown notes) and Git-backed repositories.
+
+### 7.4. Cloud & Media Infrastructure
+
+- **Global Media CDN**: Cloudinary (`uvflwz6x`) for dynamic WebP/AVIF transformation (`f_auto,q_auto`), responsive breakpoint delivery, and image hosting.
+- **Backend & Database Cloud**: Supabase (PostgreSQL with RLS) & Firebase Firestore (real-time channels & room signaling).
+- **Headless Content Platform**: Sanity.io Studio v3 with GROQ content lake.
+- **Transactional Communication**: Resend API & Telegram Bot Gateway.

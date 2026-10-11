@@ -1260,6 +1260,24 @@ input, textarea, select, .form-input {
 .patent-spotlight-tag { display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 600; }
 .patent-spotlight-status { color: var(--text-muted); font-size: 0.58rem; }
 
+.project-cover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1.1rem;
+  background: var(--charcoal);
+  border: 1px solid var(--border-dim);
+}
+.project-cover-img {
+  object-fit: cover;
+  transition: transform 0.4s ease, filter 0.4s ease;
+}
+.project-card:hover .project-cover-img {
+  transform: scale(1.04);
+}
+
 .project-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.75rem; }
 .project-cat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 0.3rem; }
 .project-links { display: flex; gap: 0.5rem; }
