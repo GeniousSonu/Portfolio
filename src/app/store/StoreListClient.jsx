@@ -6,6 +6,95 @@ import Link from 'next/link';
 import { getOptimizedImageUrl } from '@/sanity/image';
 import styles from './store.module.css';
 
+// Tech Hardware SVG Illustrations
+function TechIcon({ type }) {
+  switch (type) {
+    case 'cpu':
+      return (
+        <svg className={styles.techIconSvg} width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="4" y="4" width="16" height="16" rx="2" />
+          <rect x="9" y="9" width="6" height="6" />
+          <line x1="9" y1="1" x2="9" y2="4" /><line x1="15" y1="1" x2="15" y2="4" />
+          <line x1="9" y1="20" x2="9" y2="23" /><line x1="15" y1="20" x2="15" y2="23" />
+          <line x1="20" y1="9" x2="23" y2="9" /><line x1="20" y1="15" x2="23" y2="15" />
+          <line x1="1" y1="9" x2="4" y2="9" /><line x1="1" y1="15" x2="4" y2="15" />
+        </svg>
+      );
+    case 'gpu':
+      return (
+        <svg className={styles.techIconSvg} width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="6" width="20" height="12" rx="2" />
+          <circle cx="8" cy="12" r="2.5" />
+          <circle cx="16" cy="12" r="2.5" />
+          <line x1="6" y1="2" x2="6" y2="6" /><line x1="10" y1="2" x2="10" y2="6" />
+          <line x1="14" y1="2" x2="14" y2="6" /><line x1="18" y1="2" x2="18" y2="6" />
+        </svg>
+      );
+    case 'monitor':
+      return (
+        <svg className={styles.techIconSvg} width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2" />
+          <line x1="8" y1="21" x2="16" y2="21" />
+          <line x1="12" y1="17" x2="12" y2="21" />
+        </svg>
+      );
+    case 'ssd':
+      return (
+        <svg className={styles.techIconSvg} width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="4" width="18" height="16" rx="2" />
+          <line x1="7" y1="8" x2="11" y2="8" />
+          <circle cx="16" cy="16" r="1.5" />
+          <line x1="7" y1="12" x2="17" y2="12" />
+        </svg>
+      );
+    case 'hdd':
+      return (
+        <svg className={styles.techIconSvg} width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="4" y="2" width="16" height="20" rx="2" />
+          <circle cx="12" cy="14" r="4" />
+          <circle cx="12" cy="14" r="1" />
+          <line x1="6" y1="6" x2="6.01" y2="6" />
+        </svg>
+      );
+    case 'ram':
+      return (
+        <svg className={styles.techIconSvg} width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="7" width="20" height="10" rx="1" />
+          <line x1="6" y1="17" x2="6" y2="20" /><line x1="9" y1="17" x2="9" y2="20" />
+          <line x1="12" y1="17" x2="12" y2="20" /><line x1="15" y1="17" x2="15" y2="20" />
+          <line x1="18" y1="17" x2="18" y2="20" />
+          <rect x="5" y="10" width="3" height="4" />
+          <rect x="10" y="10" width="4" height="4" />
+          <rect x="16" y="10" width="3" height="4" />
+        </svg>
+      );
+    case 'phone':
+      return (
+        <svg className={styles.techIconSvg} width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="5" y="2" width="14" height="20" rx="2.5" />
+          <line x1="12" y1="18" x2="12.01" y2="18" />
+        </svg>
+      );
+    case 'motherboard':
+      return (
+        <svg className={styles.techIconSvg} width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="2" />
+          <rect x="6" y="6" width="6" height="6" />
+          <line x1="15" y1="6" x2="18" y2="6" /><line x1="15" y1="9" x2="18" y2="9" />
+          <line x1="6" y1="15" x2="18" y2="15" /><line x1="6" y1="18" x2="14" y2="18" />
+        </svg>
+      );
+    default:
+      return (
+        <svg className={styles.techIconSvg} width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2" />
+          <line x1="8" y1="21" x2="16" y2="21" />
+          <line x1="12" y1="17" x2="12" y2="21" />
+        </svg>
+      );
+  }
+}
+
 export default function StoreListClient({ initialProducts = [] }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -22,10 +111,13 @@ export default function StoreListClient({ initialProducts = [] }) {
   // Filter products based on search query and selected category
   const filteredProducts = useMemo(() => {
     return initialProducts.filter((product) => {
+      const q = searchQuery.toLowerCase().trim();
       const matchesSearch =
-        searchQuery.trim() === '' ||
-        product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description?.toLowerCase().includes(searchQuery.toLowerCase());
+        q === '' ||
+        product.name?.toLowerCase().includes(q) ||
+        product.description?.toLowerCase().includes(q) ||
+        product.specs?.toLowerCase().includes(q) ||
+        product.badge?.toLowerCase().includes(q);
 
       const matchesCategory =
         selectedCategory === 'All' ||
@@ -59,14 +151,14 @@ export default function StoreListClient({ initialProducts = [] }) {
             <input
               type="text"
               className={styles.searchInput}
-              placeholder="Search gear, tools, or books..."
+              placeholder="Search CPU, GPU, 4K monitors, storage..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               aria-label="Search products"
             />
           </div>
 
-          {categories.length > 2 && (
+          {categories.length > 1 && (
             <div className={styles.categories} role="tablist" aria-label="Product categories">
               {categories.map((category) => (
                 <button
@@ -91,18 +183,23 @@ export default function StoreListClient({ initialProducts = [] }) {
       {filteredProducts.length > 0 ? (
         <div className={styles.grid}>
           {filteredProducts.map((product) => {
-            const imageUrl = getOptimizedImageUrl(product.image, 640, 85);
+            const imageUrl = product.image ? getOptimizedImageUrl(product.image, 640, 85) : null;
             const imageAlt = product.image?.alt || product.name || 'Product recommendation';
+            const hasAffiliateLink = Boolean(product.affiliateUrl && product.affiliateUrl.trim().length > 0);
 
             return (
               <article key={product._id} className={styles.card}>
                 <div className={styles.imageWrapper}>
-                  {product.featured && (
+                  {product.badge ? (
+                    <span className={styles.featuredBadge}>{product.badge}</span>
+                  ) : product.featured ? (
                     <span className={styles.featuredBadge}>TOP PICK</span>
-                  )}
+                  ) : null}
+
                   {product.category && (
                     <span className={styles.categoryTag}>{product.category}</span>
                   )}
+
                   {imageUrl ? (
                     <Image
                       src={imageUrl}
@@ -112,57 +209,62 @@ export default function StoreListClient({ initialProducts = [] }) {
                       className={styles.productImage}
                     />
                   ) : (
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '100%',
-                        height: '100%',
-                        background: 'rgba(255,255,255,0.03)',
-                        color: 'var(--text-muted, #64748b)',
-                        fontSize: '0.85rem',
-                      }}
-                    >
-                      Gear Preview
+                    <div className={styles.techIconBox}>
+                      <TechIcon type={product.icon || 'monitor'} />
+                      <span className={styles.techIconLabel}>{product.category || 'Hardware'}</span>
                     </div>
                   )}
                 </div>
 
                 <div className={styles.cardBody}>
                   <h2 className={styles.productName}>{product.name}</h2>
+
+                  {product.specs && (
+                    <span className={styles.specsText}>{product.specs}</span>
+                  )}
+
                   <p className={styles.productDescription}>{product.description}</p>
 
                   <div className={styles.cardFooter}>
                     <div className={styles.priceTag}>
-                      <span className={styles.priceLabel}>Approx. Price</span>
-                      <span className={styles.priceValue}>{product.price || 'Check Store'}</span>
+                      <span className={styles.priceLabel}>Status / Store</span>
+                      <span className={styles.priceValue}>{product.price || 'Verified Gear'}</span>
                     </div>
 
-                    <a
-                      href={product.affiliateUrl}
-                      target="_blank"
-                      rel="noopener noreferrer sponsored"
-                      className={styles.buyBtn}
-                      aria-label={`Buy ${product.name} on external store (opens in new tab)`}
-                    >
-                      <span>Check Price</span>
-                      <svg
-                        className={styles.externalIcon}
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
+                    {hasAffiliateLink ? (
+                      <a
+                        href={product.affiliateUrl}
+                        target="_blank"
+                        rel="noopener noreferrer sponsored"
+                        className={styles.buyBtn}
+                        aria-label={`Buy ${product.name} on Amazon (opens in new tab)`}
                       >
-                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                        <polyline points="15 3 21 3 21 9" />
-                        <line x1="10" y1="14" x2="21" y2="3" />
-                      </svg>
-                    </a>
+                        <span>Check on Amazon</span>
+                        <svg
+                          className={styles.externalIcon}
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                          <polyline points="15 3 21 3 21 9" />
+                          <line x1="10" y1="14" x2="21" y2="3" />
+                        </svg>
+                      </a>
+                    ) : (
+                      <span
+                        className={styles.noLinkBtn}
+                        title="Personal equipment in daily rig — Amazon affiliate link will be added soon"
+                      >
+                        <span style={{ color: '#10B981', marginRight: '4px' }}>●</span>
+                        Personal Rig · Link Pending
+                      </span>
+                    )}
                   </div>
                 </div>
               </article>
@@ -179,15 +281,9 @@ export default function StoreListClient({ initialProducts = [] }) {
               <line x1="12" y1="17" x2="12" y2="21" />
             </svg>
           </div>
-          <h2 className={styles.emptyTitle}>
-            {initialProducts.length === 0
-              ? 'Curated Gear Coming Soon'
-              : 'No matching gear found'}
-          </h2>
+          <h2 className={styles.emptyTitle}>No matching gear found</h2>
           <p className={styles.emptyDesc}>
-            {initialProducts.length === 0
-              ? "I'm currently compiling my favorite developer tools, mechanical keyboards, monitors, and engineering reads. Check back shortly!"
-              : `No items matched "${searchQuery}". Try selecting "All" categories or clearing your search.`}
+            No hardware items matched &quot;{searchQuery}&quot;. Try selecting &quot;All&quot; categories or clearing your search filter.
           </p>
           <Link href="/" className={styles.homeBtn}>
             <span>Back to Portfolio</span>

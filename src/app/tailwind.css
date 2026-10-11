@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius, 0.625rem) - 4px);
+  --radius-md: calc(var(--radius, 0.625rem) - 2px);
+  --radius-lg: var(--radius, 0.625rem);
+  --radius-xl: calc(var(--radius, 0.625rem) + 4px);
+}
+
+:root {
+  --background: #050505;
+  --foreground: #F9FAFB;
+  --card: #0F1115;
+  --card-foreground: #F9FAFB;
+  --popover: #1A1D23;
+  --popover-foreground: #F9FAFB;
+  --primary: #10B981;
+  --primary-foreground: #050505;
+  --secondary: #1A1D23;
+  --secondary-foreground: #F9FAFB;
+  --muted: #1E2229;
+  --muted-foreground: #8A9BAD;
+  --accent: #22262E;
+  --accent-foreground: #F9FAFB;
+  --destructive: #F87171;
+  --destructive-foreground: #FFFFFF;
+  --border: #2A2F38;
+  --input: #2A2F38;
+  --ring: #10B981;
+  --radius: 0.625rem;
+}
+
+.dark {
+  --background: #050505;
+  --foreground: #F9FAFB;
+  --card: #0F1115;
+  --card-foreground: #F9FAFB;
+  --popover: #1A1D23;
+  --popover-foreground: #F9FAFB;
+  --primary: #10B981;
+  --primary-foreground: #050505;
+  --secondary: #1A1D23;
+  --secondary-foreground: #F9FAFB;
+  --muted: #1E2229;
+  --muted-foreground: #8A9BAD;
+  --accent: #22262E;
+  --accent-foreground: #F9FAFB;
+  --destructive: #F87171;
+  --destructive-foreground: #FFFFFF;
+  --border: #2A2F38;
+  --input: #2A2F38;
+  --ring: #10B981;
+}
+
+@keyframes border-beam {
+  100% {
+    offset-distance: 100%;
+  }
+}
+
+.animate-border-beam {
+  animation: border-beam calc(var(--duration, 15) * 1s) infinite linear;
+}
+

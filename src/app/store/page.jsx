@@ -3,22 +3,23 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { client } from '@/sanity/client';
 import { PRODUCTS_QUERY } from '@/sanity/queries';
+import { getCuratedGearProducts, AMAZON_AFFILIATE_TAG } from '@/data/gearProducts';
 import StoreListClient from './StoreListClient';
 import styles from './store.module.css';
 
 export const revalidate = 30; // ISR cache revalidation every 30 seconds
 
 export const metadata = {
-  title: 'Curated Tech Gear & Dev Tools — SK Sahinur Islam (Genious Sonu)',
+  title: 'Curated Tech Gear & Workstation Setup — SK Sahinur Islam (Genious Sonu)',
   description:
-    'Hardware, desk setups, developer tools, SaaS, and engineering books personally battle-tested and recommended by SK Sahinur Islam (Genious Sonu).',
+    'Hardware components, 4K dual monitors, multi-tiered storage drives, and developer tools personally battle-tested and recommended by SK Sahinur Islam (Genious Sonu).',
   alternates: {
     canonical: 'https://genioussonu.me/store',
   },
   openGraph: {
-    title: 'Curated Tech Gear & Dev Tools — SK Sahinur Islam (Genious Sonu)',
+    title: 'Curated Tech Gear & Workstation Setup — SK Sahinur Islam (Genious Sonu)',
     description:
-      'Hardware, desk setups, developer tools, SaaS, and engineering books personally battle-tested and recommended by SK Sahinur Islam (Genious Sonu).',
+      'Hardware, dual-display workstation, NVMe/SATA storage tiers, and developer tools personally battle-tested and recommended by SK Sahinur Islam (Genious Sonu).',
     url: 'https://genioussonu.me/store',
     siteName: 'SK Sahinur Islam (Genious Sonu) Portfolio',
     images: [
@@ -32,28 +33,32 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Curated Tech Gear & Dev Tools — SK Sahinur Islam (Genious Sonu)',
+    title: 'Curated Tech Gear & Workstation Setup — SK Sahinur Islam (Genious Sonu)',
     description:
-      'Hardware, desk setups, developer tools, and engineering books recommended by SK Sahinur Islam (Genious Sonu).',
+      'Hardware components, dual monitors, storage hierarchy, and developer tools used daily by SK Sahinur Islam.',
     creator: '@GeniousSonu',
     images: ['/icon-512.png'],
   },
 };
 
 export default async function StorePage() {
-  let products = [];
+  let sanityProducts = [];
   try {
-    products = await client.fetch(PRODUCTS_QUERY);
+    sanityProducts = await client.fetch(PRODUCTS_QUERY);
   } catch (error) {
-    console.error('Error fetching Sanity affiliate products:', error);
+    console.warn('[StorePage] Notice: Falling back to local verified gear catalog:', error?.message || error);
+    sanityProducts = [];
   }
 
-  // Generate ItemList structured data for search engine optimization
+  // Combine Sanity dynamic products with verified local workstation gear
+  const products = getCuratedGearProducts(sanityProducts);
+
+  // Generate ItemList structured data for search engines
   const itemListSchema = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    name: 'Curated Developer Gear & Recommendations by SK Sahinur Islam',
-    description: 'Hardware, software, books, and developer tooling recommendations.',
+    name: 'Curated Developer Gear & Setup by SK Sahinur Islam',
+    description: 'Workstation hardware, dual monitors, storage drives, and developer recommendations.',
     url: 'https://genioussonu.me/store',
     numberOfItems: products?.length || 0,
     itemListElement: (products || []).map((prod, index) => ({
@@ -63,12 +68,12 @@ export default async function StorePage() {
         '@type': 'Product',
         name: prod.name,
         description: prod.description || `Recommended ${prod.category || 'tool'}`,
-        url: prod.affiliateUrl,
+        url: prod.affiliateUrl || 'https://genioussonu.me/store',
         category: prod.category,
         offers: {
           '@type': 'Offer',
-          priceCurrency: 'USD',
-          price: prod.price ? prod.price.replace(/[^0-9.]/g, '') || '0' : '0',
+          priceCurrency: 'INR',
+          price: '0',
           availability: 'https://schema.org/InStock',
         },
       },
@@ -93,25 +98,25 @@ export default async function StorePage() {
         <header className={styles.header}>
           <div className={styles.badge}>
             <span>✦</span>
-            <span>Battle-Tested Hardware &amp; Tooling</span>
+            <span>Battle-Tested Workstation Hardware &amp; Rig</span>
           </div>
-          <h1 className={styles.title}>Developer Gear &amp; Tools</h1>
+          <h1 className={styles.title}>Developer Gear &amp; Store</h1>
           <p className={styles.subtitle}>
-            A hand-picked collection of hardware, peripherals, dev tools, and engineering literature that power my daily engineering workflow.
+            A curated inventory of the exact hardware components, dual-monitor setup, multi-tiered storage drives, and mobile tools powering my daily software engineering rig.
           </p>
         </header>
 
-        {/* FTC Legal Affiliate Disclosure Banner */}
+        {/* FTC & Amazon Associate Legal Affiliate Disclosure Banner */}
         <aside className={styles.disclosureBanner} aria-label="Affiliate link disclosure">
           <div className={styles.disclosureIcon} aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="16" x2="12" y2="12" />
               <line x1="12" y1="8" x2="12.01" y2="8" />
             </svg>
           </div>
           <p className={styles.disclosureText}>
-            <span className={styles.disclosureHighlight}>Affiliate Disclosure:</span> This page contains affiliate links. If you make a purchase through these links, I may receive a small commission at no additional cost to you. I only recommend equipment, software, and books that I personally use, thoroughly test, or consider exceptional.
+            <span className={styles.disclosureHighlight}>Amazon Associate Disclosure:</span> As an Amazon Associate, I earn from qualifying purchases (Tracking ID: <code>{AMAZON_AFFILIATE_TAG}</code>). Clicking these verified affiliate links supports my open-source work at zero extra cost to you. I only list gear that is physically part of my personal setup.
           </p>
         </aside>
 

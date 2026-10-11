@@ -1,4 +1,5 @@
 import "./globals.css";
+import "./tailwind.css";
 import { Geist, Poppins } from "next/font/google";
 
 const geist = Geist({

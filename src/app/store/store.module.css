@@ -330,6 +330,62 @@
   transform: translateY(-2px);
 }
 
+.noLinkBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  color: var(--text-muted, #8A9BAD);
+  padding: 0.55rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-family: var(--font-mono, monospace);
+  font-weight: 500;
+  cursor: default;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.specsText {
+  display: block;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.76rem;
+  color: var(--gold, #10B981);
+  background: rgba(16, 185, 129, 0.06);
+  border-left: 2px solid var(--gold, #10B981);
+  padding: 0.35rem 0.6rem;
+  border-radius: 0 4px 4px 0;
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+
+.techIconBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(5, 7, 12, 0.95));
+  color: var(--text-muted, #94a3b8);
+  gap: 0.6rem;
+  position: relative;
+}
+
+.techIconSvg {
+  color: var(--gold, #10B981);
+  filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.35));
+}
+
+.techIconLabel {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted, #94a3b8);
+}
+
 .externalIcon {
   stroke-width: 2.2;
 }
