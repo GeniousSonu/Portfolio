@@ -160,19 +160,6 @@ export default async function PluginTermsPage({ params }) {
             <p style={{ margin: 0, fontSize: '0.92rem', color: 'var(--text-secondary)' }}>
               These terms are established by the plugin author,{' '}
               <strong>SK Sahinur Islam</strong>{' '}
-              <span
-                style={{
-                  display: 'inline-block',
-                  background: 'rgba(234, 179, 8, 0.2)',
-                  color: '#fef08a',
-                  padding: '0.1rem 0.5rem',
-                  borderRadius: '4px',
-                  fontFamily: 'var(--font-mono, monospace)',
-                  fontSize: '0.82rem',
-                }}
-              >
-                [PLACEHOLDER: SK Sahinur Islam / Legal Entity Name]
-              </span>{' '}
               (&ldquo;Developer&rdquo;, &ldquo;we&rdquo;, or &ldquo;our&rdquo;), publisher of{' '}
               <strong>{PLUGIN_CONFIG.name}</strong> (&ldquo;the Plugin&rdquo;) accessible via{' '}
               <a

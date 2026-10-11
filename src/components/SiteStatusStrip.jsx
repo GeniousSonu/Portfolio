@@ -58,6 +58,11 @@ export default function SiteStatusStrip() {
     };
   }, []);
 
+  // If total visitors load failed and we don't have a valid total, only show online presence if > 0, or hide gracefully
+  if (displayTotal === null && loadFailed && liveCount <= 0) {
+    return null;
+  }
+
   return (
     <div className="site-status-strip" aria-label="Live site visitor statistics">
       {/* ── Live Online Presence ── */}
@@ -66,28 +71,24 @@ export default function SiteStatusStrip() {
         <span className="status-strip-tag">LIVE</span>
         <span className="status-strip-bullet" aria-hidden="true">·</span>
         <span className="status-strip-num">
-          <SlidingNumber value={liveCount} />
+          <SlidingNumber value={liveCount > 0 ? liveCount : 1} />
         </span>
         <span className="status-strip-label">ONLINE</span>
       </div>
 
-      {/* ── Minimal Divider ── */}
-      <div className="status-strip-bar" aria-hidden="true" />
-
-      {/* ── Total Unique Visitors ── */}
-      <div className="status-strip-section">
-        <EyeIcon />
-        <span className="status-strip-num">
-          {displayTotal !== null ? (
-            <SlidingNumber value={displayTotal} />
-          ) : loadFailed ? (
-            '—'
-          ) : (
-            '...'
-          )}
-        </span>
-        <span className="status-strip-label">TOTAL VISITORS</span>
-      </div>
+      {/* ── Total Unique Visitors (only rendered when real data exists) ── */}
+      {displayTotal !== null && (
+        <>
+          <div className="status-strip-bar" aria-hidden="true" />
+          <div className="status-strip-section">
+            <EyeIcon />
+            <span className="status-strip-num">
+              <SlidingNumber value={displayTotal} />
+            </span>
+            <span className="status-strip-label">TOTAL VISITORS</span>
+          </div>
+        </>
+      )}
     </div>
   );
 }

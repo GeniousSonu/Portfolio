@@ -100,10 +100,11 @@ export const components = {
     callout: Callout,
   },
   block: {
-    h1: ({ children }) => <h1 className="text-3xl font-bold text-text-primary mt-10 mb-4 tracking-tight">{children}</h1>,
-    h2: ({ children }) => <h2 className="text-2xl font-bold text-text-primary mt-8 mb-4 tracking-tight border-b border-border/20 pb-2">{children}</h2>,
-    h3: ({ children }) => <h3 className="text-xl font-semibold text-text-primary mt-6 mb-3">{children}</h3>,
-    h4: ({ children }) => <h4 className="text-lg font-semibold text-text-primary mt-4 mb-2">{children}</h4>,
+    // Article body headings are remapped so the main page title remains the singular h1
+    h1: ({ children }) => <h2 className="text-3xl font-bold text-text-primary mt-10 mb-4 tracking-tight">{children}</h2>,
+    h2: ({ children }) => <h3 className="text-2xl font-bold text-text-primary mt-8 mb-4 tracking-tight border-b border-border/20 pb-2">{children}</h3>,
+    h3: ({ children }) => <h4 className="text-xl font-semibold text-text-primary mt-6 mb-3">{children}</h4>,
+    h4: ({ children }) => <h5 className="text-lg font-semibold text-text-primary mt-4 mb-2">{children}</h5>,
     normal: ({ children }) => <p className="text-base text-text-secondary leading-relaxed mb-5">{children}</p>,
     blockquote: ({ children }) => (
       <blockquote className="my-6 border-l-4 border-[var(--red)] bg-white/[0.02] pl-4 py-2 italic text-text-primary rounded-r-lg">

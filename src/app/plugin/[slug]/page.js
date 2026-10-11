@@ -531,7 +531,7 @@ export default async function PluginLandingPage({ params }) {
                     <polyline points="21 15 16 10 5 21" />
                   </svg>
                   <span className={styles.screenshotPlaceholderBadge}>
-                    [Screenshot {item.id}: {item.title}]
+                    Preview: {item.title}
                   </span>
                 </div>
                 <figcaption className={styles.screenshotCaption}>

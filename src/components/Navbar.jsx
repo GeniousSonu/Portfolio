@@ -68,7 +68,6 @@ const MOBILE_SOCIALS = [
   { href: 'https://www.upwork.com/freelancers/~0104912246c7c7bdbf', Icon: IconUpwork, label: 'Upwork', color: '#14A800' },
   { href: 'https://tryhackme.com/p/mrbettle', Icon: IconTryHackMe, label: 'TryHackMe', color: '#EA1D2C' },
   { href: 'https://t.me/genious_sonu', Icon: IconTelegram, label: 'Telegram', color: '#229ED9' },
-  { href: 'https://wa.me/genioussonu', Icon: IconWhatsApp, label: 'WhatsApp', color: '#25D366' },
   { href: 'https://linktr.ee/sksahinurislam', Icon: IconLinktree, label: 'Linktree', color: '#39E09B' },
   { href: 'https://www.youtube.com/@GeniousSonu', Icon: IconYouTube, label: 'YouTube', color: '#FF0000' },
 ];

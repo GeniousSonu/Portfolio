@@ -107,7 +107,6 @@ const CONTACT_LINKS = [
 
 /* ── Linktree socials config ───────────────────────────────── */
 const LINKTREE_SOCIALS = [
-  { href: 'https://wa.me/genioussonu',                    Icon: IconWhatsApp,   label: 'WhatsApp',  color: '#25D366' },
   { href: 'https://t.me/genious_sonu',                    Icon: IconTelegram,   label: 'Telegram',  color: '#229ED9' },
   { href: 'https://linktr.ee/sksahinurislam',             Icon: IconLinktree,   label: 'Linktree',  color: '#39E09B' },
   { href: 'https://www.youtube.com/@GeniousSonu',          Icon: IconYouTube,    label: 'YouTube',   color: '#FF0000' },

@@ -16,8 +16,19 @@ const HELLO_SCRIPTS = [
   { text: 'Sahinur',  lang: 'en', dir: 'ltr', showCursor: true  },
 ];
 
+const SESSION_KEY = 'genioussonu_booted_v1';
+
 export default function BootPreloader() {
-  const [active, setActive] = useState(() => !hasBootedInSession);
+  const [active, setActive] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        if (sessionStorage.getItem(SESSION_KEY) === '1') {
+          return false;
+        }
+      } catch {}
+    }
+    return !hasBootedInSession;
+  });
 
   const preloaderRef = useRef(null);
   const terminalRef = useRef(null);
@@ -25,6 +36,7 @@ export default function BootPreloader() {
   const scriptRefs = useRef([]);
   const isPageReadyRef = useRef(false);
   const ceilingHitRef = useRef(false);
+  const masterTimelineRef = useRef(null);
 
   // Line containers
   const line1Ref = useRef(null);
@@ -40,7 +52,75 @@ export default function BootPreloader() {
   const cmd2TextRef = useRef(null);
   const cmd2CursorRef = useRef(null);
 
+  const finishPreloader = (hash) => {
+    hasBootedInSession = true;
+    try {
+      sessionStorage.setItem(SESSION_KEY, '1');
+    } catch {}
+    window.__preloaderActive = false;
+    document.documentElement.classList.remove('preloader-locked');
+    document.body.classList.remove('preloader-locked');
+
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'auto';
+    }
+
+    if (navState.lenis) {
+      try {
+        navState.lenis.start();
+        navState.lenis.resize();
+      } catch {}
+    }
+
+    if (hash) {
+      setTimeout(() => {
+        if (navState.lenis) {
+          navState.lenis.scrollTo(hash, { offset: -75, duration: 1.0 });
+        } else {
+          const el = document.querySelector(hash);
+          if (el) {
+            const top = el.getBoundingClientRect().top + window.scrollY - 75;
+            window.scrollTo({ top, behavior: 'smooth' });
+          }
+        }
+      }, 60);
+    }
+
+    setActive(false);
+  };
+
+  const handleSkip = React.useCallback(() => {
+    if (masterTimelineRef.current) {
+      try {
+        masterTimelineRef.current.kill();
+      } catch {}
+    }
+    if (preloaderRef.current) {
+      gsap.to(preloaderRef.current, {
+        opacity: 0,
+        duration: 0.2,
+        ease: 'power1.out',
+        onComplete: () => {
+          finishPreloader(typeof window !== 'undefined' ? window.location.hash : '');
+        },
+      });
+    } else {
+      finishPreloader(typeof window !== 'undefined' ? window.location.hash : '');
+    }
+  }, []);
+
   useEffect(() => {
+    try {
+      if (sessionStorage.getItem(SESSION_KEY) === '1') {
+        hasBootedInSession = true;
+        window.__preloaderActive = false;
+        document.documentElement.classList.remove('preloader-locked');
+        document.body.classList.remove('preloader-locked');
+        setActive(false);
+        return;
+      }
+    } catch {}
+
     if (!active || hasBootedInSession) {
       return;
     }
@@ -48,11 +128,7 @@ export default function BootPreloader() {
     // 1. bfcache protection (mobile Safari / Chrome back-forward cache restore)
     const handlePageShow = (e) => {
       if (e.persisted) {
-        hasBootedInSession = true;
-        window.__preloaderActive = false;
-        document.documentElement.classList.remove('preloader-locked');
-        document.body.classList.remove('preloader-locked');
-        setActive(false);
+        finishPreloader(window.location.hash);
       }
     };
     window.addEventListener('pageshow', handlePageShow);
@@ -76,7 +152,7 @@ export default function BootPreloader() {
       window.scrollTo(0, 0);
     }
 
-    // 4. Page readiness tracking & 6s safety ceiling
+    // 4. Page readiness tracking & 4s safety ceiling
     const markPageReady = () => {
       isPageReadyRef.current = true;
     };
@@ -90,59 +166,14 @@ export default function BootPreloader() {
 
     const ceilingTimer = setTimeout(() => {
       ceilingHitRef.current = true;
-    }, 6000);
-
-    // Helper: Final wipe-out and restore scroll / anchors
-    const finishPreloader = (hash) => {
-      hasBootedInSession = true;
-      window.__preloaderActive = false;
-      document.documentElement.classList.remove('preloader-locked');
-      document.body.classList.remove('preloader-locked');
-
-      if ('scrollRestoration' in window.history) {
-        window.history.scrollRestoration = 'auto';
-      }
-
-      if (navState.lenis) {
-        try {
-          navState.lenis.start();
-          navState.lenis.resize();
-        } catch {}
-      }
-
-      if (hash) {
-        setTimeout(() => {
-          if (navState.lenis) {
-            navState.lenis.scrollTo(hash, { offset: -75, duration: 1.0 });
-          } else {
-            const el = document.querySelector(hash);
-            if (el) {
-              const top = el.getBoundingClientRect().top + window.scrollY - 75;
-              window.scrollTo({ top, behavior: 'smooth' });
-            }
-          }
-        }, 60);
-      }
-
-      setActive(false);
-    };
+      handleSkip();
+    }, 4000);
 
     // 5. Accessibility: prefers-reduced-motion immediate bypass
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) {
       clearTimeout(ceilingTimer);
-      if (preloaderRef.current) {
-        gsap.to(preloaderRef.current, {
-          opacity: 0,
-          duration: 0.15,
-          ease: 'power1.out',
-          onComplete: () => {
-            finishPreloader(targetHash);
-          },
-        });
-      } else {
-        finishPreloader(targetHash);
-      }
+      finishPreloader(targetHash);
       return () => {
         window.removeEventListener('pageshow', handlePageShow);
       };
@@ -153,6 +184,7 @@ export default function BootPreloader() {
       const tl = gsap.timeline({
         defaults: { ease: 'power2.out' },
       });
+      masterTimelineRef.current = tl;
 
       // ─── INITIAL STATE SETUP (Guaranteed Zero Flash) ───
       gsap.set(terminalRef.current, {
@@ -354,7 +386,7 @@ export default function BootPreloader() {
       window.removeEventListener('pageshow', handlePageShow);
       ctx.revert();
     };
-  }, [active]);
+  }, [active, handleSkip]);
 
   if (!active) {
     return null;
@@ -379,13 +411,41 @@ export default function BootPreloader() {
 
         {/* 1. Terminal Window */}
         <div className="boot-terminal" ref={terminalRef}>
-          <div className="boot-terminal-header">
-            <div className="boot-dots">
-              <span className="dot-r" />
-              <span className="dot-y" />
-              <span className="dot-g" />
+          <div className="boot-terminal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div className="boot-dots">
+                <span className="dot-r" />
+                <span className="dot-y" />
+                <span className="dot-g" />
+              </div>
+              <span className="boot-title">sahinur@dev:~ (boot)</span>
             </div>
-            <span className="boot-title">sahinur@dev:~ (boot)</span>
+            <button
+              type="button"
+              onClick={handleSkip}
+              aria-label="Skip boot sequence"
+              style={{
+                background: 'transparent',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '4px',
+                color: 'var(--text-muted, #8b949e)',
+                padding: '2px 8px',
+                fontSize: '0.7rem',
+                fontFamily: 'monospace',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = '#fff';
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--text-muted, #8b949e)';
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+              }}
+            >
+              [ESC / SKIP]
+            </button>
           </div>
 
           <div className="boot-terminal-body">

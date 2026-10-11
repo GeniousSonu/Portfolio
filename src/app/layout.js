@@ -151,7 +151,6 @@ const jsonLdGraph = {
         "https://linktr.ee/sksahinurislam",
         "https://www.facebook.com/profile.php?id=61561884613549",
         "https://t.me/genious_sonu",
-        "https://wa.me/genioussonu",
         "https://tryhackme.com/p/mrbettle"
       ],
       "knowsAbout": [

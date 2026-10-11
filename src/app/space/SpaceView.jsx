@@ -777,7 +777,7 @@ export default function SpaceView({ roomId = null }) {
                 }`}
                 aria-hidden="true"
               />
-              <span>{viewerCount} {viewerCount === 1 ? 'VIEWING' : 'VIEWING'}</span>
+              <span>{viewerCount} {viewerCount === 1 ? 'VIEWER' : 'VIEWERS'}</span>
             </div>
           </div>
 

@@ -72,7 +72,6 @@ const SOCIAL_LINKS = [
   { id: 'github', label: 'GitHub', href: 'https://github.com/GeniousSonu', icon: GitHubIcon },
   { id: 'linkedin', label: 'LinkedIn', href: 'https://www.linkedin.com/in/sksahinurislam/', icon: LinkedInIcon },
   { id: 'telegram', label: 'Telegram', href: 'https://t.me/genious_sonu', icon: TelegramIcon },
-  { id: 'whatsapp', label: 'WhatsApp', href: 'https://wa.me/genioussonu', icon: WhatsAppIcon },
   { id: 'linktree', label: 'Linktree', href: 'https://linktr.ee/sksahinurislam', icon: LinktreeIcon },
 ];
 
@@ -180,7 +179,7 @@ export default function Footer() {
 
               {/* Dynamic Sitemap Navigation Groups from navigation.js */}
               <div className="footer-col footer-nav-col">
-                <h4 className="footer-col-title">Navigation</h4>
+                <h2 className="footer-col-title">Navigation</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '1rem' }}>
                   {NAV_GROUPS.map((group) => {
                     const items = getNavItemsByGroup(group.id);
@@ -208,7 +207,7 @@ export default function Footer() {
 
               {/* Connect group: Sleek icon button row */}
               <div className="footer-col footer-connect-col">
-                <h4 className="footer-col-title">Connect</h4>
+                <h2 className="footer-col-title">Connect</h2>
                 <div className="footer-social-row" role="list">
                   {SOCIAL_LINKS.map(({ id, label, href, icon: Icon }) => (
                     <a
@@ -228,7 +227,7 @@ export default function Footer() {
 
               {/* Terminal card (Desktop only, hidden on mobile) */}
               <div className="footer-col footer-terminal-col">
-                <h4 className="footer-col-title">System Status</h4>
+                <h2 className="footer-col-title">System Status</h2>
                 <div className="footer-terminal-card">
                   <div className="terminal-header" style={{ marginBottom: '0.75rem' }}>
                     <div className="dot-r"/><div className="dot-y"/><div className="dot-g"/>

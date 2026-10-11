@@ -148,8 +148,8 @@ export default function HomeBlogSection() {
             </p>
           </div>
 
-          {/* Desktop Navigation Arrows (hidden on single post) */}
-          {!isSingle && (
+          {/* Desktop Navigation Arrows (hidden on single post or when all fit on screen) */}
+          {!isSingle && (canScrollLeft || canScrollRight) && (
             <div className="home-blog-nav-arrows" aria-label="Article carousel navigation">
               <button
                 type="button"
