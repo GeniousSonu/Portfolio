@@ -20,6 +20,7 @@
 ![Lenis](https://img.shields.io/badge/Lenis_Scroll-000000?style=flat-square)
 ![Three.js](https://img.shields.io/badge/Three.js-000000?style=flat-square&logo=threedotjs&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white)
+![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=flat-square&logo=cloudinary&logoColor=white)
 ![Resend](https://img.shields.io/badge/Resend_Email-000000?style=flat-square&logo=resend&logoColor=white)
 
 </div>
@@ -67,6 +68,7 @@ Production web portfolio and technical knowledge hub engineered by **SK Sahinur 
 | **3D Graphics** | Three.js & Globe.gl | Interactive WebGL globe visualization |
 | **Content Management** | Sanity.io (v3 Embedded Studio) | Headless blog, category taxonomy, and author management |
 | **Database** | Supabase (PostgreSQL) | Structured persistence and relational storage |
+| **Media Delivery** | Cloudinary | Global media CDN, automated WebP/AVIF format transcoding |
 | **Email Delivery** | Resend | Transactional contact form dispatch |
 | **Deployment** | Vercel Edge Platform | Global CDN distribution and edge compute |
 

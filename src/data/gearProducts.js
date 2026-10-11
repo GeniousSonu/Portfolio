@@ -24,6 +24,7 @@ export const GEAR_PRODUCTS = [
     showOnUsesPage: true,
     badge: 'PRIMARY DISPLAY',
     icon: 'monitor',
+    cloudinaryImage: 'portfolio/store/gear-display-main',
   },
   {
     _id: 'gear-display-secondary',
@@ -38,6 +39,7 @@ export const GEAR_PRODUCTS = [
     showOnUsesPage: true,
     badge: 'SECONDARY MONITOR',
     icon: 'monitor',
+    cloudinaryImage: 'portfolio/store/gear-display-secondary',
   },
 
   // ── 02. Core Workstation Components ──────────────────────
@@ -54,6 +56,7 @@ export const GEAR_PRODUCTS = [
     showOnUsesPage: true,
     badge: 'GPU OF CHOICE',
     icon: 'gpu',
+    cloudinaryImage: 'portfolio/store/gear-gpu-rtx5060',
   },
   {
     _id: 'gear-cpu-ryzen5600x',

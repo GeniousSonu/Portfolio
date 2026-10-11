@@ -1,0 +1,30 @@
+{
+  "icon-512": {
+    "publicId": "portfolio/branding/icon-512",
+    "url": "https://res.cloudinary.com/uvflwz6x/image/upload/v1791730519/portfolio/branding/icon-512.png",
+    "width": 512,
+    "height": 512,
+    "format": "png"
+  },
+  "icon-192": {
+    "publicId": "portfolio/branding/icon-192",
+    "url": "https://res.cloudinary.com/uvflwz6x/image/upload/v1791730520/portfolio/branding/icon-192.png",
+    "width": 192,
+    "height": 192,
+    "format": "png"
+  },
+  "site-checkup-dashboard": {
+    "publicId": "portfolio/plugin/site-checkup-dashboard",
+    "url": "https://res.cloudinary.com/uvflwz6x/image/upload/v1791730524/portfolio/plugin/site-checkup-dashboard.jpg",
+    "width": 1536,
+    "height": 1024,
+    "format": "jpg"
+  },
+  "site-checkup-concept": {
+    "publicId": "portfolio/plugin/site-checkup-concept",
+    "url": "https://res.cloudinary.com/uvflwz6x/image/upload/v1791730526/portfolio/plugin/site-checkup-concept.jpg",
+    "width": 1408,
+    "height": 768,
+    "format": "jpg"
+  }
+}

@@ -10,6 +10,8 @@ import { useOverlay } from '@/context/OverlayContext';
 import { useTransitionRouter } from '@/context/TransitionContext';
 import { usePlayground } from '@/context/PlaygroundContext';
 import navState from '@/lib/navState';
+import { NAV_GROUPS, NAVIGATION_ITEMS, getNavItemsByGroup } from '@/config/navigation';
+import styles from './Navbar.module.css';
 
 /* ── Brand SVG Icons ── */
 const IconGitHub = () => (
@@ -54,34 +56,14 @@ const IconYouTube = () => (
   </svg>
 );
 
-const IconInstagram = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
-    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>
-  </svg>
-);
-
-const IconFacebook = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
-    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-  </svg>
-);
-
 const IconTryHackMe = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
     <path d="M10.705 0C7.54 0 4.902 2.285 4.349 5.291a4.525 4.525 0 0 0-4.107 4.5 4.525 4.525 0 0 0 4.52 4.52h6.761a.625.625 0 1 0 0-1.25H4.761a3.273 3.273 0 0 1-3.27-3.27A3.273 3.273 0 0 1 6.59 7.08a.625.625 0 0 0 .7-1.035 4.488 4.488 0 0 0-1.68-.69 5.223 5.223 0 0 1 5.096-4.104 5.221 5.221 0 0 1 5.174 4.57 4.489 4.489 0 0 0-.488.305.625.625 0 1 0 .731 1.013 3.245 3.245 0 0 1 1.912-.616 3.278 3.278 0 0 1 3.203 2.61.625.625 0 0 0 1.225-.251 4.533 4.533 0 0 0-4.428-3.61 4.54 4.54 0 0 0-.958.105C16.556 2.328 13.9 0 10.705 0zm5.192 10.64a.925.925 0 0 0-.462.108.913.913 0 0 0-.313.29 1.27 1.27 0 0 0-.175.427 2.39 2.39 0 0 0-.054.514c0 .181.018.353.054.517.036.164.095.307.175.43a.899.899 0 0 0 .313.297c.127.073.281.11.462.11.18 0 .334-.037.46-.11a.897.897 0 0 0 .309-.296c.08-.124.137-.267.173-.431.036-.164.054-.336.054-.517 0-.18-.018-.352-.054-.514a1.271 1.271 0 0 0-.173-.426.901.901 0 0 0-.309-.291.917.917 0 0 0-.46-.108zm6.486 0a.925.925 0 0 0-.462.108.913.913 0 0 0-.313.29 1.27 1.27 0 0 0-.175.427 2.39 2.39 0 0 0-.053.514c0 .181.017.353.053.517.036.164.095.307.175.43a.899.899 0 0 0 .313.297c.127.073.281.11.462.11.18 0 .334-.037.46-.11a.897.897 0 0 0 .31-.296c.078-.124.136-.267.172-.431.036-.164.054-.336.054-.517 0-.18-.018-.352-.054-.514a1.271 1.271 0 0 0-.173-.426.901.901 0 0 0-.308-.291.916.916 0 0 0-.461-.108zm-8.537.068l-.84.618.313.43.476-.368v1.877h.603v-2.557zm6.486 0l-.841.618.314.43.477-.368v1.877h.603v-2.557zm-4.435.445c.08 0 .143.028.193.084.05.057.087.127.114.21.026.083.044.173.054.269a2.541 2.541 0 0 1 0 .533c-.01.097-.028.187-.054.27a.584.584 0 0 1-.114.21.243.243 0 0 1-.193.085.248.248 0 0 1-.195-.086.584.584 0 0 1-.118-.209 1.245 1.245 0 0 1-.056-.27 2.645 2.645 0 0 1 0-.533c.01-.096.029-.186.056-.27a.583.583 0 0 1 .118-.209.25.25 0 0 1 .195-.084zm6.486 0c.08 0 .144.028.193.084.05.057.087.127.114.21.027.083.044.173.054.269a2.541 2.541 0 0 1 0 .533c-.01.097-.027.187-.054.27a.584.584 0 0 1-.114.21.243.243 0 0 1-.193.085.249.249 0 0 1-.195-.086.581.581 0 0 1-.117-.209 1.245 1.245 0 0 1-.056-.27 2.642 2.642 0 0 1 0-.533c.01-.096.028-.186.056-.27a.58.58 0 0 1 .117-.209.25.25 0 0 1 .195-.084zm-2.191 3.51a.93.93 0 0 0-.463.109.908.908 0 0 0-.312.291c-.08.122-.139.263-.175.426a2.383 2.383 0 0 0-.054.514c0 .18.018.353.054.516.036.164.094.308.175.432a.91.91 0 0 0 .312.296.92.92 0 0 0 .463.11c.18 0 .333-.037.46-.11a.892.892 0 0 0 .308-.296 1.32 1.32 0 0 0 .174-.432c.036-.163.054-.335.054-.516 0-.18-.018-.352-.054-.514a1.274 1.274 0 0 0-.174-.426.89.89 0 0 0-.309-.291.918.918 0 0 0-.46-.108zm-6.402.07l-.841.617.314.43.476-.369v1.878h.604v-2.557zm2.125 0l-.841.617.314.43.477-.369v1.878h.603v-2.557zm2.116 0l-.84.617.313.43.477-.369v1.878h.603v-2.557zm2.16.443c.08 0 .144.028.194.085a.605.605 0 0 1 .114.21c.026.083.044.172.053.269a2.639 2.639 0 0 1 0 .532 1.28 1.28 0 0 1-.053.27.585.585 0 0 1-.114.21.244.244 0 0 1-.193.085.25.25 0 0 1-.196-.085.589.589 0 0 1-.117-.21 1.245 1.245 0 0 1-.056-.27 2.597 2.597 0 0 1 0-.532c.01-.097.028-.186.056-.27a.589.589 0 0 1 .117-.209.249.249 0 0 1 .196-.085zm-6.729 3.073a.676.676 0 0 0-.335.078.661.661 0 0 0-.227.211.91.91 0 0 0-.127.31c-.027.118-.04.242-.04.373s.013.256.04.375a.93.93 0 0 0 .127.313.65.65 0 0 0 .227.215c.092.053.204.08.335.08a.655.655 0 0 0 .334-.08.65.65 0 0 0 .225-.215c.057-.09.1-.194.125-.313a1.75 1.75 0 0 0 .04-.375c0-.13-.014-.255-.04-.373a.931.931 0 0 0-.125-.31.658.658 0 0 0-.225-.21.667.667 0 0 0-.334-.08zm3.086 0a.675.675 0 0 0-.336.078.661.661 0 0 0-.226.211.907.907 0 0 0-.127.31 1.69 1.69 0 0 0-.04.373c0 .131.013.256.04.375a.928.928 0 0 0 .127.313c.058.09.134.162.226.215.093.053.205.08.336.08a.655.655 0 0 0 .334-.08.65.65 0 0 0 .224-.215c.058-.09.1-.194.126-.313a1.752 1.752 0 0 0 0-.748.94.94 0 0 0-.126-.31.657.657 0 0 0-.224-.21.667.667 0 0 0-.334-.08zm5.108 0a.675.675 0 0 0-.336.078.661.661 0 0 0-.226.211.91.91 0 0 0-.127.31c-.027.118-.04.242-.04.373s.013.256.04.375a.931.931 0 0 0 .127.313c.058.09.134.162.226.215.093.053.205.08.336.08.13 0 .243-.027.334-.08a.65.65 0 0 0 .224-.215c.058-.09.1-.194.126-.313a1.75 1.75 0 0 0 .04-.375c0-.13-.014-.255-.04-.373a.943.943 0 0 0-.126-.31.657.657 0 0 0-.224-.21.668.668 0 0 0-.334-.08zm-6.658.05l-.61.448.227.311.346-.266v1.362h.438v-1.856zm3.068 0l-.61.448.227.311.346-.266v1.362h.438v-1.856zm5.108 0l-.611.448.228.311.346-.266v1.362h.438v-1.856zm-9.712.322c.058 0 .105.02.14.062a.421.421 0 0 1 .083.151.96.96 0 0 1 .04.196 1.932 1.932 0 0 1 0 .386.954.954 0 0 1-.04.197.421.421 0 0 1-.083.152.176.176 0 0 1-.14.061.18.18 0 0 1-.141-.06.427.427 0 0 1-.085-.153.887.887 0 0 1-.041-.197 1.96 1.96 0 0 1 0-.386.893.893 0 0 1 .04-.196.42.42 0 0 1 .086-.151.181.181 0 0 1 .141-.062zm3.086 0c.058 0 .104.02.14.062a.421.421 0 0 1 .082.151.94.94 0 0 1 .04.196 1.906 1.906 0 0 1 0 .386.93.93 0 0 1-.04.197.421.421 0 0 1-.082.152.176.176 0 0 1-.14.061.18.18 0 0 1-.141-.06.42.42 0 0 1-.086-.153.846.846 0 0 1-.04-.197 1.965 1.965 0 0 1-.011-.195c0-.057.004-.121.01-.191a.849.849 0 0 1 .041-.196.42.42 0 0 1 .086-.151.182.182 0 0 1 .141-.062zm5.108 0c.058 0 .104.02.14.062a.421.421 0 0 1 .082.151.92.92 0 0 1 .04.196 1.963 1.963 0 0 1 0 .386.943.943 0 0 1-.04.197.421.421 0 0 1-.082.152.177.177 0 0 1-.14.061.18.18 0 0 1-.142-.06.437.437 0 0 1-.085-.153.95.95 0 0 1-.04-.197 1.965 1.965 0 0 1-.011-.195c0-.057.004-.121.01-.191a.959.959 0 0 1 .04-.196.47.47 0 0 1 .086-.151.181.181 0 0 1 .142-.062zm-1.684 1.814a.675.675 0 0 0-.336.079.66.66 0 0 0-.227.21.91.91 0 0 0-.127.31 1.731 1.731 0 0 0 0 .748.939.939 0 0 0 .127.314c.059.09.134.162.227.215.093.053.205.08.336.08a.66.66 0 0 0 .334-.08.648.648 0 0 0 .224-.215c.058-.09.1-.195.126-.314a1.737 1.737 0 0 0-.001-.747.928.928 0 0 0-.125-.31.65.65 0 0 0-.224-.211.668.668 0 0 0-.334-.079zm3.063 0a.676.676 0 0 0-.336.079.664.664 0 0 0-.227.21.906.906 0 0 0-.127.31 1.74 1.74 0 0 0 0 .748.936.936 0 0 0 .127.314.66.66 0 0 0 .227.215c.092.053.204.08.336.08a.654.654 0 0 0 .334-.08.648.648 0 0 0 .223-.215c.058-.09.1-.195.126-.314a1.74 1.74 0 0 0 0-.747.928.928 0 0 0-.126-.31.65.65 0 0 0-.223-.211.666.666 0 0 0-.334-.079zm-1.545.05l-.611.448.228.312.346-.267v1.363h.438v-1.856zm-1.518.323c.057 0 .104.02.14.061a.42.42 0 0 1 .082.152.91.91 0 0 1 .04.195 1.966 1.966 0 0 1 0 .387.951.951 0 0 1-.04.197.421.421 0 0 1-.082.152.177.177 0 0 1-.14.06.18.18 0 0 1-.142-.06.428.428 0 0 1-.085-.152.914.914 0 0 1-.04-.197 1.96 1.96 0 0 1-.011-.195c0-.058.003-.122.01-.192a.923.923 0 0 1 .041-.195c.02-.06.048-.11.085-.152a.181.181 0 0 1 .142-.061zm3.063 0c.057 0 .104.02.14.061a.42.42 0 0 1 .082.152.94.94 0 0 1 .04.195 1.91 1.91 0 0 1 0 .387.93.93 0 0 1-.04.197.422.422 0 0 1-.083.152.175.175 0 0 1-.14.06.18.18 0 0 1-.141-.06.423.423 0 0 1-.085-.152.907.907 0 0 1-.04-.197 1.95 1.95 0 0 1 0-.387.915.915 0 0 1 .04-.195c.02-.06.048-.11.085-.152a.182.182 0 0 1 .142-.061zm-9.713.185a.465.465 0 0 0-.232.055.456.456 0 0 0-.157.146.627.627 0 0 0-.089.215 1.168 1.168 0 0 0-.027.259c0 .09.009.177.027.26a.648.648 0 0 0 .089.216c.04.063.093.112.157.149a.459.459 0 0 0 .232.056c.09 0 .168-.02.231-.056a.45.45 0 0 0 .156-.149.67.67 0 0 0 .087-.217 1.218 1.218 0 0 0 0-.518.647.647 0 0 0-.087-.215.448.448 0 0 0-.156-.146.458.458 0 0 0-.23-.055zm1.052.035l-.423.31.158.217.24-.185v.944h.303v-1.286zm-1.052.224c.04 0 .073.014.097.042a.284.284 0 0 1 .057.105.69.69 0 0 1 .028.136c.004.049.007.092.007.133 0 .04-.003.086-.007.135a.684.684 0 0 1-.028.136.285.285 0 0 1-.057.105.123.123 0 0 1-.097.043.125.125 0 0 1-.098-.043.298.298 0 0 1-.059-.105.612.612 0 0 1-.028-.136 1.39 1.39 0 0 1 0-.268.62.62 0 0 1 .028-.136.297.297 0 0 1 .06-.105.125.125 0 0 1 .097-.042zm3.775 1.394a.463.463 0 0 0-.232.054.452.452 0 0 0-.157.146.621.621 0 0 0-.088.214 1.19 1.19 0 0 0 0 .519.641.641 0 0 0 .088.217.46.46 0 0 0 .157.15.458.458 0 0 0 .232.054.454.454 0 0 0 .232-.055.45.45 0 0 0 .155-.149.664.664 0 0 0 .087-.217 1.189 1.189 0 0 0 0-.519.642.642 0 0 0-.087-.214.446.446 0 0 0-.155-.146.459.459 0 0 0-.232-.054zm1.052.034l-.423.31.158.216.24-.185v.945h.303V22.68zm-1.052.223c.04 0 .073.014.098.043a.3.3 0 0 1 .057.105.643.643 0 0 1 .027.135 1.31 1.31 0 0 1 0 .268.654.654 0 0 1-.027.137.307.307 0 0 1-.057.105.124.124 0 0 1-.098.042.125.125 0 0 1-.098-.042.293.293 0 0 1-.059-.105.618.618 0 0 1-.028-.137 1.364 1.364 0 0 1 0-.268.612.612 0 0 1 .028-.135.287.287 0 0 1 .06-.105.123.123 0 0 1 .097-.043z"/>
   </svg>
 );
 
-const IconEmail = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="20" height="20" aria-hidden="true">
-    <rect x="2" y="4" width="20" height="16" rx="2"/>
-    <polyline points="2,4 12,13 22,4"/>
-  </svg>
-);
-
-/* ── Social nav links shown at bottom of mobile menu ── */
 const MOBILE_SOCIALS = [
-  { href: 'https://github.com/GeniousSonu',  Icon: IconGitHub,   label: 'GitHub',   color: '#e6edf3' },
+  { href: 'https://github.com/GeniousSonu', Icon: IconGitHub, label: 'GitHub', color: '#e6edf3' },
   { href: 'https://www.linkedin.com/in/sksahinurislam/', Icon: IconLinkedIn, label: 'LinkedIn', color: '#0A66C2' },
   { href: 'https://www.upwork.com/freelancers/~0104912246c7c7bdbf', Icon: IconUpwork, label: 'Upwork', color: '#14A800' },
   { href: 'https://tryhackme.com/p/mrbettle', Icon: IconTryHackMe, label: 'TryHackMe', color: '#EA1D2C' },
@@ -89,78 +71,6 @@ const MOBILE_SOCIALS = [
   { href: 'https://wa.me/genioussonu', Icon: IconWhatsApp, label: 'WhatsApp', color: '#25D366' },
   { href: 'https://linktr.ee/sksahinurislam', Icon: IconLinktree, label: 'Linktree', color: '#39E09B' },
   { href: 'https://www.youtube.com/@GeniousSonu', Icon: IconYouTube, label: 'YouTube', color: '#FF0000' },
-];
-
-const EXPLORE_ITEMS = [
-  {
-    id: '/lounge',
-    label: 'The Lounge',
-    desc: 'Real-time watch party & voice hangout',
-    badge: 'NEW',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
-        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-        <line x1="12" y1="19" x2="12" y2="22" />
-      </svg>
-    ),
-  },
-  {
-    id: '/blog',
-    label: 'Blog',
-    desc: 'Engineering articles, QA & system insights',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-      </svg>
-    ),
-  },
-  {
-    id: '/space',
-    label: 'Space',
-    desc: 'Interactive 3D sandbox & audio synth',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="10" />
-        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
-        <path d="M2 12h20" />
-      </svg>
-    ),
-  },
-  {
-    id: '/store',
-    label: 'Store',
-    desc: 'Developer tools, templates & digital assets',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-        <path d="M3 6h18" />
-        <path d="M16 10a4 4 0 0 1-8 0" />
-      </svg>
-    ),
-  },
-];
-
-const NAV_ITEMS = [
-  { id: '#about',      label: 'About' },
-  { id: '#experience', label: 'Experience' },
-  { id: '#projects',   label: 'Projects' },
-  { id: '#skills',     label: 'Skills' },
-  { id: '#certs',      label: 'Certs' },
-];
-
-const EXTRA_PAGES = [
-  { id: '/changelog',    label: 'Changelog' },
-  { id: '/architecture', label: 'Architecture' },
-  { id: '/uses',         label: 'Uses' },
-  { id: '/status',       label: 'Status' },
-  { id: '/wefik',        label: 'WEFIK' },
-  { id: '/vault',        label: 'The Vault' },
-  { id: '/tools',        label: 'Tools' },
-  { id: '/wiki',         label: 'Wiki' },
-  { id: '/confession',   label: 'Secret Notes' },
-  { id: '/play',         label: 'Play With Me' },
 ];
 
 export default function Navbar() {
@@ -172,64 +82,102 @@ export default function Navbar() {
   const mobileOpen = activeOverlay === 'nav';
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
-  const [exploreOpen, setExploreOpen] = useState(false);
-  const exploreRef = useRef(null);
-  const closeTimerRef = useRef(null);
+  const [openGroup, setOpenGroup] = useState(null); // active dropdown group ID: 'work' | 'knowledge' | 'lab' | 'about'
+  const navRef = useRef(null);
+  const dropdownTimerRef = useRef(null);
   const hamburgerBtnRef = useRef(null);
   const mobileNavRef = useRef(null);
+  const triggerRefs = useRef({});
 
-  const isExploreActive = ['/lounge', '/blog', '/space', '/store'].some((p) => pathname.startsWith(p));
+  // Primary navigation groups for triggers
+  const triggerGroups = NAV_GROUPS.filter((g) => g.id !== 'contact');
 
-  // Close explore on route change
+  // Close panels on route transition
   useEffect(() => {
-    setExploreOpen(false);
+    setOpenGroup(null);
   }, [pathname]);
 
-  // Click / tap handler (PRIMARY interaction)
-  const handleExploreToggle = (e) => {
+  const closeDropdown = useCallback(() => {
+    if (dropdownTimerRef.current) clearTimeout(dropdownTimerRef.current);
+    setOpenGroup(null);
+  }, []);
+
+  const openDropdown = useCallback((groupId) => {
+    if (dropdownTimerRef.current) clearTimeout(dropdownTimerRef.current);
+    setOpenGroup(groupId);
+  }, []);
+
+  const handleGroupToggle = (e, groupId) => {
     e.preventDefault();
     e.stopPropagation();
-    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
-    setExploreOpen((prev) => !prev);
+    if (dropdownTimerRef.current) clearTimeout(dropdownTimerRef.current);
+    setOpenGroup((prev) => (prev === groupId ? null : groupId));
   };
 
-  // Hover enhancement (Desktop only)
-  const handleMouseEnter = () => {
+  const handleGroupMouseEnter = (groupId) => {
     if (typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
-      setExploreOpen(true);
+      openDropdown(groupId);
     }
   };
 
-  const handleMouseLeave = () => {
+  const handleGroupMouseLeave = () => {
     if (typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-      closeTimerRef.current = setTimeout(() => {
-        setExploreOpen(false);
-      }, 220);
+      dropdownTimerRef.current = setTimeout(() => {
+        setOpenGroup(null);
+      }, 200);
     }
   };
 
-  // Outside pointerdown handler
+  // Close when clicking outside
   useEffect(() => {
     const handlePointerDown = (e) => {
-      if (exploreRef.current && !exploreRef.current.contains(e.target)) {
-        setExploreOpen(false);
+      if (navRef.current && !navRef.current.contains(e.target)) {
+        setOpenGroup(null);
       }
     };
     document.addEventListener('pointerdown', handlePointerDown);
     return () => {
       document.removeEventListener('pointerdown', handlePointerDown);
-      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+      if (dropdownTimerRef.current) clearTimeout(dropdownTimerRef.current);
     };
   }, []);
 
-  // Keyboard navigation on trigger
-  const handleExploreKeyDown = (e) => {
-    if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+  // Keyboard accessibility for group triggers and panel items
+  const handleTriggerKeyDown = (e, groupId) => {
+    if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      setExploreOpen(true);
+      setOpenGroup(groupId);
+      setTimeout(() => {
+        const panel = document.getElementById(`nav-panel-${groupId}`);
+        const firstLink = panel?.querySelector('a');
+        firstLink?.focus();
+      }, 40);
     } else if (e.key === 'Escape') {
-      setExploreOpen(false);
+      e.preventDefault();
+      setOpenGroup(null);
+    }
+  };
+
+  const handlePanelKeyDown = (e, groupId) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      setOpenGroup(null);
+      triggerRefs.current[groupId]?.focus();
+      return;
+    }
+
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      const panel = document.getElementById(`nav-panel-${groupId}`);
+      const items = Array.from(panel?.querySelectorAll('a') || []);
+      const currentIndex = items.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown') {
+        const nextIndex = (currentIndex + 1) % items.length;
+        items[nextIndex]?.focus();
+      } else {
+        const prevIndex = (currentIndex - 1 + items.length) % items.length;
+        items[prevIndex]?.focus();
+      }
     }
   };
 
@@ -255,11 +203,8 @@ export default function Navbar() {
 
     const handleScroll = () => {
       const currentY = window.scrollY;
-      
-      // Scrolled state past 40px
       setScrolled(currentY > 40);
 
-      // Auto-hide logic: Hide when scrolling down, show when scrolling up
       if (currentY > 120 && currentY > lastY + 6) {
         setHidden(true);
       } else if (currentY < lastY - 6 || currentY <= 40) {
@@ -270,7 +215,6 @@ export default function Navbar() {
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
@@ -284,13 +228,11 @@ export default function Navbar() {
   // Handle focus trapping and keyboard shortcuts when mobile nav is open
   useEffect(() => {
     if (mobileOpen) {
-      // Focus the close button inside the modal on open
       const timer = setTimeout(() => {
         const closeBtn = mobileNavRef.current?.querySelector('#mobile-nav-close');
         closeBtn?.focus();
       }, 60);
 
-      // Keydown listener for Escape and Tab focus trap
       const handleKeyDown = (e) => {
         if (e.key === 'Escape') {
           e.preventDefault();
@@ -332,15 +274,11 @@ export default function Navbar() {
     }
   }, [mobileOpen, closeMobileNav]);
 
-  // Prefetch routes when mobile menu opens (150ms debounce to avoid wasted fetches on accidental taps)
+  // Prefetch routes when mobile menu opens
   useEffect(() => {
     if (!mobileOpen) return;
     const timer = setTimeout(() => {
-      const routeItems = [
-        ...EXPLORE_ITEMS.map((item) => item.id),
-        ...EXTRA_PAGES.map((item) => item.id),
-        '/contact',
-      ];
+      const routeItems = NAVIGATION_ITEMS.filter((item) => item.type === 'page').map((item) => item.href);
       routeItems.forEach((href) => {
         try { router.prefetch(href); } catch {}
       });
@@ -351,7 +289,7 @@ export default function Navbar() {
   const scrollToSectionWithOffset = (targetSelector) => {
     const target = document.querySelector(targetSelector);
     if (!target) return;
-    const navHeight = 75; // sticky header height offset
+    const navHeight = 75;
     const top = target.getBoundingClientRect().top + window.scrollY - navHeight;
     window.scrollTo({
       top: Math.max(0, top),
@@ -359,11 +297,12 @@ export default function Navbar() {
     });
   };
 
-  const handleLinkClick = (e, targetId) => {
+  const handleLinkClick = (e, targetHref) => {
     e.preventDefault();
     closeOverlay('nav');
+    setOpenGroup(null);
 
-    if (targetId === '#') {
+    if (targetHref === '#' || targetHref === '/') {
       if (pathname === '/') {
         navState.startAnchorNav();
         setTimeout(() => {
@@ -375,28 +314,44 @@ export default function Navbar() {
       return;
     }
 
-    if (targetId.startsWith('/')) {
-      navState.startRouteNav();
-      transitionRouter.push(targetId);
-      return;
-    }
-
-    if (targetId.startsWith('#')) {
+    if (targetHref.startsWith('/#')) {
+      const anchor = targetHref.replace('/', '');
       if (pathname === '/') {
         navState.startAnchorNav();
         setTimeout(() => {
-          scrollToSectionWithOffset(targetId);
+          scrollToSectionWithOffset(anchor);
         }, 60);
       } else {
         if (typeof sessionStorage !== 'undefined') {
-          sessionStorage.setItem('portfolio_scroll_target', targetId);
+          sessionStorage.setItem('portfolio_scroll_target', anchor);
         }
-        transitionRouter.push('/' + targetId);
+        transitionRouter.push(targetHref);
       }
+      return;
+    }
+
+    if (targetHref.startsWith('#')) {
+      if (pathname === '/') {
+        navState.startAnchorNav();
+        setTimeout(() => {
+          scrollToSectionWithOffset(targetHref);
+        }, 60);
+      } else {
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.setItem('portfolio_scroll_target', targetHref);
+        }
+        transitionRouter.push('/' + targetHref);
+      }
+      return;
+    }
+
+    if (targetHref.startsWith('/')) {
+      navState.startRouteNav();
+      transitionRouter.push(targetHref);
     }
   };
 
-  // When pathname transitions to homepage with a target hash or stored scroll target
+  // Scroll to section when arriving on homepage
   useEffect(() => {
     if (pathname === '/') {
       const storedTarget = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('portfolio_scroll_target') : null;
@@ -416,87 +371,117 @@ export default function Navbar() {
 
   return (
     <>
-      <nav id="nav" className={`${scrolled ? 'scrolled' : ''} ${hidden ? 'nav-hidden' : ''}`} role="navigation" aria-label="Main navigation">
+      <nav
+        id="nav"
+        ref={navRef}
+        className={`${scrolled ? 'scrolled' : ''} ${hidden ? 'nav-hidden' : ''}`}
+        role="navigation"
+        aria-label="Main navigation"
+      >
         <div className="nav-inner">
           {/* Logo */}
-          <a href="#" onClick={(e) => handleLinkClick(e, '#')} className="nav-logo" aria-label="SK Sahinur Islam — Home">
+          <Link
+            href="/"
+            onClick={(e) => handleLinkClick(e, '/')}
+            className="nav-logo"
+            aria-label="SK Sahinur Islam — Home"
+          >
             <Image src="/logo.svg" alt="SONU" width={90} height={26} priority className="nav-logo-img" />
-          </a>
+          </Link>
 
-          {/* Desktop links */}
+          {/* Desktop Links (5 Groups + All Pages + Contact CTA) */}
           <ul className="nav-links" role="list">
-            {NAV_ITEMS.map(({ id, label }) => (
-              <li key={id}>
-                <a href={id} onClick={(e) => handleLinkClick(e, id)}>
-                  {label}
-                </a>
-              </li>
-            ))}
+            {triggerGroups.map((group) => {
+              const groupItems = getNavItemsByGroup(group.id);
+              const isGroupActive = groupItems.some((item) => {
+                if (item.type === 'page') return pathname === item.href || pathname.startsWith(item.href + '/');
+                return false;
+              });
+              const isOpen = openGroup === group.id;
 
-            {/* Explore Dropdown (Click-first primary, hover-enhanced on desktop) */}
-            <li
-              className="nav-dropdown-wrapper"
-              ref={exploreRef}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
+              return (
+                <li
+                  key={group.id}
+                  className="nav-dropdown-wrapper"
+                  onMouseEnter={() => handleGroupMouseEnter(group.id)}
+                  onMouseLeave={handleGroupMouseLeave}
+                >
+                  <button
+                    ref={(el) => (triggerRefs.current[group.id] = el)}
+                    type="button"
+                    className={`nav-dropdown-trigger ${isGroupActive ? 'active' : ''}`}
+                    aria-expanded={isOpen}
+                    aria-controls={`nav-panel-${group.id}`}
+                    aria-haspopup="true"
+                    aria-label={`${group.label} menu`}
+                    onClick={(e) => handleGroupToggle(e, group.id)}
+                    onKeyDown={(e) => handleTriggerKeyDown(e, group.id)}
+                  >
+                    <span>{group.label}</span>
+                    <svg
+                      className="nav-dropdown-caret"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </button>
+
+                  {isOpen && (
+                    <div
+                      id={`nav-panel-${group.id}`}
+                      className={styles.dropdownMenu}
+                      role="menu"
+                      aria-label={`${group.label} pages`}
+                      onMouseEnter={() => handleGroupMouseEnter(group.id)}
+                      onMouseLeave={handleGroupMouseLeave}
+                      onKeyDown={(e) => handlePanelKeyDown(e, group.id)}
+                    >
+                      <div className={styles.panelHeader}>{group.description}</div>
+                      {groupItems.map((item) => (
+                        <a
+                          key={item.id}
+                          href={item.href}
+                          role="menuitem"
+                          className={styles.dropdownItem}
+                          onClick={(e) => handleLinkClick(e, item.href)}
+                        >
+                          <div className={styles.itemTop}>
+                            <span className={styles.itemLabel}>{item.label}</span>
+                            {item.status === 'stub' ? (
+                              <span className={`${styles.itemTag} ${styles.itemTagStub}`}>STUB</span>
+                            ) : item.type === 'anchor' ? (
+                              <span className={styles.itemTag}>#section</span>
+                            ) : null}
+                          </div>
+                          <span className={styles.itemDesc}>{item.description}</span>
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+
+            {/* "All pages" modal trigger */}
+            <li>
               <button
                 type="button"
-                className={`nav-dropdown-trigger ${isExploreActive ? 'active' : ''}`}
-                aria-expanded={exploreOpen}
-                aria-haspopup="true"
-                aria-label="Explore menu"
-                onClick={handleExploreToggle}
-                onKeyDown={handleExploreKeyDown}
+                className={styles.allPagesBtn}
+                onClick={() => openOverlay('site_menu')}
+                aria-label="Open all pages directory"
+                title="View complete site directory"
               >
-                <span>Explore</span>
-                <svg
-                  className="nav-dropdown-caret"
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
+                <span>Index</span>
+                <span className={styles.itemTag}>All</span>
               </button>
-
-              {exploreOpen && (
-                <div
-                  className="nav-dropdown-menu"
-                  role="menu"
-                  aria-label="Explore pages"
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
-                >
-                  {EXPLORE_ITEMS.map((item) => (
-                    <a
-                      key={item.id}
-                      href={item.id}
-                      role="menuitem"
-                      className="nav-dropdown-item"
-                      onClick={(e) => {
-                        setExploreOpen(false);
-                        handleLinkClick(e, item.id);
-                      }}
-                    >
-                      <div className="nav-dropdown-item-icon">{item.icon}</div>
-                      <div className="nav-dropdown-item-info">
-                        <div className="nav-dropdown-item-top">
-                          <span className="nav-dropdown-item-title">{item.label}</span>
-                          {item.badge && <span className="nav-dropdown-badge">{item.badge}</span>}
-                        </div>
-                        <span className="nav-dropdown-item-desc">{item.desc}</span>
-                      </div>
-                    </a>
-                  ))}
-                </div>
-              )}
             </li>
 
             {/* Contact CTA */}
@@ -579,7 +564,6 @@ export default function Navbar() {
         data-lenis-prevent="true"
         onWheel={(e) => e.stopPropagation()}
       >
-        {/* Background radial glow */}
         <div className="mnav-glow" aria-hidden="true" />
 
         {/* Close button */}
@@ -592,10 +576,11 @@ export default function Navbar() {
           <span className="ham-bar ham-bar--bot" />
         </button>
 
-        {/* Mobile Quick Search / Cmd+K Pill */}
-        <div className="mnav-cmdk-box">
+        {/* Mobile Quick Search / Cmd+K Pill & All Pages Trigger */}
+        <div className="mnav-cmdk-box" style={{ display: 'flex', gap: '0.5rem', width: '100%', maxWidth: '520px' }}>
           <button
             className="mnav-cmdk-btn"
+            style={{ flex: 1 }}
             onClick={() => {
               closeMobileNav();
               setTimeout(() => {
@@ -611,68 +596,52 @@ export default function Navbar() {
             <span>Search &amp; Commands</span>
             <span className="nav-cmdk-badge">⌘K</span>
           </button>
+
+          <button
+            className="mnav-cmdk-btn"
+            style={{ width: 'auto', padding: '0 0.85rem' }}
+            onClick={() => {
+              closeMobileNav();
+              setTimeout(() => {
+                openOverlay('site_menu');
+              }, 80);
+            }}
+            aria-label="All Pages"
+          >
+            <span>All Pages</span>
+          </button>
         </div>
 
-        {/* Main link list */}
-        <nav className="mnav-links" aria-label="Mobile navigation">
-          {[...NAV_ITEMS, { id: '/contact', label: 'Contact' }].map(({ id, label }, i) => (
-            <a
-              key={id}
-              href={id}
-              className="mnav-link"
-              style={{ '--delay': `${0.04 + i * 0.05}s` }}
-              onClick={(e) => {
-                // Add instant tap feedback
-                e.currentTarget.classList.add('mnav-link--tapped');
-                handleLinkClick(e, id);
-              }}
-              tabIndex={mobileOpen ? 0 : -1}
-            >
-              <span className="mnav-link-num">0{i + 1}</span>
-              <span className="mnav-link-text">{label}</span>
-              <span className="mnav-link-arrow">→</span>
-            </a>
-          ))}
-        </nav>
-
-        {/* Mobile Explore Section */}
-        <div className="mnav-explore-section">
-          <div className="mnav-explore-label">
-            <span>Explore Creations</span>
-          </div>
-          <div className="mnav-explore-grid">
-            {EXPLORE_ITEMS.map((item) => (
-              <a
-                key={item.id}
-                href={item.id}
-                className="mnav-explore-card"
-                onClick={(e) => handleLinkClick(e, item.id)}
-                tabIndex={mobileOpen ? 0 : -1}
-              >
-                <div className="mnav-explore-card-top">
-                  <span className="mnav-explore-card-icon">{item.icon}</span>
-                  {item.badge && <span className="nav-dropdown-badge">{item.badge}</span>}
+        {/* Sectioned Group Navigation from navigation.js */}
+        <div className={styles.mobileGroups}>
+          {NAV_GROUPS.map((group) => {
+            const items = getNavItemsByGroup(group.id);
+            return (
+              <div key={group.id} className={styles.mobileGroup}>
+                <div className={styles.mobileGroupTitle}>
+                  <span>{'//'}</span>
+                  <span>{group.label}</span>
                 </div>
-                <span className="mnav-explore-card-title">{item.label}</span>
-                <span className="mnav-explore-card-desc">{item.desc}</span>
-              </a>
-            ))}
-          </div>
-        </div>
-
-        {/* Secondary pages pills */}
-        <div className="mnav-sublinks" aria-label="Additional pages">
-          {EXTRA_PAGES.map(({ id, label }) => (
-            <a
-              key={id}
-              href={id}
-              className="mnav-sublink"
-              onClick={(e) => handleLinkClick(e, id)}
-              tabIndex={mobileOpen ? 0 : -1}
-            >
-              {label}
-            </a>
-          ))}
+                <div className={styles.mobileGroupGrid}>
+                  {items.map((item) => (
+                    <a
+                      key={item.id}
+                      href={item.href}
+                      className={styles.mobileItemCard}
+                      onClick={(e) => handleLinkClick(e, item.href)}
+                      tabIndex={mobileOpen ? 0 : -1}
+                    >
+                      <div className={styles.mobileItemTitle}>
+                        <span>{item.label}</span>
+                        {item.status === 'stub' && <span className={styles.itemTagStub}>STUB</span>}
+                      </div>
+                      <span className={styles.mobileItemDesc}>{item.description}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* Mobile Install App Button */}

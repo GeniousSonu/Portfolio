@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getOptimizedImageUrl } from '@/sanity/image';
+import { buildCloudinaryUrl } from '@/lib/cloudinaryClient';
 import styles from './store.module.css';
 
 // Tech Hardware SVG Illustrations
@@ -183,7 +184,11 @@ export default function StoreListClient({ initialProducts = [] }) {
       {filteredProducts.length > 0 ? (
         <div className={styles.grid}>
           {filteredProducts.map((product) => {
-            const imageUrl = product.image ? getOptimizedImageUrl(product.image, 640, 85) : null;
+            const cloudinaryUrl = product.cloudinaryImage
+              ? buildCloudinaryUrl(product.cloudinaryImage, { width: 640, height: 480, crop: 'fill' })
+              : null;
+            const sanityUrl = product.image ? getOptimizedImageUrl(product.image, 640, 85) : null;
+            const imageUrl = cloudinaryUrl || sanityUrl;
             const imageAlt = product.image?.alt || product.name || 'Product recommendation';
             const hasAffiliateLink = Boolean(product.affiliateUrl && product.affiliateUrl.trim().length > 0);
 

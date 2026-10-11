@@ -92,6 +92,13 @@ Never hardcode ad-hoc hexadecimal color codes in component styles. Always refere
 - Use `supabaseServer.js` (with service role key) STRICTLY on the server inside route handlers for privileged updates and admin actions.
 - Firestore rules must enforce strict schema type checks, string length caps, and authenticated user identity (`request.auth.uid == uid`).
 
+### 5.3. Cloudinary & Media Delivery Standards
+
+- **Server-Only Secret Isolation**: `CLOUDINARY_API_SECRET` and `CLOUDINARY_URL` must remain strictly within server context (`src/lib/cloudinary.js` with `import 'server-only';`). Never import server Cloudinary SDK files into client components.
+- **Client Transformation Builders**: Client components must use `src/lib/cloudinaryClient.js` (`buildCloudinaryUrl`, `buildCloudinarySrcSet`), which safely constructs delivery URLs without exposing secrets.
+- **Standard Transformations**: Every Cloudinary image delivery must specify `f_auto` and `q_auto` to ensure automatic AVIF/WebP transcoding and compression.
+- **Next.js Image Security**: All Cloudinary remote domains must be permitted through `images.remotePatterns` in `next.config.mjs` matching hostname `res.cloudinary.com`.
+
 ---
 
 ## 6. Git, Build & Deployment Standards

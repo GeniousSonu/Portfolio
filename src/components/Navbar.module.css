@@ -1,0 +1,206 @@
+/* ── Dropdown Panel Styles (Phase R0 Navigation) ── */
+.dropdownMenu {
+  position: absolute;
+  top: calc(100% + 14px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 340px;
+  background: rgba(13, 17, 23, 0.96);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 0.65rem;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7), 0 0 24px rgba(16, 185, 129, 0.12);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  animation: dropdownPanelFade 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes dropdownPanelFade {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dropdownMenu {
+    animation: none;
+    transition: none;
+  }
+}
+
+.panelHeader {
+  padding: 0.4rem 0.5rem 0.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 0.25rem;
+}
+
+.dropdownItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease, color 0.18s ease;
+  outline: none;
+}
+
+.dropdownItem:hover,
+.dropdownItem:focus-visible {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(16, 185, 129, 0.28);
+  color: var(--text-primary);
+  transform: translateX(3px);
+}
+
+.itemTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.itemLabel {
+  font-family: var(--font-poppins);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.dropdownItem:hover .itemLabel,
+.dropdownItem:focus-visible .itemLabel {
+  color: var(--gold-bright);
+}
+
+.itemTag {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 600;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+.itemTagStub {
+  background: rgba(251, 191, 36, 0.15);
+  color: var(--amber);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.itemDesc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+  font-weight: 400;
+}
+
+/* Mobile accordion and list */
+.mobileGroups {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 520px;
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.mobileGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.mobileGroupTitle {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 0.25rem;
+}
+
+.mobileGroupGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 0.45rem;
+}
+
+.mobileItemCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.65rem 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.mobileItemCard:active,
+.mobileItemCard:focus-visible {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: var(--text-primary);
+  transform: scale(0.98);
+}
+
+.mobileItemTitle {
+  font-family: var(--font-poppins);
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobileItemDesc {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  line-height: 1.25;
+}
+
+.allPagesBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.03em;
+  font-family: var(--font-poppins);
+  font-weight: 500;
+  transition: color 0.25s ease;
+}
+
+.allPagesBtn:hover {
+  color: var(--gold-bright);
+}

@@ -62,6 +62,7 @@ The platform is designed around a modern **Decoupled Serverless & Realtime Hybri
 | **3D WebGL Visualization** | Three.js & Globe.gl | `0.184.0` / `2.46.1` | High-fidelity 3D interactive globe with client connectivity arcs and GPU-accelerated atmospheric glow. |
 | **Headless CMS** | Sanity.io v3 | `5.31.2` (`next-sanity: 13.3.4`) | Strict schema validation, embedded Studio route (`/studio`), real-time content lake with GROQ caching. |
 | **Relational Database** | Supabase (PostgreSQL) | `@supabase/supabase-js: 2.114.0` | Relational integrity, built-in Row-Level Security (RLS), real-time WebSocket pub/sub, rate limiting persistence. |
+| **Media Delivery & CDN** | Cloudinary | `^2.5.1` (SDK & Client Helpers) | Global media CDN, automated AVIF/WebP transcoding (`f_auto,q_auto`), dynamic responsive transformations, and secure media uploads. |
 | **Realtime Documents** | Firebase Firestore | `12.19.0` | Real-time state synchronization for The Lounge (`/lounge`) and P2P WebRTC signaling channels. |
 | **Transactional Email** | Resend | `6.25.0` | High-deliverability SMTP alternative via REST API with automated SPF/DKIM verification and React Email templates. |
 | **Machine Intelligence** | Gemini 1.5 Flash + OpenRouter | REST Edge Endpoints | Primary low-latency semantic chatbot with transparent fallback to open-source models under quota saturation. |
@@ -167,6 +168,13 @@ Allows instant two-way mobile communication without running persistent polling s
 - **WebRTC Signaling**:
   - P2P Audio Mesh: Each participant exchanges SDP offers/answers and ICE candidates via Firestore subcollection `voiceSignals/{peerA}/peers/{peerB}`.
   - P2P Screenshare (Star Topology): Presenter publishes stream; peers establish one-way downstream RTCPeerConnections negotiated via `signals/{peerA}/peers/{peerB}`.
+
+### 3.5. Subsystem E: Media CDN & Dynamic Asset Pipeline (Cloudinary)
+
+- **Automated Next-Gen Formats**: All image requests automatically transcode to AVIF or WebP based on user-agent capabilities (`f_auto,q_auto`).
+- **Dynamic Responsive Breakpoints**: Client components utilize `buildCloudinaryUrl` and `buildCloudinarySrcSet` (`src/lib/cloudinaryClient.js`) to generate device-calibrated asset resolutions.
+- **Security & Secret Isolation**: Upload operations are gated through `src/app/api/upload/route.js` and `src/lib/cloudinary.js` (`import 'server-only'`), ensuring `CLOUDINARY_API_SECRET` is never leaked to the client bundle.
+- **Remote Domain Pattern**: Enforced in `next.config.mjs` via `remotePatterns` matching `res.cloudinary.com`.
 
 ---
 
