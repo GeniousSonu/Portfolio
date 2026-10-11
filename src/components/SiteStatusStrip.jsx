@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { useSitePresence } from '@/lib/sitePresence';
+import { SlidingNumber } from '@/components/animate-ui/primitives/texts/sliding-number';
 
 function EyeIcon() {
   return (
@@ -41,35 +42,7 @@ export default function SiteStatusStrip() {
         if (!isMounted) return;
 
         if (data?.ok && typeof data.totalVisitors === 'number') {
-          const target = data.totalVisitors;
-
-          // If already animated once in this session, don't re-animate
-          if (hasAnimatedRef.current) {
-            setDisplayTotal(target);
-            return;
-          }
-
-          // Smooth count-up animation on initial page load
-          const duration = 1200;
-          const start = performance.now();
-          const easeOutQuad = (t) => t * (2 - t);
-
-          const step = (now) => {
-            if (!isMounted) return;
-            const elapsed = now - start;
-            const progress = Math.min(1, elapsed / duration);
-            const current = Math.round(easeOutQuad(progress) * target);
-            setDisplayTotal(current);
-
-            if (progress < 1) {
-              requestAnimationFrame(step);
-            } else {
-              hasAnimatedRef.current = true;
-              setDisplayTotal(target);
-            }
-          };
-
-          requestAnimationFrame(step);
+          setDisplayTotal(data.totalVisitors);
         } else {
           setLoadFailed(true);
         }
@@ -92,7 +65,9 @@ export default function SiteStatusStrip() {
         <span className="status-strip-dot" aria-hidden="true" />
         <span className="status-strip-tag">LIVE</span>
         <span className="status-strip-bullet" aria-hidden="true">·</span>
-        <span className="status-strip-num">{liveCount}</span>
+        <span className="status-strip-num">
+          <SlidingNumber value={liveCount} />
+        </span>
         <span className="status-strip-label">ONLINE</span>
       </div>
 
@@ -103,9 +78,13 @@ export default function SiteStatusStrip() {
       <div className="status-strip-section">
         <EyeIcon />
         <span className="status-strip-num">
-          {displayTotal !== null
-            ? Number(displayTotal).toLocaleString('en-US')
-            : (loadFailed ? '—' : '...')}
+          {displayTotal !== null ? (
+            <SlidingNumber value={displayTotal} />
+          ) : loadFailed ? (
+            '—'
+          ) : (
+            '...'
+          )}
         </span>
         <span className="status-strip-label">TOTAL VISITORS</span>
       </div>
