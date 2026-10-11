@@ -10,7 +10,8 @@
 
 The design language reflects an elite engineering and cyber-security aesthetic. It blends the discipline of Unix terminal systems, modern high-density dashboards, and futuristic sci-fi interfaces into a cohesive, fluid web experience.
 
-### Core Visual Pillars:
+### Core Visual Pillars
+
 1. **The Deep Void (OLED Dark Mode)**: Pure deep darks (`#050505`) as the base canvas, punctuated by subtle graphite borders and ambient emerald glow.
 2. **Emerald & Cyber Accents**: Transitioned from traditional yellow-gold to high-energy modern emerald green (`#10B981` / `#34D399`) representing terminal vitality, security, and precision.
 3. **Tactile Glassmorphism**: Multi-layered semi-transparent surfaces with backdrop blur filters, hairline borders (`1px solid rgba(255, 255, 255, 0.08)`), and inset highlights.
@@ -21,6 +22,7 @@ The design language reflects an elite engineering and cyber-security aesthetic. 
 ## 2. Color Palette & Design Tokens
 
 ### 2.1. Surface & Background Tokens
+
 ```css
 :root {
   /* Surfaces & Base Canvas */
@@ -37,6 +39,7 @@ The design language reflects an elite engineering and cyber-security aesthetic. 
 ```
 
 ### 2.2. Accent & Brand Colors
+
 ```css
 :root {
   /* Primary Cyber Emerald (Signature Brand Color) */
@@ -58,6 +61,7 @@ The design language reflects an elite engineering and cyber-security aesthetic. 
 ```
 
 ### 2.3. Typography & Text Hierarchy
+
 ```css
 :root {
   /* Text Contrast Hierarchy */
@@ -82,17 +86,18 @@ The design language reflects an elite engineering and cyber-security aesthetic. 
 | **Display H1** | Brooklyn | `clamp(2.5rem, 6vw, 4.8rem)` | 700 / 800 | `-0.03em` | 1.05 | Hero titles, primary landing banners |
 | **Section H2** | Brooklyn | `clamp(1.8rem, 3.5vw, 2.8rem)` | 700 | `-0.02em` | 1.15 | Section headers (`Experience`, `Projects`) |
 | **Card H3** | Geist / Brooklyn | `1.35rem – 1.6rem` | 600 | `-0.01em` | 1.25 | Project card titles, role headings |
-| **Subheadings H4**| Geist | `1.1rem – 1.25rem` | 600 | `0.00em` | 1.35 | Modal headers, sub-feature titles |
+| **Subheadings H4** | Geist | `1.1rem – 1.25rem` | 600 | `0.00em` | 1.35 | Modal headers, sub-feature titles |
 | **Body Large** | Geist | `1.0625rem (17px)` | 400 | `0.00em` | 1.65 | Article intros, hero summaries |
-| **Body Regular**| Geist | `0.9375rem (15px)` | 400 | `0.00em` | 1.60 | Standard paragraphs, card descriptions |
-| **Technical Mono**| Geist Mono | `0.8125rem (13px)` | 500 | `0.05em` | 1.40 | Code blocks, rack separators, status indicators |
-| **Badges & Labels**| Geist Mono / Sans | `0.75rem (12px)` | 600 | `0.08em` | 1.00 | Uppercase technical pill tags (`[ SECTION 01 ]`) |
+| **Body Regular** | Geist | `0.9375rem (15px)` | 400 | `0.00em` | 1.60 | Standard paragraphs, card descriptions |
+| **Technical Mono** | Geist Mono | `0.8125rem (13px)` | 500 | `0.05em` | 1.40 | Code blocks, rack separators, status indicators |
+| **Badges & Labels** | Geist Mono / Sans | `0.75rem (12px)` | 600 | `0.08em` | 1.00 | Uppercase technical pill tags (`[ SECTION 01 ]`) |
 
 ---
 
 ## 4. Glassmorphism & Elevation Specs
 
 ### 4.1. The Glass Token Formula
+
 All floating cards, command palettes, and navigation bars follow the unified glassmorphism formula:
 
 ```css
@@ -120,6 +125,7 @@ All floating cards, command palettes, and navigation bars follow the unified gla
 ```
 
 ### 4.2. Navigation Glass Header
+
 ```css
 .navbar-glass {
   background: rgba(5, 5, 5, 0.85);
@@ -134,6 +140,7 @@ All floating cards, command palettes, and navigation bars follow the unified gla
 ## 5. Animation, Motion & Physics Guidelines
 
 ### 5.1. Easing Curves
+
 ```css
 :root {
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);    /* Smooth decelerated arrival */
@@ -143,11 +150,13 @@ All floating cards, command palettes, and navigation bars follow the unified gla
 ```
 
 ### 5.2. Scroll-Engine Synchronization (Lenis + GSAP)
+
 - **Desktop**: Lenis runs smooth scroll with `lerp: 0.1` and `touchMultiplier: 1.5`. Lenis scroll updates are pinned to GSAP's `ScrollTrigger.update` ticker loop to prevent frame tearing or jank.
 - **Mobile**: Native hardware-accelerated kinetic touch scrolling is preserved on mobile devices (`touch: true` flag in Lenis) to ensure zero lag.
 - **Pinned Card Stacking**: In `Experience.jsx`, cards stick to the viewport with cumulative top offsets (`top: 100px + (index * 24px)`) and scale back slightly (`scale: 0.98`) as subsequent cards stack on top.
 
 ### 5.3. Page Route Transitions
+
 - Powered by the native **View Transitions API** with fallback to CSS opacity cross-fades.
 - Transition duration capped at **180ms - 220ms** with a strict 450ms safety abort timeout to guarantee navigation never hangs.
 - Respects `prefers-reduced-motion`: When active, route changes occur instantly with zero animation.
@@ -157,7 +166,9 @@ All floating cards, command palettes, and navigation bars follow the unified gla
 ## 6. Showcase Styles & Custom UI Components
 
 ### 6.1. Rack Separators (`.rack-sep`)
+
 Technical cyber-rack divider used between major sections:
+
 ```css
 .rack-sep {
   display: flex;
@@ -181,12 +192,14 @@ Technical cyber-rack divider used between major sections:
 ```
 
 ### 6.2. Interactive Custom Cursor (`CustomCursor.jsx`)
+
 - Hides default browser cursor (`cursor: none` on body).
 - Outer magnetic follower ring (`width: 32px; height: 32px`) lags with smooth lerp physics.
 - Center dot (`width: 6px; height: 6px`) attaches directly to pointer coordinates.
 - Expands and switches blend mode (`mix-blend-mode: difference`) over interactive links, buttons, and card headers.
 
 ### 6.3. Ambient Scanlines & Grid Overlay
+
 - Fixed background pseudo-elements (`#grid-overlay`, `#scan-line`) project subtle retro-futuristic grid coordinates and a soft CRT scanline animation across the page without interfering with text selection or pointer events (`pointer-events: none`).
 
 ---

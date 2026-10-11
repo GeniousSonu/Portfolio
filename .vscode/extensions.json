@@ -1,0 +1,7 @@
+{
+  "recommendations": [
+    "coderabbit.coderabbit-vscode",
+    "dbaeumer.vscode-eslint",
+    "DavidAnson.vscode-markdownlint"
+  ]
+}

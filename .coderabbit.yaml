@@ -1,0 +1,60 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: "en-US"
+early_access: true
+
+reviews:
+  profile: "chill"
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - "main"
+      - "master"
+
+  tools:
+    eslint:
+      enabled: true
+    markdownlint:
+      enabled: true
+    gitleaks:
+      enabled: true
+    shellcheck:
+      enabled: true
+
+  path_filters:
+    - "!**/node_modules/**"
+    - "!**/.next/**"
+    - "!**/build/**"
+    - "!**/dist/**"
+    - "!**/package-lock.json"
+    - "!public/sw.js" # Generated/updated via build script
+
+  path_instructions:
+    - path: "src/app/api/**"
+      instructions: |
+        Verify strict edge/serverless security:
+        - Origin and referrer header checks (CSRF protection)
+        - IP-based rate limiting via Supabase or memory store
+        - Input payload sanitization and length bounds
+        - Ensure private secrets (RESEND_API_KEY, SUPABASE_SERVICE_ROLE_KEY, TELEGRAM_BOT_TOKEN) never leak into responses.
+    - path: "src/components/**"
+      instructions: |
+        Verify React 19 and Next.js 16 best practices:
+        - Verify appropriate placement of 'use client' directives
+        - Ensure all GSAP timelines/ScrollTriggers clean up via ctx.revert()
+        - Ensure design tokens from globals.css are used instead of ad-hoc hex values
+        - Check accessibility (aria-label, keyboard navigation, focus indicators)
+    - path: "*.md"
+      instructions: |
+        Ensure markdown files adhere strictly to Markdownlint rules:
+        - Blank lines around headings and lists
+        - Specified code fence languages
+        - No inline HTML tags like <br> in tables
+
+chat:
+  auto_reply: true

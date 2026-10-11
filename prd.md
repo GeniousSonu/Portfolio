@@ -11,6 +11,7 @@
 ## 1. Executive Summary & Vision
 
 The platform is a production-grade personal engineering website, technical portfolio, interactive playground, and knowledge hub built by **SK Sahinur Islam (Genious Sonu)**. Unlike standard static resume sites, this application serves as an enterprise-grade showcase of modern full-stack web engineering, featuring:
+
 - High-performance SSR/ISR with **Next.js 16 (App Router)** and **React 19**.
 - Dual-tier data model isolating immutable content (**Sanity Headless CMS**) from low-latency real-time state (**Supabase PostgreSQL** & **Firebase Firestore**).
 - Zero-polling live chat relay bridging web visitors directly to personal **Telegram** channels with instant mobile push.
@@ -35,6 +36,7 @@ The platform is a production-grade personal engineering website, technical portf
 ## 3. Product Features & Functional Requirements
 
 ### 3.1. Core Landing & Profile Experience (`/`)
+
 - **Cyber-Terminal Boot Preloader (`BootPreloader.jsx`)**:
   - Displays multi-lingual typewriter script greetings: Bengali (সাহিনুর), Hindi (साहिनुर), Japanese (サヒヌル), Russian (сахинур), Arabic (ساهينور), English (Sahinur).
   - Session-locked (`hasBootedInSession`) with bfcache protection for instant subsequent page returns.
@@ -62,6 +64,7 @@ The platform is a production-grade personal engineering website, technical portf
 ---
 
 ### 3.2. Headless Engineering Blog & CMS (`/blog`, `/studio`)
+
 - **Sanity CMS Integration (`/studio`)**:
   - Embedded Sanity Studio v3 inside Next.js App Router (`/src/app/studio/[[...tool]]/page.jsx`).
   - Strict security gate via environment session token and admin password protection.
@@ -73,6 +76,7 @@ The platform is a production-grade personal engineering website, technical portf
 ---
 
 ### 3.3. Communication Hub (`ChatbotWidget.jsx`, `/contact`)
+
 - **Dual-Mode Interactive Widget**:
   - **Mode 1: genious.exe (Autonomous AI Assistant)**:
     - Multi-turn conversation powered by Google Gemini 1.5 Flash with fallback to OpenRouter open-weights models.
@@ -89,6 +93,7 @@ The platform is a production-grade personal engineering website, technical portf
 ---
 
 ### 3.4. Realtime Collaboration & Hangouts (`/space`, `/lounge`)
+
 - **The Lounge (`/lounge`, `/lounge/[roomId]`)**:
   - Virtual hangout space featuring synchronized YouTube playback, interactive particle canvas, real-time Firestore chat, custom cyber stickers, and presence indicators.
   - WebRTC signaling mesh for peer-to-peer screen sharing (star topology) and voice communication.
@@ -99,6 +104,7 @@ The platform is a production-grade personal engineering website, technical portf
 ---
 
 ### 3.5. Extensions & Product Showcase (`/plugin`, `/wefik`, `/store`)
+
 - **WordPress & Web Plugins Hub (`/plugin`, `/plugin/[slug]`)**:
   - Dedicated product landing for **GeniousSonu Site Checkup** (WordPress security audit & site hardening plugin).
   - Sub-pages for Changelog, Documentation (`docs/[topic]`), Support, Privacy Policy, and Terms.
@@ -111,6 +117,7 @@ The platform is a production-grade personal engineering website, technical portf
 ---
 
 ### 3.6. Utility, Privacy & Systems Pages
+
 - **System Architecture Visualizer (`/architecture`)**:
   - Deep architectural breakdown with interactive tech stack topology, step-by-step request flow animations, and engineering rationale narratives.
 - **System Status Dashboard (`/status`)**:
@@ -129,24 +136,28 @@ The platform is a production-grade personal engineering website, technical portf
 ## 4. Non-Functional Requirements (NFRs)
 
 ### 4.1. Performance & Core Web Vitals
+
 - **Largest Contentful Paint (LCP)**: < 1.2s on desktop, < 2.0s on 4G mobile.
 - **First Input Delay / INP**: < 50ms across all interactions.
 - **Cumulative Layout Shift (CLS)**: 0.000 — zero layout jank; explicit aspect ratios on all media and pre-reserved space for dynamic embeds.
 - **Asset Optimization**: Local Brooklyn and Geist font files preloaded with `font-display: swap`; images served via Next.js Image Optimization with WebP/AVIF formats.
 
 ### 4.2. Accessibility & Responsiveness
+
 - Full WCAG 2.1 AA accessibility compliance.
 - Keyboard-accessible navigation via unified Command Palette (`Ctrl+K` / `Cmd+K` via `cmdk`).
 - `prefers-reduced-motion` compliance across all GSAP ScrollTrigger sequences and View Transitions.
 - Fluid responsive grid scaling seamlessly from 320px mobile screens to 3840px 4K displays.
 
 ### 4.3. Security & Privacy
+
 - Zero client-side exposure of private API secrets (Sanity write tokens, Resend keys, Supabase service roles, Telegram bot tokens).
 - Cloudflare Turnstile bot verification and honeypot traps on all form POST endpoints.
 - Cookie-free tracking option with Google Consent Mode v2 default denial until explicit user consent.
 - Strict Content Security Policy (CSP), `X-Frame-Options: SAMEORIGIN`, and strict CORS headers on internal API routes.
 
 ### 4.4. Offline & Progressive Web App (PWA)
+
 - Offline fallback page (`/offline`) cached via Service Worker.
 - Stale-While-Revalidate caching for static HTML pages and dynamic routes.
 - Cache-First caching strategy for immutable fonts, SVG logos, and UI icons.

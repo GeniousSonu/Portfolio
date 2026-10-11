@@ -1,25 +1,16 @@
 <div align="center">
 
-<br />
-
 <!-- Logo -->
 <img src="public/logo.svg" alt="SK Sahinur Islam Logo" width="120" />
 
-<br />
-<br />
-
 # SK Sahinur Islam — Official Portfolio
 
-### Senior Web Application Developer · Co-Founder · IT Engineer · IoT Patent Holder
-
-<br />
+## Senior Web Application Developer · Co-Founder · IT Engineer · IoT Patent Holder
 
 [![Live Site](https://img.shields.io/badge/🌐%20Live%20Site-genioussonu.me-10B981?style=for-the-badge&labelColor=050505)](https://genioussonu.me)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/sksahinurislam/)
 [![GitHub](https://img.shields.io/badge/GitHub-Follow-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/GeniousSonu)
 [![Upwork](https://img.shields.io/badge/Upwork-Hire%20Me-14A800?style=for-the-badge&logo=upwork&logoColor=white)](https://www.upwork.com/freelancers/~0104912246c7c7bdbf)
-
-<br />
 
 ![Next.js](https://img.shields.io/badge/Next.js_16-000000?style=flat-square&logo=nextdotjs&logoColor=white)
 ![React](https://img.shields.io/badge/React_19-61DAFB?style=flat-square&logo=react&logoColor=000)
@@ -39,7 +30,8 @@
 
 Production web portfolio and technical knowledge hub engineered by **SK Sahinur Islam (Genious Sonu)**. The platform showcases production full-stack systems, architectural case studies, client platforms, and an embedded headless CMS blog.
 
-### Key Highlights:
+### Key Highlights
+
 - 🛠️ **Current Role**: Senior Web Application Developer at **Ib Arts** (Jul 2026 – Present), building scalable backend architecture, distributed systems, and cloud infrastructure.
 - 🚀 **Entrepreneurship**: Co-Founder at **WEFIK** (Mar 2021 – Present), directing end-to-end technical delivery for 30+ international web and mobile applications.
 - 📜 **Granted Patent**: Solar-Powered IoT Vaccine Preservation System with real-time MQTT telemetry (Patent No. 202531060002 A).
@@ -71,7 +63,7 @@ Production web portfolio and technical knowledge hub engineered by **SK Sahinur 
 | **UI Model** | React 19 | Declarative state, modern hooks, server components |
 | **Styling** | Vanilla CSS + Design Tokens | Custom theme variables, responsive grid, zero utility overhead |
 | **Smooth Scroll** | Lenis | Hardware-calibrated desktop smooth scroll |
-| **Animation Engine**| GSAP 3 (ScrollTrigger, TextPlugin) | Responsive card pinning, stagger reveals, magnetic buttons |
+| **Animation Engine** | GSAP 3 (ScrollTrigger, TextPlugin) | Responsive card pinning, stagger reveals, magnetic buttons |
 | **3D Graphics** | Three.js & Globe.gl | Interactive WebGL globe visualization |
 | **Content Management** | Sanity.io (v3 Embedded Studio) | Headless blog, category taxonomy, and author management |
 | **Database** | Supabase (PostgreSQL) | Structured persistence and relational storage |
@@ -83,6 +75,7 @@ Production web portfolio and technical knowledge hub engineered by **SK Sahinur 
 ## 🚀 Local Development
 
 ### Prerequisites
+
 - Node.js 18.18+ or 20+
 - npm 9+
 

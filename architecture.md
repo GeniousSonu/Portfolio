@@ -11,7 +11,7 @@
 
 The platform is designed around a modern **Decoupled Serverless & Realtime Hybrid Architecture**. It combines edge-rendered user interfaces, edge-cached headless CMS data, distributed relational and document storage, and peer-to-peer real-time communication protocols.
 
-```
+```text
                               ┌──────────────────────────────────────────────┐
                               │            Web / Mobile Visitors             │
                               │ (Desktop, PWA Standalone, Mobile Responsive) │
@@ -59,7 +59,7 @@ The platform is designed around a modern **Decoupled Serverless & Realtime Hybri
 | **Styling & Design System** | Vanilla CSS + CSS Modules | Modern CSS (CSS Custom Properties) | Zero runtime overhead, complete cascade control, sub-millisecond paint speeds; avoids utility bloat. |
 | **Smooth Scrolling** | Lenis by Studio Freight | `1.3.26` | Hardware-calibrated inertia scrolling on desktop (`lerp: 0.1`) synchronized with GSAP animation ticker. |
 | **Animation Engine** | GSAP & ScrollTrigger | `3.15.0` (`@gsap/react: 2.1.2`) | High-performance timeline pinning, card stacking in Experience section, magnetic physics, and batched reveals. |
-| **3D WebGL Visualization**| Three.js & Globe.gl | `0.184.0` / `2.46.1` | High-fidelity 3D interactive globe with client connectivity arcs and GPU-accelerated atmospheric glow. |
+| **3D WebGL Visualization** | Three.js & Globe.gl | `0.184.0` / `2.46.1` | High-fidelity 3D interactive globe with client connectivity arcs and GPU-accelerated atmospheric glow. |
 | **Headless CMS** | Sanity.io v3 | `5.31.2` (`next-sanity: 13.3.4`) | Strict schema validation, embedded Studio route (`/studio`), real-time content lake with GROQ caching. |
 | **Relational Database** | Supabase (PostgreSQL) | `@supabase/supabase-js: 2.114.0` | Relational integrity, built-in Row-Level Security (RLS), real-time WebSocket pub/sub, rate limiting persistence. |
 | **Realtime Documents** | Firebase Firestore | `12.19.0` | Real-time state synchronization for The Lounge (`/lounge`) and P2P WebRTC signaling channels. |
@@ -72,9 +72,10 @@ The platform is designed around a modern **Decoupled Serverless & Realtime Hybri
 ## 3. Core Subsystems & Request Flows
 
 ### 3.1. Subsystem A: Contact & Lead Ingestion Pipeline
+
 When a user submits an inquiry through `/contact` or the home page contact drawer:
 
-```
+```text
 [User Browser]
       │
       │ 1. Validate length, regex & check honeypot (client-side)
@@ -96,9 +97,10 @@ When a user submits an inquiry through `/contact` or the home page contact drawe
 ```
 
 ### 3.2. Subsystem B: Autonomous Systems Assistant (`genious.exe`)
+
 The conversational AI widget operates across three intelligent tiers:
 
-```
+```text
 [Visitor in ChatbotWidget.jsx]
       │
       │ 1. Submits prompt (< 500 characters)
@@ -122,9 +124,10 @@ The conversational AI widget operates across three intelligent tiers:
 ```
 
 ### 3.3. Subsystem C: Zero-Polling Telegram Live Chat Relay
+
 Allows instant two-way mobile communication without running persistent polling servers or injecting heavy commercial chat widgets:
 
-```
+```text
 [Web Visitor Browser]
       │
       │ 1. Visitor switches ChatbotWidget to "Live Chat" mode
@@ -158,6 +161,7 @@ Allows instant two-way mobile communication without running persistent polling s
 ```
 
 ### 3.4. Subsystem D: The Lounge & Shared Space (Realtime Collaboration)
+
 - **State Synchronization**: Uses Firebase Firestore real-time snapshot listeners (`onSnapshot`) for room state, participants, and chat messages.
 - **Synchronized Video Player**: Host controls video ID, play/pause state, and current playback time; participant players automatically synchronize within a 1.5-second buffer tolerance.
 - **WebRTC Signaling**:
@@ -168,7 +172,7 @@ Allows instant two-way mobile communication without running persistent polling s
 
 ## 4. Component Hierarchy & Navigation Flow
 
-```
+```text
 RootLayout (layout.js)
  ├── OverlayProvider (Unified body scroll lock & modal manager)
  ├── TransitionProvider (Native View Transitions API router)
@@ -283,6 +287,7 @@ CREATE TABLE contact_abuse_logs (
 ```
 
 ### 5.2. Sanity Content Schemas
+
 - **`post`**: `title`, `slug`, `author` (reference), `mainImage`, `categories` (array of references), `publishedAt`, `excerpt`, `body` (blockContent), `readingTime`, `featured`, `seoTitle`, `seoDescription`.
 - **`author`**: `name`, `slug`, `image`, `bio`.
 - **`category`**: `title`, `description`, `color`.
@@ -293,12 +298,14 @@ CREATE TABLE contact_abuse_logs (
 ## 6. Security, Authentication & Deployment
 
 ### 6.1. Security Defenses
+
 - **Environment Isolation**: Server-only secrets (`RESEND_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `TELEGRAM_BOT_TOKEN`, `STUDIO_ADMIN_PASSWORD`) are wrapped in `import 'server-only'` to guarantee zero client bundle leakage.
 - **Webhook Authenticity**: Telegram webhook requests are validated against `X-Telegram-Bot-Api-Secret-Token`.
 - **Input Sanitization**: User inputs in contact forms and chat endpoints undergo strict trimming, HTML escaping, and length truncation.
 - **CSP & HTTP Headers**: Enforced via `next.config.mjs` with `SAMEORIGIN` framing rules for `/studio`, immutable caching for static assets, and strict MIME types for service workers.
 
 ### 6.2. Deployment & CI/CD Pipeline
+
 - **Platform**: Hosted on **Vercel Edge Network** with automatic git push deployments from GitHub `main` branch.
 - **Build Step**:
   1. `node scripts/update-sw-version.mjs` updates the Service Worker cache timestamp in `public/sw.js`.

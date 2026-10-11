@@ -28,6 +28,7 @@
 ## 2. Key Architectural Decision Records (ADRs)
 
 ### ADR-01: Hybrid Data Model (Sanity CMS + Supabase + Firebase)
+
 - **Context**: Deciding between a unified monolithic database vs. specialized multi-tier storage.
 - **Decision**:
   - **Sanity.io v3**: Immutable editorial content (articles, changelogs, author profiles) benefiting from global edge CDN distribution and Incremental Static Regeneration (ISR).
@@ -36,11 +37,13 @@
 - **Consequence**: Clean architectural decoupling. Editorial changes never touch relational databases, and high-frequency real-time events never trigger heavy CMS queries.
 
 ### ADR-02: Zero-Polling Live Chat Relay via Telegram Bot API
+
 - **Context**: Enabling real-time visitor communication without paid SaaS widgets (Intercom, Crisp) or resource-heavy server polling.
 - **Decision**: When a visitor enters live chat, their browser connects to a scoped Supabase Realtime channel. Incoming messages trigger a serverless API that forwards the query to a private Telegram chat with instant push notifications on Sonu's smartphone. Operator replies trigger an authenticated webhook (`/api/live-chat/webhook`) that immediately broadcasts the reply over Supabase Realtime to the visitor's channel.
 - **Consequence**: Sub-second round-trip latency, zero recurring SaaS costs, no heavy tracking scripts, and instant mobile accessibility.
 
 ### ADR-03: Tiered AI Assistant (`genious.exe`) with Dual-Provider Fallback
+
 - **Context**: Free-tier cloud LLMs frequently experience rate limits (HTTP 429) or intermittent latency spikes.
 - **Decision**: Multi-stage routing pipeline:
   1. Local semantic FAQ matching against indexed portfolio knowledge (0 API cost, instant answer).
@@ -49,6 +52,7 @@
 - **Consequence**: High response accuracy and virtually 100% uptime without hitting expensive enterprise API tiers.
 
 ### ADR-04: Vanilla CSS Over Utility Frameworks (Tailwind)
+
 - **Context**: Maximizing aesthetic distinctiveness, paint performance, and reducing bundle weight.
 - **Decision**: Avoid TailwindCSS entirely. Implement custom CSS design tokens in `globals.css` alongside CSS Modules for component encapsulation.
 - **Consequence**: Sub-millisecond CSS parsing, zero class bloat, complete control over complex glassmorphism, responsive clamping, and GSAP animation targets.
