@@ -34,6 +34,34 @@ const nextConfig = {
         ],
       },
       {
+        // Immutable caching for Next.js build assets & chunks
+        source: '/_next/static/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      {
+        // Emergency kill switch must never be cached
+        source: '/reset',
+        headers: [
+          { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, proxy-revalidate' },
+        ],
+      },
+      {
+        // Root homepage: ensure fresh HTML so chunk hashes are always up to date
+        source: '/',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' },
+        ],
+      },
+      {
+        // Page routes: ensure fresh HTML on every navigation/refresh
+        source: '/:path((?!_next|fonts|logo|manifest|sw\\.js).*)',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' },
+        ],
+      },
+      {
         // Service Worker headers for PWA
         source: '/sw.js',
         headers: [

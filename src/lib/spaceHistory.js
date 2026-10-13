@@ -1,4 +1,5 @@
 import { getOrCreateVisitorId } from './visitorId';
+import { safeStorage } from './safeStorage';
 
 const STORAGE_PREFIX = 'sks_space_rooms_';
 export const MAX_ACTIVE_ROOMS = 5;
@@ -16,12 +17,8 @@ function getStorageKey() {
 export function getRoomHistory() {
   if (typeof window === 'undefined') return [];
   try {
-    const raw = localStorage.getItem(getStorageKey());
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    // Sort descending by lastVisitedAt
-    return parsed.sort((a, b) => (b.lastVisitedAt || 0) - (a.lastVisitedAt || 0));
+    const list = safeStorage.getJSON(getStorageKey(), [], Array.isArray);
+    return list.sort((a, b) => (b.lastVisitedAt || 0) - (a.lastVisitedAt || 0));
   } catch (err) {
     console.warn('[SpaceHistory] Read error:', err);
     return [];
@@ -47,7 +44,7 @@ export function addOrUpdateRoomHistory(roomId, previewText = '') {
       if (preview) {
         history[existingIndex].preview = preview;
       }
-      localStorage.setItem(getStorageKey(), JSON.stringify(history));
+      safeStorage.setJSON(getStorageKey(), history);
       return { success: true, count: history.length, isNew: false };
     }
 
@@ -69,7 +66,7 @@ export function addOrUpdateRoomHistory(roomId, previewText = '') {
     };
 
     history.unshift(newEntry);
-    localStorage.setItem(getStorageKey(), JSON.stringify(history));
+    safeStorage.setJSON(getStorageKey(), history);
     return { success: true, count: history.length, isNew: true };
   } catch (err) {
     console.warn('[SpaceHistory] Write error:', err);
@@ -89,7 +86,7 @@ export function updateRoomPreview(roomId, previewText) {
     if (item) {
       item.preview = (previewText || '').trim().slice(0, 35);
       item.lastVisitedAt = Date.now();
-      localStorage.setItem(getStorageKey(), JSON.stringify(history));
+      safeStorage.setJSON(getStorageKey(), history);
     }
   } catch (err) {}
 }
@@ -102,7 +99,7 @@ export function removeRoomFromHistory(roomId) {
   try {
     const cleanId = roomId.trim().toLowerCase();
     const history = getRoomHistory().filter((item) => item.roomId !== cleanId);
-    localStorage.setItem(getStorageKey(), JSON.stringify(history));
+    safeStorage.setJSON(getStorageKey(), history);
     return history;
   } catch (err) {
     console.warn('[SpaceHistory] Remove error:', err);

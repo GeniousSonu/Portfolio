@@ -15,6 +15,20 @@ let previousStyles = {
   width: '',
 };
 
+export function forceUnlock() {
+  lockCount = 0;
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    document.body.style.width = '';
+    document.documentElement.classList.remove('preloader-locked');
+    document.body.classList.remove('preloader-locked');
+  }
+}
+
 /**
  * Custom hook for locking body scroll on full-screen overlays (mobile nav, chatbot, modals).
  * Handles iOS Safari, desktop, and Android robustly by saving scrollY and using position: fixed.
@@ -25,6 +39,17 @@ export function useScrollLock(isLocked) {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    // bfcache / popstate recovery: release locks on back/forward restores
+    const handleRestore = (e) => {
+      if (e?.persisted || e?.type === 'pageshow' || e?.type === 'popstate') {
+        forceUnlock();
+        navState.lenis?.start();
+      }
+    };
+
+    window.addEventListener('pageshow', handleRestore);
+    window.addEventListener('popstate', handleRestore);
 
     if (isLocked && !hasLockedRef.current) {
       hasLockedRef.current = true;
@@ -98,6 +123,9 @@ export function useScrollLock(isLocked) {
     }
 
     return () => {
+      window.removeEventListener('pageshow', handleRestore);
+      window.removeEventListener('popstate', handleRestore);
+
       // Automatic safety cleanup on unmount
       if (hasLockedRef.current) {
         hasLockedRef.current = false;

@@ -214,6 +214,7 @@ import CommandPalette from "@/components/CommandPalette";
 import SiteMenuModal from "@/components/SiteMenuModal";
 import BootPreloader from "@/components/BootPreloader";
 import LoadingBar from "@/components/LoadingBar";
+import SelfHealInit from "@/components/SelfHealInit";
 
 export default function RootLayout({ children }) {
   const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
@@ -243,6 +244,58 @@ export default function RootLayout({ children }) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdGraph) }}
+        />
+        {/* Incident INC-001 Resilience Bootstrap (Early ChunkLoadError catcher & js-motion gate) */}
+        <script
+          id="sks-resilience-bootstrap"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                var RECOVERY_KEY = 'sks_self_heal_attempted';
+                function checkChunkError(msg) {
+                  if (!msg) return false;
+                  var str = String(msg);
+                  return str.indexOf('ChunkLoadError') !== -1 ||
+                         str.indexOf('Loading chunk') !== -1 ||
+                         str.indexOf('Failed to fetch dynamically imported module') !== -1 ||
+                         str.indexOf('error loading dynamically imported module') !== -1;
+                }
+                function handleChunkCrash(err) {
+                  if (!checkChunkError(err)) return;
+                  try {
+                    var attempts = parseInt(sessionStorage.getItem(RECOVERY_KEY) || '0', 10);
+                    if (attempts < 1) {
+                      sessionStorage.setItem(RECOVERY_KEY, '1');
+                      if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.getRegistrations().then(function(regs) {
+                          regs.forEach(function(r) { r.unregister(); });
+                        });
+                      }
+                      if ('caches' in window) {
+                        caches.keys().then(function(keys) {
+                          keys.forEach(function(k) { caches.delete(k); });
+                        });
+                      }
+                      window.location.reload();
+                    }
+                  } catch(e) {}
+                }
+                window.addEventListener('error', function(e) { handleChunkCrash(e.error || e.message); });
+                window.addEventListener('unhandledrejection', function(e) { handleChunkCrash(e.reason); });
+
+                try {
+                  var isReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                  var manualPref = localStorage.getItem('sks_reduce_motion') === 'true';
+                  if (!isReduced && !manualPref) {
+                    document.documentElement.classList.add('js-motion');
+                    setTimeout(function() {
+                      document.documentElement.classList.remove('js-motion');
+                    }, 3000);
+                  }
+                } catch(e) {}
+              })();
+            `,
+          }}
         />
         {/* Google Consent Mode v2 Default Configuration (Allows tag detection while enforcing consent) */}
         {gaId && (
@@ -278,6 +331,7 @@ export default function RootLayout({ children }) {
         )}
       </head>
       <body suppressHydrationWarning>
+        <SelfHealInit />
         <OverlayProvider>
           <TransitionProvider>
             <PlaygroundProvider>

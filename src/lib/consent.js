@@ -5,6 +5,8 @@ const CONSENT_COOKIE_KEY = 'sks_analytics_consent';
 const CONSENT_CHOICE_STORAGE_KEY = 'sks_consent_choice';
 const CONSENT_CHOICE_COOKIE_KEY = 'sks_consent_choice';
 
+import safeStorage from './safeStorage';
+
 function getGaMeasurementId() {
   return process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 }
@@ -56,13 +58,9 @@ export function applyAnalyticsDisableFlag() {
 export function getConsentStatus() {
   if (typeof window === 'undefined') return 'pending';
 
-  try {
-    const stored = localStorage.getItem(CONSENT_STORAGE_KEY);
-    if (stored === 'granted' || stored === 'denied') {
-      return stored;
-    }
-  } catch {
-    // LocalStorage blocked/unavailable
+  const stored = safeStorage.getItem(CONSENT_STORAGE_KEY);
+  if (stored === 'granted' || stored === 'denied') {
+    return stored;
   }
 
   // Check fallback cookie
@@ -83,13 +81,9 @@ export function getConsentStatus() {
 export function getConsentChoice() {
   if (typeof window === 'undefined') return 'none';
 
-  try {
-    const choice = localStorage.getItem(CONSENT_CHOICE_STORAGE_KEY);
-    if (choice === 'accept_all' || choice === 'reject' || choice === 'custom') {
-      return choice;
-    }
-  } catch {
-    // LocalStorage blocked
+  const choice = safeStorage.getItem(CONSENT_CHOICE_STORAGE_KEY);
+  if (choice === 'accept_all' || choice === 'reject' || choice === 'custom') {
+    return choice;
   }
 
   if (typeof document !== 'undefined') {
@@ -121,11 +115,7 @@ export function isConsentFullAccepted() {
 export function setConsentChoice(choice, analyticsGranted) {
   if (typeof window === 'undefined') return;
 
-  try {
-    localStorage.setItem(CONSENT_CHOICE_STORAGE_KEY, choice);
-  } catch {
-    // LocalStorage blocked
-  }
+  safeStorage.setItem(CONSENT_CHOICE_STORAGE_KEY, choice);
 
   if (typeof document !== 'undefined') {
     document.cookie = `${CONSENT_CHOICE_COOKIE_KEY}=${choice}; max-age=31536000; path=/; SameSite=Lax`;
@@ -148,11 +138,7 @@ export function setConsentChoice(choice, analyticsGranted) {
 export function setConsentStatus(status) {
   if (typeof window === 'undefined') return;
 
-  try {
-    localStorage.setItem(CONSENT_STORAGE_KEY, status);
-  } catch {
-    // LocalStorage blocked
-  }
+  safeStorage.setItem(CONSENT_STORAGE_KEY, status);
 
   // Set 1-year persistent cookie
   if (typeof document !== 'undefined') {

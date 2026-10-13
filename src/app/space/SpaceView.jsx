@@ -15,6 +15,7 @@ import {
   updateRoomPreview,
   MAX_ACTIVE_ROOMS,
 } from '@/lib/spaceHistory';
+import { safeStorage } from '@/lib/safeStorage';
 import styles from './space.module.css';
 
 const MAX_CHARS = 5000;
@@ -155,7 +156,7 @@ export default function SpaceView({ roomId = null }) {
   // ── Session Verification (Turnstile) — Only active for Global Scratchpad ──
   useEffect(() => {
     if (roomId) return; // Dedicated rooms do not require Turnstile captcha
-    const storedToken = sessionStorage.getItem('sks_space_session_token');
+    const storedToken = safeStorage.getItem('sks_space_session_token', null, 'session');
     if (storedToken) {
       setSessionToken(storedToken);
       setIsVerified(true);
@@ -187,7 +188,7 @@ export default function SpaceView({ roomId = null }) {
                   });
                   const data = await res.json();
                   if (res.ok && data.sessionToken) {
-                    sessionStorage.setItem('sks_space_session_token', data.sessionToken);
+                    safeStorage.setItem('sks_space_session_token', data.sessionToken, 'session');
                     setSessionToken(data.sessionToken);
                     setIsVerified(true);
                   }
@@ -304,7 +305,7 @@ export default function SpaceView({ roomId = null }) {
   const saveDocument = useCallback(
     async (textToSave) => {
       const isRoomMode = Boolean(roomId);
-      const token = sessionStorage.getItem('sks_space_session_token') || sessionToken;
+      const token = safeStorage.getItem('sks_space_session_token', null, 'session') || sessionToken;
 
       // Global scratchpad requires Turnstile token; rooms are authenticated by existence & rate limit
       if (!isRoomMode && !token) {
@@ -347,7 +348,7 @@ export default function SpaceView({ roomId = null }) {
         }
 
         if (res.status === 403 && data.code === 'TOKEN_EXPIRED') {
-          sessionStorage.removeItem('sks_space_session_token');
+          safeStorage.removeItem('sks_space_session_token', 'session');
           setSessionToken(null);
           setIsVerified(false);
           setSavingStatus('Verification needed');
@@ -504,7 +505,7 @@ export default function SpaceView({ roomId = null }) {
   // ── Clear Scratchpad ──
   const handleConfirmClear = async () => {
     const isRoomMode = Boolean(roomId);
-    const token = sessionStorage.getItem('sks_space_session_token') || sessionToken;
+    const token = safeStorage.getItem('sks_space_session_token', null, 'session') || sessionToken;
     if (!isRoomMode && !token) return;
 
     setIsClearing(true);

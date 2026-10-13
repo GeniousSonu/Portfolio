@@ -39,7 +39,7 @@ This is the single source of truth for how the platform looks, moves, sounds in 
 | Dark only, one surface | Dual surface: **Void** (dark) and **Bone** (warm light) chapters | Surface shifts create rhythm and editorial pacing |
 | Rounded 12px cards | 0 / 2 / 4px radii; chamfered cut-corners on filled elements | Distinctive geometry matching the instrument concept |
 | `--gold` token holding emerald | Renamed `--signal` with a deprecated alias | The old name was a migration leftover |
-| 3D only as a globe | 3D **Operator Stage** (owner's model) plus the globe, one WebGL context at a time | The owner is the product |
+| 3D only as a globe | Retain 3D Globe with design token styling; 3D owner avatar rejected (Amendment A) | Focus on engineering substance and performance |
 | Spec "Geist Mono" family set as `'Geist'` | Corrected to `'Geist Mono'` | Bug in 2.4.0 token `--font-mono` |
 
 ---
@@ -50,7 +50,7 @@ This is the single source of truth for how the platform looks, moves, sounds in 
 >
 > **A security engineer's operating console, with a human at the desk.**
 
-The visitor boots into Sonu's system. Everything systemic (data, status, structure, controls) speaks in precise, mechanical, monospaced, cold-signal terms. Everything human (the person, the story, the voice) speaks in warm, organic, serif, bone-toned terms. The 3D model of the owner is the "operator" sitting at the console. The whole site is the tension and handshake between the **system** and the **person**.
+The visitor boots into Sonu's system. Everything systemic (data, status, structure, controls) speaks in precise, mechanical, monospaced, cold-signal terms. Everything human (the person, the story, the voice) speaks in warm, organic, serif, bone-toned terms. The console and telemetry represent the operator at work. The whole site is the tension and handshake between the **system** and the **person**.
 
 This is not decoration. It is the reason behind every typographic, color, motion and layout choice in this document. When a design choice cannot be explained through system versus human, it needs a different justification or it is cut.
 
@@ -60,11 +60,11 @@ This is not decoration. It is the reason behind every typographic, color, motion
 |-------|---------|------|-------|--------|-------|
 | **System** | Data, status, labels, controls, navigation chrome, code | Geist Mono, uppercase micro-labels, tabular numerals | Signal green on Void, cool grays | Linear, stepped, typed, counted, scanned (mechanical easing) | Hairlines, crop marks, chamfers, grids |
 | **Structure** | Headlines, section architecture, body copy | Brooklyn display + Geist (grotesk) [VERIFY Brooklyn] | Ink and Bone neutrals | Confident ease-out, masked line reveals | Large type, generous negative space |
-| **Human** | The owner's story, quotes, About statement, live chat replies from Sonu | Instrument Serif (regular and italic) | Warm Bone, soft highlights | Organic ease-out and spring; slow fades; breathing | Softer edges, optical sizing, real photography and the 3D operator |
+| **Human** | The owner's story, quotes, About statement, live chat replies from Sonu | Instrument Serif (regular and italic) | Warm Bone, soft highlights | Organic ease-out and spring; slow fades; breathing | Softer edges, optical sizing, real photography and authentic artifacts |
 
 ### 1.3 Signature moves (exactly three, no more)
 
-1. **The Operator Stage.** A fixed 3D stage that holds the owner's model. The camera performs a scripted, scroll-driven "shot list" across the Home chapters (Section 9). The model materializes at boot through a scan-line reveal tied to the preloader.
+1. **The Operator Console & Telemetry Rig.** A high-precision interface architecture framing Sonu's work. The hero immediately communicates role, verified credentials, and patent via live telemetry and typography, with the interactive 3D Globe retained for global reach (Amendment A: 3D avatar model is out of scope).
 2. **Live telemetry as typography.** Real data (local time in Kolkata, last deploy short SHA, now playing, chess rating, availability) is set as typographic texture in headers, footers and margins. Never fabricated: if a source fails the field shows an em dash.
 3. **Chapter mode-shifts.** Sections are numbered chapters. Dark (Void) and light (Bone) surfaces alternate through a fast clip-path transition, with a persistent chapter rail on the left showing progress. Reading content (blog, wiki, docs) lives on Bone; showpiece and system content lives on Void.
 
@@ -86,7 +86,7 @@ Awwwards weights Design 40%, Usability 30%, Creativity 20%, Content 10%. This do
 |-----------|--------|------------------------------|---------|
 | Design | 40% | Concept-driven type, grid, color scarcity, hairline geometry, disciplined surfaces | 3, 4, 5, 6 |
 | Usability | 30% | Full-site wayfinding (rail, panels, all-pages index, palette), WCAG 2.2 AA, clear state design | 10, 13 |
-| Creativity | 20% | Operator Stage, scan-in boot, telemetry typography, mode-shifting chapters | 1.3, 8, 9 |
+| Creativity | 20% | Interactive Globe, scan-in boot, telemetry typography, mode-shifting chapters | 1.3, 8, 9 |
 | Content | 10% | Real facts only, dated stats, voice guide, specific microcopy | 15 |
 
 ---
@@ -614,19 +614,32 @@ Users can also force this with a footer toggle (persisted in `localStorage` with
 
 ---
 
-## 8. The Operator Stage (3D System)
+## 8. 3D Systems & The Globe [OPERATOR STAGE ARCHIVED PER AMENDMENT A]
 
-### 8.1 Purpose and rules
+> [!IMPORTANT]
+> **ARCHIVE & SCOPE NOTICE (Amendment A):**  
+> Per explicit owner requirements, a 3D avatar model of the owner is **NOT** used on this portfolio. The Operator Stage (`.glb` asset pipeline, React Three Fiber / `@react-three/drei` runtime dependencies, camera shot list, and Stage tiers T0–T2) is strictly **OUT OF SCOPE** and has been decommissioned.  
+> - **Do NOT install `@react-three/fiber` or `@react-three/drei`.**  
+> - **Preconditions: Do NOT halt or pause for missing `.glb` or `ASSET-REPORT.md`.**  
+> - The existing Three.js **WebGL Globe** (Section 8.1) is retained as the sole 3D visualization element on the site.  
+> Sections 8.2–8.9 below are archived for historical reference only.
 
-The Stage is the signature of the site: the owner's `.glb` model lit and directed like a product shot, living in a fixed canvas behind the Home chapters. It is **progressive enhancement**: the site is complete without it.
+### 8.1 The Globe (Active 3D System)
 
-Hard rules:
+The existing interactive Three.js Globe is retained as the sole active 3D visualization context on the site (Chapter 05: Reach).
+- **WebGL Lifecycle**: Cleanly pause animation loop when scrolled out of viewport via `IntersectionObserver`. Dispose geometries, textures, and renderer contexts on unmount.
+- **Design Tokens**: Arc colors sourced from CSS tokens (`--accent`, `--fg-3`), atmosphere tinted by `--signal-500` at low alpha, labels in mono typography (`Geist Mono`).
+- **Static Fallback**: Fallback static image rendered when WebGL is unavailable or when user prefers reduced motion (`prefers-reduced-motion: reduce`).
 
-1. **One live WebGL renderer at a time.** The Stage and the Globe never render simultaneously; the inactive one is paused or disposed before the other mounts.
-2. The Stage is **never the LCP element**. The LCP element is a still render (`operator-poster.avif`) of the same camera and lighting.
-3. The 3D chunk is dynamically imported after the first paint and idle, not counted against initial JS.
-4. No essential content or navigation lives inside the canvas.
-5. Must work with 3D unavailable: static poster, same layout, no empty box (explicit `aspect-ratio`).
+---
+
+### [ARCHIVED] 8.2 Historical Operator Stage Specification (Reference Only)
+
+*The following specification is archived per Amendment A:*
+
+The Stage was originally conceived as the owner's `.glb` model living in a fixed canvas behind the Home chapters. Per Amendment A, this avatar concept has been permanently rejected in favor of high-density engineering telemetry, verified patents, and real project architectures.
+
+Hard rules (archived):
 
 ### 8.2 Technology
 
@@ -709,11 +722,7 @@ Common runtime rules: `frameloop="demand"` when static and `invalidate()` on int
 | Footer | Small operator still or tiny live canvas (T2 only) looking toward the contact CTA |
 | `/lounge` | FUTURE: use as the owner's presence avatar |
 
-Pages other than Home reuse the cached GLB (no refetch) but mount their own small canvas, only when visible.
-
-### 8.10 The Globe (existing)
-
-Retained as a separate chapter with these updates: arc colors from tokens (`--accent`, `--fg-3`), atmosphere shader tinted by `--signal-500` at low alpha, labels in mono, static fallback image on T0, and the one-renderer rule from 8.1.
+Pages other than Home mount their own UI views cleanly without background 3D overhead.
 
 ---
 
@@ -721,26 +730,26 @@ Retained as a separate chapter with these updates: arc colors from tokens (`--ac
 
 ### 9.1 Overview
 
-Home is a sequence of numbered chapters on alternating surfaces, held together by the chapter rail and the Operator Stage. The goal is a recruiter understanding who this is within the first screen and a client understanding what to do within the last.
+Home is a sequence of numbered chapters on alternating surfaces, held together by the chapter rail, live telemetry, and the interactive 3D Globe. The goal is a recruiter understanding who this is within the first screen and a client understanding what to do within the last (Amendment A: 3D avatar model removed).
 
 ### 9.2 Chapter table
 
-| # | Chapter | Surface | Purpose | Layout | Signature detail | Motion idea | Stage state |
-|---|---------|---------|---------|--------|------------------|-------------|-------------|
-| 00 | **Boot** | Void | Identity and personality in 2s | Full-viewport terminal, greetings typed | Multilingual name sequence, build SHA line | Typed text then scan-in | Model scans in behind final greeting |
-| 01 | **Operator (Hero)** | Void | State who and what, with proof and path | Hero statement (`--step-6`, 3 lines max) on the left 7 columns; operator on the right; telemetry strip at the base; CTA pair | Hero line carries the value proposition with real specifics (role, years, patent), not a slogan; availability badge as a live status dot | Line-mask reveal; telemetry types on | Medium shot, key warm, rim signal |
-| 02 | **Human (About)** | **Bone** | The person behind the system | 5-column serif statement, 4-column facts list in mono, a pull quote | Serif human voice begins here; Kolkata coordinates label | Slow fades only | Push in to head-and-shoulders; rim fades; key warms |
-| 03 | **Experience** | Void | Career proof | Pinned card stack (existing logic) on the right, role summary and counters on the left | Dates in tabular mono; current role has a live dot | Stack pin with scale-back (the chapter's one motion idea) | Model recedes to left edge, 30% scale, 40% opacity |
-| 04 | **Projects** | Void | Work proof | Index table with filter segmented control; hover reveals a Frame preview; detail opens a full-screen case-study overlay | Table, not a card grid; FIG numbering | Row hover with preview follow (transform only) | Stage dimmed to 12% opacity (CSS) and paused |
-| 05 | **Reach (Globe)** | Void | Global trust | Globe full-bleed, client list as mono index on the side | Arcs in signal, labels in mono | Globe auto-rotation, pointer drag | Stage released; Globe active |
-| 06 | **Credentials** | **Bone** | Credibility ledger | Patent as a hero artifact (Indian Patent No. 544062) in a large Frame; 30+ credentials as a dense verifiable index | Each credential row links to verification when available | Counter on total; row reveals | None |
-| 07 | **Writing** | **Bone** | Show thinking | Latest 3 posts as an editorial list with big numerals and reading times | Serif titles optional; mono metadata | Row hover underline wipe | None |
-| 08 | **Contact (Footer)** | Void | Convert | Giant "Let's build something that holds up." style line (copy in Section 15), live chat and contact CTAs, telemetry footer | Footer wordmark ~20vw at 6% opacity; local time; availability | Hover rim-intensify on Stage; CTA magnetic effect (fine pointer only) | Small operator returns, looks toward CTA |
+| # | Chapter | Surface | Purpose | Layout | Signature detail | Motion idea | Visual / 3D focus |
+|---|---------|---------|---------|--------|------------------|-------------|-------------------|
+| 00 | **Boot** | Void | Identity and personality in 2s | Full-viewport terminal, greetings typed | Multilingual name sequence, build SHA line | Typed text then scan-line reveals DOM | Pure DOM & terminal animation |
+| 01 | **Operator (Hero)** | Void | State who and what, with proof and path | Hero statement (`--step-6`, 3 lines max) on the left 7 columns; telemetry and live metrics on right; telemetry strip at base; CTA pair | Hero line carries value proposition with real specifics (role, years, patent); availability badge as live status dot | Line-mask reveal; telemetry types on | High-precision DOM typography & telemetry |
+| 02 | **Human (About)** | **Bone** | The person behind the system | 5-column serif statement, 4-column facts list in mono, a pull quote | Serif human voice begins here; Kolkata coordinates label | Slow fades only | Editorial human typography |
+| 03 | **Experience** | Void | Career proof | Pinned card stack (existing logic) on the right, role summary and counters on the left | Dates in tabular mono; current role has a live dot | Stack pin with scale-back (chapter's motion idea) | Card stack interactions |
+| 04 | **Projects** | Void | Work proof | Index table with filter segmented control; hover reveals a Frame preview; detail opens a full-screen case-study overlay | Table, not a card grid; FIG numbering | Row hover with preview follow (transform only) | Interactive project table |
+| 05 | **Reach (Globe)** | Void | Global trust | Globe full-bleed, client list as mono index on the side | Arcs in signal, labels in mono | Globe auto-rotation, pointer drag | **Interactive 3D WebGL Globe** active |
+| 06 | **Credentials** | **Bone** | Credibility ledger | Patent as a hero artifact (Indian Patent No. 544062) in a large Frame; 30+ credentials as a dense verifiable index | Each credential row links to verification when available | Counter on total; row reveals | Verifiable credentials ledger |
+| 07 | **Writing** | **Bone** | Show thinking | Latest 3 posts as an editorial list with big numerals and reading times | Serif titles optional; mono metadata | Row hover underline wipe | Editorial post list |
+| 08 | **Contact (Footer)** | Void | Convert | Giant "Let's build something that holds up." style line (copy in Section 15), live chat and contact CTAs, telemetry footer | Footer wordmark ~20vw at 6% opacity; local time; availability | CTA magnetic effect (fine pointer only) | Telemetry footer & direct contact CTA |
 
 ### 9.3 Mobile behavior
 
 - Chapter rail becomes a top progress bar; a bottom sticky CTA bar is kept (existing behavior).
-- Stage tier T1 or T0; hero statement drops to `--step-5`; pinned stack becomes a vertical list; Globe is a static or reduced-quality render unless tier allows.
+- Hero statement drops to `--step-5`; pinned stack becomes a vertical list; Globe renders optimized or shows static fallback on low-end devices.
 - All hover reveals have tap equivalents.
 
 ### 9.4 Hero content rules
@@ -1061,6 +1070,17 @@ Precise, calm, concrete, a little dry. Specifics beat adjectives. Short sentence
 - **Taste Skill** is used at page level during R2+ as an execution and review aid. Recommended dial settings (per the skill's own parameter names): layout variance **high (8)**, motion intensity **medium-high (6–7)**, visual density **medium-high (6–7)**; the Reduced-Motion contract overrides motion intensity.
 - Never apply two skills to restyle the same component in one pass; skills advise, this document and `AGENTS.md` decide.
 
+### 16.4 What We Rejected and Why
+
+| Rejected Pattern / Feature | Why Rejected | Replacement / Alternative |
+|-----------------------------|--------------|---------------------------|
+| **3D Avatar Model of Owner (Operator Stage, `.glb`, R3F / Drei)** | **(Amendment A)** The owner does not use a 3D avatar. Adds 400KB+ minified JS weight, runtime WebGL overhead, fragile mobile battery/thermal impact, and distracts from engineering proof. Preconditions do not pause for missing `.glb`. | High-density DOM telemetry, typography, patent artifacts, and retained Three.js WebGL Globe. |
+| **Tactile Glassmorphism on every card** | AI-template signature, high GPU blend cost, compromises contrast on mobile devices. | Hairline "Frames" with coordinate crop marks; glass strictly reserved for floating overlays (header, palette). |
+| **`next-pwa` build plugin** | Abandoned repository, breaks Next.js 16 App Router builds and Turbopack, caused INC-001 blank page crash due to stale HTML caching. | Clean standalone `public/sw.js` with Network-First navigation; future migration path to Serwist (ADR-001). |
+| **Stale-While-Revalidate caching of HTML documents** | Directly caused INC-001: cached HTML referenced old chunk hashes that 404'd after deployments, permanently breaking hydration. | Strict Network-First navigation with `/offline` fallback; `Cache-Control: public, max-age=0, must-revalidate`. |
+| **Raw hex codes in CSS** | Creates color sprawl and breaks surface switching (Void ↔ Bone). | Pure CSS design tokens in `globals.css` (`var(--void)`, `var(--signal)`, etc.). |
+| **Generic utility CSS frameworks (Tailwind)** | Obscures cascade control and produces bloated DOM attribute trees without custom typography precision. | Disciplined Vanilla CSS Modules and CSS Cascade Layers (`@layer`). |
+
 ---
 
 ## 17. Implementation Architecture
@@ -1083,9 +1103,7 @@ src/
     layout/                # PageShell, PageHeader, Section, Chapter, Rail
     nav/                   # Header, GroupPanel, AllPagesIndex, Footer
     telemetry/             # TelemetryStrip, StatusDot
-  stage/                   # Operator Stage (dynamic import boundary)
-    Stage.jsx, StageCanvas.jsx, camera.config.js, lighting.config.js,
-    shaders/, tiers.js, poster.js
+  stage/                   # [ARCHIVED — Amendment A: 3D avatar stage decommissioned]
   lib/
     motion/                # gsap setup, lenis, reveal helpers, reduced-motion store
     design/                # contrast checks, token helpers
@@ -1166,15 +1184,15 @@ Chrome, Edge, Safari (macOS and iOS 16+), Firefox: latest two versions. Android 
 
 | Phase | Scope | Output |
 |-------|-------|--------|
-| **R0** | Skeleton, navigation, route inventory, skills installed, GLB inspection (in progress) | Every page reachable; config-driven nav; asset report |
+| **R0** | Skeleton, navigation, route inventory, skills installed | Every page reachable; config-driven nav |
 | **R1** | Foundation: tokens, layers, fonts, reset, base, layout primitives, Frame/Button/Tag/Input/Overlay components, `/design-lab`, contrast CI, stylelint rules, UI UX Pro Max audit | Design system usable; old tokens aliased |
 | **R2** | Shell: header, group panels, all-pages index, chapter rail, footer, command palette restyle, telemetry strip, motion toggle | Final navigation experience |
-| **R3** | Operator Stage: asset pipeline, tiers, lighting rig, scan-in, `/stage-lab`, poster set, fallbacks | Stage on Home hero |
-| **R4** | Home chapters 00–08 with Stage choreography and Globe hand-off | Redesigned Home |
+| **R3** | Visual Assets & Globe Hardening: Globe token integration, typography refinements, poster set, fallbacks (Amendment A: 3D avatar stage out of scope) | Refined Globe & Hero visuals |
+| **R4** | Home chapters 00–08 with telemetry choreography and Globe integration | Redesigned Home |
 | **R5** | Knowledge group: Blog, Wiki, Architecture, Uses (Bone reading surface) | Reading experience |
 | **R6** | Work group: Projects index and case-study overlay, WEFIK, Plugin, Store | Proof pages |
 | **R7** | Lab group: Play, Lounge, Space, Vault, Confession, Tools; God Mode phosphor theme | Playful pages |
-| **R8** | States and edges: 404 (operator), offline, legal, errors, empty states, About; remove legacy aliases; remove `/site-index`; QA, performance and accessibility hardening; release gate review | Launch candidate |
+| **R8** | States and edges: 404, offline, legal, errors, empty states, About; remove legacy aliases; remove `/site-index`; QA, performance and accessibility hardening; release gate review | Launch candidate |
 
 This sequence replaces the earlier plan of presenting three alternative art directions: the direction is decided here (DDR-001) and the owner can veto in the log below.
 
@@ -1188,16 +1206,17 @@ This sequence replaces the earlier plan of presenting three alternative art dire
 | DDR-004 | Add Instrument Serif as the Human voice (OFL, self-hosted) | Proposed |
 | DDR-005 | Keep Brooklyn as display pending licence and glyph verification | Open [VERIFY] |
 | DDR-006 | Rename `--gold` to `--signal` and migrate tokens (Section 3.5) | Proposed |
-| DDR-007 | One WebGL renderer at a time (Stage and Globe) | Decided |
-| DDR-008 | Stage is never the LCP element; poster-first | Decided |
-| DDR-009 | No post-processing stack in v1 of the Stage | Decided |
-| DDR-010 | Persistent full-site canvas is out of scope; Stage mounts on Home, About, 404, footer | Decided (revisit after R8) |
+| DDR-007 | Retain 3D Globe as sole active WebGL visualization context | Decided |
+| DDR-008 | Stage avatar model excised; DOM and telemetry first (Amendment A) | Decided |
+| DDR-009 | No post-processing or R3F runtime dependencies (Amendment A) | Decided |
+| DDR-010 | Persistent full-site canvas is out of scope | Decided |
+| DDR-011 | Reject 3D owner avatar (Operator Stage); retain Three.js WebGL Globe (Amendment A) | Decided |
 
 ### 20.3 Open items for the owner
 
 1. Confirm DDR-001 to DDR-004 (the core of the redesign).
 2. Provide the final hero copy and the facts for the telemetry strip (years, patent line, availability text).
-3. Provide the `.glb` (and any texture sources) so R0 can produce the asset report; confirm whether it is rigged and animated.
+3. [RESOLVED per Amendment A] Owner 3D avatar (.glb) is not used; Operator Stage decommissioned.
 4. Confirm Brooklyn licensing and supply the web font files and weights available.
 5. Provide a short list of 5–10 photos or screenshots to be used as real imagery in project case studies.
 6. Decide whether a visitor-selectable light/dark preference is wanted post-launch.
@@ -1260,21 +1279,9 @@ This sequence replaces the earlier plan of presenting three alternative art dire
 }
 ```
 
-### A.4 Stage container
+### A.4 Stage container [ARCHIVED — Amendment A]
 
-```css
-@layer layout {
-  .stage {
-    position: fixed; inset: 0;
-    z-index: var(--z-stage);
-    pointer-events: none;               /* enabled only inside hero hit-area */
-    contain: strict;
-  }
-  .stage__poster { position: absolute; inset: 0; }
-  .stage__canvas { position: absolute; inset: 0; opacity: 0; transition: opacity var(--dur-slow) var(--ease-out); }
-  .stage[data-ready="true"] .stage__canvas { opacity: 1; }
-}
-```
+*(Archived: The 3D avatar stage container is decommissioned per Amendment A; the Three.js WebGL Globe has its own dedicated canvas container in Chapter 05).*
 
 ### A.5 Grain layer
 
@@ -1292,9 +1299,9 @@ This sequence replaces the earlier plan of presenting three alternative art dire
 
 ---
 
-## Appendix B — Camera Keyframe Template (to be tuned in `/stage-lab`)
+## Appendix B — Camera Keyframe Template [ARCHIVED — Amendment A]
 
-Values are starting points; the agent records final values in `camera.config.js`.
+*(Archived per Amendment A: Camera keyframe scripting for the 3D avatar model is decommissioned. Historical keyframe reference retained below).*
 
 | Chapter | Camera position | Look-at | FOV | Model offset (x, y) | Model scale | Stage opacity |
 |---------|----------------|---------|-----|---------------------|-------------|---------------|

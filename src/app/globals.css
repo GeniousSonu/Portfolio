@@ -658,7 +658,7 @@ input, textarea, select, .form-input {
   font-family: var(--font-mono); font-size: 0.72rem;
   color: var(--text-muted); letter-spacing: 0.2em;
   text-transform: uppercase; margin-bottom: 1.75rem;
-  opacity: 0; transform: translateY(15px);
+  opacity: 1; transform: none;
 }
 .hero-eyebrow .line { height: 1px; width: 32px; background: var(--gold); opacity: 0.5; }
 .hero-eyebrow .status-dot {
@@ -678,33 +678,56 @@ input, textarea, select, .form-input {
 }
 .hero-name-line { overflow: hidden; display: block; }
 .hero-name-line span {
-  display: block; transform: translateY(110%); opacity: 0;
+  display: block; opacity: 1; transform: none;
 }
 .hero-role {
   font-size: clamp(1.1rem, 2.5vw, 1.6rem); font-weight: 600;
   color: var(--gold); letter-spacing: -0.01em;
   font-family: var(--font-display);
-  margin-bottom: 1.5rem; opacity: 0; transform: translateY(20px);
+  margin-bottom: 1.5rem; opacity: 1; transform: none;
 }
 .hero-desc {
   font-size: clamp(0.95rem, 1.5vw, 1.1rem); line-height: 1.7;
   color: var(--text-secondary); max-width: 560px;
-  margin-bottom: 2.5rem; opacity: 0; transform: translateY(20px);
+  margin-bottom: 2.5rem; opacity: 1; transform: none;
 }
 .hero-actions {
   display: flex; gap: 1rem; flex-wrap: wrap;
-  opacity: 0; transform: translateY(20px);
+  opacity: 1; transform: none;
 }
 .hero-terminal {
   position: absolute; right: clamp(1rem, 4vw, 5rem);
   bottom: clamp(3rem, 8vh, 6rem); z-index: 5;
   width: min(380px, calc(100vw - 2rem));
-  opacity: 0; transform: translateY(30px);
+  opacity: 1; transform: none;
 }
 .hero-stats {
   display: flex; gap: 2.5rem; flex-wrap: wrap;
   padding-top: 3rem; border-top: 1px solid var(--border-dim);
-  margin-top: 3rem; opacity: 0; transform: translateY(20px);
+  margin-top: 3rem; opacity: 1; transform: none;
+}
+
+/* Incident INC-001 Hardening: Animation states apply ONLY when JavaScript motion is verified */
+html.js-motion:not(.reduce-motion) .hero-eyebrow {
+  opacity: 0; transform: translateY(15px);
+}
+html.js-motion:not(.reduce-motion) .hero-name-line span {
+  opacity: 0; transform: translateY(110%);
+}
+html.js-motion:not(.reduce-motion) .hero-role {
+  opacity: 0; transform: translateY(20px);
+}
+html.js-motion:not(.reduce-motion) .hero-desc {
+  opacity: 0; transform: translateY(20px);
+}
+html.js-motion:not(.reduce-motion) .hero-actions {
+  opacity: 0; transform: translateY(20px);
+}
+html.js-motion:not(.reduce-motion) .hero-terminal {
+  opacity: 0; transform: translateY(30px);
+}
+html.js-motion:not(.reduce-motion) .hero-stats {
+  opacity: 0; transform: translateY(20px);
 }
 /* ── Stats: premium number treatment ── */
 .stat-item { position: relative; }
@@ -1781,11 +1804,18 @@ footer {
 .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
 .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
 
-/* ─── SECTION REVEAL CLASSES ─── */
-.reveal { opacity: 0; transform: translateY(40px); }
-.reveal-left { opacity: 0; transform: translateX(-40px); }
-.reveal-right { opacity: 0; transform: translateX(40px); }
-.stagger-child { opacity: 0; transform: translateY(20px); }
+/* ─── SECTION REVEAL CLASSES (Incident INC-001 Hardening) ─── */
+/* Default: 100% visible so content NEVER depends on JS to render */
+.reveal { opacity: 1; transform: none; }
+.reveal-left { opacity: 1; transform: none; }
+.reveal-right { opacity: 1; transform: none; }
+.stagger-child { opacity: 1; transform: none; }
+
+/* Scoped under verified JavaScript motion runtime */
+html.js-motion:not(.reduce-motion) .reveal { opacity: 0; transform: translateY(40px); }
+html.js-motion:not(.reduce-motion) .reveal-left { opacity: 0; transform: translateX(-40px); }
+html.js-motion:not(.reduce-motion) .reveal-right { opacity: 0; transform: translateX(40px); }
+html.js-motion:not(.reduce-motion) .stagger-child { opacity: 0; transform: translateY(20px); }
 
 /* ─── UTILITY ─── */
 .gold { color: var(--gold); }

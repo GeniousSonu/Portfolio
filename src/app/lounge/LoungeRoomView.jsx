@@ -29,6 +29,7 @@ import LoungeParticleCanvas from '@/components/LoungeParticleCanvas';
 import LoungeChat from '@/components/LoungeChat';
 import LoungeYouTubePlayer, { extractYouTubeId } from '@/components/LoungeYouTubePlayer';
 import { useOverlay } from '@/context/OverlayContext';
+import { safeStorage } from '@/lib/safeStorage';
 import styles from './lounge.module.css';
 
 const ORB_COLORS = [
@@ -730,8 +731,8 @@ export default function LoungeRoomView({ roomId }) {
 
   // One-time Keyboard Shortcut Hint Discovery Banner
   useEffect(() => {
-    if (joinStatus === 'joined' && typeof window !== 'undefined') {
-      const dismissed = localStorage.getItem('lounge_shortcuts_hint_dismissed');
+    if (joinStatus === 'joined') {
+      const dismissed = safeStorage.getItem('lounge_shortcuts_hint_dismissed');
       if (!dismissed) {
         setShowShortcutHint(true);
       }
@@ -740,9 +741,7 @@ export default function LoungeRoomView({ roomId }) {
 
   const handleDismissShortcutHint = () => {
     setShowShortcutHint(false);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('lounge_shortcuts_hint_dismissed', 'true');
-    }
+    safeStorage.setItem('lounge_shortcuts_hint_dismissed', 'true');
   };
 
   // Global Keyboard Shortcuts (K = chat, M = mute, D = deafen, Escape = close)

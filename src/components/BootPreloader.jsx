@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import navState from '@/lib/navState';
+import safeStorage from '@/lib/safeStorage';
 
 // Module-level session flag: once booted in this browsing session, never replay on soft navigations
 let hasBootedInSession = false;
@@ -22,7 +23,7 @@ export default function BootPreloader() {
   const [active, setActive] = useState(() => {
     if (typeof window !== 'undefined') {
       try {
-        if (sessionStorage.getItem(SESSION_KEY) === '1') {
+        if (safeStorage.getItem(SESSION_KEY, null, 'session') === '1') {
           return false;
         }
       } catch {}
@@ -55,7 +56,7 @@ export default function BootPreloader() {
   const finishPreloader = (hash) => {
     hasBootedInSession = true;
     try {
-      sessionStorage.setItem(SESSION_KEY, '1');
+      safeStorage.setItem(SESSION_KEY, '1', 'session');
     } catch {}
     window.__preloaderActive = false;
     document.documentElement.classList.remove('preloader-locked');
@@ -111,7 +112,7 @@ export default function BootPreloader() {
 
   useEffect(() => {
     try {
-      if (sessionStorage.getItem(SESSION_KEY) === '1') {
+      if (safeStorage.getItem(SESSION_KEY, null, 'session') === '1') {
         hasBootedInSession = true;
         window.__preloaderActive = false;
         document.documentElement.classList.remove('preloader-locked');
@@ -385,6 +386,9 @@ export default function BootPreloader() {
       clearTimeout(ceilingTimer);
       window.removeEventListener('pageshow', handlePageShow);
       ctx.revert();
+      window.__preloaderActive = false;
+      document.documentElement.classList.remove('preloader-locked');
+      document.body.classList.remove('preloader-locked');
     };
   }, [active, handleSkip]);
 

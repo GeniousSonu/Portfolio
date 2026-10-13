@@ -1,5 +1,7 @@
 'use client';
 
+import { safeStorage } from './safeStorage';
+
 const STORAGE_PREFIX = 'sks_lounge_rooms_';
 const DISPLAY_NAME_KEY = 'sks_lounge_display_name';
 export const MAX_ACTIVE_ROOMS = 5;
@@ -34,11 +36,7 @@ export function generateRoomCode() {
  */
 export function getLoungeDisplayName() {
   if (typeof window === 'undefined') return '';
-  try {
-    return localStorage.getItem(DISPLAY_NAME_KEY) || '';
-  } catch {
-    return '';
-  }
+  return safeStorage.getItem(DISPLAY_NAME_KEY, '');
 }
 
 /**
@@ -46,12 +44,10 @@ export function getLoungeDisplayName() {
  */
 export function setLoungeDisplayName(name) {
   if (typeof window === 'undefined') return;
-  try {
-    const clean = (name || '').trim().slice(0, 24);
-    if (clean) {
-      localStorage.setItem(DISPLAY_NAME_KEY, clean);
-    }
-  } catch {}
+  const clean = (name || '').trim().slice(0, 24);
+  if (clean) {
+    safeStorage.setItem(DISPLAY_NAME_KEY, clean);
+  }
 }
 
 /**
@@ -60,11 +56,8 @@ export function setLoungeDisplayName(name) {
 export function getRoomHistory() {
   if (typeof window === 'undefined') return [];
   try {
-    const raw = localStorage.getItem(getStorageKey());
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.sort((a, b) => (b.lastVisitedAt || 0) - (a.lastVisitedAt || 0));
+    const list = safeStorage.getJSON(getStorageKey(), [], Array.isArray);
+    return list.sort((a, b) => (b.lastVisitedAt || 0) - (a.lastVisitedAt || 0));
   } catch (err) {
     console.warn('[LoungeHistory] Read error:', err);
     return [];
@@ -89,7 +82,7 @@ export function addOrUpdateRoomHistory(roomId, previewText = '') {
       if (preview) {
         history[existingIndex].preview = preview;
       }
-      localStorage.setItem(getStorageKey(), JSON.stringify(history));
+      safeStorage.setJSON(getStorageKey(), history);
       return { success: true, count: history.length, isNew: false };
     }
 
@@ -110,7 +103,7 @@ export function addOrUpdateRoomHistory(roomId, previewText = '') {
     };
 
     history.unshift(newEntry);
-    localStorage.setItem(getStorageKey(), JSON.stringify(history));
+    safeStorage.setJSON(getStorageKey(), history);
     return { success: true, count: history.length, isNew: true };
   } catch (err) {
     console.warn('[LoungeHistory] Write error:', err);
@@ -126,7 +119,7 @@ export function removeRoomFromHistory(roomId) {
   try {
     const cleanId = roomId.trim().toLowerCase();
     const history = getRoomHistory().filter((item) => item.roomId !== cleanId);
-    localStorage.setItem(getStorageKey(), JSON.stringify(history));
+    safeStorage.setJSON(getStorageKey(), history);
     return history;
   } catch (err) {
     console.warn('[LoungeHistory] Remove error:', err);
