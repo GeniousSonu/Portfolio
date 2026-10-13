@@ -1,140 +1,116 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import gsap from 'gsap';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import navState from '@/lib/navState';
-import safeStorage from '@/lib/safeStorage';
+import { BOOT_GREETINGS, BOOT_TIMING } from '@/config/bootGreetings';
+import { bootFontVariables } from '@/lib/bootFonts';
 
-// Module-level session flag: once booted in this browsing session, never replay on soft navigations
-let hasBootedInSession = false;
+// Track already played in this document in memory (NOT in localStorage or sessionStorage)
+// This guarantees it plays on every full reload or initial document load, but NEVER on client route transitions.
+let hasBootedInThisDocument = false;
 
-const HELLO_SCRIPTS = [
-  { text: 'সাহিনুর', lang: 'bn', dir: 'ltr', showCursor: false },
-  { text: 'साहिनुर', lang: 'hi', dir: 'ltr', showCursor: false },
-  { text: 'サヒヌル', lang: 'ja', dir: 'ltr', showCursor: false },
-  { text: 'сахинур', lang: 'ru', dir: 'ltr', showCursor: false },
-  { text: 'ساهينور', lang: 'ar', dir: 'rtl', showCursor: false },
-  { text: 'Sahinur',  lang: 'en', dir: 'ltr', showCursor: true  },
-];
-
-const SESSION_KEY = 'genioussonu_booted_v1';
+/**
+ * Extract grapheme clusters safely using Intl.Segmenter.
+ * Preserves conjuncts and vowel marks in Bengali and Devanagari.
+ */
+function getGraphemes(text, lang) {
+  if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+    try {
+      const segmenter = new Intl.Segmenter(lang, { granularity: 'grapheme' });
+      return Array.from(segmenter.segment(text), (s) => s.segment);
+    } catch {
+      // Fallback
+    }
+  }
+  return Array.from(text);
+}
 
 export default function BootPreloader() {
-  const [active, setActive] = useState(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        if (safeStorage.getItem(SESSION_KEY, null, 'session') === '1') {
-          return false;
-        }
-      } catch {}
-    }
-    return !hasBootedInSession;
-  });
+  // Server-render overlay to ensure zero flash of page content underneath
+  const [active, setActive] = useState(true);
+  const [currentGreetingIndex, setCurrentGreetingIndex] = useState(0);
+  const [revealedClusters, setRevealedClusters] = useState(0);
+  const [rtlMaskPercent, setRtlMaskPercent] = useState(0);
+  const [isExiting, setIsExiting] = useState(false);
+  const [isReducedMotion, setIsReducedMotion] = useState(false);
 
-  const preloaderRef = useRef(null);
-  const terminalRef = useRef(null);
-  const helloWrapRef = useRef(null);
-  const scriptRefs = useRef([]);
-  const isPageReadyRef = useRef(false);
-  const ceilingHitRef = useRef(false);
-  const masterTimelineRef = useRef(null);
+  const containerRef = useRef(null);
+  const timerRefs = useRef([]);
+  const hasFinishedRef = useRef(false);
 
-  // Line containers
-  const line1Ref = useRef(null);
-  const line2Ref = useRef(null);
-  const line3Ref = useRef(null);
-  const line4Ref = useRef(null);
-  const line5Ref = useRef(null);
-  const line6Ref = useRef(null);
-
-  // Text target spans for real typewriter effect
-  const cmd1TextRef = useRef(null);
-  const cmd1CursorRef = useRef(null);
-  const cmd2TextRef = useRef(null);
-  const cmd2CursorRef = useRef(null);
-
-  const finishPreloader = (hash) => {
-    hasBootedInSession = true;
-    try {
-      safeStorage.setItem(SESSION_KEY, '1', 'session');
-    } catch {}
-    window.__preloaderActive = false;
-    document.documentElement.classList.remove('preloader-locked');
-    document.body.classList.remove('preloader-locked');
-
-    if ('scrollRestoration' in window.history) {
-      window.history.scrollRestoration = 'auto';
-    }
-
-    if (navState.lenis) {
-      try {
-        navState.lenis.start();
-        navState.lenis.resize();
-      } catch {}
-    }
-
-    if (hash) {
-      setTimeout(() => {
-        if (navState.lenis) {
-          navState.lenis.scrollTo(hash, { offset: -75, duration: 1.0 });
-        } else {
-          const el = document.querySelector(hash);
-          if (el) {
-            const top = el.getBoundingClientRect().top + window.scrollY - 75;
-            window.scrollTo({ top, behavior: 'smooth' });
-          }
-        }
-      }, 60);
-    }
-
-    setActive(false);
-  };
-
-  const handleSkip = React.useCallback(() => {
-    if (masterTimelineRef.current) {
-      try {
-        masterTimelineRef.current.kill();
-      } catch {}
-    }
-    if (preloaderRef.current) {
-      gsap.to(preloaderRef.current, {
-        opacity: 0,
-        duration: 0.2,
-        ease: 'power1.out',
-        onComplete: () => {
-          finishPreloader(typeof window !== 'undefined' ? window.location.hash : '');
-        },
-      });
-    } else {
-      finishPreloader(typeof window !== 'undefined' ? window.location.hash : '');
-    }
+  const clearAllTimers = useCallback(() => {
+    timerRefs.current.forEach((id) => clearTimeout(id));
+    timerRefs.current = [];
   }, []);
 
-  useEffect(() => {
-    try {
-      if (safeStorage.getItem(SESSION_KEY, null, 'session') === '1') {
-        hasBootedInSession = true;
-        window.__preloaderActive = false;
-        document.documentElement.classList.remove('preloader-locked');
-        document.body.classList.remove('preloader-locked');
-        setActive(false);
-        return;
-      }
-    } catch {}
+  const finish = useCallback(() => {
+    if (hasFinishedRef.current) return;
+    hasFinishedRef.current = true;
+    hasBootedInThisDocument = true;
+    clearAllTimers();
 
-    if (!active || hasBootedInSession) {
+    // Release scroll lock unconditionally
+    if (typeof document !== 'undefined') {
+      document.documentElement.classList.remove('preloader-locked');
+      document.body.classList.remove('preloader-locked');
+      document.documentElement.classList.add('boot-complete');
+    }
+
+    if (typeof window !== 'undefined') {
+      window.__preloaderActive = false;
+      if (navState.lenis) {
+        try {
+          navState.lenis.start();
+          navState.lenis.resize();
+        } catch {}
+      }
+    }
+
+    // Completely remove component from DOM
+    setActive(false);
+  }, [clearAllTimers]);
+
+  const handleSkip = useCallback(() => {
+    if (hasFinishedRef.current) return;
+    setIsExiting(true);
+    const exitTimer = setTimeout(finish, 200);
+    timerRefs.current.push(exitTimer);
+  }, [finish]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    // 1. Inspect navigation type: play for 'navigate', 'reload', 'prerender'
+    // Do NOT play for 'back_forward' or bfcache restore
+    const navEntries = performance.getEntriesByType?.('navigation');
+    const navEntry = navEntries && navEntries[0];
+    const navType = navEntry ? navEntry.type : 'navigate';
+    const isBackForward = navType === 'back_forward';
+
+    if (isBackForward || hasBootedInThisDocument) {
+      finish();
       return;
     }
 
-    // 1. bfcache protection (mobile Safari / Chrome back-forward cache restore)
+    // Mark as booted for this document
+    hasBootedInThisDocument = true;
+
+    // 2. bfcache protection (pageshow with event.persisted === true)
     const handlePageShow = (e) => {
       if (e.persisted) {
-        finishPreloader(window.location.hash);
+        finish();
       }
     };
     window.addEventListener('pageshow', handlePageShow);
 
-    // 2. Lock scroll and mark preloader active
+    // 3. User skip listeners (click, tap, or any key)
+    const handleKeyDown = () => handleSkip();
+    const handlePointerDown = () => handleSkip();
+
+    window.addEventListener('keydown', handleKeyDown, { passive: true });
+    window.addEventListener('pointerdown', handlePointerDown, { passive: true });
+
+    // 4. Lock scroll immediately
     window.__preloaderActive = true;
     document.documentElement.classList.add('preloader-locked');
     document.body.classList.add('preloader-locked');
@@ -144,379 +120,199 @@ export default function BootPreloader() {
       } catch {}
     }
 
-    // 3. Anchor preservation: suppress native jump on URLs with hash (e.g. /#projects)
-    const targetHash = window.location.hash;
-    if (targetHash) {
-      if ('scrollRestoration' in window.history) {
-        window.history.scrollRestoration = 'manual';
-      }
-      window.scrollTo(0, 0);
+    // 5. Absolute failsafe timeout (4.0s hard ceiling from INC-001)
+    const failsafeTimer = setTimeout(() => {
+      finish();
+    }, BOOT_TIMING.absoluteCeilingMs);
+    timerRefs.current.push(failsafeTimer);
+
+    // 6. Check motion preferences
+    const prefersReduced =
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ||
+      localStorage.getItem('sks_reduce_motion') === 'true';
+
+    if (prefersReduced) {
+      setIsReducedMotion(true);
+      // Reduced motion: show six names statically for 900 ms, then fade out
+      const staticTimer = setTimeout(() => {
+        setIsExiting(true);
+        const exitTimer = setTimeout(finish, 200);
+        timerRefs.current.push(exitTimer);
+      }, BOOT_TIMING.reducedMotionDurationMs);
+      timerRefs.current.push(staticTimer);
+
+      return () => {
+        clearAllTimers();
+        window.removeEventListener('pageshow', handlePageShow);
+        window.removeEventListener('keydown', handleKeyDown);
+        window.removeEventListener('pointerdown', handlePointerDown);
+      };
     }
 
-    // 4. Page readiness tracking & 4s safety ceiling
-    const markPageReady = () => {
-      isPageReadyRef.current = true;
+    // 7. Full Animation Orchestration
+    // Wait for document.fonts.ready (with 600ms cap) before starting sequence
+    const startSequence = async () => {
+      try {
+        await Promise.race([
+          document.fonts ? document.fonts.ready : Promise.resolve(),
+          new Promise((resolve) => setTimeout(resolve, BOOT_TIMING.fontReadyTimeoutMs)),
+        ]);
+      } catch {
+        // Proceed even on font error
+      }
+
+      if (hasFinishedRef.current) return;
+
+      let currentTimeOffset = 0;
+
+      BOOT_GREETINGS.forEach((greeting, index) => {
+        const greetingStartTimer = setTimeout(() => {
+          if (hasFinishedRef.current) return;
+          setCurrentGreetingIndex(index);
+          setRevealedClusters(0);
+          setRtlMaskPercent(0);
+
+          if (greeting.useRtlMask) {
+            // Arabic: smoothly reveal right-to-left mask over 160ms preserving cursive ligatures
+            const startTime = performance.now();
+            const animateMask = (now) => {
+              if (hasFinishedRef.current) return;
+              const elapsed = now - startTime;
+              const progress = Math.min(elapsed / BOOT_TIMING.typeDurationMs, 1);
+              setRtlMaskPercent(progress * 100);
+
+              if (progress < 1) {
+                requestAnimationFrame(animateMask);
+              }
+            };
+            requestAnimationFrame(animateMask);
+          } else {
+            // Grapheme reveal: reveal cluster-by-cluster over 160ms using Intl.Segmenter
+            const clusters = getGraphemes(greeting.text, greeting.lang);
+            const totalClusters = clusters.length;
+            const clusterInterval = Math.max(BOOT_TIMING.typeDurationMs / totalClusters, 20);
+
+            for (let c = 1; c <= totalClusters; c++) {
+              const clusterTimer = setTimeout(() => {
+                if (hasFinishedRef.current) return;
+                setRevealedClusters(c);
+              }, c * clusterInterval);
+              timerRefs.current.push(clusterTimer);
+            }
+          }
+        }, currentTimeOffset);
+
+        timerRefs.current.push(greetingStartTimer);
+        currentTimeOffset += BOOT_TIMING.greetingDurationMs;
+      });
+
+      // Exit wipe transition after all 6 greetings complete (~2040ms)
+      const exitStartTimer = setTimeout(() => {
+        if (hasFinishedRef.current) return;
+        setIsExiting(true);
+
+        const exitCompleteTimer = setTimeout(() => {
+          finish();
+        }, BOOT_TIMING.exitDurationMs);
+        timerRefs.current.push(exitCompleteTimer);
+      }, currentTimeOffset);
+
+      timerRefs.current.push(exitStartTimer);
     };
 
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-      isPageReadyRef.current = true;
-    } else {
-      window.addEventListener('load', markPageReady, { once: true });
-      document.addEventListener('DOMContentLoaded', markPageReady, { once: true });
-    }
-
-    const ceilingTimer = setTimeout(() => {
-      ceilingHitRef.current = true;
-      handleSkip();
-    }, 4000);
-
-    // 5. Accessibility: prefers-reduced-motion immediate bypass
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) {
-      clearTimeout(ceilingTimer);
-      finishPreloader(targetHash);
-      return () => {
-        window.removeEventListener('pageshow', handlePageShow);
-      };
-    }
-
-    // 6. Master GSAP Timeline inside gsap.context for React 18 Strict Mode safety
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
-        defaults: { ease: 'power2.out' },
-      });
-      masterTimelineRef.current = tl;
-
-      // ─── INITIAL STATE SETUP (Guaranteed Zero Flash) ───
-      gsap.set(terminalRef.current, {
-        autoAlpha: 0,
-        scale: 0.84,
-        rotateX: 16,
-        y: 35,
-        transformPerspective: 900,
-      });
-
-      gsap.set(
-        [line1Ref.current, line2Ref.current, line3Ref.current, line4Ref.current, line5Ref.current, line6Ref.current],
-        {
-          autoAlpha: 0,
-          y: 6,
-        }
-      );
-
-      gsap.set(helloWrapRef.current, {
-        display: 'none',
-        autoAlpha: 0,
-        scale: 0.92,
-      });
-
-      // Hide all scripts initially
-      scriptRefs.current.forEach((el) => {
-        if (el) {
-          el.style.display = 'none';
-          el.style.opacity = '0';
-        }
-      });
-
-      // Clear typed text initially
-      if (cmd1TextRef.current) cmd1TextRef.current.textContent = '';
-      if (cmd2TextRef.current) cmd2TextRef.current.textContent = '';
-
-      // ─── ACT 1: Cinematic Terminal 3D Perspective Fly-In & Settle (~0.6s) ───
-      tl.to(terminalRef.current, {
-        autoAlpha: 1,
-        scale: 1,
-        rotateX: 0,
-        y: 0,
-        duration: 0.6,
-        ease: 'power3.out',
-      });
-
-      // ─── ACT 2: Real Letter-by-Letter Typewriter Boot Sequence (~1.8s) ───
-      // Line 1: Show prompt and cursor
-      tl.to(line1Ref.current, { autoAlpha: 1, y: 0, duration: 0.15 }, '+=0.1');
-
-      // Type 'whoami' letter-by-letter on timeline
-      const cmd1Tracker = { count: 0 };
-      const cmd1Text = 'whoami';
-      tl.to(cmd1Tracker, {
-        count: cmd1Text.length,
-        duration: 0.38,
-        ease: 'none',
-        onUpdate: () => {
-          if (cmd1TextRef.current) {
-            cmd1TextRef.current.textContent = cmd1Text.slice(0, Math.round(cmd1Tracker.count));
-          }
-        },
-      });
-
-      // Hide line 1 cursor
-      tl.set(cmd1CursorRef.current, { display: 'none' }, '+=0.06');
-
-      // Line 2: Output drops in smoothly (sahinur_islam)
-      tl.to(line2Ref.current, { autoAlpha: 1, y: 0, duration: 0.22, ease: 'back.out(1.5)' }, '+=0.08');
-
-      // Line 3: Show prompt and cursor for script execution
-      tl.to(line3Ref.current, { autoAlpha: 1, y: 0, duration: 0.15 }, '+=0.18');
-
-      // Type './init_portfolio.sh' letter-by-letter on timeline
-      const cmd2Tracker = { count: 0 };
-      const cmd2Text = './init_portfolio.sh';
-      tl.to(cmd2Tracker, {
-        count: cmd2Text.length,
-        duration: 0.52,
-        ease: 'none',
-        onUpdate: () => {
-          if (cmd2TextRef.current) {
-            cmd2TextRef.current.textContent = cmd2Text.slice(0, Math.round(cmd2Tracker.count));
-          }
-        },
-      });
-
-      // Hide line 3 cursor
-      tl.set(cmd2CursorRef.current, { display: 'none' }, '+=0.06');
-
-      // Status lines 4, 5, 6 glide in smoothly
-      tl.to(line4Ref.current, { autoAlpha: 1, y: 0, duration: 0.2 }, '+=0.1');
-      tl.to(line5Ref.current, { autoAlpha: 1, y: 0, duration: 0.18 }, '+=0.12');
-      tl.to(line6Ref.current, { autoAlpha: 1, y: 0, duration: 0.18 }, '+=0.12');
-
-      // Pause on compiled terminal state so user can read it
-      tl.to({}, { duration: 0.4 });
-
-      // ─── ACT 3: Silky Dissolve & Multilingual Global Hello (~1.8s) ───
-      // Terminal compiles / dissolves with soft blur
-      tl.to(terminalRef.current, {
-        scale: 0.94,
-        y: -10,
-        autoAlpha: 0,
-        filter: 'blur(12px)',
-        duration: 0.42,
-        ease: 'power2.inOut',
-      });
-
-      // Helper to smoothly swap visible script frame with cross-fade
-      const showScriptFrame = (index) => {
-        scriptRefs.current.forEach((el, i) => {
-          if (!el) return;
-          if (i === index) {
-            el.style.display = 'inline-block';
-            gsap.fromTo(el, { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.18, ease: 'power2.out', overwrite: true });
-          } else {
-            el.style.display = 'none';
-            el.style.opacity = '0';
-          }
-        });
-      };
-
-      // Activate Global Hello container and show first script (Bengali)
-      tl.add(() => {
-        if (terminalRef.current) terminalRef.current.style.display = 'none';
-        if (helloWrapRef.current) {
-          helloWrapRef.current.style.display = 'flex';
-        }
-        showScriptFrame(0);
-      });
-
-      // Hello container scales and clears blur
-      tl.fromTo(
-        helloWrapRef.current,
-        { autoAlpha: 0, scale: 0.92, filter: 'blur(10px)' },
-        { autoAlpha: 1, scale: 1, filter: 'blur(0px)', duration: 0.35, ease: 'power3.out' }
-      );
-
-      // Frame 0: Bengali (সাহিনুর) displays for 240ms
-      tl.to({}, { duration: 0.24 });
-
-      // Frame 1: Hindi (साहिनुर)
-      tl.add(() => showScriptFrame(1));
-      tl.to({}, { duration: 0.24 });
-
-      // Frame 2: Japanese (サヒヌル)
-      tl.add(() => showScriptFrame(2));
-      tl.to({}, { duration: 0.24 });
-
-      // Frame 3: Russian (сахинур)
-      tl.add(() => showScriptFrame(3));
-      tl.to({}, { duration: 0.24 });
-
-      // Frame 4: Arabic (ساهينور - dir="rtl", cursor hidden)
-      tl.add(() => showScriptFrame(4));
-      tl.to({}, { duration: 0.24 });
-
-      // Frame 5: Latin resting state (Sahinur _) with gold blinking cursor
-      tl.add(() => showScriptFrame(5));
-      // Hold on the Latin resting state for ~550ms
-      tl.to({}, { duration: 0.55 });
-
-      // ─── GATING LOGIC: Wait for page ready OR ceiling, then smooth wipe-out ───
-      tl.add(() => {
-        const executeWipeOut = () => {
-          if (!preloaderRef.current) {
-            finishPreloader(targetHash);
-            return;
-          }
-
-          gsap.to(preloaderRef.current, {
-            autoAlpha: 0,
-            scale: 1.05,
-            filter: 'blur(8px)',
-            duration: 0.5,
-            ease: 'power2.inOut',
-            onComplete: () => {
-              finishPreloader(targetHash);
-            },
-          });
-        };
-
-        if (isPageReadyRef.current || ceilingHitRef.current) {
-          executeWipeOut();
-        } else {
-          const checkInterval = setInterval(() => {
-            if (isPageReadyRef.current || ceilingHitRef.current) {
-              clearInterval(checkInterval);
-              executeWipeOut();
-            }
-          }, 60);
-        }
-      });
-    }, preloaderRef);
+    startSequence();
 
     return () => {
-      clearTimeout(ceilingTimer);
+      clearAllTimers();
       window.removeEventListener('pageshow', handlePageShow);
-      ctx.revert();
-      window.__preloaderActive = false;
-      document.documentElement.classList.remove('preloader-locked');
-      document.body.classList.remove('preloader-locked');
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('pointerdown', handlePointerDown);
+      // Clean up locks if unmounted unexpectedly
+      if (typeof document !== 'undefined') {
+        document.documentElement.classList.remove('preloader-locked');
+        document.body.classList.remove('preloader-locked');
+      }
     };
-  }, [active, handleSkip]);
+  }, [finish, handleSkip, clearAllTimers]);
 
-  if (!active) {
-    return null;
-  }
+  if (!active) return null;
+
+  const activeGreeting = BOOT_GREETINGS[currentGreetingIndex] || BOOT_GREETINGS[0];
+  const clusters = getGraphemes(activeGreeting.text, activeGreeting.lang);
+  const visibleText = clusters.slice(0, revealedClusters).join('');
 
   return (
     <aside
       id="boot-preloader"
-      ref={preloaderRef}
+      ref={containerRef}
+      className={`boot-preloader-root ${bootFontVariables} ${isExiting ? 'boot-exit-wipe' : ''}`}
       role="status"
       aria-label="Loading SK Sahinur Islam's portfolio"
     >
-      {/* Screen Reader Announcement */}
-      <div className="sr-only" aria-live="polite">
-        Loading SK Sahinur Islam&apos;s Portfolio...
-      </div>
+      {/* Visually hidden live text for assistive technologies */}
+      <span className="sr-only">Sahinur</span>
 
-      {/* Visual Animation Container */}
+      {/* Decorative multilingual sequence */}
       <div className="boot-scene" aria-hidden="true">
-        {/* Ambient Glow */}
+        {/* Subtle radial ambient glow using CSS tokens */}
         <div className="boot-ambient-glow" />
 
-        {/* 1. Terminal Window */}
-        <div className="boot-terminal" ref={terminalRef}>
-          <div className="boot-terminal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <div className="boot-dots">
-                <span className="dot-r" />
-                <span className="dot-y" />
-                <span className="dot-g" />
-              </div>
-              <span className="boot-title">sahinur@dev:~ (boot)</span>
+        {/* Pre-measured reserved box to guarantee zero layout shift */}
+        <div className="boot-box-container">
+          {isReducedMotion ? (
+            /* Reduced motion: clean static presentation of all six scripts */
+            <div className="boot-static-grid">
+              {BOOT_GREETINGS.map((g) => (
+                <span
+                  key={g.id}
+                  lang={g.lang}
+                  dir={g.dir}
+                  className="boot-static-item"
+                  style={{ fontFamily: g.fontFamily }}
+                >
+                  {g.text}
+                </span>
+              ))}
             </div>
-            <button
-              type="button"
-              onClick={handleSkip}
-              aria-label="Skip boot sequence"
-              style={{
-                background: 'transparent',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                borderRadius: '4px',
-                color: 'var(--text-muted, #8b949e)',
-                padding: '2px 8px',
-                fontSize: '0.7rem',
-                fontFamily: 'monospace',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = '#fff';
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'var(--text-muted, #8b949e)';
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-              }}
-            >
-              [ESC / SKIP]
-            </button>
-          </div>
-
-          <div className="boot-terminal-body">
-            {/* Line 1: $ whoami */}
-            <div className="boot-line" ref={line1Ref}>
-              <span className="boot-prompt">$</span>
-              <span className="boot-cmd" ref={cmd1TextRef}></span>
-              <span className="boot-typing-cursor" ref={cmd1CursorRef}>▋</span>
+          ) : (
+            /* Full motion: Grapheme typing / Arabic RTL mask reveal */
+            <div className="boot-greeting-stage">
+              {activeGreeting.useRtlMask ? (
+                <span
+                  key={activeGreeting.id}
+                  lang={activeGreeting.lang}
+                  dir={activeGreeting.dir}
+                  className="boot-name-text boot-arabic-mask"
+                  style={{
+                    fontFamily: activeGreeting.fontFamily,
+                    clipPath: `inset(0 0 0 calc(100% - ${rtlMaskPercent}%))`,
+                    WebkitClipPath: `inset(0 0 0 calc(100% - ${rtlMaskPercent}%))`,
+                  }}
+                >
+                  {activeGreeting.text}
+                </span>
+              ) : (
+                <span
+                  key={activeGreeting.id}
+                  lang={activeGreeting.lang}
+                  dir={activeGreeting.dir}
+                  className="boot-name-text"
+                  style={{ fontFamily: activeGreeting.fontFamily }}
+                >
+                  {visibleText}
+                  {/* Blinking gold cursor on final English greeting */}
+                  {activeGreeting.id === 'en' && (
+                    <span className="boot-accent-cursor">_</span>
+                  )}
+                </span>
+              )}
             </div>
-
-            {/* Line 2: sahinur_islam */}
-            <div className="boot-line boot-out-highlight" ref={line2Ref}>
-              <span className="boot-output">sahinur_islam</span>
-            </div>
-
-            {/* Line 3: $ ./init_portfolio.sh */}
-            <div className="boot-line" ref={line3Ref}>
-              <span className="boot-prompt">$</span>
-              <span className="boot-cmd" ref={cmd2TextRef}></span>
-              <span className="boot-typing-cursor" ref={cmd2CursorRef}>▋</span>
-            </div>
-
-            {/* Line 4: Loading modules... [OK] */}
-            <div className="boot-line boot-status" ref={line4Ref}>
-              <span className="boot-dim">Loading modules...</span>
-              <span className="boot-ok">[OK]</span>
-            </div>
-
-            {/* Line 5: Establishing connection... [OK] */}
-            <div className="boot-line boot-status" ref={line5Ref}>
-              <span className="boot-dim">Establishing connection...</span>
-              <span className="boot-ok">[OK]</span>
-            </div>
-
-            {/* Line 6: Compiling experience.js... [OK] */}
-            <div className="boot-line boot-status" ref={line6Ref}>
-              <span className="boot-dim">Compiling experience.js...</span>
-              <span className="boot-ok">[OK]</span>
-            </div>
-          </div>
+          )}
         </div>
 
-        {/* 2. Global Hello Display - Guaranteed 100% hidden by default in CSS and inline style */}
-        <div
-          className="boot-hello-wrap"
-          ref={helloWrapRef}
-          style={{ display: 'none', opacity: 0, visibility: 'hidden' }}
-        >
-          <div className="boot-hello-content">
-            {HELLO_SCRIPTS.map((script, idx) => (
-              <span
-                key={script.lang}
-                ref={(el) => (scriptRefs.current[idx] = el)}
-                className="boot-hello-word"
-                dir={script.dir}
-                lang={script.lang}
-                style={{ display: 'none', opacity: 0 }}
-              >
-                {script.text}
-                {script.showCursor && (
-                  <span className="boot-cursor" aria-hidden="true">
-                    _
-                  </span>
-                )}
-              </span>
-            ))}
-          </div>
+        {/* Accessible skip prompt */}
+        <div className="boot-skip-hint">
+          <span>Click or press any key to skip</span>
         </div>
       </div>
     </aside>

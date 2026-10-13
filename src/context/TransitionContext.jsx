@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import PageTransitionWaveform from '@/components/PageTransitionWaveform';
 
 const TransitionContext = createContext(null);
 
@@ -9,21 +10,24 @@ export function TransitionProvider({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const [transitionStatus, setTransitionStatus] = useState('idle'); // 'idle' | 'transitioning' | 'completed'
+  const [transitionPhase, setTransitionPhase] = useState('idle'); // 'idle' | 'fade-out' | 'sweep' | 'fade-in'
+  const [waveformActive, setWaveformActive] = useState(false);
+  const [announcement, setAnnouncement] = useState('');
 
-  // Ref to track active ViewTransition instance
+  // Refs for tracking in-flight transitions and timeouts
   const activeTransitionRef = useRef(null);
-  // Ref to track active AbortController for in-flight transitions
   const activeControllerRef = useRef(null);
-  // Ref to resolve the startViewTransition DOM update promise once pathname updates
   const transitionResolverRef = useRef(null);
-  // Ref to track active safety timeout
   const activeTimeoutRef = useRef(null);
-  // Ref to track destination pathname
-  const targetPathRef = useRef(null);
-  // Deduplication ref to prevent duplicate triggers within same event cycle
+  const phaseTimersRef = useRef([]);
   const lastNavRef = useRef({ href: '', time: 0 });
 
-  // Suppress harmless ViewTransition AbortErrors in dev overlays (e.g. Next.js Turbopack)
+  const clearPhaseTimers = useCallback(() => {
+    phaseTimersRef.current.forEach((id) => clearTimeout(id));
+    phaseTimersRef.current = [];
+  }, []);
+
+  // Suppress harmless ViewTransition AbortErrors in dev overlays
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -44,7 +48,7 @@ export function TransitionProvider({ children }) {
     };
   }, []);
 
-  // When pathname changes, settle the pending transition and notify shared context
+  // When pathname changes, settle pending transition, move focus, and announce new title
   useEffect(() => {
     if (transitionResolverRef.current) {
       transitionResolverRef.current();
@@ -54,24 +58,39 @@ export function TransitionProvider({ children }) {
       clearTimeout(activeTimeoutRef.current);
       activeTimeoutRef.current = null;
     }
-    targetPathRef.current = null;
+
+    // Announce route change to screen readers
+    const pageTitle = document.title || 'Page';
+    setAnnouncement(`Navigated to ${pageTitle}`);
+
+    // Accessibility: Move focus to main landmark or h1
+    setTimeout(() => {
+      const mainEl = document.querySelector('main') || document.querySelector('h1');
+      if (mainEl) {
+        if (!mainEl.hasAttribute('tabindex')) {
+          mainEl.setAttribute('tabindex', '-1');
+        }
+        mainEl.focus({ preventScroll: true });
+      }
+    }, 60);
+
     setTransitionStatus('completed');
+    setTransitionPhase('fade-in');
 
-    // After animation duration (180ms), return to idle
-    const timer = setTimeout(() => {
+    const settleTimer = setTimeout(() => {
       setTransitionStatus('idle');
-    }, 220);
+      setTransitionPhase('idle');
+      setWaveformActive(false);
+    }, 180);
 
-    return () => clearTimeout(timer);
+    return () => clearTimeout(settleTimer);
   }, [pathname]);
 
   const transitionNavigate = useCallback((href) => {
     if (!href || typeof window === 'undefined') return;
 
     // 1. Pre-flight checks: anchor links or same path
-    if (href.startsWith('#')) {
-      return;
-    }
+    if (href.startsWith('#')) return;
 
     const normalize = (p) => {
       if (!p) return '/';
@@ -84,27 +103,25 @@ export function TransitionProvider({ children }) {
     try {
       const targetUrl = new URL(href, window.location.href);
       targetPath = targetUrl.pathname;
-      // Same-page hash navigation (e.g. /#contact when already on /)
       if (normalize(targetPath) === normalize(currentPath) && targetUrl.hash) {
         return;
       }
-      // Same path without hash - no route transition needed
       if (normalize(targetPath) === normalize(currentPath) && !targetUrl.hash) {
         return;
       }
     } catch {
-      // Relative path fallback
       if (normalize(href) === normalize(currentPath)) return;
     }
 
-    // Deduplication guard: ignore redundant triggers for same destination within 250ms
+    // Deduplication guard: ignore redundant triggers within 150ms
     const now = Date.now();
-    if (lastNavRef.current.href === href && now - lastNavRef.current.time < 250) {
+    if (lastNavRef.current.href === href && now - lastNavRef.current.time < 150) {
       return;
     }
     lastNavRef.current = { href, time: now };
 
     // 2. Rapid navigation interruption: cleanly abort prior in-flight transition
+    clearPhaseTimers();
     if (activeTimeoutRef.current) {
       clearTimeout(activeTimeoutRef.current);
       activeTimeoutRef.current = null;
@@ -116,9 +133,7 @@ export function TransitionProvider({ children }) {
     if (activeTransitionRef.current) {
       try {
         activeTransitionRef.current.skipTransition?.();
-      } catch {
-        // Safe ignore
-      }
+      } catch {}
       activeTransitionRef.current = null;
     }
     if (activeControllerRef.current) {
@@ -128,107 +143,103 @@ export function TransitionProvider({ children }) {
 
     const controller = new AbortController();
     activeControllerRef.current = controller;
-    targetPathRef.current = targetPath;
 
     // 3. Accessibility check: prefers-reduced-motion
-    const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const prefersReducedMotion =
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ||
+      localStorage.getItem('sks_reduce_motion') === 'true';
+
     if (prefersReducedMotion) {
       setTransitionStatus('completed');
+      setTransitionPhase('idle');
+      setWaveformActive(false);
       router.push(href);
       return;
     }
 
-    // 4. Native View Transitions API support check
-    const supportsViewTransitions = typeof document !== 'undefined' && 'startViewTransition' in document;
-
-    if (!supportsViewTransitions) {
-      // Fallback for Firefox and older Safari: CSS opacity fade
-      setTransitionStatus('transitioning');
-      router.push(href);
-      return;
-    }
-
-    // 5. Native View Transition with AbortController & 450ms safety timeout
+    // 4. Waveform + Fade Sequence (380ms total duration, 450ms hard safety ceiling)
     setTransitionStatus('transitioning');
+    setWaveformActive(true);
+    setTransitionPhase('fade-out');
 
-    let isSettled = false;
-    let finishPromiseResolve = null;
+    // Update root classes for CSS fade coordination
+    const shell = document.querySelector('.page-transition-shell');
+    if (shell) {
+      shell.classList.add('transition-out');
+      shell.classList.remove('transition-in');
+    }
 
-    const transitionPromise = new Promise((resolve) => {
-      finishPromiseResolve = resolve;
-      transitionResolverRef.current = () => {
-        if (!isSettled && !controller.signal.aborted) {
-          isSettled = true;
-          resolve();
+    // 100ms: Waveform sweep left to right across center
+    const sweepTimer = setTimeout(() => {
+      if (controller.signal.aborted) return;
+      setTransitionPhase('sweep');
+    }, 100);
+    phaseTimersRef.current.push(sweepTimer);
+
+    // 200ms: Route execution & new content fade-in
+    const navExecuteTimer = setTimeout(() => {
+      if (controller.signal.aborted) return;
+      setTransitionPhase('fade-in');
+
+      // Native View Transitions check
+      const supportsViewTransitions = typeof document !== 'undefined' && 'startViewTransition' in document;
+      if (supportsViewTransitions) {
+        try {
+          const transition = document.startViewTransition(() => {
+            router.push(href);
+          });
+          activeTransitionRef.current = transition;
+          transition.finished
+            ?.then(() => {
+              activeTransitionRef.current = null;
+            })
+            ?.catch(() => {
+              activeTransitionRef.current = null;
+            });
+        } catch {
+          router.push(href);
         }
-      };
-    });
+      } else {
+        router.push(href);
+      }
 
-    // 450ms timeout guard: ensures transition NEVER hangs or blocks interactivity
+      if (shell) {
+        shell.classList.remove('transition-out');
+        shell.classList.add('transition-in');
+      }
+    }, 200);
+    phaseTimersRef.current.push(navExecuteTimer);
+
+    // 380ms: Final completion and waveform removal
+    const completeTimer = setTimeout(() => {
+      if (controller.signal.aborted) return;
+      setWaveformActive(false);
+      setTransitionPhase('idle');
+      setTransitionStatus('completed');
+      if (shell) {
+        shell.classList.remove('transition-in', 'transition-out');
+      }
+    }, 380);
+    phaseTimersRef.current.push(completeTimer);
+
+    // 450ms: Hard safety timeout (guarantees interactivity never blocked)
     const timeoutId = setTimeout(() => {
-      if (!isSettled) {
-        isSettled = true;
-        transitionResolverRef.current = null;
-        if (finishPromiseResolve) finishPromiseResolve();
-        setTransitionStatus('completed');
+      clearPhaseTimers();
+      setWaveformActive(false);
+      setTransitionPhase('idle');
+      setTransitionStatus('completed');
+      if (shell) {
+        shell.classList.remove('transition-in', 'transition-out');
       }
     }, 450);
     activeTimeoutRef.current = timeoutId;
-
-    controller.signal.addEventListener('abort', () => {
-      clearTimeout(timeoutId);
-      if (!isSettled) {
-        isSettled = true;
-        transitionResolverRef.current = null;
-        if (finishPromiseResolve) finishPromiseResolve();
-      }
-    });
-
-    try {
-      const transition = document.startViewTransition(async () => {
-        router.push(href);
-        await transitionPromise;
-      });
-      activeTransitionRef.current = transition;
-
-      transition.ready?.then(() => {
-        // ViewTransition ready
-      }).catch(() => {
-        // ViewTransition ready rejected (non-fatal)
-      });
-
-      transition.finished
-        ?.then(() => {
-          clearTimeout(timeoutId);
-          if (activeTransitionRef.current === transition) {
-            activeTransitionRef.current = null;
-          }
-          if (!controller.signal.aborted) {
-            setTransitionStatus('completed');
-          }
-        })
-        ?.catch(() => {
-          clearTimeout(timeoutId);
-          if (activeTransitionRef.current === transition) {
-            activeTransitionRef.current = null;
-          }
-          if (!controller.signal.aborted) {
-            setTransitionStatus('completed');
-          }
-        });
-    } catch {
-      clearTimeout(timeoutId);
-      router.push(href);
-      setTransitionStatus('completed');
-    }
-  }, [router]);
+  }, [router, clearPhaseTimers]);
 
   // Global click interceptor for internal links in bubble phase
   useEffect(() => {
     if (typeof document === 'undefined') return;
 
     const handleGlobalLinkClick = (e) => {
-      // Ignore if event was already handled (e.g. by an explicit onClick), or modified clicks
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
         return;
       }
@@ -236,7 +247,6 @@ export function TransitionProvider({ children }) {
       const anchor = e.target.closest?.('a[href]');
       if (!anchor) return;
 
-      // Ignore external, target="_blank", or download links
       if (anchor.target && anchor.target !== '_self') return;
       if (anchor.hasAttribute('download')) return;
 
@@ -245,24 +255,17 @@ export function TransitionProvider({ children }) {
         return;
       }
 
-      // Ignore pure in-page anchor links like href="#contact"
       if (hrefAttr.startsWith('#')) return;
 
       try {
-        const targetUrl = new URL(anchor.href, window.location.href);
-        // Ensure same origin
+        const targetUrl = new URL(hrefAttr, window.location.href);
         if (targetUrl.origin !== window.location.origin) return;
-
-        // Same-page hash navigation
-        if (targetUrl.pathname === window.location.pathname && targetUrl.hash) return;
-        // Exact same path
-        if (targetUrl.pathname === window.location.pathname && !targetUrl.hash) return;
 
         // Route navigation: intercept and drive via transitionNavigate
         e.preventDefault();
         transitionNavigate(targetUrl.pathname + targetUrl.search + targetUrl.hash);
       } catch {
-        // Allow browser default
+        // Safe ignore
       }
     };
 
@@ -276,9 +279,19 @@ export function TransitionProvider({ children }) {
     <TransitionContext.Provider
       value={{
         transitionStatus,
+        transitionPhase,
+        waveformActive,
         transitionNavigate,
       }}
     >
+      {/* Route change waveform overlay */}
+      <PageTransitionWaveform active={waveformActive} phase={transitionPhase} />
+
+      {/* Screen reader route title announcement */}
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {announcement}
+      </div>
+
       {children}
     </TransitionContext.Provider>
   );
@@ -289,7 +302,6 @@ export function useTransitionRouter() {
   const router = useRouter();
 
   if (!context) {
-    // Safe fallback if called outside TransitionProvider or during SSR
     return {
       transitionStatus: 'idle',
       transitionNavigate: (href) => router.push(href),
