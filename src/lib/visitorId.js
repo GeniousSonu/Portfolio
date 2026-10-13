@@ -4,13 +4,15 @@
  * and unique deduplicated presence tracking across multiple open tabs.
  */
 
+import { safeStorage } from './safeStorage';
+
 const VISITOR_ID_STORAGE_KEY = 'sks_visitor_id';
 
 export function getOrCreateVisitorId() {
   if (typeof window === 'undefined') return null;
 
   try {
-    let visitorId = localStorage.getItem(VISITOR_ID_STORAGE_KEY);
+    let visitorId = safeStorage.getItem(VISITOR_ID_STORAGE_KEY, null);
     if (visitorId && /^[0-9a-fA-F-]{16,64}$/.test(visitorId)) {
       return visitorId;
     }
@@ -21,7 +23,7 @@ export function getOrCreateVisitorId() {
       visitorId = 'v_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
     }
 
-    localStorage.setItem(VISITOR_ID_STORAGE_KEY, visitorId);
+    safeStorage.setItem(VISITOR_ID_STORAGE_KEY, visitorId);
     return visitorId;
   } catch (err) {
     // If localStorage is blocked in private browsing mode, return a fallback session ID
