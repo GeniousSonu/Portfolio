@@ -198,7 +198,7 @@ export const NAVIGATION_ITEMS = [
     type: 'page',
     group: 'about',
     description: 'Senior software developer background, patents, vision & bio',
-    status: 'stub',
+    status: 'live',
     keywords: ['about', 'bio', 'story', 'developer', 'sonu', 'engineer'],
     icon: 'user',
   },
@@ -292,7 +292,7 @@ export const EXCLUDED_FROM_NAV = [
     type: 'page',
     group: 'excluded',
     description: 'PWA service worker offline fallback screen',
-    status: 'stub',
+    status: 'live',
   },
   {
     id: 'nav-site-index',

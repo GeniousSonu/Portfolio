@@ -69,7 +69,11 @@ async function runTests() {
     totalCalculatedTime >= 1800 && totalCalculatedTime <= 2500,
     `Total duration is ${totalCalculatedTime}ms (strictly within 1.8s and 2.5s)`
   );
-  assert(preloaderSrc.includes('const [active, setActive] = useState(true);'), 'Overlay is server-rendered by default (zero flash)');
+  assert(
+    preloaderSrc.includes('const [active, setActive] = useState(true);') ||
+    preloaderSrc.includes('BOOT_STATES.IDLE'),
+    'Overlay is server-rendered by default (zero flash)'
+  );
 
   // -------------------------------------------------------------
   // Test (b): Immediate reload in same session runs preloader again

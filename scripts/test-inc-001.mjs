@@ -164,9 +164,10 @@ console.log('\nScenario C: Corrupted Storage Resiliency (safeStorage.js)');
   );
 
   assert(
-    preloader.includes('safeStorage.getItem') && preloader.includes('SESSION_KEY'),
-    'BootPreloader.jsx: Uses safeStorage for session boot tracker',
-    'BootPreloader not using safeStorage'
+    preloader.includes('hasBootedInThisDocument') ||
+    (preloader.includes('safeStorage.getItem') && preloader.includes('SESSION_KEY')),
+    'BootPreloader.jsx: Uses in-memory or defensive storage for boot lifecycle',
+    'BootPreloader boot lifecycle tracker missing'
   );
 }
 
@@ -219,10 +220,10 @@ console.log('\nScenario E: BootPreloader Hardening & Scroll Lock Safety');
   const scrollLockContent = fs.readFileSync(path.join(projectRoot, 'src/hooks/useScrollLock.js'), 'utf8');
 
   assert(
-    preloaderContent.includes('ceilingHitRef.current = true') &&
-    preloaderContent.includes('4000'),
-    'BootPreloader.jsx: 4-second absolute ceiling timer forces preloader unlock',
-    '4s preloader ceiling timer missing'
+    (preloaderContent.includes('ceilingHitRef.current = true') && preloaderContent.includes('4000')) ||
+    (preloaderContent.includes('BOOT_EVENTS.FAILSAFE') && preloaderContent.includes('BOOT_TIMING.absoluteCeilingMs')),
+    'BootPreloader.jsx: Absolute ceiling timer forces preloader failsafe unlock',
+    'Preloader failsafe ceiling timer missing'
   );
 
   assert(

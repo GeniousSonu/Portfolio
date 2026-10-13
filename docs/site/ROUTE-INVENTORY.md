@@ -17,13 +17,12 @@
 | `/#skills` | `src/app/page.js` (`#skills`) | Client section | Core competencies & tech matrices | Real | No (Anchor) |
 | `/#certifications`| `src/app/page.js` (`#certifications`)| Client section | 30+ verified security & cloud credentials | Real | Yes (About) |
 | `/#global-reach` | `src/app/page.js` (`#global-reach`)| Client section | Three.js interactive WebGL telemetry globe | Real | No (Anchor) |
-| `/about` | `src/app/about/page.js` | Static / RSC | Dedicated deep-dive biographical narrative | Missing | Yes (About) |
+| `/about` | `src/app/about/page.js` | Static / RSC | Dedicated deep-dive biographical narrative | Real | Yes (About) |
 | `/blog` | `src/app/blog/page.jsx` | ISR (Sanity) | Technical essays, architecture deep-dives | Real | Yes (Knowledge) |
 | `/blog/[slug]` | `src/app/blog/[slug]/page.jsx` | ISR (Sanity) | Headless article reader with TOC & code blocks | Real | No (Dynamic) |
 | `/wiki` | `src/app/wiki/page.js` | Static / RSC | Digital garden, patent blueprints & knowledge base | Real | Yes (Knowledge) |
 | `/architecture` | `src/app/architecture/page.jsx` | Static / RSC | System topology, telemetry data flow & security specs | Real | Yes (Knowledge) |
 | `/uses` | `src/app/uses/page.jsx` | Static / RSC | Dual-monitor workstation, hardware & toolchain setup | Real | Yes (Knowledge) |
-| `/work` | `src/app/work/page.js` | Static / RSC | Comprehensive catalog of all projects & agency work | Missing | Proposed (Work) |
 | `/wefik` | `src/app/wefik/page.js` | Static / RSC | Co-founder agency showcase & client operations | Real | Yes (Work) |
 | `/plugin` | `src/app/plugin/page.js` | Static / RSC | WordPress plugin hub (Site Checkup suite) | Real | Yes (Work) |
 | `/plugin/[slug]` | `src/app/plugin/[slug]/page.js` | Dynamic / SSR | Plugin detail & feature breakdown | Real | No (Dynamic) |
@@ -48,18 +47,18 @@
 | `/privacy` | `src/app/privacy/page.jsx` | Static / RSC | Platform GDPR/CCPA privacy notice | Real | Yes (Footer) |
 | `/terms` | `src/app/terms/page.jsx` | Static / RSC | Terms of service & intellectual property notice | Real | Yes (Footer) |
 | `/bot/privacy-policy` | `src/app/bot/privacy-policy/page.jsx` | Static / RSC | Telegram live-chat bot privacy policy | Real | Yes (Footer) |
-| `/offline` | `src/app/offline/page.js` | Static / PWA | Service Worker offline fallback screen | Missing | No (Excluded) |
+| `/offline` | `src/app/offline/page.js` | Static / PWA | Service Worker offline fallback screen | Real | No (Excluded) |
 | `/studio` | `src/app/studio/[[...tool]]/page.jsx` | Dynamic / SSR | Embedded Sanity Studio CMS route | Real | No (Excluded) |
-| `/site-index` | `src/app/site-index/page.js` | Static / Review | Complete route directory (R0 owner review only) | Missing | No (Excluded) |
+| `/site-index` | `src/app/site-index/page.js` | Static / Review | Complete route directory (R0 owner review only) | Real | No (Excluded) |
 
 ---
 
 ## 2. Inventory Summary Counts
 
-- **Real Active Routes / Sections:** 36
+- **Real Active Routes / Sections:** 38
 - **Partial Routes:** 0
 - **Stub Routes:** 0
-- **Missing Expected Routes:** 3 (`/about`, `/offline`, `/site-index`)
+- **Missing Expected Routes:** 0
 
 ---
 

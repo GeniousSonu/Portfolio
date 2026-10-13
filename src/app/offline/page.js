@@ -1,6 +1,8 @@
 import React from 'react';
-import { PageShell, PageHeader, PageStub } from '@/components/layout';
+import { PageShell, PageHeader, Container, Section } from '@/components/layout';
 import { buildMetadata } from '@/lib/seo';
+import OfflineView from './OfflineView';
+import styles from './offline.module.css';
 
 export const metadata = buildMetadata({
   title: 'Offline — Network Disconnected',
@@ -13,16 +15,15 @@ export default function OfflinePage() {
   return (
     <PageShell>
       <PageHeader
-        eyebrow="[ PWA TELEMETRY · STATUS 0 ]"
+        eyebrow="[ PWA TELEMETRY · DISCONNECTED ]"
         title="Offline Mode Active"
-        summary="Your client appears to be disconnected from the network. Cached pages and Service Worker resources remain available."
+        summary="Service Worker is serving local assets. Reconnect to a network to synchronize real-time telemetry, live chat, and collaborative spaces."
       />
-      <PageStub
-        title="Client Operating in Offline Storage"
-        summary="Service Worker vCache is serving local assets. Reconnect to a network to synchronize real-time telemetry, live chat, and collaborative spaces."
-        status="stub"
-        routeHref="/offline"
-      />
+      <Section className={styles.wrapper}>
+        <Container>
+          <OfflineView />
+        </Container>
+      </Section>
     </PageShell>
   );
 }

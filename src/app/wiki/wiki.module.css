@@ -1,0 +1,160 @@
+.wrapper {
+  padding-block: var(--space-8, 3rem);
+}
+
+.filterBar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.filterBtn {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filterBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+
+.filterBtnActive {
+  background: var(--signal, var(--gold));
+  color: var(--void);
+  border-color: var(--signal, var(--gold));
+  font-weight: 600;
+}
+
+.searchBox {
+  width: 100%;
+  max-width: 380px;
+  margin-left: auto;
+  position: relative;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.45rem 0.85rem;
+  border-radius: 6px;
+  background: var(--void);
+  border: 1px solid var(--border-color);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  box-sizing: border-box;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--signal, var(--gold));
+}
+
+.wikiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: var(--space-6, 1.5rem);
+}
+
+.wikiCard {
+  background: var(--surface-1, rgba(255, 255, 255, 0.02));
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.wikiCard:hover {
+  transform: translateY(-2px);
+  border-color: var(--signal, var(--gold));
+}
+
+.cardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.categoryTag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--signal, var(--gold));
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.readTime {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.cardTitle {
+  font-size: 1.2rem;
+  color: var(--text);
+  margin-bottom: 0.75rem;
+  line-height: 1.35;
+}
+
+.cardExcerpt {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  flex: 1;
+  margin-bottom: 1.25rem;
+}
+
+.keyTakeaway {
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 2px solid var(--signal, var(--gold));
+  border-radius: 0 6px 6px 0;
+  font-size: 0.8rem;
+  color: var(--text);
+  margin-bottom: 1rem;
+  font-family: var(--font-mono);
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.tags {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.tag {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  padding: 0.15rem 0.45rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+  color: var(--text-dim, var(--text-muted));
+}
+
+.emptyState {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
