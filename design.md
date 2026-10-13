@@ -762,15 +762,26 @@ Builds on Redesign Phase R0 (`src/config/navigation.js` is the single source of 
 - Group panels open on hover-intent (120ms delay) and on focus/click; each panel is a two-column list with item titles, one-line descriptions, and a status tag for `partial` or `stub` pages (visible during the redesign for the owner, hidden before launch via a flag).
 - The header auto-hides on scroll down and returns on scroll up (transform only), always visible when focus is within.
 
-### 10.2 All-pages index (the full-screen menu)
+### 10.2 Site Menu & Mobile Navigation Overlay (Founder Decision 2026-10-12)
 
-Opened by the menu button or `M`. Registered with `openOverlay('site_menu')`.
+Opened by the mobile hamburger menu button or `M`. Registered with `openOverlay('nav')` (`#mobile-nav`).
 
-- Full-viewport overlay on Void with an oversized numbered index of every page (`01 Projects … 24 Terms`) in `--step-4` display type, grouped under mono group labels.
-- Hover or focus on a row shows a preview (poster image, one-line description, status) in a Frame at the right; on touch, tap opens directly.
-- Includes live telemetry strip, search field (palette lite), and legal links at the bottom.
-- Keyboard: arrow keys navigate rows, `Enter` opens, `Esc` closes and returns focus; focus is trapped inside; background scroll locked through the overlay system.
-- Mobile: same list, previews omitted, rows are full-width 56px targets.
+- **Overlay**: `fixed inset-0 z-50` with independent scroll container (`overflow-y: auto`, `overscroll-behavior: contain`), backdrop blur 12px, safe-area inset padding (`top: max(20px, env(safe-area-inset-top))`, `bottom: max(32px, env(safe-area-inset-bottom))`). Backdrop click outside 480px content column or `Escape` key closes overlay.
+- **Header**: 64px sticky header containing full-width 44px Search button (`Search & commands` with `<kbd>⌘K</kbd>` badge, wires to command palette) and 44×44px Close button with 20px centered `×` glyph.
+- **View Switcher**: 44px segmented control (`Sections` | `All pages`) with 200ms transform sliding indicator.
+- **Sections View**:
+  - Group headers: mono `// WORK`, `// KNOWLEDGE`, `// LAB` + 12px gap + count pill (`05`, `04`, `04`) + flex-1 hairline rule.
+  - Card Grid: `grid-cols-2`, 10px gap, `grid-auto-rows: 1fr` (equal row heights guaranteed across all viewports). 3 columns on tablet/landscape (≥640px).
+  - Card Anatomy (Icon + Title only, zero descriptions):
+    - Padding: 16px, min-height: 96px, radius: 14px, border: 1px `rgba(255, 255, 255, 0.08)`.
+    - Distinct Lucide icons (22×22px, stroke-width exactly 1.5, round caps/joins, `aria-hidden="true"`, gray-400 `#9ca3af` $\to$ accent `#10b981` on press).
+    - Top row: Lucide icon on left; external accent arrow `↗` (14px, accent at 70%) on right for WEFIK only.
+    - Title: 15px/20px semi-bold, single line truncated with ellipsis (`text-overflow: ellipsis; white-space: nowrap;`).
+    - Active / Press State: `transform: scale(0.96)`, `background: rgba(255, 255, 255, 0.06)`, `border-color: rgba(16, 185, 129, 0.5)`, icon color accent `#10b981` (120ms ease-out).
+    - Focus-Visible: 2px accent outline offset 2px.
+    - Motion: 280ms cubic-bezier(0.22, 1, 0.36, 1) translateY(12px $\to$ 0) with 30ms stagger per card. `prefers-reduced-motion`: instant opacity fade, no stagger, no transform.
+- **All Pages View**: Flat list of all navigation and legal destinations, ≥44px touch targets, 15px titles, mono route paths, 16px chevron right.
+- **Footer**: Hairline rule divider, telemetry state (`● systems nominal`) and direct link to `/status`.
 
 ### 10.3 Chapter rail
 

@@ -23,6 +23,11 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
+  --color-menu-overlay: var(--menu-overlay-bg);
+  --color-menu-card: var(--menu-card-bg);
+  --color-menu-card-border: var(--menu-card-border);
+  --color-menu-accent: var(--menu-accent);
+
   --radius-sm: calc(var(--radius, 0.625rem) - 4px);
   --radius-md: calc(var(--radius, 0.625rem) - 2px);
   --radius-lg: var(--radius, 0.625rem);
@@ -50,6 +55,22 @@
   --input: #2A2F38;
   --ring: #10B981;
   --radius: 0.625rem;
+
+  /* Menu Design Tokens (Section 2) */
+  --menu-overlay-bg: rgba(5, 7, 12, 0.98);
+  --menu-card-bg: rgba(255, 255, 255, 0.035);
+  --menu-card-border: rgba(255, 255, 255, 0.08);
+  --menu-card-border-active: rgba(16, 185, 129, 0.6);
+  --menu-accent: #10b981;
+  --menu-accent-80: rgba(16, 185, 129, 0.8);
+  --menu-accent-70: rgba(16, 185, 129, 0.7);
+  --menu-accent-60: rgba(16, 185, 129, 0.6);
+  --menu-accent-50: rgba(16, 185, 129, 0.5);
+  --menu-accent-25: rgba(16, 185, 129, 0.25);
+  --menu-text-title: #f9fafb;
+  --menu-text-muted: #6b7280;
+  --menu-card-min-height: 96px;
+  --menu-card-icon-size: 22px;
 }
 
 .dark {
