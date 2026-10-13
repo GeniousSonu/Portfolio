@@ -633,96 +633,14 @@ The existing interactive Three.js Globe is retained as the sole active 3D visual
 
 ---
 
-### [ARCHIVED] 8.2 Historical Operator Stage Specification (Reference Only)
+### 8.2 Historical Operator Stage Specification (Archived per Amendment A)
 
-*The following specification is archived per Amendment A:*
+Per explicit owner requirements, a 3D avatar model of the owner is **NOT** used on this portfolio. The Operator Stage (`.glb` asset pipeline, React Three Fiber / `@react-three/drei` runtime dependencies, camera shot list, and Stage tiers T0–T2) has been decommissioned.
 
-The Stage was originally conceived as the owner's `.glb` model living in a fixed canvas behind the Home chapters. Per Amendment A, this avatar concept has been permanently rejected in favor of high-density engineering telemetry, verified patents, and real project architectures.
-
-Hard rules (archived):
-
-### 8.2 Technology
-
-- `three` plus `@react-three/fiber` v9 (React 19 compatible) and `@react-three/drei`, dynamic import, client only [VERIFY exact versions at install; pin exact versions].
-- `@gltf-transform/cli` for the asset pipeline (offline, not shipped).
-- Meshopt or Draco decoders self-hosted under `/public/3d/decoders/`; KTX2 (Basis) transcoder self-hosted if KTX2 textures are used. **No decoders or HDRIs from third-party CDNs** (CSP and privacy).
-- Post-processing: **none by default.** Vignette and grain are done in CSS over the canvas. If one effect is added later (for example subtle bloom on emissive parts), it requires a measured performance case (DDR).
-- Future: three.js WebGPU renderer with automatic WebGL fallback is allowed once stable in the pinned version (Section 19).
-
-### 8.3 Asset pipeline (mandatory, in this order)
-
-1. Keep the original in `assets-source/models/` (not in `public/`).
-2. Inspect: triangles, vertices, meshes, materials, textures, skeleton, animations. Record in `docs/3d/ASSET-REPORT.md`.
-3. Optimize with gltf-transform: dedupe, prune, resample animation, weld/simplify only if above budget, texture resize, Meshopt (or Draco) geometry compression, KTX2 or WebP textures.
-4. Produce two delivery tiers:
-   - `operator-high.glb` (desktop): target ≤ 3 MB, ≤ 100k triangles, textures ≤ 2048px.
-   - `operator-low.glb` (mobile and mid-range): target ≤ 1.2 MB, ≤ 40k triangles, textures ≤ 1024px.
-5. Render the poster set from the real scene with final lighting: `operator-poster.avif` and `.webp` at 1×/2× and a 24px blurred placeholder (LQIP), for each chapter state that shows the model (hero, about, footer).
-6. Preload only the tier that will be used; `useGLTF.preload` after idle.
-
-If the inspection shows budgets cannot be met without visible loss, the agent reports and the owner decides (DDR).
-
-### 8.4 Scene composition
-
-- **Camera**: perspective, FOV 28–35° (portrait-like compression, flattering and less distorted than wide FOV). Starting position gives a medium shot (waist-up) with the model on the right third on desktop, centered and lower on mobile.
-- **Background**: transparent canvas over the DOM; depth is created by lighting, a faint floor reflection (fake: a gradient plane, not real reflection), and the CSS grid and grain layers.
-- **Floor**: invisible shadow-catcher with soft contact shadow (drei `ContactShadows` or a baked texture), low resolution (512), blur 2.5–3.5.
-
-### 8.5 Lighting rig
-
-All lighting is physically plausible, low-count, and tuned in a dedicated `/stage-lab` dev route (noindex, dev and preview only).
-
-| Light | Role | Position (relative to model, starting values) | Color | Notes |
-|-------|------|-----------------------------------------------|-------|-------|
-| **Key** | Main form | Upper left front (-2.2, 2.6, 2.4), directional or spot, soft | Warm neutral `#FFF1E0` | Human voice; intensity ~2.2; shadows off (contact shadow only) |
-| **Rim** | Separation from Void | Behind right (2.4, 1.8, -2.6) | `--signal-500` `#10B981` | System voice; intensity ~3.0; the "console light" |
-| **Fill** | Lift shadows | HDRI only | Neutral cool | Environment intensity ~0.35 |
-| **Kicker** (optional) | Edge on the hair or shoulders | Behind left low | Cool white | Only if the model needs it |
-
-- **Environment**: a self-hosted 1k `.hdr` (or `.exr`) studio-style HDRI under `/public/3d/env/`, used only for reflections and fill; background stays transparent.
-- **Tone mapping**: ACES Filmic (or AgX if the pinned three version provides better color on skin and the owner prefers it), `outputColorSpace = SRGBColorSpace`, exposure ~1.0.
-- **Materials**: respect the PBR materials in the file; adjust roughness or envMap intensity only through a documented override map. Never recolor skin or clothing.
-- **Dynamic lighting hooks**: the rim light color and intensity respond to theme state: Void/default = signal green, Bone chapters = rim fades and key warms, God Mode = phosphor rim with a faint scanline shader (Section 12.6), CTA hover in the contact chapter = rim intensifies briefly.
-- Lighting values are stored in a typed config (`src/stage/lighting.config.js`) so art direction changes do not require code changes.
-
-### 8.6 Behavior and choreography
-
-| State | Trigger | Behavior |
-|-------|---------|----------|
-| **Boot scan-in** | After preloader greetings | Model materializes through a horizontal scan: a custom shader uniform (`uScan` 0→1) clips and brightens the edge in signal green over ≤ 1.4s, then settles to the final material. Poster cross-fades under it |
-| **Idle** | Hero | If rigged: subtle breathing and weight shift loop (human motion); if not rigged: ≤ 1.5° slow yaw drift. Amplitudes capped; paused offscreen and in hidden tabs |
-| **Pointer follow** | Fine pointer only | Head and spine (if rigged) or whole-model yaw ease toward the cursor within ±12°, lerped, 0.08 damping; disabled on touch and reduced motion |
-| **Greeting** | First hero view only | Optional single wave or nod if an animation exists in the file; once per session |
-| **Scroll shot list** | Scroll position | Camera and model state interpolate between chapter keyframes (Section 9.2) scrubbed through a GSAP timeline mutating refs |
-| **Hand-off to Globe** | Entering the Globe chapter | Stage fades to opacity 0 over 400ms, then `frameloop="never"` and resources released; Globe mounts afterwards. Reverse on exit |
-
-### 8.7 Performance tiers
-
-| Tier | Condition | Experience |
-|------|-----------|------------|
-| **T0** | `prefers-reduced-motion`, `saveData`, low `deviceMemory` (< 4), `hardwareConcurrency` < 4, WebGL unavailable, user toggle "3D off", or `?3d=off` (dev/preview) | Poster only; no canvas, no three.js download |
-| **T1** | Mobile and mid-range | `operator-low.glb`, DPR clamp [1, 1.5], no contact-shadow blur animation, pointer-follow off, lighting rig reduced to key plus rim plus HDRI |
-| **T2** | Desktop with decent GPU | `operator-high.glb`, DPR clamp [1, 2], full rig, pointer follow |
-
-Common runtime rules: `frameloop="demand"` when static and `invalidate()` on interaction; pause with `IntersectionObserver` when offscreen and with `visibilitychange` when hidden; a frame-time monitor drops one tier if the median frame time exceeds 24ms for 2 seconds; handle `webglcontextlost` and `restored`; dispose geometries, materials and textures on unmount; never allocate per frame.
-
-### 8.8 Accessibility of the Stage
-
-- The canvas is `aria-hidden="true"` with the poster providing an `alt` on the visible `<img>` fallback (for example "Portrait render of Sonu at his console"). Meaning is carried by DOM text.
-- No keyboard traps; no focusable elements inside the canvas.
-- Text over the Stage must meet contrast against the poster and the darkest and lightest plausible canvas states (use a scrim gradient behind text where needed).
-- No flashing exceeding WCAG limits; scan-in is a single pass.
-
-### 8.9 Other Stage placements
-
-| Place | Treatment |
-|-------|-----------|
-| `/about` | Close-up or three-quarter shot on Bone with warm key; short idle only |
-| `/404` | Operator facing away or shrugging pose (if the rig allows), "SIGNAL LOST" copy; poster fallback |
-| Footer | Small operator still or tiny live canvas (T2 only) looking toward the contact CTA |
-| `/lounge` | FUTURE: use as the owner's presence avatar |
-
-Pages other than Home mount their own UI views cleanly without background 3D overhead.
+- **Dependencies**: Do NOT install `@react-three/fiber` or `@react-three/drei`.
+- **Preconditions**: Do NOT halt or pause for missing `.glb` or `ASSET-REPORT.md`.
+- **Active 3D**: The existing Three.js **WebGL Globe** (Section 8.1) is retained as the sole 3D visualization element on the site.
+- **Visual Identity**: The site prioritizes high-density DOM telemetry, verified credentials, and authentic engineering artifacts over avatar rendering.
 
 ---
 
