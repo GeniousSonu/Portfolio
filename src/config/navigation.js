@@ -300,7 +300,7 @@ export const EXCLUDED_FROM_NAV = [
     href: '/site-index',
     type: 'page',
     group: 'excluded',
-    description: 'Complete directory of all platform routes for R0 owner review',
+    description: 'Complete directory of all platform routes and documents',
     status: 'stub',
   },
 ];

@@ -1,7 +1,7 @@
 /**
- * Unified Boot Sequence Configuration (TASK BOOT-002)
+ * Preloader and boot sequence configuration
  * 
- * Finite State Machine States & Events, Timing Budgets, and Content.
+ * Finite state machine states, events, timing budgets, and content.
  * Target Total Duration: <= 3.6s
  * Absolute Failsafe: 4.5s
  */
@@ -88,7 +88,7 @@ export const TERMINAL_CONTENT = Object.freeze({
 });
 
 /**
- * Timing Budgets (BOOT-002 Contract)
+ * Stage timing configuration
  * Terminal: 1.2s - 1.4s
  * Names: 1.8s (6 x 300ms)
  * Exit: ~0.4s

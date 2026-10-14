@@ -1,5 +1,5 @@
 /**
- * Safe Browser Storage Utility (Incident INC-001 Hardening)
+ * Safe Browser Storage Utility
  * 
  * Provides fail-safe, guarded access to localStorage and sessionStorage.
  * Prevents hydration crashes, JSON parse errors, and storage-blocked exceptions (private browsing).

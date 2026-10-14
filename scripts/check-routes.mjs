@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Route Verification Script (Phase R0 Skeleton Gate)
+ * Navigation and Route Integrity Verification Script
  *
  * Verifies that every `href` declared in `src/config/navigation.js`:
  * 1. Resolves to an actual physical route directory/file in `src/app/`, OR

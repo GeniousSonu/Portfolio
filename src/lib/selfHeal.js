@@ -1,5 +1,5 @@
 /**
- * Client Self-Healing Recovery Module (Incident INC-001)
+ * Client Self-Healing Recovery Module
  * 
  * Intercepts ChunkLoadError, chunk download rejections, and hydration failures.
  * Automatically unregisters all service workers, clears Cache Storage, and executes

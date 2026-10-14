@@ -46,17 +46,4 @@ public/workbox-*.js
 public/swe-worker-*.js
 public/workbox-*.js.map
 
-# Local development & workspace artifacts
-.agents/
-.antigravity/
-.cursor/
-.windsurf/
-.claude/
-.gemini/
-agent/
-AGENTS.md
-CLAUDE.md
-skills-lock.json
-scratch/
-temp_backup/
-scripts/verify_discord_stage.mjs
+

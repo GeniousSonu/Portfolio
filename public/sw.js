@@ -1,6 +1,6 @@
 // High-Reliability PWA Service Worker for SK Sahinur Islam Portfolio
-// Built for Next.js 16 App Router & Zero-Stale Navigation Architecture
-// Incident INC-001 Hardened: Navigations are strictly Network-First with Offline fallback only
+// Built for Next.js App Router & Zero-Stale Navigation Architecture
+// Navigations are strictly Network-First with Offline fallback only
 
 const CACHE_VERSION = 'v-1791894973535';
 const STATIC_CACHE = `sks-static-${CACHE_VERSION}`;
@@ -86,8 +86,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // ── STRATEGY A: Navigation & HTML Requests (STRICTLY NETWORK-FIRST / NETWORK-ONLY) ──
-  // CRITICAL INC-001 FIX: NEVER cache HTML documents or Next.js navigation responses in runtime cache!
+  // Strategy: Navigation & HTML Requests (Network-First)
+  // Never cache HTML documents or Next.js navigation responses in runtime cache.
   // Prevents serving stale HTML with dead chunk hashes. Falls back to pre-cached /offline page only.
   if (request.mode === 'navigate' || request.headers.get('accept')?.includes('text/html')) {
     event.respondWith(

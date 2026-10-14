@@ -245,7 +245,7 @@ export default function RootLayout({ children }) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdGraph) }}
         />
-        {/* Self-Hosted OFL Boot Font Preloads (BOOT-001) */}
+        {/* Self-Hosted Boot Font Preloads */}
         <link rel="preload" href="/fonts/boot/noto-sans-bengali-subset.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preload" href="/fonts/boot/noto-sans-devanagari-subset.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preload" href="/fonts/boot/noto-sans-jp-subset.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
@@ -258,7 +258,7 @@ export default function RootLayout({ children }) {
             __html: `(function(){try{var nav=performance.getEntriesByType&&performance.getEntriesByType('navigation')[0];if(nav&&nav.type==='back_forward'){document.documentElement.classList.add('boot-skip');}}catch(e){}})();`,
           }}
         />
-        {/* Incident INC-001 Resilience Bootstrap (Early ChunkLoadError catcher & js-motion gate) */}
+        {/* Client Error Recovery Bootstrap (Early ChunkLoadError handler & js-motion gate) */}
         <script
           id="sks-resilience-bootstrap"
           dangerouslySetInnerHTML={{

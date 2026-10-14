@@ -82,7 +82,7 @@ export function PageStub({ title, summary, status = 'stub', routeHref = '/' }) {
         <div className={styles.stubCard}>
           <h2 className={styles.stubTitle}>{title}</h2>
           <p className={styles.stubDesc}>
-            {summary || 'This section is currently being architected as part of the Phase R0 skeleton. Complete content and system telemetry will be deployed in an upcoming release cycle.'}
+            {summary || 'This section is currently in development. Complete content will be deployed in an upcoming release.'}
           </p>
 
           <div className={styles.stubActions}>

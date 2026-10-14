@@ -1,5 +1,5 @@
 /**
- * Boot Sequence Greetings Configuration (BOOT-001)
+ * Multilingual greetings configuration for boot sequence
  * 
  * Order is strictly specified:
  * 1. Bengali: সাহিনুর (lang bn, dir ltr)

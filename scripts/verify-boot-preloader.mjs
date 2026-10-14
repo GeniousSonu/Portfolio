@@ -1,17 +1,8 @@
 /**
- * Automated Verification Suite for Incident BOOT-001
+ * Verification Suite for Boot Preloader & Transitions
  * 
- * Verifies all 10 specifications from PART 5:
- * (a) Full load sequence & timing budget (1.8s - 2.5s)
- * (b) Immediate reload in same session runs preloader again (no sessionStorage bug)
- * (c) Back/forward navigation suppresses preloader (html.boot-skip)
- * (d) prefers-reduced-motion runs static presentation (<= 1.2s total)
- * (e) Click/tap/keypress skips cleanly to exit
- * (f) Client-side route change runs waveform transition (380ms) and skips preloader
- * (g) Rapid route clicks settle cleanly without stuck overlays
- * (h) Boot font glyph coverage: all 6 scripts verified against cmap tables
- * (i) Accessibility: aria-hidden, sr-only 'Sahinur', live route announcer
- * (j) Absolute 4.0s failsafe unmount & scroll unlock
+ * Verifies preloader timing budgets, session handling, motion preferences,
+ * font readiness, and route transitions.
  */
 
 import fs from 'node:fs';
@@ -37,9 +28,8 @@ function assert(condition, message) {
 }
 
 async function runTests() {
-  console.log('====================================================');
-  console.log('  RUNNING INCIDENT BOOT-001 VERIFICATION SUITE');
-  console.log('====================================================\n');
+  console.log('  RUNNING BOOT PRELOADER VERIFICATION SUITE');
+
 
   // Load configuration and files
   const bootConfigPath = path.join(ROOT, 'src/config/bootGreetings.js');
