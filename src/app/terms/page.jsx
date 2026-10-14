@@ -95,6 +95,7 @@ export default function TermsPage() {
     { id: 'indemnification', num: '11', title: 'Indemnification' },
     { id: 'governing-law', num: '12', title: 'Governing Law & Dispute Resolution' },
     { id: 'contact', num: '13', title: 'Modifications & Inquiries' },
+    { id: 'advisory', num: '14', title: 'Statutory Review Advisory' },
   ];
 
   return (
@@ -382,8 +383,21 @@ export default function TermsPage() {
                 <strong>SK Sahinur Islam (Genious Sonu)</strong><br />
                 Senior Web Application Developer &amp; IT Engineer<br />
                 Location: Kolkata, West Bengal, India<br />
-                Email: <a href="mailto:sahinurislamm2002@gmail.com" style={{ color: 'var(--gold)' }}>sahinurislamm2002@gmail.com</a><br />
-                Direct Inquiry: <Link href="/#contact" style={{ color: 'var(--gold)' }}>genioussonu.me/#contact</Link>
+                Email: <a href="mailto:talk2sahinur@gmail.com" style={{ color: 'var(--gold)' }}>talk2sahinur@gmail.com</a><br />
+                Direct Inquiry: <Link href="/contact" style={{ color: 'var(--gold)' }}>genioussonu.me/contact</Link>
+              </p>
+            </div>
+          </section>
+
+          {/* 14. Statutory Review Advisory */}
+          <section id="advisory" className={styles.section}>
+            <h2 className={styles.sectionTitle}>
+              <span className={styles.sectionNumber}>14.</span> Statutory Review Advisory
+            </h2>
+            <div className={`${styles.callout} ${styles.calloutWarning}`}>
+              <div className={styles.calloutHeader}>Legal Professional Review Advisory</div>
+              <p style={{ margin: 0 }}>
+                Notice: The conditions, acceptable use covenants, and intellectual property statements published on this page represent automated contractual declarations. Counterparties, commercial clients, and site visitors are advised that these provisions do not substitute for formal legal counsel. A qualified legal professional should review all bilateral contracts and enterprise agreements.
               </p>
             </div>
           </section>
@@ -398,11 +412,14 @@ export default function TermsPage() {
             <Link href="/privacy" className={styles.legalNavLink}>
               Privacy Policy
             </Link>
+            <Link href="/imprint" className={styles.legalNavLink}>
+              Imprint &amp; Notice
+            </Link>
             <Link href="/bot/privacy-policy" className={styles.legalNavLink}>
               Bot Privacy Policy
             </Link>
           </div>
-          <Link href="/#contact" className={styles.contactBtn}>
+          <Link href="/contact" className={styles.contactBtn}>
             Get in Touch <span>→</span>
           </Link>
         </div>

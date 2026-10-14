@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import CookiePreferencesButton from '@/components/CookiePreferencesButton';
 import styles from '../legal.module.css';
 
 export const metadata = {
@@ -94,6 +95,7 @@ export default function PrivacyPage() {
     { id: 'no-sale', num: '10', title: 'Zero Data Sale & Sharing Guarantee' },
     { id: 'children', num: '11', title: "Children's Privacy Protection" },
     { id: 'contact-rights', num: '12', title: 'Exercising Your Rights & Contact' },
+    { id: 'advisory', num: '13', title: 'Statutory Review Advisory' },
   ];
 
   return (
@@ -187,7 +189,7 @@ export default function PrivacyPage() {
                 <strong>SK Sahinur Islam (Genious Sonu)</strong><br />
                 Senior Web Application Developer &amp; IT Engineer<br />
                 Location: Kolkata, West Bengal, India<br />
-                Direct Privacy Inquiries: <a href="mailto:sahinurislamm2002@gmail.com" style={{ color: 'var(--gold)' }}>sahinurislamm2002@gmail.com</a><br />
+                Direct Privacy Inquiries: <a href="mailto:talk2sahinur@gmail.com" style={{ color: 'var(--gold)' }}>talk2sahinur@gmail.com</a><br />
                 Official Domain: <span style={{ color: 'var(--text-primary)' }}>https://genioussonu.me</span>
               </p>
             </div>
@@ -258,8 +260,11 @@ export default function PrivacyPage() {
               </p>
             </div>
             <p className={styles.paragraph}>
-              You can reopen your cookie configuration panel and modify your preferences at any time by clicking the &quot;Cookie Settings&quot; button in the footer.
+              You can reopen your cookie configuration panel and modify your preferences at any time by clicking the &quot;Cookie Settings&quot; button in the footer, or directly below:
             </p>
+            <div style={{ marginTop: '1rem', marginBottom: '1.5rem' }}>
+              <CookiePreferencesButton label="Open Cookie Consent Settings" />
+            </div>
           </section>
 
           {/* 05. Data Usage */}
@@ -289,23 +294,51 @@ export default function PrivacyPage() {
             <div className={styles.cardsGrid}>
               <div className={styles.card}>
                 <div className={styles.cardTitle}>Vercel Inc. (USA)</div>
-                <p className={styles.cardText}>Primary hosting, edge routing, serverless compute, and SSL termination. Compliant with EU-US Data Privacy Framework.</p>
+                <p className={styles.cardText}>Primary edge hosting, CDN caching, serverless execution, and performance telemetry under Standard Contractual Clauses (SCCs).</p>
               </div>
               <div className={styles.card}>
-                <div className={styles.cardTitle}>Resend Inc. (USA)</div>
-                <p className={styles.cardText}>Transactional email delivery service utilized securely by <code>/api/contact</code> to dispatch contact form submissions to my private inbox.</p>
+                <div className={styles.cardTitle}>Supabase Pte. Ltd. (Singapore/USA)</div>
+                <p className={styles.cardText}>Encrypted relational PostgreSQL database, persistent session tokens, and Lounge Space room state management.</p>
               </div>
               <div className={styles.card}>
-                <div className={styles.cardTitle}>Sanity AS (Norway/EU)</div>
+                <div className={styles.cardTitle}>Google LLC — Firebase (USA)</div>
+                <p className={styles.cardText}>Firestore realtime presence, live active user counters, and peer-to-peer room state synchronization.</p>
+              </div>
+              <div className={styles.card}>
+                <div className={styles.cardTitle}>Sanity AS (Norway/EEA)</div>
                 <p className={styles.cardText}>Headless Content Management System (CMS) hosting technical blog posts, project metadata, and gear recommendations under GDPR standards.</p>
               </div>
               <div className={styles.card}>
-                <div className={styles.cardTitle}>Google LLC (USA)</div>
-                <p className={styles.cardText}>Optional Google Analytics 4 (telemetry activated only upon consent) and Google Gemini API (supporting chatbot conversational inference).</p>
+                <div className={styles.cardTitle}>Cloudinary Ltd. (USA)</div>
+                <p className={styles.cardText}>Secure image CDN, responsive asset transformation, and modern WebP/AVIF delivery pipelines.</p>
               </div>
               <div className={styles.card}>
-                <div className={styles.cardTitle}>Groq Inc. (USA)</div>
-                <p className={styles.cardText}>High-speed LPU AI inference engine powering the Genious Bot conversational assistant under strict zero-training API policies.</p>
+                <div className={styles.cardTitle}>Resend Inc. (USA)</div>
+                <p className={styles.cardText}>Transactional email delivery service utilized securely by <code>/api/contact</code> to dispatch form submissions to my private inbox.</p>
+              </div>
+              <div className={styles.card}>
+                <div className={styles.cardTitle}>Telegram Messenger Inc. (Dubai/Global)</div>
+                <p className={styles.cardText}>Secure real-time bot API relay for urgent engineering alerts and live chat transmission.</p>
+              </div>
+              <div className={styles.card}>
+                <div className={styles.cardTitle}>Google LLC — Google Gemini (USA)</div>
+                <p className={styles.cardText}>Enterprise Gemini AI API powering interactive assistant summaries and chatbot inference under zero-training terms.</p>
+              </div>
+              <div className={styles.card}>
+                <div className={styles.cardTitle}>Google LLC — Google Analytics (USA)</div>
+                <p className={styles.cardText}>Google Analytics 4 with Google Consent Mode v2 (IP anonymized; strictly suppressed until explicit user opt-in).</p>
+              </div>
+              <div className={styles.card}>
+                <div className={styles.cardTitle}>Spotify AB (Sweden/EU)</div>
+                <p className={styles.cardText}>Interactive audio lounge preview player embeds governed under native European Union data privacy standards.</p>
+              </div>
+              <div className={styles.card}>
+                <div className={styles.cardTitle}>YouTube LLC (Google LLC, USA)</div>
+                <p className={styles.cardText}>Embedded technical demonstrations and media streaming within the interactive Lounge player.</p>
+              </div>
+              <div className={styles.card}>
+                <div className={styles.cardTitle}>GitHub Inc. (Microsoft Corp., USA)</div>
+                <p className={styles.cardText}>Public software repository sync, open-source commit telemetry, and developer portfolio showcases.</p>
               </div>
             </div>
           </section>
@@ -331,8 +364,26 @@ export default function PrivacyPage() {
               <span className={styles.sectionNumber}>08.</span> Data Retention Periods
             </h2>
             <p className={styles.paragraph}>
-              I do not hoard personal data. Inquiries received via the contact form are retained for up to <span className={styles.highlightText}>24 months</span> in my secure email archive for business continuity, or until you request premature deletion. Temporary edge server logs are automatically purged within <span className={styles.highlightText}>30 days</span>.
+              I do not hoard personal data. In accordance with the principles of data minimization and storage limitation, all collected data is bound to explicit retention schedules:
             </p>
+            <div className={styles.cardsGrid}>
+              <div className={styles.card}>
+                <div className={styles.cardTitle}>Contact Form Inquiries</div>
+                <p className={styles.cardText}>Retained for up to <span className={styles.highlightText}>24 months</span> in my private email archive for ongoing professional correspondence, or until you request deletion.</p>
+              </div>
+              <div className={styles.card}>
+                <div className={styles.cardTitle}>Server Edge &amp; Security Logs</div>
+                <p className={styles.cardText}>Temporary HTTP transit logs captured for DDoS filtering and firewall integrity are automatically purged after <span className={styles.highlightText}>30 days</span>.</p>
+              </div>
+              <div className={styles.card}>
+                <div className={styles.cardTitle}>Lounge Space &amp; Live Chat</div>
+                <p className={styles.cardText}>Ephemeral session messages and presence states are automatically flushed upon room closure or after <span className={styles.highlightText}>24 hours</span> of inactivity.</p>
+              </div>
+              <div className={styles.card}>
+                <div className={styles.cardTitle}>Consent-Gated Analytics</div>
+                <p className={styles.cardText}>Pseudonymous client identifiers retained by Google Analytics 4 for up to <span className={styles.highlightText}>14 months</span> before automated expiration.</p>
+              </div>
+            </div>
           </section>
 
           {/* 09. Global Rights */}
@@ -400,8 +451,21 @@ export default function PrivacyPage() {
               <p style={{ margin: 0 }}>
                 <strong>SK Sahinur Islam</strong><br />
                 Attn: Data Privacy &amp; Protection<br />
-                Email: <a href="mailto:sahinurislamm2002@gmail.com" style={{ color: 'var(--gold)' }}>sahinurislamm2002@gmail.com</a><br />
+                Email: <a href="mailto:talk2sahinur@gmail.com" style={{ color: 'var(--gold)' }}>talk2sahinur@gmail.com</a><br />
                 Response Time: Within 30 calendar days (free of charge)
+              </p>
+            </div>
+          </section>
+
+          {/* 13. Statutory Review Advisory */}
+          <section id="advisory" className={styles.section}>
+            <h2 className={styles.sectionTitle}>
+              <span className={styles.sectionNumber}>13.</span> Statutory Review Advisory
+            </h2>
+            <div className={`${styles.callout} ${styles.calloutWarning}`}>
+              <div className={styles.calloutHeader}>Legal Professional Review Advisory</div>
+              <p style={{ margin: 0 }}>
+                Notice: The privacy declarations and data inventory statements published on this page represent automated technical disclosures compiled in adherence to platform architecture. While drafted to align with the Indian DPDP Act 2023, EU GDPR, and US privacy statutes, visitors and enterprise partners are advised that these texts do not constitute formal legal counsel. Formal legal professional review is recommended for bespoke regulatory scrutiny.
               </p>
             </div>
           </section>
@@ -410,17 +474,20 @@ export default function PrivacyPage() {
         {/* Legal Switcher Footer Bar */}
         <div className={styles.legalNavBlock}>
           <div className={styles.legalLinksGroup}>
+            <Link href="/privacy" className={`${styles.legalNavLink} ${styles.legalNavLinkActive}`}>
+              Privacy Policy
+            </Link>
             <Link href="/terms" className={styles.legalNavLink}>
               Terms &amp; Conditions
             </Link>
-            <Link href="/privacy" className={`${styles.legalNavLink} ${styles.legalNavLinkActive}`}>
-              Privacy Policy
+            <Link href="/imprint" className={styles.legalNavLink}>
+              Imprint &amp; Notice
             </Link>
             <Link href="/bot/privacy-policy" className={styles.legalNavLink}>
               Bot Privacy Policy
             </Link>
           </div>
-          <Link href="/#contact" className={styles.contactBtn}>
+          <Link href="/contact" className={styles.contactBtn}>
             Get in Touch <span>→</span>
           </Link>
         </div>
