@@ -7,14 +7,18 @@ import gsap from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import { isConsentFullAccepted } from '@/lib/consent';
 import SiteStatusStrip from '@/components/SiteStatusStrip';
-import { NAV_GROUPS, getNavItemsByGroup, FOOTER_LEGAL_ITEMS } from '@/config/navigation';
+import {
+  getFooterNavItems,
+  FOOTER_CONNECT_ITEMS,
+  FOOTER_LEGAL_ITEMS,
+} from '@/config/navigation';
 
 /* ── Logo SVG (inline, inherits color) ──────────────────────── */
 function FooterLogo() {
   return (
     <svg
       viewBox="152 399 697 200"
-      aria-label="SONU Logo"
+      aria-label="SK Sahinur Islam Logo"
       style={{ width: 90, height: 'auto', display: 'block', color: 'var(--gold)' }}
       fill="currentColor"
     >
@@ -36,6 +40,14 @@ function GitHubIcon() {
   );
 }
 
+function WordPressIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12.158 12.786l-2.698 7.84c.806.236 1.657.365 2.54.365 1.047 0 2.051-.181 2.986-.511-.024-.041-.046-.084-.07-.127l-2.758-7.567zm-5.748.428l3.693-10.02c-.89.418-1.684.996-2.35 1.704-.492.525-.893 1.134-1.185 1.802-.34.778-.528 1.636-.528 2.535 0 1.411.455 2.715 1.229 3.774.283.389.62.735 1.141.205zm11.378-7.914c.264.717.412 1.495.412 2.308 0 1.576-.569 3.018-1.517 4.137l-3.235-9.378c.844.385 1.611.91 2.278 1.554.764.738 1.442 1.939 2.062 1.379zm-5.788-3.3c-5.523 0-10 4.477-10 10 0 2.222.727 4.275 1.954 5.939l-.027-.08 3.865-10.597c.484-1.328.675-2.336.675-3.114 0-1.327-.971-2.145-1.942-2.145h-.194c1.724-1.286 3.862-2.046 6.18-2.046 3.493 0 6.6 1.71 8.527 4.35-.043-.003-.086-.007-.13-.007-.97 0-1.942.818-1.942 2.145 0 .778.192 1.786.676 3.114l3.864 10.597-.027.08c1.227-1.664 1.954-3.717 1.954-5.939 0-5.523-4.477-10-10-10z" />
+    </svg>
+  );
+}
+
 function LinkedInIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -52,34 +64,21 @@ function TelegramIcon() {
   );
 }
 
-function WhatsAppIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.225 8.225 0 012.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.196 8.196 0 01-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.03-1.25-.75-.67-1.26-1.5-1.41-1.75-.14-.25-.02-.39.11-.51.11-.11.25-.29.37-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.77 2.7 4.29 3.79.6.26 1.07.41 1.43.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.1-.22-.17-.47-.29z"/>
-    </svg>
-  );
-}
-
-function LinktreeIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M13.736 5.853l4.005-4.117 2.325 2.38-4.2 4.005h5.908v3.305h-5.937l4.229 4.108-2.325 2.334-5.741-5.76v8.468h-3.3v-8.459l-5.741 5.751-2.325-2.325 4.22-4.117H0V8.121h5.908L1.708 4.116l2.325-2.38 4.005 4.117V0h3.7v5.853z"/>
-    </svg>
-  );
-}
-
-const SOCIAL_LINKS = [
-  { id: 'github', label: 'GitHub', href: 'https://github.com/GeniousSonu', icon: GitHubIcon },
-  { id: 'linkedin', label: 'LinkedIn', href: 'https://www.linkedin.com/in/sksahinurislam/', icon: LinkedInIcon },
-  { id: 'telegram', label: 'Telegram', href: 'https://t.me/genious_sonu', icon: TelegramIcon },
-  { id: 'linktree', label: 'Linktree', href: 'https://linktr.ee/sksahinurislam', icon: LinktreeIcon },
-];
+const CONNECT_ICONS = {
+  'connect-github': GitHubIcon,
+  'connect-wordpress': WordPressIcon,
+  'connect-linkedin': LinkedInIcon,
+  'connect-telegram': TelegramIcon,
+};
 
 export default function Footer() {
   const pathname = usePathname();
   const transitionRouter = useTransitionRouter();
   const year = new Date().getFullYear();
   const [showCookieControl, setShowCookieControl] = useState(false);
+
+  const navigateItems = getFooterNavItems('navigate');
+  const workItems = getFooterNavItems('work');
 
   useEffect(() => {
     gsap.registerPlugin(ScrollToPlugin);
@@ -142,19 +141,26 @@ export default function Footer() {
   return (
     <footer id="footer" style={{ position: 'relative', overflow: 'hidden' }}>
       {/* Top gradient fade from page into footer */}
-      <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, height: '80px',
-        background: 'linear-gradient(to bottom, var(--void), transparent)',
-        pointerEvents: 'none', zIndex: 1,
-      }} />
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '80px',
+          background: 'linear-gradient(to bottom, var(--void), transparent)',
+          pointerEvents: 'none',
+          zIndex: 1,
+        }}
+      />
 
       {/* Content */}
       <div className="footer-content">
-        {/* ── Upper section ── */}
+        {/* ── Upper section: Brand + Curated 4-Column Directory (T01) ── */}
         <div className="footer-upper">
           <div className="site-container">
             <div className="footer-top-grid">
-              {/* Brand col */}
+              {/* Brand Column */}
               <div className="footer-brand">
                 <Link
                   href="/"
@@ -170,83 +176,129 @@ export default function Footer() {
                 </p>
                 {/* Status pill */}
                 <div className="footer-status">
-                  <span className="status-dot" style={{ width: 7, height: 7, borderRadius: '50%', background: '#10B981', display: 'inline-block', animation: 'pulse-dot 2s ease infinite', marginRight: 8 }} />
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--text-muted)', letterSpacing: '0.12em' }}>
+                  <span
+                    className="status-dot"
+                    style={{
+                      width: 7,
+                      height: 7,
+                      borderRadius: '50%',
+                      background: 'var(--gold)',
+                      display: 'inline-block',
+                      animation: 'pulse-dot 2s ease infinite',
+                      marginRight: 8,
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '0.65rem',
+                      color: 'var(--text-muted)',
+                      letterSpacing: '0.12em',
+                    }}
+                  >
                     OPEN TO GLOBAL ROLES · IST (UTC+5:30)
                   </span>
                 </div>
               </div>
 
-              {/* Dynamic Sitemap Navigation Groups from navigation.js */}
-              <div className="footer-col footer-nav-col">
-                <h2 className="footer-col-title">Navigation</h2>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '1rem' }}>
-                  {NAV_GROUPS.map((group) => {
-                    const items = getNavItemsByGroup(group.id);
+              {/* Column 1: Navigate */}
+              <nav aria-label="Navigate" className="footer-col footer-col-navigate">
+                <h2 className="footer-col-title">Navigate</h2>
+                <ul className="footer-curated-list" role="list">
+                  {navigateItems.map((item) => (
+                    <li key={item.id}>
+                      <a
+                        href={item.href}
+                        onClick={(e) => handleNavClick(e, item.href)}
+                        className="footer-nav-item"
+                      >
+                        {item.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+
+              {/* Column 2: Work */}
+              <nav aria-label="Work" className="footer-col footer-col-work">
+                <h2 className="footer-col-title">Work</h2>
+                <ul className="footer-curated-list" role="list">
+                  {workItems.map((item) => (
+                    <li key={item.id}>
+                      <a
+                        href={item.href}
+                        onClick={(e) => handleNavClick(e, item.href)}
+                        className="footer-nav-item"
+                      >
+                        {item.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+
+              {/* Column 3: Connect */}
+              <nav aria-label="Connect" className="footer-col footer-col-connect">
+                <h2 className="footer-col-title">Connect</h2>
+                <ul className="footer-curated-list" role="list">
+                  {FOOTER_CONNECT_ITEMS.map((item) => {
+                    const Icon = CONNECT_ICONS[item.id] || GitHubIcon;
                     return (
-                      <div key={group.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', color: 'var(--gold)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.2rem' }}>
-                          {group.label}
-                        </span>
-                        {items.map((item) => (
-                          <a
-                            key={item.id}
-                            href={item.href}
-                            onClick={(e) => handleNavClick(e, item.href)}
-                            className="footer-nav-item"
-                            style={{ minHeight: '32px', fontSize: '0.74rem' }}
-                          >
-                            {item.label}
-                          </a>
-                        ))}
-                      </div>
+                      <li key={item.id}>
+                        <a
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="footer-nav-item footer-connect-link"
+                          aria-label={`${item.label} (opens in new tab)`}
+                        >
+                          <span className="footer-connect-icon" aria-hidden="true">
+                            <Icon />
+                          </span>
+                          <span>{item.label}</span>
+                        </a>
+                      </li>
                     );
                   })}
-                </div>
-              </div>
+                </ul>
+              </nav>
 
-              {/* Connect group: Sleek icon button row */}
-              <div className="footer-col footer-connect-col">
-                <h2 className="footer-col-title">Connect</h2>
-                <div className="footer-social-row" role="list">
-                  {SOCIAL_LINKS.map(({ id, label, href, icon: Icon }) => (
-                    <a
-                      key={id}
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={label}
-                      className="footer-social-btn"
-                    >
-                      <Icon />
-                      <span className="footer-social-tooltip">{label}</span>
-                    </a>
+              {/* Column 4: Legal & Preferences */}
+              <nav aria-label="Legal" className="footer-col footer-col-legal">
+                <h2 className="footer-col-title">Legal</h2>
+                <ul className="footer-curated-list" role="list">
+                  {FOOTER_LEGAL_ITEMS.map((item) => (
+                    <li key={item.id}>
+                      <Link href={item.href} className="footer-nav-item">
+                        {item.label}
+                      </Link>
+                    </li>
                   ))}
-                </div>
-              </div>
-
-              {/* Terminal card (Desktop only, hidden on mobile) */}
-              <div className="footer-col footer-terminal-col">
-                <h2 className="footer-col-title">System Status</h2>
-                <div className="footer-terminal-card">
-                  <div className="terminal-header" style={{ marginBottom: '0.75rem' }}>
-                    <div className="dot-r"/><div className="dot-y"/><div className="dot-g"/>
-                    <span style={{ marginLeft: '0.5rem', fontSize: '0.62rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>sahinur@dev:~</span>
-                  </div>
-                  {[
-                    { key: 'uptime', val: '99.9%' },
-                    { key: 'kernel', val: '6.8.0-49-generic' },
-                    { key: 'load avg', val: '0.42, 0.38, 0.41' },
-                    { key: 'processes', val: '247 running' },
-                    { key: 'location', val: 'Kolkata, IN' },
-                  ].map(({ key, val }) => (
-                    <div key={key} className="footer-sys-row">
-                      <span className="footer-sys-key">{key}</span>
-                      <span className="footer-sys-val">{val}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+                  {showCookieControl && (
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (typeof window !== 'undefined') {
+                            window.dispatchEvent(new CustomEvent('open-cookie-preferences'));
+                          }
+                        }}
+                        className="footer-nav-item footer-cookie-btn"
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          padding: 0,
+                          font: 'inherit',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                        }}
+                      >
+                        Cookie Settings
+                      </button>
+                    </li>
+                  )}
+                </ul>
+              </nav>
             </div>
           </div>
         </div>
@@ -259,35 +311,21 @@ export default function Footer() {
         {/* ── Divider ── */}
         <div style={{ borderTop: '1px solid var(--border-dim)', margin: '0' }} />
 
-        {/* ── Bottom bar ── */}
+        {/* ── Bottom Bar ── */}
         <div className="footer-bottom">
           <div className="site-container">
             <div className="footer-bottom-inner">
               <div className="footer-cmd">
                 <span style={{ color: 'var(--red)', fontFamily: 'var(--font-mono)' }}>root@sahinur-dev</span>
                 <span style={{ color: 'var(--blue)', fontFamily: 'var(--font-mono)' }}>:~$</span>
-                <span style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}> echo &quot;Built with precision, deployed with intent.&quot; · {year}</span>
+                <span style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                  {' '}echo &quot;Built with precision, deployed with intent.&quot; · {year}
+                </span>
               </div>
-              <div className="footer-bottom-links">
-                {FOOTER_LEGAL_ITEMS.map((item) => (
-                  <Link key={item.id} href={item.href} className="footer-link">
-                    {item.label}
-                  </Link>
-                ))}
-                {showCookieControl && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (typeof window !== 'undefined') {
-                        window.dispatchEvent(new CustomEvent('open-cookie-preferences'));
-                      }
-                    }}
-                    className="footer-link footer-cookie-link"
-                    style={{ background: 'transparent', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer' }}
-                  >
-                    Cookie Settings
-                  </button>
-                )}
+              <div className="footer-bottom-meta">
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+                  All systems operational · Clean navigation architecture
+                </span>
               </div>
             </div>
           </div>

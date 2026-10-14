@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint",
     "check:routes": "node scripts/check-routes.mjs",
-    "test:boot": "node scripts/test-boot-001.mjs"
+    "test:boot": "node scripts/test-boot-001.mjs",
+    "test:t01": "node scripts/test-t01-footer.mjs"
   },
   "allowScripts": {
     "esbuild": true,
