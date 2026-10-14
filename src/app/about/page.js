@@ -15,9 +15,9 @@ export default function AboutPage() {
   return (
     <PageShell>
       <PageHeader
-        eyebrow="[ OPERATOR DOSSIER · SPEC 01 ]"
-        title="Engineering at the edge of systems, code & infrastructure."
-        summary="Senior Web Application Developer & IT Specialist based in Kolkata, India. Bridging high-concurrency backend services, Linux infrastructure, patent-granted IoT hardware, and client-centric product execution."
+        eyebrow="[ BIOGRAPHICAL DOSSIER · SPEC 01 ]"
+        title="Engineering at the intersection of systems, code & craft."
+        summary="Design Engineer & Systems Architect based in Kolkata, India. Bridging high-concurrency real-time protocols, Linux infrastructure, patent-granted hardware cryptography, and high-craft digital products."
       />
 
       <Section className={styles.wrapper}>
@@ -49,7 +49,7 @@ export default function AboutPage() {
                 </div>
                 <div className={styles.telemetryRow}>
                   <span className={styles.telemetryLabel}>Primary Role</span>
-                  <span className={styles.telemetryValue}>Senior Web Dev</span>
+                  <span className={styles.telemetryValue}>Design Engineer</span>
                 </div>
                 <div className={styles.telemetryRow}>
                   <span className={styles.telemetryLabel}>Organization</span>

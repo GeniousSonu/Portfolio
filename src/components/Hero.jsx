@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useRef } from 'react';
+import Link from 'next/link';
 import gsap from 'gsap';
 import { TextPlugin } from 'gsap/TextPlugin';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -159,23 +160,23 @@ export default function Hero() {
             </div>
 
             <PlayableElement>
-              <h1 className="hero-name" aria-label="SK Sahinur Islam (Genious Sonu) — Full Stack Developer & IT Engineer" ref={nameRef}>
+              <h1 className="hero-name" aria-label="SK Sahinur Islam (Genious Sonu) — Design Engineer & Systems Architect" ref={nameRef}>
                 <span className="hero-name-line"><span><EditableText>SK</EditableText></span></span>
                 <span className="hero-name-line"><span><EditableText>Sahinur</EditableText></span></span>
                 <span className="hero-name-line"><span><EditableText>Islam</EditableText></span></span>
-                <span className="sr-only"> (Genious Sonu) — Full Stack Developer &amp; IT Engineer</span>
+                <span className="sr-only"> (Genious Sonu) — Design Engineer &amp; Systems Architect</span>
               </h1>
             </PlayableElement>
 
             <PlayableElement>
-              <p className="hero-role" id="hero-role" ref={roleRef}><EditableText>Full Stack Developer &amp; IT Engineer</EditableText></p>
+              <p className="hero-role" id="hero-role" ref={roleRef}><EditableText>Design Engineer &amp; Systems Architect</EditableText></p>
             </PlayableElement>
 
             <PlayableElement>
               <p className="hero-desc" id="hero-desc" ref={descRef}>
-                <EditableText>I build systems that don&apos;t fail at 3 AM. From MERN stack web apps to patented IoT cold chains,</EditableText>
+                <EditableText>Architecting resilient real-time protocols, secure distributed systems, and high-fidelity product interfaces.</EditableText>
                 <br />
-                <EditableText>I engineer at the intersection of</EditableText> <span className="gold"><EditableText>web, infrastructure, and security.</EditableText></span>
+                <EditableText>Granted Indian Patentee (IoT Cold-Chain) · Co-Founder at WEFIK ·</EditableText> <span className="gold"><EditableText>30+ Verified Credentials.</EditableText></span>
               </p>
             </PlayableElement>
 
@@ -191,53 +192,55 @@ export default function Hero() {
                 }}
                 className="btn btn-gold"
               >
-                View Projects ↓
+                Selected Works ↓
               </a>
-              <a href="https://www.linkedin.com/in/sksahinurislam/" target="_blank" rel="noopener noreferrer" className="btn btn-ghost">LinkedIn →</a>
+              <Link href="/projects/iot-cold-chain-patent" className="btn btn-ghost">
+                Patent Blueprint →
+              </Link>
             </div>
 
             <div className="hero-stats" id="hero-stats" ref={statsRef}>
               <div className="stat-item">
-                <div className="stat-value" data-target="5"><span className="count-num">0</span><span>+</span></div>
-                <div className="stat-label">Years Active</div>
-              </div>
-              <div className="stat-item">
-                <div className="stat-value" data-target="40"><span className="count-num">0</span><span>+</span></div>
-                <div className="stat-label">Projects Done</div>
+                <div className="stat-value" data-target="1"><span className="count-num">0</span></div>
+                <div className="stat-label">Granted Patent (2025)</div>
               </div>
               <div className="stat-item">
                 <div className="stat-value" data-target="30"><span className="count-num">0</span><span>+</span></div>
-                <div className="stat-label">Certifications</div>
+                <div className="stat-label">Verified Certifications</div>
               </div>
               <div className="stat-item">
-                <div className="stat-value" data-target="1"><span className="count-num">0</span></div>
-                <div className="stat-label">Patent Granted</div>
+                <div className="stat-value" data-target="40"><span className="count-num">0</span><span>+</span></div>
+                <div className="stat-label">Shipped Systems</div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-value" data-target="5"><span className="count-num">0</span><span>+</span></div>
+                <div className="stat-label">Years Engineering</div>
               </div>
             </div>
           </div>
 
-          {/* Hero Terminal */}
+          {/* Hero Architectural Console */}
           <PlayableElement>
           <div className="hero-terminal" id="hero-terminal" ref={terminalRef}>
             <div className="terminal-window">
               <div className="terminal-header">
                 <div className="dot-r"></div><div className="dot-y"></div><div className="dot-g"></div>
-                <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', color: 'var(--text-muted)' }}>sahinur@dev:~</span>
+                <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', color: 'var(--gold)', fontFamily: 'var(--font-mono)' }}>sahinur.is // systems-telemetry</span>
               </div>
               <div className="sysinfo-body">
                 <div className="ssh-prompt">
-                  <div className="ssh-line"><span className="ssh-prompt-str">sahinur@dev:~$</span><span className="ssh-cmd">neofetch --minimal</span></div>
-                  <div className="ssh-line ssh-out">  OS: Ubuntu 24.04 LTS x86_64</div>
-                  <div className="ssh-line ssh-out">  Kernel: 6.8.0-49-generic</div>
-                  <div className="ssh-line ssh-out">  Shell: zsh 5.9</div>
-                  <div className="ssh-line ssh-out">  Stack: MERN · Laravel · Python</div>
-                  <div className="ssh-line ssh-out">  Uptime: 5y 4m 12d</div>
-                  <div className="ssh-line"><span className="ssh-prompt-str">sahinur@dev:~$</span><span className="ssh-cmd">whoami</span></div>
-                  <div className="ssh-line ssh-out">  sk-sahinur-islam (co-founder, dev, qa-intern)</div>
+                  <div className="ssh-line"><span className="ssh-prompt-str">operator:~$</span><span className="ssh-cmd">telemetry --status</span></div>
+                  <div className="ssh-line ssh-out">  PATENT: App No. 202431057476 (Granted Jan 2025)</div>
+                  <div className="ssh-line ssh-out">  TITLE: IoT Cold-Chain Tamper-Proof Cryptography</div>
+                  <div className="ssh-line ssh-out">  HARDWARE: Microchip ATECC608B + ESP32-S3 + LoRaWAN</div>
+                  <div className="ssh-line ssh-out">  STACK: Next.js 16 · Supabase · Sanity v3 · WebRTC</div>
+                  <div className="ssh-line ssh-out">  LOCATION: Kolkata, WB, IN (22.5726° N, 88.3639° E)</div>
+                  <div className="ssh-line"><span className="ssh-prompt-str">operator:~$</span><span className="ssh-cmd">whoami</span></div>
+                  <div className="ssh-line ssh-out">  SK Sahinur Islam // Design Engineer &amp; Co-Founder</div>
                   <div className="ssh-line">
-                    <span className="ssh-prompt-str">sahinur@dev:~$</span>
+                    <span className="ssh-prompt-str">operator:~$</span>
                     <span id="terminal-typing" className="ssh-cmd" ref={typingRef}></span>
-                    <span style={{ color: 'var(--green)', animation: 'blink 1s step-end infinite' }}>▋</span>
+                    <span style={{ color: 'var(--gold)', animation: 'blink 1s step-end infinite' }}>▋</span>
                   </div>
                 </div>
               </div>

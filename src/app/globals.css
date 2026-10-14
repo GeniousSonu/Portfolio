@@ -111,13 +111,35 @@
 /* ─── Reset & Root ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --void: #050505; --graphite: #0F1115; --gunmetal: #1A1D23;
-  --surface: #22262E; --border: #2A2F38; --border-dim: #1E2229;
-  --text-primary: #F9FAFB; --text-secondary: #D1D5DB; --text-muted: #8A9BAD;
-  --gold: #10B981; --gold-dim: #059669; --gold-bright: #34D399; /* Remapped from gold to premium emerald greens */
-  --silver: #8A9BAD; --silver-bright: #C1CDD9;
-  --green: #4ADE80; --amber: #FBBF24; --blue: #60A5FA;
-  --red: #F87171; --purple: #A78BFA;
+  --void: #0B0D0E;
+  --graphite: #121518;
+  --gunmetal: #181C20;
+  --surface: #171A1E;
+  --surface-obsidian: #131619;
+  --surface-card: #15181C;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hairline: rgba(255, 255, 255, 0.08);
+  --border-brass: rgba(212, 175, 55, 0.28);
+  --border-dim: rgba(255, 255, 255, 0.04);
+  --text-primary: #ECEAE4;
+  --text-secondary: #A1A1AA;
+  --text-muted: #94A3B8;
+  --gold: #D4AF37;
+  --gold-dim: #997A24;
+  --gold-bright: #F59E0B;
+  --signal: #10B981;
+  --signal-dim: #059669;
+  --silver: #A1A1AA;
+  --silver-bright: #E4E4E7;
+  --green: #10B981;
+  --amber: #F59E0B;
+  --blue: #38BDF8;
+  --red: #F87171;
+  --purple: #C084FC;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
   --font-sans: 'Geist', 'Geist Fallback', system-ui, sans-serif;
   --font-display: 'Geist', 'Geist Fallback', system-ui, sans-serif;
   --font-mono: 'Geist', 'Geist Fallback', monospace;
@@ -188,10 +210,17 @@ footer {
   font-style: normal;
 }
 
-::selection { background: rgba(16,185,129,0.2); color: var(--gold-bright); }
-::-webkit-scrollbar { width: 3px; }
-::-webkit-scrollbar-track { background: var(--graphite); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+::selection { background: rgba(212, 175, 55, 0.22); color: var(--gold-bright); }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--void); }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: var(--radius-sm); }
+::-webkit-scrollbar-thumb:hover { background: var(--gold-dim); }
+
+/* Universal High-Visibility Focus Ring */
+*:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
 
 /* ─── Custom Cursor ─── */
 #cursor {
@@ -203,14 +232,30 @@ footer {
 }
 #cursor-ring {
   position: fixed; top: 0; left: 0; width: 32px; height: 32px;
-  border: 1px solid rgba(16,185,129,0.4); border-radius: 50%;
+  border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 50%;
   pointer-events: none; z-index: 2147483646; transform: translate(-50%, -50%);
   transition: width 0.3s var(--ease-out), height 0.3s var(--ease-out),
               border-color 0.3s, opacity 0.3s;
 }
 body:has(a:hover) #cursor-ring,
 body:has(button:hover) #cursor-ring,
-body:has([role="button"]:hover) #cursor-ring { width: 50px; height: 50px; border-color: var(--gold); }
+body:has([role="button"]:hover) #cursor-ring { width: 48px; height: 48px; border-color: var(--gold); }
+
+/* Suppress custom cursor over text inputs to never obscure native caret */
+body:has(input:hover, textarea:hover, [contenteditable]:hover) #cursor,
+body:has(input:hover, textarea:hover, [contenteditable]:hover) #cursor-ring {
+  opacity: 0;
+}
+
+/* Suppress custom cursor on touch/pointer coarse devices */
+@media (hover: none) or (pointer: coarse) {
+  #cursor, #cursor-ring {
+    display: none !important;
+  }
+  body {
+    cursor: auto !important;
+  }
+}
 
 /* ─── Grid Overlay ─── */
 #grid-overlay {

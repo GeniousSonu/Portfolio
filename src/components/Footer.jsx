@@ -208,7 +208,7 @@ export default function Footer() {
               {/* Connect group: Sleek icon button row */}
               <div className="footer-col footer-connect-col">
                 <h2 className="footer-col-title">Connect</h2>
-                <div className="footer-social-row" role="list">
+                <div className="footer-social-row">
                   {SOCIAL_LINKS.map(({ id, label, href, icon: Icon }) => (
                     <a
                       key={id}

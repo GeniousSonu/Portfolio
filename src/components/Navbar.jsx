@@ -336,7 +336,6 @@ export default function Navbar() {
                     <div
                       id={`nav-panel-${group.id}`}
                       className={styles.dropdownMenu}
-                      role="menu"
                       aria-label={`${group.label} pages`}
                       onMouseEnter={() => handleGroupMouseEnter(group.id)}
                       onMouseLeave={handleGroupMouseLeave}
@@ -347,7 +346,6 @@ export default function Navbar() {
                         <a
                           key={item.id}
                           href={item.href}
-                          role="menuitem"
                           className={styles.dropdownItem}
                           onClick={(e) => handleLinkClick(e, item.href)}
                         >
