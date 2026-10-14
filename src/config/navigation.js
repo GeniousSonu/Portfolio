@@ -8,6 +8,8 @@
  * - Do not hardcode navigation links in component files.
  * - All anchor links (#projects, #experience, #certifications) resolve to homepage sections.
  * - All page links resolve to real or stub routes.
+ * - `footer`: whether the item appears in the curated 4-column footer (T01).
+ * - `footerColumn`: which curated column ('work' | 'navigate') the item belongs to.
  */
 
 export const NAV_GROUPS = [
@@ -30,6 +32,8 @@ export const NAVIGATION_ITEMS = [
     status: 'live',
     keywords: ['projects', 'code', 'portfolio', 'iot', 'patent', 'work'],
     icon: 'folder',
+    footer: true,
+    footerColumn: 'work',
   },
   {
     id: 'nav-experience',
@@ -41,6 +45,8 @@ export const NAVIGATION_ITEMS = [
     status: 'live',
     keywords: ['experience', 'career', 'jobs', 'history', 'timeline', 'work'],
     icon: 'briefcase',
+    footer: true,
+    footerColumn: 'work',
   },
   {
     id: 'nav-wefik',
@@ -52,6 +58,8 @@ export const NAVIGATION_ITEMS = [
     status: 'live',
     keywords: ['wefik', 'agency', 'client', 'co-founder', 'business'],
     icon: 'building',
+    footer: true,
+    footerColumn: 'work',
   },
   {
     id: 'nav-plugin',
@@ -63,6 +71,8 @@ export const NAVIGATION_ITEMS = [
     status: 'live',
     keywords: ['plugin', 'wordpress', 'security', 'checkup', 'tools'],
     icon: 'puzzle',
+    footer: true,
+    footerColumn: 'work',
   },
   {
     id: 'nav-store',
@@ -74,6 +84,8 @@ export const NAVIGATION_ITEMS = [
     status: 'live',
     keywords: ['store', 'gear', 'hardware', 'setup', 'amazon', 'products'],
     icon: 'shopping-bag',
+    footer: true,
+    footerColumn: 'work',
   },
 
   // ── 02. Knowledge ─────────────────────────────────────────
@@ -87,6 +99,8 @@ export const NAVIGATION_ITEMS = [
     status: 'live',
     keywords: ['blog', 'articles', 'writing', 'posts', 'sanity', 'essays'],
     icon: 'book-open',
+    footer: true,
+    footerColumn: 'navigate',
   },
   {
     id: 'nav-wiki',
@@ -98,6 +112,8 @@ export const NAVIGATION_ITEMS = [
     status: 'live',
     keywords: ['wiki', 'garden', 'notes', 'docs', 'knowledge', 'patent'],
     icon: 'bookmark',
+    footer: true,
+    footerColumn: 'navigate',
   },
   {
     id: 'nav-architecture',
@@ -109,6 +125,8 @@ export const NAVIGATION_ITEMS = [
     status: 'live',
     keywords: ['architecture', 'system', 'flow', 'security', 'diagram', 'diagrams'],
     icon: 'cpu',
+    footer: false,
+    footerColumn: null,
   },
   {
     id: 'nav-uses',
@@ -120,6 +138,8 @@ export const NAVIGATION_ITEMS = [
     status: 'live',
     keywords: ['uses', 'setup', 'hardware', 'rig', 'specs', 'desk'],
     icon: 'monitor',
+    footer: true,
+    footerColumn: 'navigate',
   },
 
   // ── 03. Lab ───────────────────────────────────────────────
@@ -133,6 +153,8 @@ export const NAVIGATION_ITEMS = [
     status: 'live',
     keywords: ['play', 'experiment', 'canvas', 'shaders', 'webgl'],
     icon: 'sparkles',
+    footer: false,
+    footerColumn: null,
   },
   {
     id: 'nav-lounge',
@@ -144,6 +166,8 @@ export const NAVIGATION_ITEMS = [
     status: 'live',
     keywords: ['lounge', 'hangout', 'video', 'webrtc', 'chat', 'rooms'],
     icon: 'video',
+    footer: false,
+    footerColumn: null,
   },
   {
     id: 'nav-space',
@@ -155,6 +179,8 @@ export const NAVIGATION_ITEMS = [
     status: 'live',
     keywords: ['space', 'whiteboard', 'canvas', 'multiplayer', 'draw'],
     icon: 'edit-3',
+    footer: false,
+    footerColumn: null,
   },
   {
     id: 'nav-vault',
@@ -166,6 +192,8 @@ export const NAVIGATION_ITEMS = [
     status: 'live',
     keywords: ['vault', 'media', 'books', 'movies', 'music', 'archive'],
     icon: 'lock',
+    footer: false,
+    footerColumn: null,
   },
   {
     id: 'nav-confession',
@@ -177,6 +205,8 @@ export const NAVIGATION_ITEMS = [
     status: 'live',
     keywords: ['confession', 'feedback', 'anonymous', 'inbox'],
     icon: 'message-square',
+    footer: false,
+    footerColumn: null,
   },
   {
     id: 'nav-tools',
@@ -188,6 +218,8 @@ export const NAVIGATION_ITEMS = [
     status: 'live',
     keywords: ['tools', 'utilities', 'formatters', 'encoders', 'regex'],
     icon: 'terminal',
+    footer: false,
+    footerColumn: null,
   },
 
   // ── 04. About ─────────────────────────────────────────────
@@ -201,6 +233,8 @@ export const NAVIGATION_ITEMS = [
     status: 'live',
     keywords: ['about', 'bio', 'story', 'developer', 'sonu', 'engineer'],
     icon: 'user',
+    footer: true,
+    footerColumn: 'navigate',
   },
   {
     id: 'nav-certifications',
@@ -212,6 +246,8 @@ export const NAVIGATION_ITEMS = [
     status: 'live',
     keywords: ['certifications', 'credentials', 'security', 'badges', 'skills'],
     icon: 'award',
+    footer: false,
+    footerColumn: null,
   },
   {
     id: 'nav-status',
@@ -223,9 +259,11 @@ export const NAVIGATION_ITEMS = [
     status: 'live',
     keywords: ['status', 'uptime', 'health', 'telemetry', 'ping', 'infrastructure'],
     icon: 'activity',
+    footer: true,
+    footerColumn: 'navigate',
   },
 
-  // ── 05. Primary CTA ───────────────────────────────────────
+  // ── 05. Primary CTA & Index ───────────────────────────────
   {
     id: 'nav-contact',
     label: 'Contact',
@@ -236,6 +274,48 @@ export const NAVIGATION_ITEMS = [
     status: 'live',
     keywords: ['contact', 'email', 'hire', 'message', 'telegram'],
     icon: 'mail',
+    footer: false,
+    footerColumn: null,
+  },
+  {
+    id: 'nav-all-pages',
+    label: 'All Pages (Index)',
+    href: '/site-index',
+    type: 'page',
+    group: 'knowledge',
+    description: 'Complete directory of all platform routes and destinations',
+    status: 'live',
+    keywords: ['index', 'pages', 'directory', 'sitemap', 'all'],
+    icon: 'grid',
+    footer: true,
+    footerColumn: 'navigate',
+  },
+];
+
+export const FOOTER_CONNECT_ITEMS = [
+  {
+    id: 'connect-github',
+    label: 'GitHub',
+    href: 'https://github.com/GeniousSonu',
+    description: 'Open source repositories, experiments & contributions',
+  },
+  {
+    id: 'connect-wordpress',
+    label: 'WordPress.org',
+    href: 'https://profiles.wordpress.org/genioussonu/',
+    description: 'Plugin directory profile & core contributions',
+  },
+  {
+    id: 'connect-linkedin',
+    label: 'LinkedIn',
+    href: 'https://www.linkedin.com/in/sksahinurislam/',
+    description: 'Professional experience, client work & network',
+  },
+  {
+    id: 'connect-telegram',
+    label: 'Telegram',
+    href: 'https://t.me/genious_sonu',
+    description: 'Direct messaging & transmission channel',
   },
 ];
 
@@ -260,6 +340,17 @@ export const FOOTER_LEGAL_ITEMS = [
     description: 'Platform usage guidelines and intellectual property notice',
     status: 'live',
     keywords: ['terms', 'legal', 'conditions'],
+    icon: 'file-text',
+  },
+  {
+    id: 'nav-imprint',
+    label: 'Imprint',
+    href: '/imprint',
+    type: 'page',
+    group: 'legal',
+    description: 'Operator identity, legal notice, and regulatory contact channels',
+    status: 'stub',
+    keywords: ['imprint', 'legal', 'operator', 'notice', 'impressum'],
     icon: 'file-text',
   },
   {
@@ -294,15 +385,6 @@ export const EXCLUDED_FROM_NAV = [
     description: 'PWA service worker offline fallback screen',
     status: 'live',
   },
-  {
-    id: 'nav-site-index',
-    label: 'Site Index',
-    href: '/site-index',
-    type: 'page',
-    group: 'excluded',
-    description: 'Complete directory of all platform routes for R0 owner review',
-    status: 'stub',
-  },
 ];
 
 /**
@@ -312,6 +394,15 @@ export const EXCLUDED_FROM_NAV = [
  */
 export function getNavItemsByGroup(groupId) {
   return NAVIGATION_ITEMS.filter((item) => item.group === groupId);
+}
+
+/**
+ * Helper to retrieve items flagged for a specific curated footer column
+ * @param {'navigate' | 'work'} column
+ * @returns {Array} List of footer-flagged navigation items
+ */
+export function getFooterNavItems(column) {
+  return NAVIGATION_ITEMS.filter((item) => item.footer && item.footerColumn === column);
 }
 
 /**
