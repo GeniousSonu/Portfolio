@@ -91,7 +91,7 @@
   font-size: clamp(2rem, 4vw, 2.75rem);
   font-weight: 800;
   line-height: 1.15;
-  color: #fff;
+  color: var(--text-primary);
   letter-spacing: -0.025em;
   margin-bottom: 1rem;
 }
@@ -186,9 +186,9 @@
   border-radius: 50%;
 }
 
-.tocDotRed { background: #ef4444; }
-.tocDotYellow { background: #f59e0b; }
-.tocDotGreen { background: #10b981; }
+.tocDotRed { background: var(--red); }
+.tocDotYellow { background: var(--amber); }
+.tocDotGreen { background: var(--gold); }
 
 .tocList {
   display: grid;
@@ -238,7 +238,7 @@
   font-family: var(--font-sans);
   font-size: 1.45rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-primary);
   letter-spacing: -0.015em;
   margin-bottom: 1.1rem;
   display: flex;
@@ -260,7 +260,7 @@
 }
 
 .highlightText {
-  color: #fff;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
@@ -280,12 +280,12 @@
 
 .calloutWarning {
   background: rgba(245, 158, 11, 0.05);
-  border-left-color: #f59e0b;
+  border-left-color: var(--amber);
 }
 
 .calloutDanger {
   background: rgba(239, 68, 68, 0.05);
-  border-left-color: #ef4444;
+  border-left-color: var(--red);
 }
 
 .calloutHeader {
@@ -295,7 +295,7 @@
   font-family: var(--font-mono);
   font-weight: 700;
   font-size: 0.8rem;
-  color: #fff;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -351,7 +351,7 @@
   font-family: var(--font-mono);
   font-size: 0.88rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
   display: flex;
   align-items: center;

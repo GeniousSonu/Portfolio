@@ -22,7 +22,7 @@ const NAV_CONFIG_PATH = path.join(ROOT_DIR, 'src', 'config', 'navigation.js');
 
 // Dynamically import navigation configuration
 const navModule = await import(`file://${NAV_CONFIG_PATH}`);
-const { NAVIGATION_ITEMS, FOOTER_LEGAL_ITEMS, EXCLUDED_FROM_NAV } = navModule;
+const { NAVIGATION_ITEMS, FOOTER_LEGAL_ITEMS, EXCLUDED_FROM_NAV, FOOTER_CONNECT_ITEMS } = navModule;
 
 const allItems = [
   ...NAVIGATION_ITEMS,
@@ -31,6 +31,29 @@ const allItems = [
 ];
 
 console.log(`[check-routes] Verifying ${allItems.length} navigation endpoints against codebase...`);
+
+// Validate T01 curated footer metadata
+let footerErrors = false;
+for (const item of NAVIGATION_ITEMS) {
+  if (typeof item.footer !== 'boolean') {
+    console.error(`  ❌ Missing boolean 'footer' property on item "${item.id}"`);
+    footerErrors = true;
+  }
+  if (item.footer && !['work', 'navigate'].includes(item.footerColumn)) {
+    console.error(`  ❌ Invalid footerColumn "${item.footerColumn}" on item "${item.id}". Expected 'work' or 'navigate'.`);
+    footerErrors = true;
+  }
+}
+
+if (!Array.isArray(FOOTER_CONNECT_ITEMS) || FOOTER_CONNECT_ITEMS.length === 0) {
+  console.error(`  ❌ Missing or empty FOOTER_CONNECT_ITEMS`);
+  footerErrors = true;
+}
+
+if (footerErrors) {
+  console.error(`\n[check-routes] FAILED: Invalid footer configuration schema detected.`);
+  process.exit(1);
+}
 
 let hasErrors = false;
 let verifiedCount = 0;

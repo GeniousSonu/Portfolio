@@ -9,7 +9,10 @@
     "start": "next start",
     "lint": "eslint",
     "check:routes": "node scripts/check-routes.mjs",
-    "test:boot": "node scripts/test-boot-001.mjs"
+    "test:boot": "node scripts/test-boot-001.mjs",
+    "test:t01": "node scripts/test-t01-footer.mjs",
+    "check:processors": "node scripts/check-processors.mjs",
+    "test:t02": "node scripts/check-processors.mjs && node scripts/test-t02-legal.mjs"
   },
   "allowScripts": {
     "esbuild": true,
