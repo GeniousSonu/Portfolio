@@ -20,7 +20,7 @@ export const CHANGELOG_RELEASES = [
       {
         type: 'Fix',
         description:
-          'Excluded internal agent and development markdown files (AGENTS.md, DEVELOPMENT.md, CONTRIBUTING.md, README.md, .agents/) from release packages.',
+          'Excluded development markdown files and repository maintenance documents from distribution archives.',
       },
       {
         type: 'Hardening',

@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 
 /**
- * Route Segment Error Boundary (Incident INC-001)
+ * Route Segment Error Boundary
  * Prevents application blank screen when any route or component throws during render or hydration.
  */
 export default function Error({ error, reset }) {

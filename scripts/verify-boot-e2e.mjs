@@ -4,14 +4,14 @@ import path from 'path';
 
 const PORT = 3005;
 const BASE_URL = `http://localhost:${PORT}`;
-const SCREEN_DIR = path.resolve(process.cwd(), 'docs/design/audit/screens/boot');
+const SCREEN_DIR = path.resolve(process.cwd(), '.private/reports/screens/boot');
 
 if (!fs.existsSync(SCREEN_DIR)) {
   fs.mkdirSync(SCREEN_DIR, { recursive: true });
 }
 
 async function runTests() {
-  console.log(`[BOOT-002 TEST RUNNER] Starting Playwright test suite against ${BASE_URL}...`);
+  console.log(`[E2E TEST RUNNER] Starting Playwright test suite against ${BASE_URL}...`);
   const browser = await chromium.launch({
     executablePath: '/usr/bin/google-chrome',
     headless: true,

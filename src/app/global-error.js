@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 
 /**
- * Global Root Error Boundary (Incident INC-001)
+ * Global Root Error Boundary
  * Catches errors thrown inside RootLayout and prevents total document unmount.
  * Must render its own <html> and <body>.
  */

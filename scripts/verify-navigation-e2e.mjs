@@ -21,9 +21,8 @@ async function checkServerReady(timeoutMs = 15000) {
 }
 
 async function runE2E() {
-  console.log('\n============================================================');
-  console.log(`INC-001 LIVE SERVER & HEADLESS E2E VERIFICATION (PORT ${TEST_PORT})`);
-  console.log('============================================================\n');
+  console.log(`Navigation & Reliability E2E Verification (PORT ${TEST_PORT})\n`);
+
 
   console.log(`[1] Launching standalone Next.js production server on port ${TEST_PORT}...`);
   const serverProcess = spawn('npx', ['next', 'start', '-p', String(TEST_PORT)], {

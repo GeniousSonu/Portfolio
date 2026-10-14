@@ -17,7 +17,7 @@ import { bootFontVariables } from '@/lib/bootFonts';
 let hasBootedInThisDocument = false;
 
 /**
- * Finite State Machine Reducer (TASK BOOT-002)
+ * Finite state machine reducer for the application boot sequence
  */
 function bootReducer(state, action) {
   const transitions = BOOT_TRANSITIONS[state];
@@ -175,7 +175,7 @@ export default function BootPreloader() {
       } catch {}
     }
 
-    // 5. Absolute failsafe timeout (4.5s ceiling from BOOT-002 contract)
+    // 5. Absolute failsafe timeout to prevent blocking UI on slow connections
     registerTimer(() => {
       dispatch({ type: BOOT_EVENTS.FAILSAFE });
       finishBoot();

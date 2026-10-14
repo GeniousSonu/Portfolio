@@ -358,7 +358,7 @@ export async function broadcastToSpace(event, payload) {
   });
 }
 
-/* ─── Instant Sync Rooms (Multi-Device Space) ─── */
+// Instant Sync Rooms
 
 const ROOM_ID_CHARSET = 'abcdefghjkmnpqrstuvwxyz23456789'; // URL-safe lowercase alphanumeric (no ambiguous 0,o,1,l)
 const ROOM_TTL_HOURS = 48;

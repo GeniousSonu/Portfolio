@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "check:routes": "node scripts/check-routes.mjs",
-    "test:boot": "node scripts/test-boot-001.mjs"
+    "test:boot": "node scripts/verify-boot-preloader.mjs"
   },
   "allowScripts": {
     "esbuild": true,

@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { PageShell, PageHeader, Container, Section } from '@/components/layout';
 import { buildMetadata } from '@/lib/seo';
 import {
@@ -11,18 +12,21 @@ import {
 import styles from './siteIndex.module.css';
 
 /**
- * TODO: Temporary Phase R0 Review Page
- * This route is strictly for internal architecture verification, navigation audits,
- * and owner inspection. It will be decommissioned before final production launch.
+ * Site Index and Route Directory
+ * Development tool for inspecting configured platform routes and navigation groups.
  */
 export const metadata = buildMetadata({
-  title: 'Site Index — Architecture Review Directory',
-  description: 'Complete directory of all platform routes, navigation groups, and status states for internal audit.',
+  title: 'Site Index — Route Directory',
+  description: 'Directory of platform routes, navigation groups, and status states.',
   path: '/site-index',
-  noIndex: true, // Strictly excluded from search crawlers
+  noIndex: true,
 });
 
 export default function SiteIndexPage() {
+  if (process.env.NODE_ENV === 'production') {
+    notFound();
+  }
+
   const allGroups = [
     ...NAV_GROUPS,
     { id: 'legal', label: 'Legal & Policies', description: 'Mandatory compliance, terms and data policies' },
@@ -38,9 +42,9 @@ export default function SiteIndexPage() {
   return (
     <PageShell>
       <PageHeader
-        eyebrow="[ SKELETON REVIEW DIRECTORY ]"
+        eyebrow="[ ROUTE DIRECTORY ]"
         title="Complete Site Topology Index"
-        summary="Internal directory of every navigatable route, homepage anchor section, and legal document configured in navigation.js for Phase R0."
+        summary="Directory of all navigatable routes, homepage anchor sections, and documents configured across the platform."
       />
 
       <Section>
@@ -60,7 +64,7 @@ export default function SiteIndexPage() {
             </div>
             <div className={styles.stat}>
               <span className={styles.statVal}>{NAVIGATION_ITEMS.filter(i => i.status === 'stub').length + EXCLUDED_FROM_NAV.filter(i => i.status === 'stub').length}</span>
-              <span className={styles.statLabel}>R0 Stubs</span>
+              <span className={styles.statLabel}>Draft Routes</span>
             </div>
           </div>
 

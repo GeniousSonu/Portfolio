@@ -64,7 +64,7 @@
   font-display: swap;
 }
 
-/* ─── Self-Hosted OFL Boot Font Subsets (BOOT-001) ─── */
+/* Boot font subsets */
 @font-face {
   font-family: 'Noto Sans Bengali Boot';
   src: url('/fonts/boot/noto-sans-bengali-subset.woff2') format('woff2');
@@ -764,7 +764,7 @@ input, textarea, select, .form-input {
   margin-top: 3rem; opacity: 1; transform: none;
 }
 
-/* Incident INC-001 Hardening: Animation states apply ONLY when JavaScript motion is verified */
+/* Animation states apply only when JavaScript motion is verified */
 html.js-motion:not(.reduce-motion) .hero-eyebrow {
   opacity: 0; transform: translateY(15px);
 }
@@ -1861,7 +1861,7 @@ footer {
 .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
 .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
 
-/* ─── SECTION REVEAL CLASSES (Incident INC-001 Hardening) ─── */
+/* Section reveal classes */
 /* Default: 100% visible so content NEVER depends on JS to render */
 .reveal { opacity: 1; transform: none; }
 .reveal-left { opacity: 1; transform: none; }
@@ -3370,7 +3370,7 @@ html.reduce-motion .ambientGlow {
   view-transition-name: none !important;
 }
 
-/* ─── Waveform Page Transition (BOOT-001 Part 4) ─── */
+/* Waveform page transition */
 .transition-waveform-container {
   position: fixed;
   top: 50%;

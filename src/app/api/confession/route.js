@@ -111,7 +111,7 @@ export async function POST(request) {
       console.warn('[Confession API] Supabase unavailable, proceeding gracefully:', dbErr?.message);
     }
 
-    // 8. Telegram notification per PRD FR-CONF-07 (Message is "New confession received" only, without text)
+    // Silent Telegram moderation alert (notification only, without message text)
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID;
     if (botToken && chatId) {

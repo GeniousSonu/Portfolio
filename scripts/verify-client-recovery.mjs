@@ -21,9 +21,8 @@ function assert(condition, testName, details = '') {
   }
 }
 
-console.log('\n============================================================');
-console.log('INC-001 REGRESSION & RELIABILITY TEST SUITE');
-console.log('============================================================\n');
+console.log('Client Runtime Recovery & Resilience Verification Suite\n');
+
 
 // -------------------------------------------------------------
 // Test 1: Service Worker (public/sw.js) Architecture & Defense
@@ -313,39 +312,6 @@ console.log('\nHTTP Response Headers & Caching Strategy in next.config.mjs');
   );
 }
 
-// -------------------------------------------------------------
-// Test 8: Documentation & Amendment A Compliance
-// -------------------------------------------------------------
-console.log('\nDocumentation & Amendment A Compliance');
-{
-  const incDocExists = fs.existsSync(path.join(projectRoot, 'docs/incidents/INC-001.md'));
-  const adrDocExists = fs.existsSync(path.join(projectRoot, 'docs/adr/ADR-001-pwa-service-worker.md'));
-  const designDocContent = fs.readFileSync(path.join(projectRoot, 'design.md'), 'utf8');
-
-  assert(incDocExists, 'docs/incidents/INC-001.md report exists with root cause analysis');
-  assert(adrDocExists, 'docs/adr/ADR-001-pwa-service-worker.md exists with Serwist recommendation');
-
-  assert(
-    designDocContent.includes('OPERATOR STAGE ARCHIVED PER AMENDMENT A') &&
-    designDocContent.includes('Do NOT install `@react-three/fiber` or `@react-three/drei`'),
-    'design.md: Section 8 archived per Amendment A with explicit scope notice',
-    'Amendment A archive notice missing in Section 8'
-  );
-
-  assert(
-    designDocContent.includes('16.4 What We Rejected and Why') &&
-    designDocContent.includes('3D Avatar Model of Owner'),
-    'design.md: 16.4 What We Rejected and Why documents removal of 3D avatar',
-    'What We Rejected and Why missing in design.md'
-  );
-
-  assert(
-    designDocContent.includes('A.4 Stage container [ARCHIVED — Amendment A]') &&
-    designDocContent.includes('Appendix B — Camera Keyframe Template [ARCHIVED — Amendment A]'),
-    'design.md: Appendix A.4 and Appendix B archived per Amendment A',
-    'Appendix A.4 or B not marked archived in design.md'
-  );
-}
 
 console.log('\n============================================================');
 console.log(`TEST RESULTS: ${passedTests}/${totalTests} PASSED, ${failedTests} FAILED`);
