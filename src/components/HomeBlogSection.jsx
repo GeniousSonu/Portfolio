@@ -33,25 +33,47 @@ const INITIAL_POSTS = [
         _id: '4ba3adce-af1e-4fc9-ae7a-56d72e1dd741',
         title: 'Cyber Security',
         slug: 'cyber-security',
-        color: '#06b6d4',
       },
     ],
   },
 ];
 
+function BlogCardSkeleton() {
+  return (
+    <article className="home-blog-card home-blog-card-skeleton" aria-hidden="true">
+      <div className="home-blog-thumb skeleton-pulse" />
+      <div className="home-blog-body">
+        <div className="home-blog-meta">
+          <div className="skeleton-line skeleton-cat" />
+          <div className="skeleton-line skeleton-date" />
+        </div>
+        <div className="skeleton-line skeleton-title" />
+        <div className="skeleton-line skeleton-title-short" />
+        <div className="skeleton-line skeleton-desc" />
+        <div className="skeleton-line skeleton-desc" />
+        <div className="home-blog-footer">
+          <div className="skeleton-line skeleton-cta" />
+        </div>
+      </div>
+    </article>
+  );
+}
+
 export default function HomeBlogSection() {
   const [posts, setPosts] = useState(INITIAL_POSTS);
   const [totalCount, setTotalCount] = useState(INITIAL_POSTS.length);
+  const [loading, setLoading] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const containerRef = useRef(null);
   const carouselRef = useRef(null);
 
-// Fetch up to 10 live articles from our internal server API
+  // Fetch up to 10 live articles from our internal server API
   useEffect(() => {
     let isMounted = true;
     async function fetchPosts() {
       try {
+        setLoading(true);
         const res = await fetch('/api/posts');
         if (!res.ok) return;
         const result = await res.json();
@@ -61,6 +83,8 @@ export default function HomeBlogSection() {
         }
       } catch (err) {
         console.warn('Could not fetch latest posts from /api/posts, using cached snapshot:', err?.message || err);
+      } finally {
+        if (isMounted) setLoading(false);
       }
     }
     fetchPosts();
@@ -140,7 +164,7 @@ export default function HomeBlogSection() {
         <div className="home-blog-header-row reveal">
           <div className="home-blog-header-text">
             <div className="s-label">
-              <span style={{ color: 'var(--red)' }}>●</span> Articles &amp; Engineering Notes
+              <span style={{ color: 'var(--gold-bright)' }}>●</span> Articles &amp; Engineering Notes
             </div>
             <h2 className="section-title">Latest from the Blog</h2>
             <p className="section-subtitle">
@@ -197,68 +221,96 @@ export default function HomeBlogSection() {
             aria-label="Blog posts carousel"
             data-lenis-prevent
           >
-            {posts.map((post) => {
-              const category = post.categories?.[0]?.title || 'Engineering';
-              const categoryColor = post.categories?.[0]?.color || '#06b6d4';
-              const postDate = post.publishedAt
-                ? new Date(post.publishedAt).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                  })
-                : 'Recent';
+            {loading && posts.length === 0 ? (
+              <>
+                <BlogCardSkeleton />
+                <BlogCardSkeleton />
+              </>
+            ) : (
+              posts.map((post) => {
+                const category = post.categories?.[0]?.title || 'Engineering';
+                const postSlug = post.slug || '#';
+                const postUrl = `/blog/${postSlug}`;
+                const postDate = post.publishedAt
+                  ? new Date(post.publishedAt).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })
+                  : 'Recent';
 
-              return (
-                <article key={post._id} className="home-blog-card">
-                  {/* Cover Image */}
-                  <div className="home-blog-thumb">
+                return (
+                  <article key={post._id} className="home-blog-card">
+                    {/* Accessible whole-card tap target (T10) */}
+                    <Link
+                      href={postUrl}
+                      className="home-blog-stretched-link"
+                      aria-label={`Read article: ${post.title}`}
+                      tabIndex={-1}
+                    />
+
+                    {/* Cover Image: 16/9 aspect ratio with zero layout shift */}
                     {post.mainImage?.asset?.url ? (
-                      <Image
-                        src={post.mainImage.asset.url}
-                        alt={post.mainImage.alt || post.title}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 85vw, 360px"
-                      />
+                      <div className="home-blog-thumb">
+                        <Image
+                          src={post.mainImage.asset.url}
+                          alt={post.mainImage.alt || post.title}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 360px"
+                          priority={false}
+                        />
+                      </div>
                     ) : (
-                      <div className="home-blog-thumb-fallback">
+                      <div className="home-blog-thumb home-blog-thumb-fallback">
                         <span className="mono muted">ARTICLE</span>
                       </div>
                     )}
-                  </div>
 
-                  <div className="home-blog-body">
-                    <div className="home-blog-meta">
-                      <span
-                        className="home-blog-cat"
-                        style={{ borderColor: `${categoryColor}50`, color: categoryColor }}
-                      >
-                        {category}
-                      </span>
-                      <span className="home-blog-date mono muted">
-                        {postDate} {post.readTime ? `· ${post.readTime} min read` : ''}
-                      </span>
+                    <div className="home-blog-body">
+                      {/* Mono metadata row */}
+                      <div className="home-blog-meta">
+                        <span className="home-blog-cat">
+                          {category}
+                        </span>
+                        <span className="home-blog-date mono muted">
+                          {postDate} {post.readTime ? `· ${post.readTime} min read` : ''}
+                        </span>
+                      </div>
+
+                      {/* Title: clamped to 2-3 lines */}
+                      <h3 className="home-blog-title">
+                        <Link href={postUrl}>{post.title}</Link>
+                      </h3>
+
+                      {/* Excerpt: clamped to 2 lines, >= 16px body text */}
+                      {post.excerpt && <p className="home-blog-desc">{post.excerpt}</p>}
+
+                      {/* Footer: explicit, touch-friendly affordance */}
+                      <div className="home-blog-footer">
+                        <Link href={postUrl} className="home-blog-readmore">
+                          <span>Read Article</span>
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                            <polyline points="12 5 19 12 12 19" />
+                          </svg>
+                        </Link>
+                      </div>
                     </div>
-
-                    <h3 className="home-blog-title">
-                      <Link href={`/blog/${post.slug || '#'}`}>{post.title}</Link>
-                    </h3>
-
-                    {post.excerpt && <p className="home-blog-desc">{post.excerpt}</p>}
-
-                    <div className="home-blog-footer">
-                      <Link href={`/blog/${post.slug || '#'}`} className="home-blog-readmore">
-                        <span>Read Article</span>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                          <line x1="5" y1="12" x2="19" y2="12" />
-                          <polyline points="12 5 19 12 12 19" />
-                        </svg>
-                      </Link>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
+                  </article>
+                );
+              })
+            )}
           </div>
         </div>
 
@@ -266,7 +318,7 @@ export default function HomeBlogSection() {
         <div className="home-blog-cta-wrap reveal">
           <Link href="/blog" className="home-blog-cta-btn">
             <span>Explore All Articles {totalCount > 1 ? `(${totalCount})` : ''}</span>
-            <span className="cta-arrow">→</span>
+            <span className="cta-arrow" aria-hidden="true">→</span>
           </Link>
         </div>
       </div>
