@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { PLUGIN_CONFIG, ALL_PLUGINS } from '@/config/plugin';
+import { getWordPressOrgPluginData } from '@/lib/wporg';
 import styles from '../plugin.module.css';
 
 export async function generateStaticParams() {
@@ -14,7 +15,9 @@ export async function generateMetadata({ params }) {
   const { slug } = await params;
   if (slug !== PLUGIN_CONFIG.slug) return {};
 
-  const title = `${PLUGIN_CONFIG.name} — WordPress Security Audit & Hardening`;
+  const wpOrgData = await getWordPressOrgPluginData(PLUGIN_CONFIG.slug);
+  const version = wpOrgData?.version || PLUGIN_CONFIG.version;
+  const title = `${PLUGIN_CONFIG.name} (v${version}) — WordPress Security Audit & Hardening`;
   const description = PLUGIN_CONFIG.tagline;
   const canonicalUrl = `https://www.genioussonu.me/plugin/${PLUGIN_CONFIG.slug}`;
 
@@ -45,13 +48,24 @@ export default async function PluginLandingPage({ params }) {
     notFound();
   }
 
+  // Fetch live plugin metadata from api.wordpress.org (cached with 1-hour ISR)
+  const wpOrgData = await getWordPressOrgPluginData(PLUGIN_CONFIG.slug);
+
+  const currentVersion = wpOrgData?.version || PLUGIN_CONFIG.version;
+  const lastUpdated = wpOrgData?.lastUpdated || PLUGIN_CONFIG.updatedDate;
+  const activeInstalls = wpOrgData?.activeInstalls;
+  const ratingScore = wpOrgData?.rating;
+  const numRatings = wpOrgData?.numRatings;
+  const isLiveOnWpOrg = Boolean(wpOrgData?.wordpressOrgUrl);
+  const downloadUrl = wpOrgData?.downloadUrl || PLUGIN_CONFIG.releaseZipUrl;
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
     name: PLUGIN_CONFIG.name,
     operatingSystem: 'WordPress 5.8+',
     applicationCategory: 'SecurityApplication',
-    softwareVersion: PLUGIN_CONFIG.version,
+    softwareVersion: currentVersion,
     description: PLUGIN_CONFIG.tagline,
     offers: {
       '@type': 'Offer',
@@ -168,7 +182,17 @@ export default async function PluginLandingPage({ params }) {
             <div className={styles.heroContent}>
               <div className={styles.heroKicker}>
                 <span className={styles.badge}>WordPress Security SOP</span>
-                <span className={styles.versionPill}>v{PLUGIN_CONFIG.version}</span>
+                <span className={styles.versionPill}>v{currentVersion}</span>
+                {activeInstalls && (
+                  <span className={styles.versionPill} title="Active WordPress Installations">
+                    ★ {activeInstalls} installs
+                  </span>
+                )}
+                {ratingScore && (
+                  <span className={styles.versionPill} title={`${numRatings} WordPress.org ratings`}>
+                    ★ {ratingScore}/5.0 ({numRatings})
+                  </span>
+                )}
               </div>
               <h1 className={styles.title}>
                 {PLUGIN_CONFIG.name}
@@ -177,7 +201,7 @@ export default async function PluginLandingPage({ params }) {
 
               <div className={styles.heroActions}>
                 <a
-                  href={PLUGIN_CONFIG.releaseZipUrl}
+                  href={downloadUrl}
                   className={styles.btnPrimary}
                   download
                 >
@@ -196,17 +220,17 @@ export default async function PluginLandingPage({ params }) {
                     <polyline points="7 10 12 15 17 10" />
                     <line x1="12" y1="15" x2="12" y2="3" />
                   </svg>
-                  <span>Download v{PLUGIN_CONFIG.version}</span>
+                  <span>Download v{currentVersion}</span>
                 </a>
 
-                {PLUGIN_CONFIG.wordpressOrgUrl ? (
+                {isLiveOnWpOrg ? (
                   <a
-                    href={PLUGIN_CONFIG.wordpressOrgUrl}
+                    href={wpOrgData.wordpressOrgUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={styles.btnSecondary}
                   >
-                    View on WordPress.org
+                    View on WordPress.org ↗
                   </a>
                 ) : (
                   <span className={styles.versionPill} title="Plugin review submitted">
@@ -225,7 +249,7 @@ export default async function PluginLandingPage({ params }) {
               </div>
 
               <div className={styles.releaseInfo}>
-                <span>Release: {PLUGIN_CONFIG.updatedDate}</span>
+                <span>Release: {lastUpdated}</span>
                 <span> · </span>
                 <span>License: {PLUGIN_CONFIG.license}</span>
                 <span> · </span>

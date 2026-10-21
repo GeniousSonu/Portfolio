@@ -9,6 +9,63 @@
 
 export const CHANGELOG_RELEASES = [
   {
+    version: '1.3.3',
+    date: 'October 19, 2026',
+    changes: [
+      {
+        type: 'Fix',
+        description:
+          'Remote WordPress.org changelog scanning for security updates with strict semantic version parsing and zero false findings on local fixtures.',
+      },
+      {
+        type: 'Feature',
+        description:
+          'Destructive action password confirmation setting toggle (default OFF) with full capability and nonce preservation.',
+      },
+      {
+        type: 'Feature',
+        description:
+          'Seven honest task result states (Done & Verified, Applied Not Verified, Needs Action, Needs Host or Manual, Informational, Not Applicable, Failed) with actionable plugin capability guidance on every task.',
+      },
+      {
+        type: 'Fix',
+        description:
+          'Environment sensitivity for TLS probe and SPF/DMARC checks to mark local (.local, localhost) and non-HTTPS sites as Not Applicable.',
+      },
+      {
+        type: 'Fix',
+        description:
+          'Guarded is_plugin_active calling context and established strict Level B guided status for 2FA and Child Theme Scaffolder.',
+      },
+      {
+        type: 'Security',
+        description:
+          'In-memory atomic wp-config.php updates with zero disk backup persistence and local cryptographic salt generation.',
+      },
+      {
+        type: 'Privacy',
+        description:
+          'Independent per-source opt-in consent controls defaulting to off for all external API lookups.',
+      },
+    ],
+  },
+  {
+    version: '1.3.2',
+    date: 'October 15, 2026',
+    changes: [
+      {
+        type: 'Fix',
+        description:
+          'Synchronized text domain to genioussonu-site-checkup across entire PHP and JS codebase.',
+      },
+      {
+        type: 'Hardening',
+        description:
+          'Hardened phpcs annotations and verified strict WordPress Coding Standards compliance.',
+      },
+    ],
+  },
+  {
     version: '1.3.1',
     date: 'September 28, 2026',
     changes: [

@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { PLUGIN_CONFIG, ALL_PLUGINS } from '@/config/plugin';
 import { CHANGELOG_RELEASES } from '@/data/pluginChangelog';
+import { getWordPressOrgPluginData } from '@/lib/wporg';
 import styles from '../../plugin.module.css';
 
 export async function generateStaticParams() {
@@ -15,7 +16,9 @@ export async function generateMetadata({ params }) {
   const { slug } = await params;
   if (slug !== PLUGIN_CONFIG.slug) return {};
 
-  const title = `Changelog & Release Notes — ${PLUGIN_CONFIG.name}`;
+  const wpOrgData = await getWordPressOrgPluginData(PLUGIN_CONFIG.slug);
+  const version = wpOrgData?.version || PLUGIN_CONFIG.version;
+  const title = `Changelog & Release Notes (v${version}) — ${PLUGIN_CONFIG.name}`;
   const description =
     'Complete release history, vulnerability fixes, hardening enhancements, and feature milestones for GeniousSonu Site Checkup.';
   const canonicalUrl = `https://www.genioussonu.me/plugin/${PLUGIN_CONFIG.slug}/changelog`;
@@ -44,6 +47,11 @@ export async function generateMetadata({ params }) {
 export default async function PluginChangelogPage({ params }) {
   const { slug } = await params;
   if (slug !== PLUGIN_CONFIG.slug) notFound();
+
+  // Fetch live plugin metadata from api.wordpress.org (cached with 1-hour ISR)
+  const wpOrgData = await getWordPressOrgPluginData(PLUGIN_CONFIG.slug);
+  const currentVersion = wpOrgData?.version || PLUGIN_CONFIG.version;
+  const lastUpdated = wpOrgData?.lastUpdated || PLUGIN_CONFIG.updatedDate;
 
   return (
     <div className={styles.pageWrapper}>
