@@ -10,7 +10,7 @@ export const PLUGIN_CONFIG = {
   slug: 'genioussonu-site-checkup',
   tagline:
     'Complete security audit, site hardening checklist, and vulnerability scanner for WordPress. One-click safe hardening, login protection, and client reports.',
-  version: '1.3.3',
+  version: '1.3.4',
   requiresWp: '5.8',
   testedUpTo: '6.7',
   requiresPhp: '7.4',
@@ -19,12 +19,11 @@ export const PLUGIN_CONFIG = {
   authorWpProfile: 'https://profiles.wordpress.org/genioussonu/',
   githubRepoUrl: 'https://github.com/GeniousSonu/Site-Checkup-Pro',
   releaseZipUrl:
-    'https://github.com/GeniousSonu/Site-Checkup-Pro/releases/download/v1.3.3/genioussonu-site-checkup.zip',
-  // WordPress.org URL populated dynamically or fallback
-  wordpressOrgUrl: '',
-  wpDirectoryStatus: 'Approved by WordPress.org — Pending initial SVN tag release',
+    'https://github.com/GeniousSonu/Site-Checkup-Pro/releases/download/v1.3.4/genioussonu-site-checkup.zip',
+  wordpressOrgUrl: 'https://wordpress.org/plugins/genioussonu-site-checkup/',
+  wpDirectoryStatus: 'Live on WordPress.org Plugin Directory',
   supportEmail: 'support@genioussonu.me',
-  updatedDate: 'October 19, 2026',
+  updatedDate: 'October 21, 2026',
   license: 'GPLv2 or later',
   licenseUrl: 'https://www.gnu.org/licenses/old-licenses/gpl-2.0.html',
   canonicalPluginUri: 'https://www.genioussonu.me/plugin/genioussonu-site-checkup',

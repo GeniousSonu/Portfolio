@@ -14,9 +14,9 @@ export async function generateMetadata({ params }) {
   const { slug } = await params;
   if (slug !== PLUGIN_CONFIG.slug) return {};
 
-  const title = `Support & Assistance — ${PLUGIN_CONFIG.name}`;
+  const title = 'GeniousSonu Site Checkup Support & Help Desk';
   const description =
-    'Official support guidelines, issue reporting checklist, and diagnostic procedures for GeniousSonu Site Checkup.';
+    'Get support for GeniousSonu Site Checkup. Fast help and troubleshooting for your WordPress security hardening checklist, scanner audits, and tools.';
   const canonicalUrl = `https://www.genioussonu.me/plugin/${PLUGIN_CONFIG.slug}/support`;
 
   return {

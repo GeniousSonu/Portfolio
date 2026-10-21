@@ -14,9 +14,9 @@ export async function generateMetadata({ params }) {
   const { slug } = await params;
   if (slug !== PLUGIN_CONFIG.slug) return {};
 
-  const title = `Terms of Use — ${PLUGIN_CONFIG.name}`;
+  const title = 'Terms of Service | GeniousSonu Site Checkup';
   const description =
-    'Plain-language terms of use for GeniousSonu Site Checkup. GPLv2 licensing, backup responsibilities, AS-IS warranty disclaimers, and support scope.';
+    'Terms of service for GeniousSonu Site Checkup, the open-source GPL WordPress security hardening checklist plugin for professional site security.';
   const canonicalUrl = `https://www.genioussonu.me/plugin/${PLUGIN_CONFIG.slug}/terms`;
 
   return {

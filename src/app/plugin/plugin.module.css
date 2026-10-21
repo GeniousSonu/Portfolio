@@ -108,6 +108,20 @@
   line-height: 1.6;
 }
 
+.formerlyNote {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-family: var(--font-mono, monospace);
+  color: var(--gold-bright, #34d399);
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 6px;
+  padding: 0.35rem 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
 /* Plugin Listing Grid (for /plugin index) */
 .pluginGrid {
   display: grid;

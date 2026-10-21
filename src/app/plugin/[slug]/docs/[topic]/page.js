@@ -25,8 +25,28 @@ export async function generateMetadata({ params }) {
   const currentTopic = DOCS_TOPICS.find((t) => t.slug === topic);
   if (!currentTopic) return {};
 
-  const title = `${currentTopic.title} — ${PLUGIN_CONFIG.name} Docs`;
-  const description = currentTopic.shortDesc;
+  const topicTitles = {
+    'installation': 'Install Guide | GeniousSonu Site Checkup',
+    'getting-started': 'Getting Started | GeniousSonu Site Checkup',
+    'task-reference': 'Task Reference | GeniousSonu Site Checkup',
+    'recommended-settings': 'Recommended Setup | GeniousSonu Site Checkup',
+    'troubleshooting': 'Troubleshooting | GeniousSonu Site Checkup',
+    'updating': 'Updating Guide | GeniousSonu Site Checkup',
+  };
+
+  const topicDescriptions = {
+    'installation': 'Install GeniousSonu Site Checkup via WP Admin or ZIP. Get started with this WordPress security hardening checklist plugin in minutes.',
+    'getting-started': 'Run your first audit with GeniousSonu Site Checkup. Use this WordPress security hardening checklist to scan SOP coverage and fix risks.',
+    'task-reference': 'Explore all 64 audit checks in GeniousSonu Site Checkup. Complete WordPress security hardening checklist reference for agencies and devs.',
+    'recommended-settings': 'Recommended configurations for GeniousSonu Site Checkup, your complete WordPress security hardening checklist for servers and firewalls.',
+    'troubleshooting': 'Troubleshooting and FAQs for GeniousSonu Site Checkup. Quick fixes for this WordPress security hardening checklist plugin.',
+    'updating': 'How to safely update GeniousSonu Site Checkup. Keep your WordPress security hardening checklist current with the latest patches.',
+  };
+
+  const title = topicTitles[topic] || `${currentTopic.title} | ${PLUGIN_CONFIG.name}`;
+  const description =
+    topicDescriptions[topic] ||
+    `${currentTopic.shortDesc} Learn more with GeniousSonu Site Checkup, the WordPress security hardening checklist.`;
   const canonicalUrl = `https://www.genioussonu.me/plugin/${PLUGIN_CONFIG.slug}/docs/${topic}`;
 
   return {

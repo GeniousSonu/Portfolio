@@ -15,10 +15,9 @@ export async function generateMetadata({ params }) {
   const { slug } = await params;
   if (slug !== PLUGIN_CONFIG.slug) return {};
 
-  const wpOrgData = await getWordPressOrgPluginData(PLUGIN_CONFIG.slug);
-  const version = wpOrgData?.version || PLUGIN_CONFIG.version;
-  const title = `${PLUGIN_CONFIG.name} (v${version}) — WordPress Security Audit & Hardening`;
-  const description = PLUGIN_CONFIG.tagline;
+  const title = 'GeniousSonu Site Checkup — WP Security Checklist';
+  const description =
+    'GeniousSonu Site Checkup is an open-source WordPress security hardening checklist plugin with 1-click safe fixes, scanner audits, and client reports.';
   const canonicalUrl = `https://www.genioussonu.me/plugin/${PLUGIN_CONFIG.slug}`;
 
   return {
@@ -58,6 +57,8 @@ export default async function PluginLandingPage({ params }) {
   const numRatings = wpOrgData?.numRatings;
   const isLiveOnWpOrg = Boolean(wpOrgData?.wordpressOrgUrl);
   const downloadUrl = wpOrgData?.downloadUrl || PLUGIN_CONFIG.releaseZipUrl;
+  const wpOrgPluginUrl = 'https://wordpress.org/plugins/genioussonu-site-checkup/';
+  const wpOrgZipDownloadUrl = 'https://downloads.wordpress.org/plugin/genioussonu-site-checkup.zip';
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -66,7 +67,8 @@ export default async function PluginLandingPage({ params }) {
     operatingSystem: 'WordPress 5.8+',
     applicationCategory: 'SecurityApplication',
     softwareVersion: currentVersion,
-    description: PLUGIN_CONFIG.tagline,
+    description:
+      'GeniousSonu Site Checkup is an open-source WordPress security hardening checklist plugin with 1-click safe fixes, scanner audits, and client reports.',
     offers: {
       '@type': 'Offer',
       price: '0',
@@ -78,8 +80,13 @@ export default async function PluginLandingPage({ params }) {
       url: PLUGIN_CONFIG.authorUrl,
       sameAs: PLUGIN_CONFIG.authorWpProfile,
     },
-    downloadUrl: PLUGIN_CONFIG.releaseZipUrl,
     url: `https://www.genioussonu.me/plugin/${PLUGIN_CONFIG.slug}`,
+    downloadUrl: wpOrgZipDownloadUrl,
+    installUrl: wpOrgPluginUrl,
+    sameAs: [
+      wpOrgPluginUrl,
+      PLUGIN_CONFIG.githubRepoUrl,
+    ],
   };
 
   const screenshots = [
@@ -167,6 +174,14 @@ export default async function PluginLandingPage({ params }) {
             Terms of Use
           </Link>
           <a
+            href="https://wordpress.org/plugins/genioussonu-site-checkup/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.navPill}
+          >
+            WordPress.org ↗
+          </a>
+          <a
             href={PLUGIN_CONFIG.githubRepoUrl}
             target="_blank"
             rel="noopener noreferrer"
@@ -197,6 +212,9 @@ export default async function PluginLandingPage({ params }) {
               <h1 className={styles.title}>
                 {PLUGIN_CONFIG.name}
               </h1>
+              <div className={styles.formerlyNote}>
+                Formerly Site Checkup Pro · WordPress Security Hardening Checklist
+              </div>
               <p className={styles.subtitle}>{PLUGIN_CONFIG.tagline}</p>
 
               <div className={styles.heroActions}>
@@ -223,20 +241,14 @@ export default async function PluginLandingPage({ params }) {
                   <span>Download v{currentVersion}</span>
                 </a>
 
-                {isLiveOnWpOrg ? (
-                  <a
-                    href={wpOrgData.wordpressOrgUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.btnSecondary}
-                  >
-                    View on WordPress.org ↗
-                  </a>
-                ) : (
-                  <span className={styles.versionPill} title="Plugin review submitted">
-                    ◈ {PLUGIN_CONFIG.wpDirectoryStatus}
-                  </span>
-                )}
+                <a
+                  href={wpOrgPluginUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.btnSecondary}
+                >
+                  Also on WordPress.org ↗
+                </a>
 
                 <a
                   href={PLUGIN_CONFIG.githubRepoUrl}

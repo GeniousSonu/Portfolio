@@ -29,8 +29,29 @@ const IconPlatform = () => (
   </svg>
 );
 
+const IconShield = () => (
+  <svg className="action-btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+  </svg>
+);
+
 /* ── Projects Data ─────────────────────────────────────────── */
 const PROJECTS = [
+  {
+    title: 'GeniousSonu Site Checkup — WP Security Checklist',
+    category: '2026 · WordPress · Security',
+    dotColor: '#10B981',
+    desc: 'Automated WordPress security hardening checklist and vulnerability audit plugin. Features 64 agency SOP checks, 1-click safe fixes with diff preview, and client audit reporting.',
+    stack: ['PHP', 'WordPress', 'Security Hardening', 'REST API', 'JavaScript'],
+    metrics: [
+      { val: '64', label: 'SOP Checks' },
+      { val: '1-Click', label: 'Safe Fixes' },
+      { val: 'GPLv2', label: 'Open Source' }
+    ],
+    link: '/plugin/genioussonu-site-checkup',
+    btnType: 'plugin',
+    btnText: 'View Plugin & Docs',
+  },
   {
     title: 'LearnAI — Adaptive Intelligent Tutoring',
     category: '2024 · AI/ML',
@@ -262,8 +283,7 @@ export default function Projects() {
               <h3 className="project-title">
                 <a
                   href={project.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  {...(!project.link.startsWith('/') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                   className="project-title-link"
                 >
                   {project.title}
@@ -298,12 +318,11 @@ export default function Projects() {
                 <div className="project-bottom-action">
                   <a
                     href={project.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    {...(!project.link.startsWith('/') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                     className={`project-action-btn ${
                       project.btnType === 'patent'
                         ? 'project-btn-patent'
-                        : project.btnType === 'agency'
+                        : project.btnType === 'agency' || project.btnType === 'plugin'
                         ? 'project-btn-agency'
                         : 'project-btn-github'
                     }`}
@@ -313,6 +332,8 @@ export default function Projects() {
                       <IconPatentDoc />
                     ) : project.btnType === 'agency' ? (
                       <IconPlatform />
+                    ) : project.btnType === 'plugin' ? (
+                      <IconShield />
                     ) : (
                       <IconGitHub />
                     )}

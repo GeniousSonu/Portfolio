@@ -15,9 +15,9 @@ export async function generateMetadata({ params }) {
   const { slug } = await params;
   if (slug !== PLUGIN_CONFIG.slug) return {};
 
-  const title = `Documentation — ${PLUGIN_CONFIG.name}`;
+  const title = 'GeniousSonu Site Checkup Documentation & Guides';
   const description =
-    'Comprehensive documentation, setup guides, and 64-item agency task reference for GeniousSonu Site Checkup.';
+    'Official documentation for GeniousSonu Site Checkup. Learn how to use this WordPress security hardening checklist to protect your site and fix flaws.';
   const canonicalUrl = `https://www.genioussonu.me/plugin/${PLUGIN_CONFIG.slug}/docs`;
 
   return {

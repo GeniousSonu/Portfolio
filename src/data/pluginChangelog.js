@@ -9,6 +9,22 @@
 
 export const CHANGELOG_RELEASES = [
   {
+    version: '1.3.4',
+    date: 'October 21, 2026',
+    changes: [
+      {
+        type: 'Docs',
+        description:
+          'Optimize WordPress.org search visibility with natural keywords, verified search tags, and real-world FAQs.',
+      },
+      {
+        type: 'Docs',
+        description:
+          'Update project portfolio landing page, comprehensive SOP task reference, and live verification.',
+      },
+    ],
+  },
+  {
     version: '1.3.3',
     date: 'October 19, 2026',
     changes: [

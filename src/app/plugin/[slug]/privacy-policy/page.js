@@ -14,9 +14,9 @@ export async function generateMetadata({ params }) {
   const { slug } = await params;
   if (slug !== PLUGIN_CONFIG.slug) return {};
 
-  const title = `Privacy Policy — ${PLUGIN_CONFIG.name}`;
+  const title = 'Privacy Policy | GeniousSonu Site Checkup';
   const description =
-    'Plain-English privacy policy detailing data sovereignty, zero-collection defaults, and external service opt-ins for GeniousSonu Site Checkup.';
+    'Privacy policy for GeniousSonu Site Checkup. Learn how our WordPress security hardening checklist protects your data with zero tracking by default.';
   const canonicalUrl = `https://www.genioussonu.me/plugin/${PLUGIN_CONFIG.slug}/privacy-policy`;
 
   return {

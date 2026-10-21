@@ -16,11 +16,9 @@ export async function generateMetadata({ params }) {
   const { slug } = await params;
   if (slug !== PLUGIN_CONFIG.slug) return {};
 
-  const wpOrgData = await getWordPressOrgPluginData(PLUGIN_CONFIG.slug);
-  const version = wpOrgData?.version || PLUGIN_CONFIG.version;
-  const title = `Changelog & Release Notes (v${version}) — ${PLUGIN_CONFIG.name}`;
+  const title = 'GeniousSonu Site Checkup Changelog & Releases';
   const description =
-    'Complete release history, vulnerability fixes, hardening enhancements, and feature milestones for GeniousSonu Site Checkup.';
+    'Full changelog for GeniousSonu Site Checkup. Discover the latest WordPress security hardening checklist updates, vulnerability patches, and fixes.';
   const canonicalUrl = `https://www.genioussonu.me/plugin/${PLUGIN_CONFIG.slug}/changelog`;
 
   return {
