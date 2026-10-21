@@ -10,16 +10,16 @@ export default function NotFound() {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#050505',
-      color: '#F9FAFB',
-      fontFamily: "'Geist', 'Geist Fallback', system-ui, sans-serif",
+      backgroundColor: 'var(--void, #0B0D0E)',
+      color: 'var(--text-primary, #ECEAE4)',
+      fontFamily: "var(--font-sans, system-ui, sans-serif)",
       padding: '2rem',
       position: 'relative',
       overflow: 'hidden'
     }}>
       {/* Background Grid */}
-      <div id="grid-overlay" style={{ opacity: 0.2 }} aria-hidden="true" />
-      <div id="scan-line" style={{ opacity: 0.5 }} aria-hidden="true" />
+      <div id="grid-overlay" style={{ opacity: 0.15 }} aria-hidden="true" />
+      <div id="scan-line" style={{ opacity: 0.3 }} aria-hidden="true" />
 
       <main style={{
         zIndex: 10,
@@ -35,13 +35,13 @@ export default function NotFound() {
           display: 'inline-flex',
           alignItems: 'center',
           gap: '0.6rem',
-          padding: '0.4rem 0.9rem',
-          background: 'rgba(15, 17, 21, 0.8)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          borderRadius: '9999px',
+          padding: '0.35rem 0.85rem',
+          background: 'rgba(212, 175, 55, 0.08)',
+          border: '1px solid var(--border-brass, rgba(212, 175, 55, 0.28))',
+          borderRadius: 'var(--radius-sm, 6px)',
           fontSize: '0.75rem',
-          fontFamily: 'monospace',
-          color: '#8A9BAD'
+          fontFamily: 'var(--font-mono, monospace)',
+          color: 'var(--gold, #D4AF37)'
         }}>
           <span style={{
             width: '6px',
@@ -60,9 +60,7 @@ export default function NotFound() {
           letterSpacing: '-0.04em',
           lineHeight: 1,
           margin: 0,
-          background: 'linear-gradient(180deg, #FFFFFF 0%, #8A9BAD 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent'
+          color: 'var(--text-primary, #ECEAE4)'
         }}>
           404
         </h1>
@@ -70,24 +68,24 @@ export default function NotFound() {
         {/* Subtitle */}
         <p style={{
           fontSize: '1rem',
-          color: '#D1D5DB',
+          color: 'var(--text-secondary, #A1A1AA)',
           lineHeight: 1.6,
           margin: 0,
-          fontWeight: 300,
+          fontWeight: 400,
           maxWidth: '440px'
         }}>
           The route you requested does not exist or has been relocated to another endpoint.
         </p>
 
         {/* Terminal sysinfo card */}
-        <div className="sysinfo" style={{ width: '100%', margin: '0.5rem 0', textAlign: 'left' }}>
+        <div className="sysinfo" style={{ width: '100%', margin: '0.5rem 0', textAlign: 'left', borderRadius: 'var(--radius-sm, 6px)' }}>
           <div className="sysinfo-header">
             <div className="dot-r" /><div className="dot-y" /><div className="dot-g" />
             <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
               sahinur@dev:~$ status --check
             </span>
           </div>
-          <div className="sysinfo-body" style={{ padding: '1rem', fontSize: '0.8rem', fontFamily: 'monospace' }}>
+          <div className="sysinfo-body" style={{ padding: '1rem', fontSize: '0.8rem', fontFamily: 'var(--font-mono, monospace)' }}>
             <div style={{ color: 'var(--red)', marginBottom: '0.3rem' }}>
               ERR: Target URL unreachable
             </div>
@@ -105,14 +103,14 @@ export default function NotFound() {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '0.5rem',
-            padding: '0.75rem 1.6rem',
-            borderRadius: '9999px',
+            padding: '0.65rem 1.4rem',
+            borderRadius: 'var(--radius-sm, 6px)',
             fontSize: '0.85rem',
             textDecoration: 'none',
-            transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+            transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
           }}
         >
-          ← Return to Terminal
+          ← Return to Overview
         </Link>
       </main>
       </div>
