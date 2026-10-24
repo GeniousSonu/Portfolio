@@ -37,3 +37,10 @@ Whenever you write, edit, refactor, or complete any code in this repository, you
 - **ESLint & Prettier**: Configured for auto-validation on save. Keep code formatted according to standard rules (2 spaces, single quotes where applicable, trailing commas where appropriate).
 - **Markdownlint**: Enforce blank lines around headers/lists and explicit code fence languages on all `.md` files.
 - **CodeRabbit**: Local VS Code extension (`coderabbit.coderabbit-vscode`) and repository schema (`.coderabbit.yaml`) are active. All code written must meet CodeRabbit automated PR quality gates.
+
+---
+
+## 3. Git Branch Synchronization & Conflict Prevention Protocol
+
+- **Pre-Execution & Pre-Push Synchronization**: Before starting any task, before staging edits, and before pushing any branch or completing work, agents **MUST** execute `git fetch origin` and pull/rebase against `origin/main` (or active topic branches) to guarantee zero merge conflicts with upstream work.
+- **Conflict Avoidance Invariant**: Never push or draft changes on top of a stale base. Always verify local `HEAD` alignment with `origin/main` prior to concluding operations.

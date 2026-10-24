@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "769a2bcf722703c6",
+        "id": "e75b0b26f20466df",
         "type": "tabs",
         "children": [
           {
-            "id": "52ea18c49397d7db",
+            "id": "19f0d008bcd1a85f",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "README.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "README"
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
             }
           }
         ]
@@ -188,8 +184,21 @@
       "bases:Create new base": false
     }
   },
-  "active": "52ea18c49397d7db",
+  "active": "19f0d008bcd1a85f",
   "lastOpenFiles": [
+    "scripts/test-sentry-suite.mjs",
+    "src/app/api/preview-sentry-throw/route.js",
+    "src/app/api/preview-sentry-throw",
+    "src/lib/sentryScrubber.js",
+    "node_modules/get-east-asian-width/readme.md",
+    "docs/app/api-reference/file-conventions/layout.md",
+    "docs/app/api-reference/file-conventions",
+    "docs/app/api-reference",
+    "docs/app",
+    "Untitled.canvas",
+    "GEMINI.md",
+    "memory.md",
+    "README.md",
     "CLAUDE.md",
     "AGENTS.md"
   ]

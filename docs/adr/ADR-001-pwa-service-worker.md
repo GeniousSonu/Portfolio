@@ -12,6 +12,7 @@
 The platform is built on Next.js 16 (App Router), React 19, and modern web standards. PWA functionality was originally introduced to support progressive installation, offline reliability, and caching of static assets.
 
 During Incident INC-001, users experienced persistent blank screens (`#050505` background with only scrollbars visible) across page reloads. The investigation revealed that:
+
 1. Legacy PWA tooling (`next-pwa` or ad-hoc Workbox scripts) applied **Stale-While-Revalidate** caching to HTML navigation requests.
 2. In Next.js App Router, every production deployment generates newly hashed JavaScript chunks (e.g. `/_next/static/chunks/app/page-[hash].js`).
 3. Serving stale cached HTML led the client browser to request chunk hashes that no longer existed on the production host (HTTP 404), triggering unhandled `ChunkLoadError` exceptions.
@@ -35,10 +36,12 @@ We must define a durable, robust service worker strategy that guarantees reliabi
 ## 3. Options Considered
 
 ### Option A: `next-pwa` (Legacy)
+
 - **Evaluation:** Rejected.
 - **Rationale:** Abandoned repository, unmaintained for multiple major Next.js versions. Deeply tightly-coupled to legacy Webpack 4/5 tapable hooks. Incompatible with Next.js 16 and Turbopack. Generates unpredictable, opaque caching manifests that historically caused INC-001.
 
 ### Option B: Standalone Hand-Crafted `public/sw.js` (Adopted for Immediate & Baseline Protection)
+
 - **Evaluation:** Accepted as the immediate and permanent baseline.
 - **Rationale:**
   - 100% transparent and deterministic.
@@ -49,6 +52,7 @@ We must define a durable, robust service worker strategy that guarantees reliabi
   - Works identically under both `next dev` (Turbopack) and `next build` (Webpack).
 
 ### Option C: Migration to Serwist (`@serwist/next`)
+
 - **Evaluation:** Accepted as the Recommended Future Enhancement Path.
 - **Rationale:**
   - Serwist is the modern, actively maintained successor to `next-pwa` and `@ducanh2912/next-pwa`.
@@ -84,10 +88,12 @@ We must define a durable, robust service worker strategy that guarantees reliabi
 ## 5. Consequences
 
 ### Positive
+
 - **Guaranteed Freshness:** Visitors always receive the latest deployment's HTML and chunk references.
 - **Zero Build Breakage:** Turbopack and Next.js 16 builds execute cleanly without plugin collisions.
 - **Deterministic Recovery:** Users trapped by obsolete workers from previous builds are automatically rescued via the `activate` cache eviction and client self-healing script.
 - **Auditable & Maintainable:** The entire caching logic lives in a single, well-documented file ([public/sw.js](file:///home/dayshift/Music/Portfolio/public/sw.js)).
 
 ### Tradeoffs
+
 - Offline browsing is limited to previously cached assets and the dedicated `/offline` page, rather than arbitrary offline reading of unvisited dynamic articles. This is an intentional tradeoff in favor of 100% stability.

@@ -9,7 +9,7 @@
 
 ## 1. Executive Summary
 
-Visitors and testers reported that the animated name preloader sequence ("Sahinur" across multilingual scripts) was completely absent after using the site, upon normal reloads, and upon route navigation. 
+Visitors and testers reported that the animated name preloader sequence ("Sahinur" across multilingual scripts) was completely absent after using the site, upon normal reloads, and upon route navigation.
 
 A thorough investigation of the component tree, state initialization, storage systems, and CSS styling revealed the concrete root causes:
 
@@ -27,12 +27,15 @@ A thorough investigation of the component tree, state initialization, storage sy
 ## 2. Evidence & Audit Findings (Checklist)
 
 ### (a) Did the component render at all?
+
 - **Finding:** Yes, `<BootPreloader />` was still imported and rendered in `src/app/layout.js` (line 339). It was neither removed nor commented out by INC-001.
 - **Evidence:** `src/app/layout.js:339` mounts `<BootPreloader />` within `<TransitionProvider>` and `<PlaygroundProvider>`.
 
 ### (b) `hasBootedInSession` and `sessionStorage` / `localStorage` logic
+
 - **Finding:** `sessionStorage` key `genioussonu_booted_v1` was set on the first boot finish.
 - **Evidence:** In `BootPreloader.jsx`:
+
   ```js
   const [active, setActive] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -45,22 +48,27 @@ A thorough investigation of the component tree, state initialization, storage sy
     return !hasBootedInSession;
   });
   ```
+
   Once set in the session, `sessionStorage` persists across all page reloads in that tab. Thus, any reload after the initial visit resulted in `active = false`, causing the component to return `null` immediately.
 
 ### (c) `pageshow` and `bfcache` handling
+
 - **Finding:** While `BootPreloader.jsx` added a `pageshow` listener for `event.persisted`, it did not prevent the initial overlay render during `back_forward` navigations before hydration.
 - **Evidence:** An early inline script to add `.boot-skip` on `navigation.type === 'back_forward'` was missing from `<head>`, risking a flash of preloader overlay when returning via browser history.
 
 ### (d) Layout placement vs `template.js`
+
 - **Finding:** The component lives in `src/app/layout.js` (the persistent root layout).
 - **Evidence:** Because Next.js App Router root layouts do not remount on client-side route transitions, it is in the correct structural container. However, relying on persistent browser storage caused it to fail on genuine full-document reloads.
 
 ### (e) CSS or class rules hiding the element
+
 - **Finding:** In `src/app/globals.css`:
   - `.boot-hello-wrap` had inline `display: none; opacity: 0; visibility: hidden;` until Act 3 of the previous timeline.
   - Furthermore, if `sessionStorage` had the boot flag, `#boot-preloader` never rendered to the DOM at all (`if (!active) return null;`).
 
 ### (f) Font loading for multilingual scripts
+
 - **Finding:** No self-hosted local font subsets existed for the multilingual names.
 - **Evidence:** `src/app/layout.js` linked to Google Fonts CDN for Noto Sans Bengali, Devanagari, Arabic, and JP, but lacked Cyrillic (Russian), and did not wait for `document.fonts.ready`. If the CDN request was slow, the greetings rendered with system fallback fonts or tofu boxes.
 

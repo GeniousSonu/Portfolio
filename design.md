@@ -619,14 +619,17 @@ Users can also force this with a footer toggle (persisted in `localStorage` with
 > [!IMPORTANT]
 > **ARCHIVE & SCOPE NOTICE (Amendment A):**  
 > Per explicit owner requirements, a 3D avatar model of the owner is **NOT** used on this portfolio. The Operator Stage (`.glb` asset pipeline, React Three Fiber / `@react-three/drei` runtime dependencies, camera shot list, and Stage tiers T0–T2) is strictly **OUT OF SCOPE** and has been decommissioned.  
+>
 > - **Do NOT install `@react-three/fiber` or `@react-three/drei`.**  
 > - **Preconditions: Do NOT halt or pause for missing `.glb` or `ASSET-REPORT.md`.**  
 > - The existing Three.js **WebGL Globe** (Section 8.1) is retained as the sole 3D visualization element on the site.  
+>
 > Sections 8.2–8.9 below are archived for historical reference only.
 
 ### 8.1 The Globe (Active 3D System)
 
 The existing interactive Three.js Globe is retained as the sole active 3D visualization context on the site (Chapter 05: Reach).
+
 - **WebGL Lifecycle**: Cleanly pause animation loop when scrolled out of viewport via `IntersectionObserver`. Dispose geometries, textures, and renderer contexts on unmount.
 - **Design Tokens**: Arc colors sourced from CSS tokens (`--accent`, `--fg-3`), atmosphere tinted by `--signal-500` at low alpha, labels in mono typography (`Geist Mono`).
 - **Static Fallback**: Fallback static image rendered when WebGL is unavailable or when user prefers reduced motion (`prefers-reduced-motion: reduce`).
@@ -756,6 +759,7 @@ Never `outline: none` without an equivalent. Focus rings are visible on both sur
 | **Secondary** | Transparent with `--line-3` hairline, crop-mark ticks on hover/focus, label `--fg-1` | Alternatives |
 | **Tertiary / text** | Mono or sans label with signal underline wipe (left to right, 240ms) | Inline actions |
 | **Icon** | 44×44 target, Frame ticks on hover | Toolbars |
+
 Sizes: S 40px, M 48px, L 56px height (all ≥ 24×24 minimum target, and ≥ 44px on touch). Loading state replaces the label with a typed ellipsis (`…` cycling) at fixed width to avoid layout shift. Fine-pointer-only magnetic pull ≤ 6px on primary CTAs; disabled on touch and reduced motion.
 
 ### 11.4 Links
@@ -850,6 +854,7 @@ Smooth scroll on desktop (Lenis), native on touch. Anchor navigation always uses
 | `Esc` | Close the topmost overlay |
 | Arrow keys | Navigate lists, tabs, menus |
 | Konami code | God Mode (Section 12.6) |
+
 Shortcuts never fire while typing in inputs, textareas or contenteditable (including Chaos Mode editing).
 
 ### 12.3 Touch
@@ -1005,7 +1010,7 @@ Precise, calm, concrete, a little dry. Specifics beat adjectives. Short sentence
 
 ### 17.1 File structure
 
-```
+```text
 src/
   styles/
     index.css              # @layer order, imports
