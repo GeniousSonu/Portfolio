@@ -10,7 +10,8 @@
     "lint": "eslint",
     "check:routes": "node scripts/check-routes.mjs",
     "test:boot": "node scripts/test-boot-001.mjs",
-    "test:t10": "node scripts/test-t10-blog-card.mjs"
+    "test:t10": "node scripts/test-t10-blog-card.mjs",
+    "test:sentry": "node scripts/test-sentry-suite.mjs"
   },
   "allowScripts": {
     "esbuild": true,
@@ -25,7 +26,7 @@
     "@portabletext/react": "^7.0.1",
     "@sanity/image-url": "^2.1.1",
     "@sanity/vision": "^3.78.0",
-    "@sentry/nextjs": "^11.9.0",
+    "@sentry/nextjs": "11.9.0",
     "@supabase/ssr": "^0.12.5",
     "@supabase/supabase-js": "^2.114.0",
     "@tailwindcss/postcss": "^4.3.3",

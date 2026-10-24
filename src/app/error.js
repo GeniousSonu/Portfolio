@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import * as Sentry from '@sentry/nextjs';
 
 /**
  * Route Segment Error Boundary (Incident INC-001)
@@ -8,8 +9,11 @@ import React, { useEffect } from 'react';
  */
 export default function Error({ error, reset }) {
   useEffect(() => {
-    // Log sanitized error without PII
+    // Log sanitized error and report to Sentry
     console.error('[Application Error Boundary caught error]:', error?.message || 'Unknown render error');
+    if (error) {
+      Sentry.captureException(error);
+    }
   }, [error]);
 
   const handleHardRefresh = () => {

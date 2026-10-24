@@ -63,3 +63,6 @@ scripts/verify_discord_stage.mjs
 .private/
 *.private.md
 NOTES*.md
+
+# Sentry Config File
+.env.sentry-build-plugin

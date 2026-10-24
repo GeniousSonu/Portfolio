@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import * as Sentry from '@sentry/nextjs';
 
 /**
  * Global Root Error Boundary (Incident INC-001)
@@ -10,6 +11,9 @@ import React, { useEffect } from 'react';
 export default function GlobalError({ error, reset }) {
   useEffect(() => {
     console.error('[Global Error Boundary]:', error?.message || 'Root layout error');
+    if (error) {
+      Sentry.captureException(error);
+    }
   }, [error]);
 
   return (

@@ -66,10 +66,39 @@ export function initSelfHealing() {
         sessionStorage.setItem(RECOVERY_KEY, String(attempts + 1));
       } catch {}
 
+      // Report initial self-heal attempt to Sentry once
+      try {
+        const Sentry = await import('@sentry/nextjs');
+        Sentry.captureException(err instanceof Error ? err : new Error(String(err)), {
+          level: 'warning',
+          tags: {
+            mechanism: 'self-heal',
+            stage: 'recovery-reload',
+            attempt: String(attempts + 1),
+          },
+          fingerprint: ['self-heal', 'chunk-or-hydration-error'],
+        });
+      } catch {}
+
       await clearAllServiceWorkersAndCaches();
       window.location.reload();
     } else {
       console.error('[SelfHeal] Recovery already attempted for this session. Showing fallback UI.');
+
+      // Report exhausted self-heal to Sentry once without looping
+      try {
+        const Sentry = await import('@sentry/nextjs');
+        Sentry.captureException(err instanceof Error ? err : new Error(String(err)), {
+          level: 'fatal',
+          tags: {
+            mechanism: 'self-heal',
+            stage: 'exhausted',
+            attempt: String(attempts),
+          },
+          fingerprint: ['self-heal', 'exhausted-blank-screen-risk'],
+        });
+      } catch {}
+
       window.dispatchEvent(new CustomEvent('self-heal-exhausted', { detail: { error: err } }));
     }
   };
