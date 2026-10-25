@@ -1,89 +1,89 @@
-"use client";
+'use client';
 import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 /* ── Current Roles Data ── */
-const CURRENT_ROLES = [
+export const CURRENT_ROLES = [
   {
-    company: "Ib Arts",
-    type: "Full-time · On-site",
-    role: "Senior Web Application Developer",
-    date: "Jul 2026 – Present",
-    duration: "2 mos",
-    logo: "/logo/ibarts.png",
-    desc: "Driving backend architecture and DevOps infrastructure for production-grade web applications. Designing scalable RESTful APIs, optimizing CI/CD pipelines, managing containerized deployments, and ensuring high-availability server configurations. Collaborating cross-functionally to bridge frontend delivery with robust backend systems.",
-    tags: ["Node.js", "Express", "Docker", "CI/CD", "AWS", "MongoDB", "PostgreSQL", "DevOps"]
+    company: 'Ib Arts',
+    type: 'Full-time · On-site',
+    role: 'Senior Web Application Developer',
+    date: 'Jul 2026 – Present',
+    duration: '2 mos',
+    logo: '/logo/ibarts.png',
+    desc: 'Driving backend architecture and DevOps infrastructure for production-grade web applications. Designing scalable RESTful APIs, optimizing CI/CD pipelines, managing containerized deployments, and ensuring high-availability server configurations. Collaborating cross-functionally to bridge frontend delivery with robust backend systems.',
+    tags: ['Node.js', 'Express', 'Docker', 'CI/CD', 'AWS', 'MongoDB', 'PostgreSQL', 'DevOps'],
   },
   {
-    company: "Upwork",
-    type: "Freelance · Remote",
-    role: "Freelance Full-Stack Developer & Web Solutions Specialist",
-    date: "Apr 2025 – Present",
-    duration: "1 yr 3 mos",
-    logo: "/logo/upwork.png",
-    desc: "Delivering full-stack engineering to global clients. Stack spans WordPress, Shopify, Wix Studio, MERN, Laravel, and AI/ML integrations. Also handle UI/UX in Figma, branding, SEO, SMO, and performance marketing.",
-    tags: ["React", "Node.js", "Laravel", "WordPress", "Shopify", "MongoDB", "Figma", "SEO"]
+    company: 'Upwork',
+    type: 'Freelance · Remote',
+    role: 'Freelance Full-Stack Developer & Web Solutions Specialist',
+    date: 'Apr 2025 – Present',
+    duration: '1 yr 3 mos',
+    logo: '/logo/upwork.png',
+    desc: 'Delivering full-stack engineering to global clients. Stack spans WordPress, Shopify, Wix Studio, MERN, Laravel, and AI/ML integrations. Also handle UI/UX in Figma, branding, SEO, SMO, and performance marketing.',
+    tags: ['React', 'Node.js', 'Laravel', 'WordPress', 'Shopify', 'MongoDB', 'Figma', 'SEO'],
   },
   {
-    company: "WEFIK",
-    type: "Full-time · Remote",
-    role: "Co-Founder",
-    date: "Mar 2021 – Present",
-    duration: "5 yrs 4 mos",
-    logo: "/logo/wefik.jpeg",
-    desc: "Co-founded a digital solutions company. Responsible for vision, strategic growth, project delivery oversight, and building global client relationships. Led 30+ projects across web, mobile, and digital marketing for clients in 5+ countries.",
-    tags: ["PHP", "Laravel", "React", "Node.js", "Leadership", "Business Strategy"]
-  }
+    company: 'WEFIK',
+    type: 'Full-time · Remote',
+    role: 'Co-Founder',
+    date: 'Mar 2021 – Present',
+    duration: '5 yrs 4 mos',
+    logo: '/logo/wefik.jpeg',
+    desc: 'Co-founded a digital solutions company. Responsible for vision, strategic growth, project delivery oversight, and building global client relationships. Led 30+ projects across web, mobile, and digital marketing for clients in 5+ countries.',
+    tags: ['PHP', 'Laravel', 'React', 'Node.js', 'Leadership', 'Business Strategy'],
+  },
 ];
 
 /* ── Past Roles Data (Stacking deck order) ── */
-const PAST_ROLES = [
+export const PAST_ROLES = [
   {
-    index: "01",
-    company: "ARC Document Solutions",
-    type: "Full-time · On-site",
-    role: "QA Engineer",
-    date: "Sep 2025 – Jun 2026",
-    duration: "10 mos",
-    logo: "/logo/ARC.png",
-    desc: "Embedded in production QA workflows for document processing pipelines. Validated output integrity across large-volume scanning operations, flagged regression defects in document management software, and contributed to test case documentation.",
-    tags: ["QA Testing", "Document Management", "Process Improvement", "Technical Writing"]
+    index: '01',
+    company: 'ARC Document Solutions',
+    type: 'Full-time · On-site',
+    role: 'QA Engineer',
+    date: 'Sep 2025 – Jun 2026',
+    duration: '10 mos',
+    logo: '/logo/ARC.png',
+    desc: 'Embedded in production QA workflows for document processing pipelines. Validated output integrity across large-volume scanning operations, flagged regression defects in document management software, and contributed to test case documentation.',
+    tags: ['QA Testing', 'Document Management', 'Process Improvement', 'Technical Writing'],
   },
   {
-    index: "02",
-    company: "Teenager Esports",
-    type: "Full-time · Remote",
-    role: "Head of Development",
-    date: "Sep 2023 – Feb 2024",
-    duration: "6 mos",
-    logo: "/logo/teenagers-esports.jpg",
-    desc: "Led the development division of a gaming esports organization. Owned the technical roadmap, managed dev teams, built tournament management systems, and integrated streaming infrastructure (OBS, Streamlabs APIs).",
-    tags: ["Dev Leadership", "CI/CD", "Web Dev", "Gaming Infra"]
+    index: '02',
+    company: 'Teenager Esports',
+    type: 'Full-time · Remote',
+    role: 'Head of Development',
+    date: 'Sep 2023 – Feb 2024',
+    duration: '6 mos',
+    logo: '/logo/teenagers-esports.jpg',
+    desc: 'Led the development division of a gaming esports organization. Owned the technical roadmap, managed dev teams, built tournament management systems, and integrated streaming infrastructure (OBS, Streamlabs APIs).',
+    tags: ['Dev Leadership', 'CI/CD', 'Web Dev', 'Gaming Infra'],
   },
   {
-    index: "03",
-    company: "Guru Nanak Institute of Technology",
-    type: "Full-time · On-site",
-    role: "Web Developer",
-    date: "Jul 2023 – Feb 2024",
-    duration: "8 mos",
-    logo: "/logo/gnit.png",
-    desc: "Built and maintained web platforms for the institute. Redesigned institutional website (60% load time improvement), developed student event registration system used by 3,000+ students.",
-    tags: ["PHP", "MySQL", "WordPress", "JavaScript"]
+    index: '03',
+    company: 'Guru Nanak Institute of Technology',
+    type: 'Full-time · On-site',
+    role: 'Web Developer',
+    date: 'Jul 2023 – Feb 2024',
+    duration: '8 mos',
+    logo: '/logo/gnit.png',
+    desc: 'Built and maintained web platforms for the institute. Redesigned institutional website (60% load time improvement), developed student event registration system used by 3,000+ students.',
+    tags: ['PHP', 'MySQL', 'WordPress', 'JavaScript'],
   },
   {
-    index: "04",
-    company: "CipherSchools",
-    type: "Internship · Remote",
-    role: "Full-Stack Developer",
-    date: "Sep 2022 – Nov 2022",
-    duration: "3 mos",
-    logo: "/logo/cipherSchool.webp",
-    desc: "Shipped 5 production features for an ed-tech platform. Optimized SQL queries reducing API response time by 40%. First professional experience with a real product codebase.",
-    tags: ["PHP", "MySQL", "HTML/CSS", "JavaScript"]
-  }
+    index: '04',
+    company: 'CipherSchools',
+    type: 'Internship · Remote',
+    role: 'Full-Stack Developer',
+    date: 'Sep 2022 – Nov 2022',
+    duration: '3 mos',
+    logo: '/logo/cipherSchool.webp',
+    desc: 'Shipped 5 production features for an ed-tech platform. Optimized SQL queries reducing API response time by 40%. First professional experience with a real product codebase.',
+    tags: ['PHP', 'MySQL', 'HTML/CSS', 'JavaScript'],
+  },
 ];
 
 export default function Experience() {
@@ -127,8 +127,8 @@ export default function Experience() {
             scrollTrigger: {
               trigger: revealEl,
               start: 'top 85%',
-              toggleActions: 'play none none none'
-            }
+              toggleActions: 'play none none none',
+            },
           }
         );
       }
@@ -138,7 +138,7 @@ export default function Experience() {
       const mm = gsap.matchMedia();
 
       // ── Desktop / Tablet Stacking Setup (min-width: 768px) ──
-      mm.add("(min-width: 768px)", () => {
+      mm.add('(min-width: 768px)', () => {
         const offsetStep = 40; // px vertical offset per stacked card so top-bar peeks out
         const totalCards = cards.length;
 
@@ -179,13 +179,13 @@ export default function Experience() {
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: pastPinRef.current,
-            start: "top 12%",
+            start: 'top 12%',
             end: `+=${(totalCards - 1) * 450}`,
             pin: true,
             scrub: 0.5,
             anticipatePin: 1,
             invalidateOnRefresh: true,
-          }
+          },
         });
 
         // Sequence through incoming cards (1, 2, 3...)
@@ -202,7 +202,7 @@ export default function Experience() {
             {
               opacity: 1,
               duration: 0.25,
-              ease: "power1.in",
+              ease: 'power1.in',
             },
             stepLabel
           );
@@ -218,7 +218,7 @@ export default function Experience() {
               y: currentTargetY,
               scale: 1,
               duration: 1,
-              ease: "none",
+              ease: 'none',
             },
             stepLabel
           );
@@ -235,7 +235,7 @@ export default function Experience() {
                 scale: targetScale,
                 filter: `brightness(${targetBrightness})`,
                 duration: 1,
-                ease: "none",
+                ease: 'none',
               },
               stepLabel
             );
@@ -244,7 +244,7 @@ export default function Experience() {
       });
 
       // ── Mobile Setup (max-width: 767px) Natural scroll, clean vertical list ──
-      mm.add("(max-width: 767px)", () => {
+      mm.add('(max-width: 767px)', () => {
         cards.forEach((card) => {
           gsap.set(card, {
             scale: 1,
@@ -267,11 +267,11 @@ export default function Experience() {
             y: 0,
             duration: 0.5,
             stagger: 0.08,
-            ease: "power2.out",
+            ease: 'power2.out',
             scrollTrigger: {
               trigger: pastPinRef.current,
-              start: "top 90%",
-              toggleActions: "play none none none",
+              start: 'top 90%',
+              toggleActions: 'play none none none',
             },
           }
         );
@@ -292,13 +292,13 @@ export default function Experience() {
   return (
     <section id="experience" className="section" ref={containerRef}>
       <div className="site-container">
-        
         {/* Section Header */}
         <div className="exp-header-reveal" style={{ marginBottom: '3.5rem' }}>
           <div className="s-label">Career History</div>
           <h2 className="section-title">Where I&apos;ve shipped code</h2>
           <p className="section-subtitle">
-            From technical internships and digital leadership to co-founding WEFIK and engineering backend systems — a track record built on real execution.
+            From technical internships and digital leadership to co-founding WEFIK and engineering
+            backend systems — a track record built on real execution.
           </p>
         </div>
 
@@ -316,7 +316,14 @@ export default function Experience() {
               <div key={role.company} className="current-role-card">
                 <div className="role-card-top">
                   <div className="role-logo-wrap">
-                    <Image src={role.logo} alt={`${role.company} Logo`} width={44} height={44} className="role-logo-img" style={{ objectFit: 'contain' }} />
+                    <Image
+                      src={role.logo}
+                      alt={`${role.company} Logo`}
+                      width={44}
+                      height={44}
+                      className="role-logo-img"
+                      style={{ objectFit: 'contain' }}
+                    />
                   </div>
                   <div className="role-header-text">
                     <div className="role-company-row">
@@ -336,7 +343,9 @@ export default function Experience() {
 
                 <div className="role-tags-list">
                   {role.tags.map((tag) => (
-                    <span key={tag} className="tag">{tag}</span>
+                    <span key={tag} className="tag">
+                      {tag}
+                    </span>
                   ))}
                 </div>
               </div>
@@ -365,12 +374,21 @@ export default function Experience() {
                   <div className="deck-card-inner">
                     <div className="deck-card-top-bar">
                       <div className="deck-num-badge">ROLE {role.index} / 04</div>
-                      <div className="deck-timeline-badge">{role.date} ({role.duration})</div>
+                      <div className="deck-timeline-badge">
+                        {role.date} ({role.duration})
+                      </div>
                     </div>
 
                     <div className="role-card-top">
                       <div className="role-logo-wrap past-logo-wrap">
-                        <Image src={role.logo} alt={`${role.company} Logo`} width={44} height={44} className="role-logo-img" style={{ objectFit: 'contain' }} />
+                        <Image
+                          src={role.logo}
+                          alt={`${role.company} Logo`}
+                          width={44}
+                          height={44}
+                          className="role-logo-img"
+                          style={{ objectFit: 'contain' }}
+                        />
                       </div>
                       <div className="role-header-text">
                         <div className="role-company-row">
@@ -385,7 +403,9 @@ export default function Experience() {
 
                     <div className="role-tags-list">
                       {role.tags.map((tag) => (
-                        <span key={tag} className="tag">{tag}</span>
+                        <span key={tag} className="tag">
+                          {tag}
+                        </span>
                       ))}
                     </div>
                   </div>
@@ -394,7 +414,6 @@ export default function Experience() {
             </div>
           </div>
         </div>
-
       </div>
     </section>
   );

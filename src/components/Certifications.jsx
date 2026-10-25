@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import gsap from 'gsap';
@@ -9,34 +9,67 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 /* LinkedIn Learning — inline SVG (no logo file provided) */
 const LogoLinkedIn = () => (
   <svg viewBox="0 0 72 72" width="28" height="28" aria-label="LinkedIn" role="img">
-    <rect width="72" height="72" rx="8" fill="#0A66C2"/>
-    <path fill="#fff" d="M13.4 27.5h9.4v30.6h-9.4zM18.1 23.5a5.4 5.4 0 1 1 0-10.9 5.4 5.4 0 0 1 0 10.9zM58.7 58.1H49.3V43c0-3.6-.1-8.2-5-8.2-5 0-5.7 3.9-5.7 7.9v15.4H29.2V27.5h9v4.2h.1c1.2-2.4 4.3-4.9 8.8-4.9 9.4 0 11.1 6.2 11.1 14.2v17.1z"/>
+    <rect width="72" height="72" rx="8" fill="#0A66C2" />
+    <path
+      fill="#fff"
+      d="M13.4 27.5h9.4v30.6h-9.4zM18.1 23.5a5.4 5.4 0 1 1 0-10.9 5.4 5.4 0 0 1 0 10.9zM58.7 58.1H49.3V43c0-3.6-.1-8.2-5-8.2-5 0-5.7 3.9-5.7 7.9v15.4H29.2V27.5h9v4.2h.1c1.2-2.4 4.3-4.9 8.8-4.9 9.4 0 11.1 6.2 11.1 14.2v17.1z"
+    />
   </svg>
 );
 
 /* Image-based logos using Next.js Image optimization */
 const LogoTryHackMe = () => (
-  <Image src="/logo/tryhackme.png" alt="TryHackMe" width={28} height={28} style={{ objectFit: 'contain', borderRadius: '4px' }} />
+  <Image
+    src="/logo/tryhackme.png"
+    alt="TryHackMe"
+    width={28}
+    height={28}
+    style={{ objectFit: 'contain', borderRadius: '4px' }}
+  />
 );
 
 const LogoCoursera = () => (
-  <Image src="/logo/coursera.png" alt="Coursera" width={28} height={28} style={{ objectFit: 'contain', borderRadius: '4px' }} />
+  <Image
+    src="/logo/coursera.png"
+    alt="Coursera"
+    width={28}
+    height={28}
+    style={{ objectFit: 'contain', borderRadius: '4px' }}
+  />
 );
 
 const LogoUdemy = () => (
-  <Image src="/logo/udemy.png" alt="Udemy" width={28} height={28} style={{ objectFit: 'contain', borderRadius: '4px' }} />
+  <Image
+    src="/logo/udemy.png"
+    alt="Udemy"
+    width={28}
+    height={28}
+    style={{ objectFit: 'contain', borderRadius: '4px' }}
+  />
 );
 
 const LogoAon = () => (
-  <Image src="/logo/Aon.png" alt="Aon" width={28} height={28} style={{ objectFit: 'contain', borderRadius: '4px' }} />
+  <Image
+    src="/logo/Aon.png"
+    alt="Aon"
+    width={28}
+    height={28}
+    style={{ objectFit: 'contain', borderRadius: '4px' }}
+  />
 );
 
 const LogoArdent = () => (
-  <Image src="/logo/ardent.png" alt="Ardent Computech" width={28} height={28} style={{ objectFit: 'contain', borderRadius: '4px' }} />
+  <Image
+    src="/logo/ardent.png"
+    alt="Ardent Computech"
+    width={28}
+    height={28}
+    style={{ objectFit: 'contain', borderRadius: '4px' }}
+  />
 );
 
 /* ── Cert data ─────────────────────────────────────────────── */
-const CERTS = [
+export const CERTS = [
   {
     Logo: LogoLinkedIn,
     bg: 'rgba(10,102,194,0.1)',
@@ -184,10 +217,19 @@ export default function Certifications() {
     const revealEl = containerRef.current?.querySelector('.reveal');
     let titleTrigger;
     if (revealEl) {
-      titleTrigger = gsap.fromTo(revealEl,
+      titleTrigger = gsap.fromTo(
+        revealEl,
         { opacity: 0, y: 35 },
-        { opacity: 1, y: 0, duration: 0.85, ease: 'power3.out',
-          scrollTrigger: { trigger: revealEl, start: 'top 85%', toggleActions: 'play none none none' }
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.85,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: revealEl,
+            start: 'top 85%',
+            toggleActions: 'play none none none',
+          },
         }
       );
     }
@@ -195,19 +237,29 @@ export default function Certifications() {
     const gridEl = containerRef.current?.querySelector('.certs-grid');
     let mm = gsap.matchMedia();
 
-    mm.add("(min-width: 769px)", () => {
+    mm.add('(min-width: 769px)', () => {
       if (gridEl) {
         const children = gridEl.querySelectorAll('.stagger-child');
-        gsap.fromTo(children,
+        gsap.fromTo(
+          children,
           { opacity: 0, y: 30 },
-          { opacity: 1, y: 0, duration: 0.6, stagger: 0.05, ease: 'power3.out',
-            scrollTrigger: { trigger: gridEl, start: 'top 80%', toggleActions: 'play none none none' }
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            stagger: 0.05,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: gridEl,
+              start: 'top 80%',
+              toggleActions: 'play none none none',
+            },
           }
         );
       }
     });
 
-    mm.add("(max-width: 768px)", () => {
+    mm.add('(max-width: 768px)', () => {
       if (gridEl) {
         const children = gridEl.querySelectorAll('.stagger-child');
         gsap.set(children, { opacity: 1, y: 0 }); // Always visible on mobile for immediate horizontal swiping
@@ -215,7 +267,8 @@ export default function Certifications() {
     });
 
     return () => {
-      titleTrigger?.scrollTrigger?.kill(); titleTrigger?.kill();
+      titleTrigger?.scrollTrigger?.kill();
+      titleTrigger?.kill();
       mm.revert();
     };
   }, []);
@@ -228,7 +281,8 @@ export default function Certifications() {
           <div className="s-label">Credentials</div>
           <h2 className="section-title">30+ Certifications</h2>
           <p className="section-subtitle">
-            CompTIA, TryHackMe, Coursera, Udemy, LinkedIn Learning — continuous learning across the stack.
+            CompTIA, TryHackMe, Coursera, Udemy, LinkedIn Learning — continuous learning across the
+            stack.
           </p>
         </div>
 
@@ -239,7 +293,12 @@ export default function Certifications() {
 
         {/* Horizontal scroll snap wrapper on mobile */}
         <div className="certs-scroll-wrapper" data-lenis-prevent>
-          <div className="certs-grid" role="region" aria-label="Certifications carousel" data-lenis-prevent>
+          <div
+            className="certs-grid"
+            role="region"
+            aria-label="Certifications carousel"
+            data-lenis-prevent
+          >
             {CERTS.map((cert, i) => (
               <div key={i} className="cert-card stagger-child">
                 {/* Provider logo */}
@@ -256,9 +315,7 @@ export default function Certifications() {
                   <div className="cert-issuer">{cert.issuer}</div>
                   <div className="cert-meta-row">
                     <span className="cert-date">{cert.date}</span>
-                    {cert.credId && (
-                      <span className="cert-cred-id">{cert.credId}</span>
-                    )}
+                    {cert.credId && <span className="cert-cred-id">{cert.credId}</span>}
                   </div>
                 </div>
               </div>
@@ -275,7 +332,7 @@ export default function Certifications() {
             className="btn-linkedin"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452z"/>
+              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452z" />
             </svg>
             Verify All on LinkedIn
           </a>
