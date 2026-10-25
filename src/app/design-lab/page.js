@@ -10,8 +10,8 @@ export const metadata = {
 };
 
 export default function DesignLabPage() {
-  // Guarded to development and preview environments only
-  if (process.env.NODE_ENV === 'production' && !process.env.VERCEL_ENV) {
+  // Dev-only unless explicitly running on a Vercel preview deployment.
+  if (process.env.NODE_ENV === 'production' && process.env.VERCEL_ENV !== 'preview') {
     notFound();
   }
 
@@ -21,11 +21,16 @@ export default function DesignLabPage() {
         <div className={styles.telemetryTag}>[ STAGE 5 PILOT // DESIGN SYSTEM SPECIMEN ]</div>
         <h1 className={styles.labTitle}>Design Engineering Laboratory</h1>
         <p className={styles.labSubtitle}>
-          Verifying tokens, typography tension, hairline brass frames, and interactive tactile components for the Warm Editorial Craft art direction.
+          Verifying tokens, typography tension, hairline brass frames, and interactive tactile
+          components for the Warm Editorial Craft art direction.
         </p>
         <div className={styles.navRow}>
-          <Link href="/" className={styles.linkChip}>← Return to Home</Link>
-          <Link href="/projects/iot-cold-chain-patent" className={styles.linkChip}>View Patent Case Study →</Link>
+          <Link href="/" className={styles.linkChip}>
+            ← Return to Home
+          </Link>
+          <Link href="/projects/iot-cold-chain-patent" className={styles.linkChip}>
+            View Patent Case Study →
+          </Link>
         </div>
       </header>
 
@@ -45,23 +50,38 @@ export default function DesignLabPage() {
             <span className={styles.swatchLabel}>--surface-card</span>
             <span className={styles.swatchHex}>#15181C</span>
           </div>
-          <div className={styles.swatchCard} style={{ background: 'var(--gold)', color: '#0B0D0E' }}>
+          <div
+            className={styles.swatchCard}
+            style={{ background: 'var(--gold)', color: '#0B0D0E' }}
+          >
             <span className={styles.swatchLabel}>--gold</span>
             <span className={styles.swatchHex}>#D4AF37</span>
           </div>
-          <div className={styles.swatchCard} style={{ background: 'var(--gold-bright)', color: '#0B0D0E' }}>
+          <div
+            className={styles.swatchCard}
+            style={{ background: 'var(--gold-bright)', color: '#0B0D0E' }}
+          >
             <span className={styles.swatchLabel}>--gold-bright</span>
             <span className={styles.swatchHex}>#F59E0B</span>
           </div>
-          <div className={styles.swatchCard} style={{ background: 'var(--signal)', color: '#0B0D0E' }}>
+          <div
+            className={styles.swatchCard}
+            style={{ background: 'var(--signal)', color: '#0B0D0E' }}
+          >
             <span className={styles.swatchLabel}>--signal</span>
             <span className={styles.swatchHex}>#10B981</span>
           </div>
-          <div className={styles.swatchCard} style={{ background: 'var(--text-primary)', color: '#0B0D0E' }}>
+          <div
+            className={styles.swatchCard}
+            style={{ background: 'var(--text-primary)', color: '#0B0D0E' }}
+          >
             <span className={styles.swatchLabel}>--text-primary</span>
             <span className={styles.swatchHex}>#ECEAE4</span>
           </div>
-          <div className={styles.swatchCard} style={{ background: 'var(--text-secondary)', color: '#0B0D0E' }}>
+          <div
+            className={styles.swatchCard}
+            style={{ background: 'var(--text-secondary)', color: '#0B0D0E' }}
+          >
             <span className={styles.swatchLabel}>--text-secondary</span>
             <span className={styles.swatchHex}>#A1A1AA</span>
           </div>
@@ -87,13 +107,18 @@ export default function DesignLabPage() {
           <div className={styles.typeRow}>
             <span className={styles.typeMeta}>Body Large (18px / 1.65 line-height)</span>
             <p className={styles.bodyLg}>
-              Bridging low-level hardware cryptography, distributed edge protocols, and high-fidelity interface design. Verified patent holder for tamper-proof IoT telemetry with hardware-enforced logging.
+              Bridging low-level hardware cryptography, distributed edge protocols, and
+              high-fidelity interface design. Verified patent holder for tamper-proof IoT telemetry
+              with hardware-enforced logging.
             </p>
           </div>
           <div className={styles.typeRow}>
-            <span className={styles.typeMeta}>Technical Monospace Telemetry (13px / tabular numerals)</span>
+            <span className={styles.typeMeta}>
+              Technical Monospace Telemetry (13px / tabular numerals)
+            </span>
             <p className={styles.codeTelemetry}>
-              PATENT_APP_NO: 202431057476 // STATUS: GRANTED_2025 // ATECC608B: READY // LATENCY: 14.2ms
+              PATENT_APP_NO: 202431057476 // STATUS: GRANTED_2025 // ATECC608B: READY // LATENCY:
+              14.2ms
             </p>
           </div>
         </div>
@@ -110,7 +135,9 @@ export default function DesignLabPage() {
               <span className={styles.statusPip} />
             </div>
             <div className={styles.metricValue}>1</div>
-            <div className={styles.metricDesc}>Granted Indian Patent (2025) in IoT Cold-Chain Monitoring</div>
+            <div className={styles.metricDesc}>
+              Granted Indian Patent (2025) in IoT Cold-Chain Monitoring
+            </div>
           </div>
 
           {/* Metric Tile 2 */}
@@ -120,7 +147,9 @@ export default function DesignLabPage() {
               <span className={styles.statusPip} />
             </div>
             <div className={styles.metricValue}>30+</div>
-            <div className={styles.metricDesc}>Cloud, Cybersecurity &amp; Distributed Systems Accreditations</div>
+            <div className={styles.metricDesc}>
+              Cloud, Cybersecurity &amp; Distributed Systems Accreditations
+            </div>
           </div>
 
           {/* Metric Tile 3 */}
@@ -130,7 +159,9 @@ export default function DesignLabPage() {
               <span className={styles.statusPip} />
             </div>
             <div className={styles.metricValue}>14.2ms</div>
-            <div className={styles.metricDesc}>Edge WebRTC / WebSocket Ingress Latency (Kolkata DC)</div>
+            <div className={styles.metricDesc}>
+              Edge WebRTC / WebSocket Ingress Latency (Kolkata DC)
+            </div>
           </div>
         </div>
       </section>
@@ -141,7 +172,9 @@ export default function DesignLabPage() {
         <div className={styles.controlsRow}>
           <button type="button" className={styles.btnPrimary}>
             <span>Primary Brass Action</span>
-            <span className={styles.btnArrow} aria-hidden="true">→</span>
+            <span className={styles.btnArrow} aria-hidden="true">
+              →
+            </span>
           </button>
 
           <button type="button" className={styles.btnSecondary}>
@@ -153,7 +186,12 @@ export default function DesignLabPage() {
           </button>
 
           <div className={styles.filterGroup} role="tablist" aria-label="Sample filters">
-            <button type="button" className={`${styles.filterTab} ${styles.filterTabActive}`} role="tab" aria-selected="true">
+            <button
+              type="button"
+              className={`${styles.filterTab} ${styles.filterTabActive}`}
+              role="tab"
+              aria-selected="true"
+            >
               All Systems
             </button>
             <button type="button" className={styles.filterTab} role="tab" aria-selected="false">
