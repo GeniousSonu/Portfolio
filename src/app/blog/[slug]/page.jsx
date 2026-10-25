@@ -1,43 +1,46 @@
-import React from 'react'
-import { notFound } from 'next/navigation'
-import Link from 'next/link'
-import Image from 'next/image'
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
-import PortableTextRenderer from '@/components/PortableTextRenderer'
-import { client } from '@/sanity/client'
-import { getOptimizedImageUrl } from '@/sanity/image'
-import { POST_QUERY, POST_SLUGS_QUERY } from '@/sanity/queries'
-import ShareButtons from './ShareButtons'
-import styles from './post.module.css'
+import React from 'react';
+import { notFound } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import PortableTextRenderer from '@/components/PortableTextRenderer';
+import { client } from '@/sanity/client';
+import { getOptimizedImageUrl } from '@/sanity/image';
+import { POST_QUERY, POST_SLUGS_QUERY } from '@/sanity/queries';
+import ShareButtons from './ShareButtons';
+import styles from './post.module.css';
 
-export const revalidate = 30 // ISR cache revalidation every 30 seconds
+export const revalidate = 30; // ISR cache revalidation every 30 seconds
 
 export async function generateStaticParams() {
   try {
-    const slugs = await client.withConfig({ useCdn: false }).fetch(POST_SLUGS_QUERY)
+    const slugs = await client.withConfig({ useCdn: false }).fetch(POST_SLUGS_QUERY);
     return slugs.map((item) => ({
       slug: item.slug,
-    }))
+    }));
   } catch (err) {
-    console.error('Error generating static params for blog:', err)
-    return []
+    console.error('Error generating static params for blog:', err);
+    return [];
   }
 }
 
 export async function generateMetadata({ params }) {
-  const { slug } = await params
-  const post = await client.fetch(POST_QUERY, { slug })
+  const { slug } = await params;
+  const post = await client.fetch(POST_QUERY, { slug });
 
   if (!post) {
     return {
       title: 'Article Not Found — SK Sahinur Islam',
-    }
+    };
   }
 
-  const title = `${post.title} — SK Sahinur Islam (Genious Sonu)`
-  const description = post.excerpt || `Read ${post.title} by SK Sahinur Islam (Genious Sonu).`
-  const imageUrl = getOptimizedImageUrl(post.mainImage, 1200, 85) || post.mainImage?.asset?.url || 'https://genioussonu.me/icon-512.png'
+  const title = `${post.title} — SK Sahinur Islam (Genious Sonu)`;
+  const description = post.excerpt || `Read ${post.title} by SK Sahinur Islam (Genious Sonu).`;
+  const imageUrl =
+    getOptimizedImageUrl(post.mainImage, 1200, 85) ||
+    post.mainImage?.asset?.url ||
+    'https://genioussonu.me/icon-512.png';
 
   return {
     title,
@@ -69,16 +72,18 @@ export async function generateMetadata({ params }) {
       creator: '@GeniousSonu',
       images: [imageUrl],
     },
-  }
+  };
 }
 
 export default async function BlogPostPage({ params }) {
-  const { slug } = await params
-  const post = await client.fetch(POST_QUERY, { slug })
+  const { slug } = await params;
+  const post = await client.fetch(POST_QUERY, { slug });
 
   if (!post) {
-    notFound()
+    notFound();
   }
+
+  const postImageUrl = post.mainImage?.asset?.url || 'https://genioussonu.me/og-image.png';
 
   // Schema.org BlogPosting structured data
   const jsonLd = {
@@ -86,7 +91,7 @@ export default async function BlogPostPage({ params }) {
     '@type': 'BlogPosting',
     headline: post.title,
     description: post.excerpt,
-    image: post.mainImage?.asset?.url || imageUrl,
+    image: postImageUrl,
     datePublished: post.publishedAt,
     author: {
       '@type': 'Person',
@@ -102,14 +107,16 @@ export default async function BlogPostPage({ params }) {
       '@type': 'WebPage',
       '@id': `https://genioussonu.me/blog/${slug}`,
     },
-  }
+  };
+
+  const safeJsonLd = JSON.stringify(jsonLd)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026');
 
   return (
     <article className={styles.articlePage}>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd }} />
       <Navbar />
 
       {/* Ambient background glow */}
@@ -144,7 +151,9 @@ export default async function BlogPostPage({ params }) {
               {post.author?.image ? (
                 <div className={styles.authorAvatar}>
                   <Image
-                    src={getOptimizedImageUrl(post.author.image, 96) || post.author.image.asset?.url}
+                    src={
+                      getOptimizedImageUrl(post.author.image, 96) || post.author.image.asset?.url
+                    }
                     alt={post.author.name || 'Author'}
                     fill
                     className="object-cover"
@@ -152,17 +161,14 @@ export default async function BlogPostPage({ params }) {
                 </div>
               ) : (
                 <div className={styles.authorAvatar}>
-                  <Image
-                    src="/logo.svg"
-                    alt="Author"
-                    fill
-                    className="object-cover p-1"
-                  />
+                  <Image src="/logo.svg" alt="Author" fill className="object-cover p-1" />
                 </div>
               )}
               <div>
                 <div className={styles.authorName}>{post.author?.name || 'SK Sahinur Islam'}</div>
-                <div className={styles.authorRole}>{post.author?.role || 'Full-Stack Developer & Engineer'}</div>
+                <div className={styles.authorRole}>
+                  {post.author?.role || 'Full-Stack Developer & Engineer'}
+                </div>
               </div>
             </div>
 
@@ -196,28 +202,46 @@ export default async function BlogPostPage({ params }) {
         )}
 
         {/* Cross-Platform Syndication Notice (if present) */}
-        {post.syncMetadata && (post.syncMetadata.mediumUrl || post.syncMetadata.devToUrl || post.syncMetadata.hashnodeUrl) && (
-          <div className={styles.syncSection}>
-            <span>Also syndicated on:</span>
-            <div className={styles.syncLinks}>
-              {post.syncMetadata.mediumUrl && (
-                <a href={post.syncMetadata.mediumUrl} target="_blank" rel="noopener noreferrer" className={styles.syncLink}>
-                  Medium ↗
-                </a>
-              )}
-              {post.syncMetadata.devToUrl && (
-                <a href={post.syncMetadata.devToUrl} target="_blank" rel="noopener noreferrer" className={styles.syncLink}>
-                  Dev.to ↗
-                </a>
-              )}
-              {post.syncMetadata.hashnodeUrl && (
-                <a href={post.syncMetadata.hashnodeUrl} target="_blank" rel="noopener noreferrer" className={styles.syncLink}>
-                  Hashnode ↗
-                </a>
-              )}
+        {post.syncMetadata &&
+          (post.syncMetadata.mediumUrl ||
+            post.syncMetadata.devToUrl ||
+            post.syncMetadata.hashnodeUrl) && (
+            <div className={styles.syncSection}>
+              <span>Also syndicated on:</span>
+              <div className={styles.syncLinks}>
+                {post.syncMetadata.mediumUrl && (
+                  <a
+                    href={post.syncMetadata.mediumUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.syncLink}
+                  >
+                    Medium ↗
+                  </a>
+                )}
+                {post.syncMetadata.devToUrl && (
+                  <a
+                    href={post.syncMetadata.devToUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.syncLink}
+                  >
+                    Dev.to ↗
+                  </a>
+                )}
+                {post.syncMetadata.hashnodeUrl && (
+                  <a
+                    href={post.syncMetadata.hashnodeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.syncLink}
+                  >
+                    Hashnode ↗
+                  </a>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* Article Body Content */}
         <section className={styles.contentWrapper}>
@@ -235,5 +259,5 @@ export default async function BlogPostPage({ params }) {
 
       <Footer />
     </article>
-  )
+  );
 }

@@ -1,44 +1,49 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import Link from 'next/link';
 import { clearAllServiceWorkersAndCaches } from '@/lib/selfHeal';
 import safeStorage from '@/lib/safeStorage';
 
 export default function ResetPage() {
-  const [status, setStatus] = useState('Clearing site storage and caches...');
+  const [isResetting, setIsResetting] = useState(false);
+  const [status, setStatus] = useState(
+    'Clicking reset will unregister service workers, purge offline caches, and reset local app preferences.'
+  );
   const [complete, setComplete] = useState(false);
 
-  useEffect(() => {
-    async function performReset() {
+  const handlePerformReset = async () => {
+    if (isResetting || complete) return;
+    setIsResetting(true);
+
+    try {
+      setStatus('Unregistering service workers & clearing Cache Storage...');
+      await clearAllServiceWorkersAndCaches();
+
+      setStatus('Clearing local application preferences & session state...');
+      safeStorage.clearAppKeys();
+
+      // Clear any self-heal loop counters
       try {
-        setStatus('Unregistering service workers & clearing Cache Storage...');
-        await clearAllServiceWorkersAndCaches();
+        sessionStorage.clear();
+      } catch {}
 
-        setStatus('Clearing local application preferences & session state...');
-        safeStorage.clearAppKeys();
+      setStatus('Cache reset complete. Redirecting to home...');
+      setComplete(true);
 
-        // Also clear any self-heal loop counters
-        try {
-          sessionStorage.clear();
-        } catch {}
+      const timer = setTimeout(() => {
+        window.location.replace('/');
+      }, 800);
 
-        setStatus('Cache reset complete. Redirecting to home...');
-        setComplete(true);
-
-        const timer = setTimeout(() => {
-          window.location.replace('/');
-        }, 600);
-
-        return () => clearTimeout(timer);
-      } catch (err) {
-        console.error('[Reset] Failed to complete full reset:', err);
-        setStatus('Reset encountered an error, but cache cleanup was attempted.');
-        setComplete(true);
-      }
+      return () => clearTimeout(timer);
+    } catch (err) {
+      console.error('[Reset] Failed to complete full reset:', err);
+      setStatus('Reset encountered an error, but cache cleanup was attempted.');
+      setComplete(true);
+    } finally {
+      setIsResetting(false);
     }
-
-    performReset();
-  }, []);
+  };
 
   return (
     <div
@@ -48,7 +53,7 @@ export default function ResetPage() {
         justifyContent: 'center',
         minHeight: '100vh',
         minHeight: '100dvh',
-        backgroundColor: '#050505',
+        backgroundColor: 'var(--void, #050505)',
         color: '#f9fafb',
         fontFamily: 'monospace',
         padding: '24px',
@@ -59,8 +64,8 @@ export default function ResetPage() {
         style={{
           maxWidth: '460px',
           width: '100%',
-          backgroundColor: '#0f1115',
-          border: '1px solid rgba(255, 255, 255, 0.12)',
+          backgroundColor: 'var(--card-bg, #0f1115)',
+          border: '1px solid var(--border, rgba(255, 255, 255, 0.12))',
           borderRadius: '12px',
           padding: '28px',
           textAlign: 'center',
@@ -78,7 +83,7 @@ export default function ResetPage() {
             backgroundColor: 'rgba(16, 185, 129, 0.1)',
             border: '1px solid rgba(16, 185, 129, 0.3)',
             marginBottom: '16px',
-            color: '#10b981',
+            color: 'var(--accent, #10b981)',
             fontSize: '20px',
           }}
         >
@@ -101,23 +106,59 @@ export default function ResetPage() {
           style={{
             fontSize: '13px',
             lineHeight: 1.6,
-            color: '#9ca3af',
+            color: 'var(--text-muted, #9ca3af)',
             marginBottom: '24px',
           }}
         >
           {status}
         </p>
 
+        {!complete && !isResetting && (
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+            <button
+              type="button"
+              onClick={handlePerformReset}
+              style={{
+                cursor: 'pointer',
+                padding: '10px 20px',
+                backgroundColor: 'var(--accent, #10b981)',
+                color: 'var(--void, #050505)',
+                fontWeight: 600,
+                fontSize: '13px',
+                borderRadius: '8px',
+                border: 'none',
+                transition: 'opacity 0.2s ease',
+              }}
+            >
+              Confirm Reset &amp; Purge Cache
+            </button>
+            <Link
+              href="/"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '10px 16px',
+                backgroundColor: 'transparent',
+                color: '#9ca3af',
+                border: '1px solid var(--border, rgba(255, 255, 255, 0.12))',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                fontSize: '13px',
+              }}
+            >
+              Cancel
+            </Link>
+          </div>
+        )}
+
         {complete && (
-          // Full document reload is intentional here to bypass stale router memory after storage wipe
-          // eslint-disable-next-line @next/next/no-html-link-for-pages
-          <a
+          <Link
             href="/"
             style={{
               display: 'inline-block',
               padding: '10px 20px',
-              backgroundColor: '#10b981',
-              color: '#050505',
+              backgroundColor: 'var(--accent, #10b981)',
+              color: 'var(--void, #050505)',
               fontWeight: 600,
               fontSize: '13px',
               borderRadius: '8px',
@@ -126,7 +167,7 @@ export default function ResetPage() {
             }}
           >
             Return to Home (/) →
-          </a>
+          </Link>
         )}
       </div>
     </div>

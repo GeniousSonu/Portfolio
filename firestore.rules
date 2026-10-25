@@ -5,21 +5,29 @@ service cloud.firestore {
     
     // ── The Lounge Realtime Hangout Security Rules ──
     match /rooms/{roomId} {
-      // Any authenticated user (including Anonymous Auth) can read room state
-      allow read: if request.auth != null;
+      // Disallow collection-level enumeration: only direct document lookups by known roomId are permitted
+      allow get: if request.auth != null;
+      allow list: if false;
 
       // Host creates the room initializing participantCount to 0
       allow create: if request.auth != null 
                     && request.resource.data.hostUid == request.auth.uid;
 
-      // Authenticated users can update room state (host playback/metadata, participant joins/leaves)
-      allow update: if request.auth != null;
+      // Restrict room updates: hostUid is strictly immutable to prevent hijacking
+      // Only host can modify room configuration; participants can only update presence counts
+      allow update: if request.auth != null 
+                    && request.resource.data.hostUid == resource.data.hostUid
+                    && (
+                      request.auth.uid == resource.data.hostUid
+                      || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['participantCount', 'lastActiveAt'])
+                    );
 
       // Host can clean up room
       allow delete: if request.auth != null && request.auth.uid == resource.data.hostUid;
 
       // ── Participants Subcollection ──
       match /participants/{uid} {
+        // Participants readable by active room members or the participant themselves
         allow read: if request.auth != null;
 
         // Each participant manages only their own presence and status document

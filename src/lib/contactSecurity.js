@@ -16,19 +16,19 @@ const memoryRateLimitCache = new Map();
  * Tunable Security Constants
  */
 export const RATE_LIMIT_CONFIG = {
-  IP_10M_MAX: 3,              // Max 3 submissions per 10 minutes per IP
-  IP_10M_WINDOW: 600,         // 10 minutes in seconds
-  IP_1H_MAX: 5,               // Max 5 submissions per 1 hour per IP
-  IP_1H_WINDOW: 3600,         // 1 hour in seconds
-  GLOBAL_1M_MAX: 20,          // Max 20 submissions per 1 minute globally (circuit breaker)
-  GLOBAL_1M_WINDOW: 60,       // 1 minute in seconds
-  MIN_TIME_ON_FORM_MS: 3000,  // Submissions under 3s rejected as automated bot tell
-  MAX_URL_COUNT: 2,           // Maximum allowable links in message body
+  IP_10M_MAX: 3, // Max 3 submissions per 10 minutes per IP
+  IP_10M_WINDOW: 600, // 10 minutes in seconds
+  IP_1H_MAX: 5, // Max 5 submissions per 1 hour per IP
+  IP_1H_WINDOW: 3600, // 1 hour in seconds
+  GLOBAL_1M_MAX: 20, // Max 20 submissions per 1 minute globally (circuit breaker)
+  GLOBAL_1M_WINDOW: 60, // 1 minute in seconds
+  MIN_TIME_ON_FORM_MS: 3000, // Submissions under 3s rejected as automated bot tell
+  MAX_URL_COUNT: 2, // Maximum allowable links in message body
   MIN_NAME_LENGTH: 2,
   MAX_NAME_LENGTH: 100,
   MIN_MESSAGE_LENGTH: 10,
   MAX_MESSAGE_LENGTH: 5000,
-  DNS_TIMEOUT_MS: 2500,       // Fast timeout for DNS MX / A lookup
+  DNS_TIMEOUT_MS: 2500, // Fast timeout for DNS MX / A lookup
 };
 
 export const GENERIC_CLIENT_ERROR =
@@ -154,7 +154,8 @@ export async function checkAtomicContactRateLimit(clientIp) {
     }
     memoryRateLimitCache.set(memKey, {
       count: (mem && now < mem.resetAt ? mem.count : 0) + 1,
-      resetAt: mem && now < mem.resetAt ? mem.resetAt : now + RATE_LIMIT_CONFIG.GLOBAL_1M_WINDOW * 1000,
+      resetAt:
+        mem && now < mem.resetAt ? mem.resetAt : now + RATE_LIMIT_CONFIG.GLOBAL_1M_WINDOW * 1000,
     });
   }
 
@@ -193,7 +194,8 @@ export async function checkAtomicContactRateLimit(clientIp) {
     }
     memoryRateLimitCache.set(memKey, {
       count: (mem && now < mem.resetAt ? mem.count : 0) + 1,
-      resetAt: mem && now < mem.resetAt ? mem.resetAt : now + RATE_LIMIT_CONFIG.IP_10M_WINDOW * 1000,
+      resetAt:
+        mem && now < mem.resetAt ? mem.resetAt : now + RATE_LIMIT_CONFIG.IP_10M_WINDOW * 1000,
     });
   }
 
@@ -400,16 +402,22 @@ export function validateContentQuality(rawName, rawMessage) {
  */
 export async function verifyTurnstileSecurity(token, clientIp) {
   const secretKey =
-    process.env.TURNSTILE_SECRET_KEY || '1x0000000000000000000000000000000AA';
+    process.env.TURNSTILE_SECRET_KEY ||
+    (process.env.NODE_ENV !== 'production' ? '1x0000000000000000000000000000000AA' : '');
   const isTestingKey = secretKey === '1x0000000000000000000000000000000AA';
+  const isProd = process.env.NODE_ENV === 'production';
 
-  // In local development or with official testing keys, allow smooth bypass
-  if (!token && (isTestingKey || process.env.NODE_ENV !== 'production')) {
-    return { success: true };
+  // In non-production development with testing keys, allow bypass
+  if (!token) {
+    if (!isProd && isTestingKey) {
+      return { success: true };
+    }
+    return { success: false, reason: 'turnstile_token_missing' };
   }
 
-  if (!token) {
-    return { success: false, reason: 'turnstile_token_missing' };
+  if (isProd && !secretKey) {
+    console.error('[Contact Security] TURNSTILE_SECRET_KEY is not configured in production.');
+    return { success: false, reason: 'turnstile_misconfigured' };
   }
 
   try {
@@ -419,7 +427,7 @@ export async function verifyTurnstileSecurity(token, clientIp) {
     }
     return { success: true };
   } catch (err) {
-    if (isTestingKey || process.env.NODE_ENV !== 'production') {
+    if (!isProd && isTestingKey) {
       return { success: true };
     }
     // Fail closed in production

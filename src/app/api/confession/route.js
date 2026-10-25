@@ -1,11 +1,7 @@
 import { NextResponse } from 'next/server';
 import crypto from 'node:crypto';
 import { getServiceSupabase } from '@/lib/supabaseServer';
-import {
-  extractClientIp,
-  validateHoneypot,
-  validateRequestOrigin,
-} from '@/lib/contactSecurity';
+import { extractClientIp, validateHoneypot, validateRequestOrigin } from '@/lib/contactSecurity';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,6 +22,31 @@ function checkRateLimit(ip) {
   validTimestamps.push(now);
   ipSubmissionsMap.set(ip, validTimestamps);
   return true;
+}
+
+function getConfessionKey() {
+  const secret =
+    process.env.CONFESSION_ENCRYPTION_KEY ||
+    process.env.STUDIO_SESSION_SECRET ||
+    process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('Confession encryption key is unconfigured in production');
+    }
+    return crypto.createHash('sha256').update('dev-confession-fallback-secret-2026').digest();
+  }
+
+  return crypto.createHash('sha256').update(secret).digest();
+}
+
+function encryptConfessionPayload(plainText) {
+  const key = getConfessionKey();
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+  const encrypted = Buffer.concat([cipher.update(plainText, 'utf8'), cipher.final()]);
+  const authTag = cipher.getAuthTag();
+  return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted.toString('hex')}`;
 }
 
 export async function POST(request) {
@@ -91,27 +112,49 @@ export async function POST(request) {
     const ipHash = crypto.createHash('sha256').update(`${clientIp}:${salt}`).digest('hex');
     const confessionId = crypto.randomUUID();
 
-    // 7. Persist to Supabase if configured
+    // 7. AES-256-GCM encryption & persistence to Supabase
+    let encryptedBody;
+    try {
+      encryptedBody = encryptConfessionPayload(noteText);
+    } catch (encErr) {
+      console.error('[Confession API] Encryption failed:', encErr.message);
+      return NextResponse.json(
+        { success: false, error: 'Security vault encryption unavailable.' },
+        { status: 500 }
+      );
+    }
+
     try {
       const supabase = getServiceSupabase();
       const { error: dbError } = await supabase.from('confessions').insert({
         id: confessionId,
-        body: noteText,
-        is_encrypted: Boolean(body.isEncrypted),
+        body: encryptedBody,
+        is_encrypted: true,
         status: 'new',
         ip_hash: ipHash,
         created_at: new Date().toISOString(),
       });
 
       if (dbError) {
-        // Table may not exist yet in Supabase project; log for awareness but don't fail user
-        console.warn('[Confession API] Supabase table insert notice:', dbError.message);
+        console.error('[Confession API] Supabase table insert failed:', dbError.message);
+        if (process.env.NODE_ENV === 'production') {
+          return NextResponse.json(
+            { success: false, error: 'Failed to securely store confession in vault.' },
+            { status: 500 }
+          );
+        }
       }
     } catch (dbErr) {
-      console.warn('[Confession API] Supabase unavailable, proceeding gracefully:', dbErr?.message);
+      console.error('[Confession API] Supabase service exception:', dbErr?.message);
+      if (process.env.NODE_ENV === 'production') {
+        return NextResponse.json(
+          { success: false, error: 'Vault storage service unavailable.' },
+          { status: 500 }
+        );
+      }
     }
 
-    // 8. Telegram notification per PRD FR-CONF-07 (Message is "New confession received" only, without text)
+    // 8. Telegram notification per PRD FR-CONF-07 (Notice only, without sensitive body)
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID;
     if (botToken && chatId) {
@@ -127,7 +170,7 @@ export async function POST(request) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           chat_id: chatId,
-          text: `🔐 <b>New Anonymous Confession</b>\n\nA new message has been dropped into the vault.\n• <b>Time:</b> ${istTime} IST\n• <b>Length:</b> ${noteText.length} chars`,
+          text: `🔐 <b>New Anonymous Confession</b>\n\nA new encrypted message has been dropped into the vault.\n• <b>Time:</b> ${istTime} IST\n• <b>Length:</b> ${noteText.length} chars`,
           parse_mode: 'HTML',
         }),
       }).catch((err) => {

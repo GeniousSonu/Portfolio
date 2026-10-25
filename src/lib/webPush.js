@@ -6,7 +6,7 @@ import { getServiceSupabase } from '@/lib/supabaseServer';
 const HMAC_SECRET =
   process.env.STUDIO_SESSION_SECRET ||
   process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  'sks-live-chat-push-secret-2026';
+  (process.env.NODE_ENV === 'production' ? null : 'sks-live-chat-push-secret-2026');
 
 let isVapidInitialized = false;
 
@@ -86,6 +86,14 @@ export function signLiveChatSessionToken(sessionId) {
     throw new Error('sessionId is required to generate session token');
   }
 
+  if (!HMAC_SECRET) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('Live chat HMAC secret is not configured in production');
+    }
+  }
+
+  const effectiveSecret = HMAC_SECRET || 'dev-fallback-secret-2026';
+
   const payload = {
     sessionId,
     iat: Date.now(),
@@ -94,7 +102,7 @@ export function signLiveChatSessionToken(sessionId) {
 
   const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url');
   const signature = crypto
-    .createHmac('sha256', HMAC_SECRET)
+    .createHmac('sha256', effectiveSecret)
     .update(encodedPayload)
     .digest('base64url');
 
@@ -109,6 +117,12 @@ export function verifyLiveChatSessionToken(token, expectedSessionId) {
     return { valid: false, error: 'Session token missing' };
   }
 
+  if (!HMAC_SECRET && process.env.NODE_ENV === 'production') {
+    return { valid: false, error: 'Live chat HMAC secret unconfigured in production' };
+  }
+
+  const effectiveSecret = HMAC_SECRET || 'dev-fallback-secret-2026';
+
   const parts = token.split('.');
   if (parts.length !== 2) {
     return { valid: false, error: 'Invalid token format' };
@@ -116,11 +130,17 @@ export function verifyLiveChatSessionToken(token, expectedSessionId) {
 
   const [encodedPayload, signature] = parts;
   const expectedSignature = crypto
-    .createHmac('sha256', HMAC_SECRET)
+    .createHmac('sha256', effectiveSecret)
     .update(encodedPayload)
     .digest('base64url');
 
-  if (signature !== expectedSignature) {
+  const sigBuffer = Buffer.from(signature);
+  const expectedSigBuffer = Buffer.from(expectedSignature);
+
+  if (
+    sigBuffer.length !== expectedSigBuffer.length ||
+    !crypto.timingSafeEqual(sigBuffer, expectedSigBuffer)
+  ) {
     return { valid: false, error: 'Invalid session token signature' };
   }
 
@@ -226,8 +246,15 @@ export async function sendLiveChatPushNotification(sessionId) {
     const sendPromises = subs.map(async ({ id, subscription }) => {
       // Re-validate endpoint before network dispatch
       if (!isValidPushEndpoint(subscription?.endpoint)) {
-        console.warn(`[WebPush] Pruning subscription ${id} with invalid endpoint:`, subscription?.endpoint);
-        await supabase.from('push_subscriptions').delete().eq('id', id).catch(() => {});
+        console.warn(
+          `[WebPush] Pruning subscription ${id} with invalid endpoint:`,
+          subscription?.endpoint
+        );
+        await supabase
+          .from('push_subscriptions')
+          .delete()
+          .eq('id', id)
+          .catch(() => {});
         return;
       }
 
@@ -237,10 +264,19 @@ export async function sendLiveChatPushNotification(sessionId) {
         const statusCode = err?.statusCode;
         // 410 Gone or 404 Not Found indicates the client has revoked permission or uninstalled
         if (statusCode === 410 || statusCode === 404) {
-          console.log(`[WebPush] Subscription ${id} expired (${statusCode}). Pruning from database.`);
-          await supabase.from('push_subscriptions').delete().eq('id', id).catch(() => {});
+          console.log(
+            `[WebPush] Subscription ${id} expired (${statusCode}). Pruning from database.`
+          );
+          await supabase
+            .from('push_subscriptions')
+            .delete()
+            .eq('id', id)
+            .catch(() => {});
         } else {
-          console.warn(`[WebPush] Failed sending push to subscription ${id} (status: ${statusCode}):`, err.message);
+          console.warn(
+            `[WebPush] Failed sending push to subscription ${id} (status: ${statusCode}):`,
+            err.message
+          );
         }
       }
     });

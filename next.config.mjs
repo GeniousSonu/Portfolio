@@ -21,25 +21,37 @@ const nextConfig = {
   async headers() {
     return [
       {
+        // Global Security Headers applied to all routes
+        source: '/:path*',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(self), browsing-topics=()',
+          },
+          { key: 'X-DNS-Prefetch-Control', value: 'on' },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload',
+          },
+        ],
+      },
+      {
         // Allow Sanity Studio to load resources from its CDN
         source: '/studio/:path*',
-        headers: [
-          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
-        ],
+        headers: [{ key: 'X-Frame-Options', value: 'SAMEORIGIN' }],
       },
       {
         // Immutable caching for static fonts
         source: '/fonts/:path*',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
-        ],
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
       },
       {
         // Immutable caching for Next.js build assets & chunks
         source: '/_next/static/:path*',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
-        ],
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
       },
       {
         // Emergency kill switch must never be cached
@@ -51,16 +63,12 @@ const nextConfig = {
       {
         // Root homepage: ensure fresh HTML so chunk hashes are always up to date
         source: '/',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' },
-        ],
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' }],
       },
       {
         // Page routes: ensure fresh HTML on every navigation/refresh
         source: '/:path((?!_next|fonts|logo|manifest|sw\\.js).*)',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' },
-        ],
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' }],
       },
       {
         // Service Worker headers for PWA
@@ -118,9 +126,9 @@ export default withSentryConfig(nextConfig, {
   // For all available options, see:
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
 
-  org: "sahinur-portfolio",
+  org: 'sahinur-portfolio',
 
-  project: "portfolio",
+  project: 'portfolio',
 
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
@@ -138,7 +146,7 @@ export default withSentryConfig(nextConfig, {
   // This can increase your server load as well as your hosting bill.
   // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
   // side errors will fail.
-  tunnelRoute: "/monitoring",
+  tunnelRoute: '/monitoring',
 
   webpack: {
     // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)

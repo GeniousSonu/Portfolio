@@ -1,13 +1,20 @@
 import 'server-only';
 import { v2 as cloudinary } from 'cloudinary';
 
-// Configure server-side Cloudinary instance securely
-cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'uvflwz6x',
-  api_key: process.env.CLOUDINARY_API_KEY || '829647793376663',
-  api_secret: process.env.CLOUDINARY_API_SECRET || '6DOrofRJiBhABqNlUsMA7TCsAbQ',
-  secure: true,
-});
+// Configure server-side Cloudinary instance securely from environment variables
+const cloudName =
+  process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME;
+const apiKey = process.env.CLOUDINARY_API_KEY;
+const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+if (cloudName && apiKey && apiSecret) {
+  cloudinary.config({
+    cloud_name: cloudName,
+    api_key: apiKey,
+    api_secret: apiSecret,
+    secure: true,
+  });
+}
 
 export { cloudinary };
 
@@ -28,19 +35,22 @@ export async function uploadImage(source, options = {}) {
     publicId,
     tags = ['portfolio'],
     resourceType = 'image',
-    transformation = [
-      { quality: 'auto:good' },
-      { fetch_format: 'auto' },
-    ],
+    transformation = [{ quality: 'auto:good' }, { fetch_format: 'auto' }],
   } = options;
+
+  if (!cloudName || !apiKey || !apiSecret) {
+    throw new Error(
+      'Cloudinary environment credentials (CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET) are missing.'
+    );
+  }
 
   const uploadOptions = {
     folder,
     resource_type: resourceType,
     tags,
     transformation,
-    overwrite: true,
-    invalidate: true,
+    overwrite: options.overwrite === true,
+    invalidate: options.invalidate === true,
   };
 
   if (publicId) {
@@ -96,13 +106,7 @@ export async function deleteImage(publicId, resourceType = 'image') {
 export function getOptimizedCloudinaryUrl(publicId, transforms = {}) {
   if (!publicId) return '';
 
-  const {
-    width,
-    height,
-    crop = 'fill',
-    quality = 'auto',
-    format = 'auto',
-  } = transforms;
+  const { width, height, crop = 'fill', quality = 'auto', format = 'auto' } = transforms;
 
   return cloudinary.url(publicId, {
     secure: true,

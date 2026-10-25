@@ -10,21 +10,27 @@ import {
 import { deleteSpaceEntry, broadcastToSpace } from '@/lib/sharedSpace';
 import { sendLiveChatPushNotification } from '@/lib/webPush';
 
+import crypto from 'crypto';
+
 export async function POST(req) {
   try {
-    // Parse incoming webhook payload
-    const body = await req.json().catch(() => null);
-
-    // 1. Verify Telegram Webhook Secret Token
+    // 1. Verify Telegram Webhook Secret Token strictly
     const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
     const incomingSecret = req.headers.get('x-telegram-bot-api-secret-token');
 
-    if (webhookSecret && incomingSecret !== webhookSecret) {
-      console.warn('[LiveChatWebhook] Unauthorized webhook access attempt rejected.');
-      return NextResponse.json(
-        { error: 'Unauthorized: invalid webhook secret' },
-        { status: 401 }
-      );
+    if (!webhookSecret || !incomingSecret) {
+      console.warn('[LiveChatWebhook] Unauthorized access attempt: missing secret token.');
+      return NextResponse.json({ error: 'Unauthorized: missing webhook secret' }, { status: 401 });
+    }
+
+    const incomingBuf = Buffer.from(incomingSecret);
+    const secretBuf = Buffer.from(webhookSecret);
+    if (
+      incomingBuf.length !== secretBuf.length ||
+      !crypto.timingSafeEqual(incomingBuf, secretBuf)
+    ) {
+      console.warn('[LiveChatWebhook] Unauthorized access attempt: invalid secret token.');
+      return NextResponse.json({ error: 'Unauthorized: invalid webhook secret' }, { status: 401 });
     }
 
     if (!body || typeof body !== 'object') {
@@ -66,15 +72,15 @@ export async function POST(req) {
         }).catch((e) => console.warn('[LiveChatWebhook] answerCallbackQuery notice:', e.message));
       }
 
-      // 2. Verify origin chat / sender
+      // 2. Verify origin chat / sender strictly
       const isAuthorized =
-        !expectedChatId ||
-        cbChatId === expectedChatId ||
-        cbFromId === expectedChatId;
+        Boolean(expectedChatId) && (cbChatId === expectedChatId || cbFromId === expectedChatId);
 
       if (!isAuthorized) {
-        console.warn(`[LiveChatWebhook] Unauthorized callback from chatId=${cbChatId}, fromId=${cbFromId}`);
-        return NextResponse.json({ ok: true });
+        console.warn(
+          `[LiveChatWebhook] Unauthorized callback from chatId=${cbChatId}, fromId=${cbFromId}`
+        );
+        return NextResponse.json({ error: 'Unauthorized callback sender' }, { status: 403 });
       }
 
       // Handle Quick Reply button taps ("qr:<type>:<sessionId>")
@@ -83,7 +89,8 @@ export async function POST(req) {
         const qrType = parts[1];
         const sessionId = parts.slice(2).join(':');
 
-        const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || process.env.CONTACT_NOTIFICATION_EMAIL;
+        const contactEmail =
+          process.env.NEXT_PUBLIC_CONTACT_EMAIL || process.env.CONTACT_NOTIFICATION_EMAIL;
         const cannedMap = {
           thanks: '👋 Thanks for reaching out! How can I help you today?',
           busy: '⏳ Give me just a few minutes, I am reviewing your message and will reply shortly!',
@@ -110,7 +117,10 @@ export async function POST(req) {
 
           // 2. Send confirmation in Telegram chat so Sonu has a clean record
           if (botToken && targetChatId) {
-            const cleanNotice = String(replyText).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const cleanNotice = String(replyText)
+              .replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;');
             const sentMsgRes = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -178,13 +188,14 @@ export async function POST(req) {
 
           // 3. Update the Telegram message so Sonu sees visual confirmation
           if (botToken && targetChatId && cb.message?.message_id) {
+            const safeEntryId = entryId.replace(/[<>&"']/g, '');
             await fetch(`https://api.telegram.org/bot${botToken}/editMessageText`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 chat_id: targetChatId,
                 message_id: cb.message.message_id,
-                text: `🗑️ <b>Entry Deleted from Shared Space</b>\n<b>ID:</b> <code>${entryId}</code>\n\n<i>This entry was permanently deleted from the live board by Sonu.</i>`,
+                text: `🗑️ <b>Entry Deleted from Shared Space</b>\n<b>ID:</b> <code>${safeEntryId}</code>\n\n<i>This entry was permanently deleted from the live board by Sonu.</i>`,
                 parse_mode: 'HTML',
               }),
             }).catch(() => {});

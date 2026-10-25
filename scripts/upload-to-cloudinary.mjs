@@ -7,11 +7,24 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..');
 
-// Configure Cloudinary using user's credentials
+// Configure Cloudinary strictly using environment variables
+const cloudName =
+  process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME;
+const apiKey = process.env.CLOUDINARY_API_KEY;
+const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+if (!cloudName || !apiKey || !apiSecret) {
+  console.error('[Error] Missing required Cloudinary credentials in environment.');
+  console.error(
+    'Please define CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET before running this script.'
+  );
+  process.exit(1);
+}
+
 cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'uvflwz6x',
-  api_key: process.env.CLOUDINARY_API_KEY || '829647793376663',
-  api_secret: process.env.CLOUDINARY_API_SECRET || '6DOrofRJiBhABqNlUsMA7TCsAbQ',
+  cloud_name: cloudName,
+  api_key: apiKey,
+  api_secret: apiSecret,
   secure: true,
 });
 
@@ -54,16 +67,15 @@ async function runUpload() {
     }
 
     try {
-      console.log(`[Cloudinary] Uploading ${asset.localPath} to ${asset.folder}/${asset.publicId}...`);
+      console.log(
+        `[Cloudinary] Uploading ${asset.localPath} to ${asset.folder}/${asset.publicId}...`
+      );
       const result = await cloudinary.uploader.upload(fullPath, {
         folder: asset.folder,
         public_id: asset.publicId,
         tags: asset.tags,
         overwrite: true,
-        transformation: [
-          { quality: 'auto:good' },
-          { fetch_format: 'auto' },
-        ],
+        transformation: [{ quality: 'auto:good' }, { fetch_format: 'auto' }],
       });
 
       console.log(`  ✓ Uploaded successfully: ${result.secure_url}`);

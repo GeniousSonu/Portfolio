@@ -8,7 +8,7 @@ const MAX_HISTORY_TURNS = 6;
 
 // Rate limit policies (Strict Free-Tier Ceilings)
 const IP_WINDOW_SECONDS = 600; // 10 minutes
-const IP_MAX_REQUESTS = 10;    // Max 10 messages per user per 10-minute window
+const IP_MAX_REQUESTS = 10; // Max 10 messages per user per 10-minute window
 const DAILY_WINDOW_SECONDS = 86400; // 24 hours
 const GEMINI_DAILY_MAX_REQUESTS = Number(process.env.CHATBOT_DAILY_CAP) || 400; // Independent cap for Gemini
 const OPENROUTER_DAILY_MAX_REQUESTS = Number(process.env.OPENROUTER_DAILY_CAP) || 400; // Independent cap for OpenRouter
@@ -23,48 +23,57 @@ const DEFAULT_FAQ_CONTEXT = [
   {
     category: 'career',
     question: 'Who is SK Sahinur Islam?',
-    answer: 'SK Sahinur Islam is a Senior Web Application Developer at Ib Arts, Co-Founder of WEFIK, and an IT Engineer based in Kolkata, India. He holds an Indian IoT patent in vaccine preservation and specializes in backend architecture, DevOps, Node.js, Next.js, and cloud systems.'
+    answer:
+      'SK Sahinur Islam is a Senior Web Application Developer at Ib Arts, Co-Founder of WEFIK, and an IT Engineer based in Kolkata, India. He holds an Indian IoT patent in vaccine preservation and specializes in backend architecture, DevOps, Node.js, Next.js, and cloud systems.',
   },
   {
     category: 'career',
     question: 'Where does Sahinur work currently?',
-    answer: 'Sahinur is currently a Senior Web Application Developer at Ib Arts, where he builds scalable enterprise systems, REST APIs, and automated cloud workflows.'
+    answer:
+      'Sahinur is currently a Senior Web Application Developer at Ib Arts, where he builds scalable enterprise systems, REST APIs, and automated cloud workflows.',
   },
   {
     category: 'career',
     question: 'Did Sahinur work at ARC Document Solutions?',
-    answer: 'Yes, Sahinur worked as a QA Engineer (Quality Assurance Engineer) at ARC Document Solutions from September 2025 to June 2026, validating document processing pipelines, output integrity, and software regression testing.'
+    answer:
+      'Yes, Sahinur worked as a QA Engineer (Quality Assurance Engineer) at ARC Document Solutions from September 2025 to June 2026, validating document processing pipelines, output integrity, and software regression testing.',
   },
   {
     category: 'patent',
-    question: 'What is Sahinur\'s IoT patent about?',
-    answer: 'Sahinur holds an Indian Patent (Patent No. 544062) for an IoT-based system and method for real-time monitoring and alert generation for temperature-sensitive vaccine storage and cold-chain logistics.'
+    question: "What is Sahinur's IoT patent about?",
+    answer:
+      'Sahinur holds an Indian Patent (Patent No. 544062) for an IoT-based system and method for real-time monitoring and alert generation for temperature-sensitive vaccine storage and cold-chain logistics.',
   },
   {
     category: 'tech_stack',
     question: 'What technologies does Sahinur specialize in?',
-    answer: 'His core stack includes Node.js, Next.js, React, Linux Systems Administration, PostgreSQL, Supabase, Docker, DevOps CI/CD pipelines, and IoT protocols.'
+    answer:
+      'His core stack includes Node.js, Next.js, React, Linux Systems Administration, PostgreSQL, Supabase, Docker, DevOps CI/CD pipelines, and IoT protocols.',
   },
   {
     category: 'projects',
     question: 'What is WEFIK?',
-    answer: 'WEFIK is a creative digital agency co-founded by Sahinur in March 2021, delivering high-performance web applications, digital products, and technical consulting.'
+    answer:
+      'WEFIK is a creative digital agency co-founded by Sahinur in March 2021, delivering high-performance web applications, digital products, and technical consulting.',
   },
   {
     category: 'hobbies',
     question: 'What does Sahinur do in his free time?',
-    answer: 'Outside engineering, Sahinur enjoys exploring cybersecurity CTFs, homelabbing, listening to synthwave and ambient music, reading science fiction and tech philosophy, and watching cinema.'
+    answer:
+      'Outside engineering, Sahinur enjoys exploring cybersecurity CTFs, homelabbing, listening to synthwave and ambient music, reading science fiction and tech philosophy, and watching cinema.',
   },
   {
     category: 'books',
-    question: 'What are Sahinur\'s favorite books?',
-    answer: 'Top recommendations include "Designing Data-Intensive Applications" by Martin Kleppmann, "The Phoenix Project", and sci-fi classics like "Dune" by Frank Herbert.'
+    question: "What are Sahinur's favorite books?",
+    answer:
+      'Top recommendations include "Designing Data-Intensive Applications" by Martin Kleppmann, "The Phoenix Project", and sci-fi classics like "Dune" by Frank Herbert.',
   },
   {
     category: 'movies',
     question: 'What movies and shows does Sahinur enjoy?',
-    answer: 'He loves mind-bending sci-fi and thrillers like Mr. Robot, Blade Runner 2049, Interstellar, Dark, and Silicon Valley.'
-  }
+    answer:
+      'He loves mind-bending sci-fi and thrillers like Mr. Robot, Blade Runner 2049, Interstellar, Dark, and Silicon Valley.',
+  },
 ];
 
 let _tableMissingCache = false;
@@ -84,7 +93,7 @@ async function checkRateLimit(key, maxRequests, windowSeconds) {
       const { data: rpcData, error: rpcError } = await supabase.rpc('check_rate_limit', {
         p_key: key,
         p_max: maxRequests,
-        p_window_seconds: windowSeconds
+        p_window_seconds: windowSeconds,
       });
 
       if (!rpcError && rpcData) {
@@ -167,12 +176,20 @@ function isValidOrigin(req) {
 
   try {
     const url = new URL(checkUrl);
-    // Allow localhost in any environment for development / testing
-    if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+    // Allow localhost in non-production environments
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      (url.hostname === 'localhost' || url.hostname === '127.0.0.1')
+    ) {
       return true;
     }
-    // Allow portfolio domains
-    if (url.hostname.endsWith('genioussonu.me') || url.hostname.endsWith('sksahinurislam.dev')) {
+    // Allow portfolio domains with strict dot boundary
+    if (
+      url.hostname === 'genioussonu.me' ||
+      url.hostname.endsWith('.genioussonu.me') ||
+      url.hostname === 'sksahinurislam.dev' ||
+      url.hostname.endsWith('.sksahinurislam.dev')
+    ) {
       return true;
     }
     // Allow vercel deployment previews
@@ -191,23 +208,128 @@ function isValidOrigin(req) {
 }
 
 const STOP_WORDS = new Set([
-  'a', 'about', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'from',
-  'has', 'he', 'in', 'is', 'it', 'its', 'of', 'on', 'or', 'that', 'the',
-  'to', 'was', 'were', 'will', 'with', 'what', 'when', 'where', 'which',
-  'who', 'why', 'how', 'can', 'could', 'would', 'should', 'do', 'does',
-  'did', 'have', 'had', 'been', 'there', 'their', 'they', 'this', 'these',
-  'those', 'i', 'me', 'my', 'you', 'your', 'we', 'our', 'us', 'tell',
-  'give', 'show', 'say', 'know', 'many', 'much', 'briefly', 'explain',
-  'word', 'more', 'some', 'any', 'please', 'just', 'like'
+  'a',
+  'about',
+  'an',
+  'and',
+  'are',
+  'as',
+  'at',
+  'be',
+  'by',
+  'for',
+  'from',
+  'has',
+  'he',
+  'in',
+  'is',
+  'it',
+  'its',
+  'of',
+  'on',
+  'or',
+  'that',
+  'the',
+  'to',
+  'was',
+  'were',
+  'will',
+  'with',
+  'what',
+  'when',
+  'where',
+  'which',
+  'who',
+  'why',
+  'how',
+  'can',
+  'could',
+  'would',
+  'should',
+  'do',
+  'does',
+  'did',
+  'have',
+  'had',
+  'been',
+  'there',
+  'their',
+  'they',
+  'this',
+  'these',
+  'those',
+  'i',
+  'me',
+  'my',
+  'you',
+  'your',
+  'we',
+  'our',
+  'us',
+  'tell',
+  'give',
+  'show',
+  'say',
+  'know',
+  'many',
+  'much',
+  'briefly',
+  'explain',
+  'word',
+  'more',
+  'some',
+  'any',
+  'please',
+  'just',
+  'like',
 ]);
 
 const PERSONAL_KEYWORDS = new Set([
-  'sahinur', 'sonu', 'islam', 'patent', 'patents', 'iot', 'vaccine', 'vaccines',
-  'wefik', 'arts', 'developer', 'engineer', 'stack', 'technologies', 'skills',
-  'skill', 'projects', 'project', 'books', 'book', 'movies', 'movie', 'hobbies',
-  'hobby', 'career', 'resume', 'bio', 'contact', 'experience', 'certs', 'certifications',
-  'cert', 'education', 'college', 'gnit', 'agency', 'frontend', 'backend', 'devops',
-  'linux', 'docker', 'coldchain', 'temperature', 'portfolio', 'work'
+  'sahinur',
+  'sonu',
+  'islam',
+  'patent',
+  'patents',
+  'iot',
+  'vaccine',
+  'vaccines',
+  'wefik',
+  'arts',
+  'developer',
+  'engineer',
+  'stack',
+  'technologies',
+  'skills',
+  'skill',
+  'projects',
+  'project',
+  'books',
+  'book',
+  'movies',
+  'movie',
+  'hobbies',
+  'hobby',
+  'career',
+  'resume',
+  'bio',
+  'contact',
+  'experience',
+  'certs',
+  'certifications',
+  'cert',
+  'education',
+  'college',
+  'gnit',
+  'agency',
+  'frontend',
+  'backend',
+  'devops',
+  'linux',
+  'docker',
+  'coldchain',
+  'temperature',
+  'portfolio',
+  'work',
 ]);
 
 /**
@@ -261,7 +383,11 @@ async function getFaqContext(userMessage) {
   const matched = scored.filter((s) => s.score > 0);
   const hasMatch = hasPersonalTerm || matched.length > 0;
 
-  const topFaqs = hasMatch ? (matched.length > 0 ? matched.slice(0, 5).map((s) => s.faq) : faqs.slice(0, 3)) : [];
+  const topFaqs = hasMatch
+    ? matched.length > 0
+      ? matched.slice(0, 5).map((s) => s.faq)
+      : faqs.slice(0, 3)
+    : [];
   const faqContext = topFaqs
     .map((f) => `[Category: ${f.category}]\nQ: ${f.question}\nA: ${f.answer}`)
     .join('\n\n');
@@ -352,10 +478,7 @@ async function callOpenRouterModel({ apiKey, systemPrompt, messages, timeoutMs =
     const url = 'https://openrouter.ai/api/v1/chat/completions';
     const body = {
       model: modelName,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        ...messages,
-      ],
+      messages: [{ role: 'system', content: systemPrompt }, ...messages],
       reasoning: { max_tokens: 0 },
       temperature: 0.6,
       max_tokens: 600,
@@ -395,7 +518,12 @@ async function callOpenRouterModel({ apiKey, systemPrompt, messages, timeoutMs =
     } catch (err) {
       clearTimeout(timer);
       lastError = err;
-      if (err?.status === 429 || err?.status === 503 || err?.status === 404 || err?.name === 'AbortError') {
+      if (
+        err?.status === 429 ||
+        err?.status === 503 ||
+        err?.status === 404 ||
+        err?.name === 'AbortError'
+      ) {
         continue;
       }
       throw err;
@@ -404,7 +532,6 @@ async function callOpenRouterModel({ apiKey, systemPrompt, messages, timeoutMs =
 
   throw lastError || { status: 500, message: 'OpenRouter models exhausted' };
 }
-
 
 export async function POST(req) {
   // 1. Origin verification
@@ -450,7 +577,9 @@ export async function POST(req) {
 
   // 4. Rate Limiting: Client IP extraction
   const forwarded = req.headers.get('x-forwarded-for');
-  const ip = forwarded ? forwarded.split(',')[0].trim() : req.headers.get('x-real-ip') || '127.0.0.1';
+  const ip = forwarded
+    ? forwarded.split(',')[0].trim()
+    : req.headers.get('x-real-ip') || '127.0.0.1';
 
   // ── LAYER 1: Per-User Rate Limit (Max 10 messages per 10 minutes) ──
   const ipKey = `ip:${ip}`;
@@ -458,7 +587,8 @@ export async function POST(req) {
   if (!ipCheck.allowed) {
     return NextResponse.json(
       {
-        reply: "You're asking questions a bit quickly! You've reached the limit of 10 messages for this 10-minute window. Please take a short breather and try again in a few minutes.",
+        reply:
+          "You're asking questions a bit quickly! You've reached the limit of 10 messages for this 10-minute window. Please take a short breather and try again in a few minutes.",
       },
       { status: 429 }
     );
@@ -471,9 +601,15 @@ export async function POST(req) {
   // ── PATH A: FAQ MATCH FOUND -> ROUTE TO GEMINI (Personal & Portfolio Context) ──
   if (hasMatch) {
     const todayGeminiKey = `global:gemini:${today}`;
-    const geminiDailyCheck = await checkRateLimit(todayGeminiKey, GEMINI_DAILY_MAX_REQUESTS, DAILY_WINDOW_SECONDS);
+    const geminiDailyCheck = await checkRateLimit(
+      todayGeminiKey,
+      GEMINI_DAILY_MAX_REQUESTS,
+      DAILY_WINDOW_SECONDS
+    );
     if (!geminiDailyCheck.allowed) {
-      console.warn(`[RATE_LIMIT] Gemini global daily cap of ${GEMINI_DAILY_MAX_REQUESTS} reached today (${todayGeminiKey}). API call blocked.`);
+      console.warn(
+        `[RATE_LIMIT] Gemini global daily cap of ${GEMINI_DAILY_MAX_REQUESTS} reached today (${todayGeminiKey}). API call blocked.`
+      );
       return NextResponse.json(
         {
           reply: "I've hit my daily limit of questions — try again tomorrow!",
@@ -482,7 +618,9 @@ export async function POST(req) {
       );
     }
 
-    console.log(`[CHATBOT_ROUTING] Query: "${rawMessage.slice(0, 40)}" -> Handled by: GEMINI (${matchedCount} FAQ matches)`);
+    console.log(
+      `[CHATBOT_ROUTING] Query: "${rawMessage.slice(0, 40)}" -> Handled by: GEMINI (${matchedCount} FAQ matches)`
+    );
 
     const systemPrompt = `You are genious.exe, the intelligent systems assistant for SK Sahinur Islam's official portfolio. Sahinur is a Senior Web Application Developer at Ib Arts, Co-Founder of WEFIK, and an IT Engineer based in Kolkata, India.
 
@@ -544,7 +682,9 @@ Example: "Sahinur holds an Indian Patent (Patent No. 544062) for an IoT-based re
         return NextResponse.json({ reply });
       } catch (err) {
         // If Gemini candidate models all failed, fall through to OpenRouter fallback if available
-        console.warn('[CHATBOT_ROUTING] Gemini free models exhausted or timed out. Attempting OpenRouter fallback...');
+        console.warn(
+          '[CHATBOT_ROUTING] Gemini free models exhausted or timed out. Attempting OpenRouter fallback...'
+        );
       }
     }
 
@@ -566,7 +706,9 @@ Example: "Sahinur holds an Indian Patent (Patent No. 544062) for an IoT-based re
 
         return NextResponse.json({ reply });
       } catch (openRouterErr) {
-        console.warn('[CHATBOT_ROUTING] OpenRouter fallback also failed or rate-limited. Using direct verified FAQ fallback.');
+        console.warn(
+          '[CHATBOT_ROUTING] OpenRouter fallback also failed or rate-limited. Using direct verified FAQ fallback.'
+        );
       }
     }
 
@@ -592,16 +734,25 @@ Example: "Sahinur holds an Indian Patent (Patent No. 544062) for an IoT-based re
     }
 
     return NextResponse.json(
-      { reply: "genious.exe is ready! Please ask about Sahinur's engineering projects, tech stack, or cold-chain patent. [action:nav:#skills|Explore Technical Skills]" },
+      {
+        reply:
+          "genious.exe is ready! Please ask about Sahinur's engineering projects, tech stack, or cold-chain patent. [action:nav:#skills|Explore Technical Skills]",
+      },
       { status: 200 }
     );
   }
 
   // ── PATH B: NO FAQ MATCH -> ROUTE TO OPENROUTER ──
   const todayOpenRouterKey = `global:openrouter:${today}`;
-  const openRouterDailyCheck = await checkRateLimit(todayOpenRouterKey, OPENROUTER_DAILY_MAX_REQUESTS, DAILY_WINDOW_SECONDS);
+  const openRouterDailyCheck = await checkRateLimit(
+    todayOpenRouterKey,
+    OPENROUTER_DAILY_MAX_REQUESTS,
+    DAILY_WINDOW_SECONDS
+  );
   if (!openRouterDailyCheck.allowed) {
-    console.warn(`[RATE_LIMIT] OpenRouter global daily cap of ${OPENROUTER_DAILY_MAX_REQUESTS} reached today (${todayOpenRouterKey}). API call blocked.`);
+    console.warn(
+      `[RATE_LIMIT] OpenRouter global daily cap of ${OPENROUTER_DAILY_MAX_REQUESTS} reached today (${todayOpenRouterKey}). API call blocked.`
+    );
     return NextResponse.json(
       {
         reply: "I've hit my daily limit of general questions — try again tomorrow!",
@@ -614,11 +765,14 @@ Example: "Sahinur holds an Indian Patent (Patent No. 544062) for an IoT-based re
   if (!openRouterApiKey) {
     console.warn('[ROUTING] OPENROUTER_API_KEY missing in environment.');
     return NextResponse.json({
-      reply: "I am genious.exe, configured to answer questions about Sahinur Islam's engineering work and portfolio. What would you like to know about his projects or skills? [action:nav:#skills|Explore Technical Skills]",
+      reply:
+        "I am genious.exe, configured to answer questions about Sahinur Islam's engineering work and portfolio. What would you like to know about his projects or skills? [action:nav:#skills|Explore Technical Skills]",
     });
   }
 
-  console.log(`[CHATBOT_ROUTING] Query: "${rawMessage.slice(0, 40)}" -> Handled by: OPENROUTER [General query]`);
+  console.log(
+    `[CHATBOT_ROUTING] Query: "${rawMessage.slice(0, 40)}" -> Handled by: OPENROUTER [General query]`
+  );
 
   const openRouterSystemPrompt = `You are genious.exe, a helpful general-purpose assistant embedded in SK Sahinur Islam's official portfolio site.
 Sahinur is a Senior Web Application Developer at Ib Arts, Co-Founder of WEFIK, and an IT Engineer based in Kolkata, India.
@@ -663,12 +817,17 @@ STRICT GUARDRAILS:
   } catch (err) {
     if (err?.status === 429) {
       return NextResponse.json(
-        { reply: "I'm getting a lot of questions right now — please try asking again in a moment!" },
+        {
+          reply: "I'm getting a lot of questions right now — please try asking again in a moment!",
+        },
         { status: 429 }
       );
     }
     return NextResponse.json(
-      { reply: "I am genious.exe, Sahinur Islam's systems assistant! What would you like to know about Sahinur's engineering projects, skills, or IoT cold-chain patent? [action:nav:#skills|Explore Technical Skills] [action:nav:#projects|View Projects]" },
+      {
+        reply:
+          "I am genious.exe, Sahinur Islam's systems assistant! What would you like to know about Sahinur's engineering projects, skills, or IoT cold-chain patent? [action:nav:#skills|Explore Technical Skills] [action:nav:#projects|View Projects]",
+      },
       { status: 200 }
     );
   }

@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/supabaseServer';
 import { saveTelegramMessage, broadcastToSession } from '@/lib/liveChatSessions';
-import { signLiveChatSessionToken } from '@/lib/webPush';
+import { signLiveChatSessionToken, verifyLiveChatSessionToken } from '@/lib/webPush';
 
+const SESSION_ID_REGEX =
+  /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|sess_[0-9]{10,16}_[a-z0-9]{6,16})$/i;
 const MAX_MESSAGE_LENGTH = 500;
 const IP_WINDOW_SECONDS = 120; // 2-minute sliding window
-const IP_MAX_REQUESTS = 10;     // Max 10 messages per 2 minutes
+const IP_MAX_REQUESTS = 10; // Max 10 messages per 2 minutes
 
 function escapeHtml(text) {
   return String(text || '')
@@ -68,10 +70,17 @@ export async function POST(req) {
     const clientIp = forwardedFor ? forwardedFor.split(',')[0].trim() : realIp || '127.0.0.1';
     const rateLimitKey = `live_chat:${clientIp}`;
 
-    const { allowed } = await checkLiveChatRateLimit(rateLimitKey, IP_MAX_REQUESTS, IP_WINDOW_SECONDS);
+    const { allowed } = await checkLiveChatRateLimit(
+      rateLimitKey,
+      IP_MAX_REQUESTS,
+      IP_WINDOW_SECONDS
+    );
     if (!allowed) {
       return NextResponse.json(
-        { error: 'You are sending messages too quickly. Please wait a moment before sending another message to Sonu!' },
+        {
+          error:
+            'You are sending messages too quickly. Please wait a moment before sending another message to Sonu!',
+        },
         { status: 429 }
       );
     }
@@ -82,10 +91,22 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Invalid JSON request payload.' }, { status: 400 });
     }
 
-    const { sessionId, message, visitorName, name } = body;
+    const { sessionId, message, visitorName, name, sessionToken: bodyToken } = body;
 
-    if (!sessionId || typeof sessionId !== 'string' || sessionId.length > 128) {
+    if (!sessionId || typeof sessionId !== 'string' || !SESSION_ID_REGEX.test(sessionId)) {
       return NextResponse.json({ error: 'Valid sessionId is required.' }, { status: 400 });
+    }
+
+    // If caller provided sessionToken, verify it
+    const authHeader = req.headers.get('authorization') || '';
+    const headerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : null;
+    const token = bodyToken || headerToken || req.headers.get('x-livechat-session-token');
+
+    if (token) {
+      const verification = verifyLiveChatSessionToken(token, sessionId);
+      if (!verification.valid) {
+        return NextResponse.json({ error: 'Invalid live-chat session token.' }, { status: 401 });
+      }
     }
 
     if (!message || typeof message !== 'string' || !message.trim()) {
@@ -209,10 +230,7 @@ export async function POST(req) {
     const telegramMessageId = tgData.result?.message_id;
     if (!telegramMessageId) {
       console.error('[LiveChat] Telegram response missing message_id:', tgData);
-      return NextResponse.json(
-        { error: 'Invalid response from Telegram relay.' },
-        { status: 502 }
-      );
+      return NextResponse.json({ error: 'Invalid response from Telegram relay.' }, { status: 502 });
     }
 
     // 8. Persist telegram_message_id -> session_id mapping in Supabase

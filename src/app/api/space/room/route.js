@@ -1,13 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/supabaseServer';
-import {
-  createSpaceRoom,
-  getSpaceRoom,
-  verifyTurnstileToken,
-} from '@/lib/sharedSpace';
+import { createSpaceRoom, getSpaceRoom, verifyTurnstileToken } from '@/lib/sharedSpace';
 
-const ROOM_CREATE_LIMIT = 10;          // Max 10 room creations per hour per IP
-const ROOM_CREATE_WINDOW = 60 * 60;    // 1 hour (3600s)
+const ROOM_CREATE_LIMIT = 10; // Max 10 room creations per hour per IP
+const ROOM_CREATE_WINDOW = 60 * 60; // 1 hour (3600s)
 
 function getClientIp(req) {
   const forwarded = req.headers.get('x-forwarded-for');
@@ -118,15 +114,16 @@ export async function POST(req) {
       );
     }
 
-    // 2. Turnstile Verification (if token provided)
+    // 2. Turnstile Verification
     const body = await req.json().catch(() => ({}));
     const turnstileToken = body.turnstileToken;
 
-    if (turnstileToken) {
-      const turnstileCheck = await verifyTurnstileToken(turnstileToken, clientIp);
-      if (!turnstileCheck.success) {
-        return NextResponse.json({ error: turnstileCheck.error }, { status: 403 });
-      }
+    const turnstileCheck = await verifyTurnstileToken(turnstileToken, clientIp);
+    if (!turnstileCheck.success) {
+      return NextResponse.json(
+        { error: turnstileCheck.error || 'Bot verification challenge failed.' },
+        { status: 403 }
+      );
     }
 
     // 3. Create room in database
@@ -139,9 +136,9 @@ export async function POST(req) {
       url: `/space/${room.roomId}`,
     });
   } catch (err) {
-    console.error('[API Space Room POST] Error:', err);
+    console.error('[API Space Room POST] Error:', err?.message);
     return NextResponse.json(
-      { error: err.message || 'Failed to create sync room.' },
+      { error: 'Failed to create sync room. Please try again later.' },
       { status: 500 }
     );
   }

@@ -5,9 +5,10 @@ import { getServiceSupabase } from '@/lib/supabaseServer';
 const MAX_CONTENT_LENGTH = 5000;
 const SESSION_TOKEN_TTL_MS = 2 * 60 * 60 * 1000; // 2 hours
 const HMAC_SECRET =
+  process.env.SPACE_SESSION_SECRET ||
   process.env.STUDIO_SESSION_SECRET ||
   process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  'sks-space-scratchpad-secure-key-2026';
+  (process.env.NODE_ENV === 'production' ? '' : 'sks-space-dev-local-secret-key-32chars');
 
 // In-memory rate limiting fallback cache in case DB table is being created
 const memoryRateLimitCache = new Map();
@@ -59,6 +60,10 @@ export function sanitizeSpaceContent(rawText) {
  * from causing false 403 lockouts on mobile phones.
  */
 export function signSpaceSessionToken() {
+  if (!HMAC_SECRET) {
+    throw new Error('Server session signing secret is not configured.');
+  }
+
   const payload = {
     sessionId: crypto.randomUUID(),
     exp: Date.now() + SESSION_TOKEN_TTL_MS,
@@ -83,6 +88,10 @@ export function verifySpaceSessionToken(token) {
     return { valid: false, expired: false, error: 'Session token missing' };
   }
 
+  if (!HMAC_SECRET) {
+    return { valid: false, expired: false, error: 'Server authentication secret not configured' };
+  }
+
   const parts = token.split('.');
   if (parts.length !== 2) {
     return { valid: false, expired: false, error: 'Invalid token format' };
@@ -94,7 +103,10 @@ export function verifySpaceSessionToken(token) {
     .update(encodedPayload)
     .digest('base64url');
 
-  if (signature !== expectedSignature) {
+  const sigBuf = Buffer.from(signature);
+  const expBuf = Buffer.from(expectedSignature);
+
+  if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
     return { valid: false, expired: false, error: 'Invalid token signature' };
   }
 
@@ -115,15 +127,25 @@ export function verifySpaceSessionToken(token) {
  */
 export async function verifyTurnstileToken(token, clientIp) {
   const secretKey =
-    process.env.TURNSTILE_SECRET_KEY || '1x0000000000000000000000000000000AA';
+    process.env.TURNSTILE_SECRET_KEY ||
+    (process.env.NODE_ENV !== 'production' ? '1x0000000000000000000000000000000AA' : '');
   const isTestingKey = secretKey === '1x0000000000000000000000000000000AA';
+  const isProd = process.env.NODE_ENV === 'production';
 
-  // In local development or when using official testing keys, allow smooth bypass if token is omitted
+  // In local development or testing only, allow bypass if token is omitted
   if (!token) {
-    if (isTestingKey || process.env.NODE_ENV !== 'production') {
+    if (!isProd && isTestingKey) {
       return { success: true };
     }
     return { success: false, error: 'Please complete the bot security challenge.' };
+  }
+
+  if (isProd && !secretKey) {
+    console.error('[SharedSpace Turnstile] TURNSTILE_SECRET_KEY is not configured in production.');
+    return {
+      success: false,
+      error: 'Bot verification service is not properly configured on server.',
+    };
   }
 
   try {
@@ -147,10 +169,11 @@ export async function verifyTurnstileToken(token, clientIp) {
 
     const firstError = data['error-codes'] && data['error-codes'][0];
 
-    // If Cloudflare flags secret key as invalid and user is using testing key, pass gracefully
+    // If Cloudflare flags secret key as invalid and user is in non-prod with testing key, pass gracefully
     if (
-      (firstError === 'invalid-input-secret' || firstError === 'missing-input-response') &&
-      isTestingKey
+      !isProd &&
+      isTestingKey &&
+      (firstError === 'invalid-input-secret' || firstError === 'missing-input-response')
     ) {
       return { success: true };
     }
@@ -167,7 +190,7 @@ export async function verifyTurnstileToken(token, clientIp) {
     };
   } catch (err) {
     console.error('[SharedSpace Turnstile] Verification error:', err.message);
-    if (isTestingKey || process.env.NODE_ENV !== 'production') {
+    if (!isProd && isTestingKey) {
       return { success: true };
     }
     return { success: false, error: 'Verification service temporarily unreachable.' };
@@ -488,7 +511,12 @@ export async function getSpaceRoom(roomId) {
     const updatedAtMs = new Date(fbData.updated_at).getTime();
     const expiresAtMs = updatedAtMs + ROOM_TTL_HOURS * 60 * 60 * 1000;
     if (Date.now() > expiresAtMs) {
-      supabase.from('shared_space_document').delete().eq('id', fallbackId).then(() => {}).catch(() => {});
+      supabase
+        .from('shared_space_document')
+        .delete()
+        .eq('id', fallbackId)
+        .then(() => {})
+        .catch(() => {});
       return { expired: true, roomId: cleanId };
     }
 
@@ -517,7 +545,12 @@ export async function getSpaceRoom(roomId) {
       const updatedAtMs = new Date(fbData.updated_at).getTime();
       const expiresAtMs = updatedAtMs + ROOM_TTL_HOURS * 60 * 60 * 1000;
       if (Date.now() > expiresAtMs) {
-        supabase.from('shared_space_document').delete().eq('id', fallbackId).then(() => {}).catch(() => {});
+        supabase
+          .from('shared_space_document')
+          .delete()
+          .eq('id', fallbackId)
+          .then(() => {})
+          .catch(() => {});
         return { expired: true, roomId: cleanId };
       }
       return {
@@ -533,7 +566,12 @@ export async function getSpaceRoom(roomId) {
 
   if (new Date(data.expires_at).getTime() < Date.now()) {
     // Opportunistically remove expired room
-    supabase.from('shared_space_rooms').delete().eq('room_id', cleanId).then(() => {}).catch(() => {});
+    supabase
+      .from('shared_space_rooms')
+      .delete()
+      .eq('room_id', cleanId)
+      .then(() => {})
+      .catch(() => {});
     return { expired: true, roomId: cleanId };
   }
 
@@ -692,4 +730,3 @@ export async function broadcastToRoom(roomId, event, payload) {
     });
   });
 }
-

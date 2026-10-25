@@ -46,7 +46,10 @@ function getSonuLocalTime() {
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const rawData = typeof window !== 'undefined' ? window.atob(base64) : Buffer.from(base64, 'base64').toString('binary');
+  const rawData =
+    typeof window !== 'undefined'
+      ? window.atob(base64)
+      : Buffer.from(base64, 'base64').toString('binary');
   const outputArray = new Uint8Array(rawData.length);
   for (let i = 0; i < rawData.length; ++i) {
     outputArray[i] = rawData.charCodeAt(i);
@@ -106,11 +109,25 @@ function parseMessageActions(rawText) {
   const actions = [];
   let match;
   while ((match = actionRegex.exec(rawText)) !== null) {
-    actions.push({
-      type: match[1], // 'nav' or 'open'
-      target: match[2].trim(),
-      label: match[3].trim(),
-    });
+    const type = match[1];
+    const target = match[2].trim();
+    const label = match[3].trim();
+
+    // Validate target security
+    if (type === 'nav') {
+      if ((target.startsWith('/') || target.startsWith('#')) && !target.startsWith('//')) {
+        actions.push({ type, target, label });
+      }
+    } else if (type === 'open') {
+      try {
+        const parsed = new URL(target);
+        if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+          actions.push({ type, target: parsed.href, label });
+        }
+      } catch {
+        // Discard invalid/unsafe URLs
+      }
+    }
   }
 
   const cleanText = rawText.replace(actionRegex, '').trim();
@@ -275,7 +292,8 @@ export default function ChatbotWidget() {
 
     const checkOffline = () => {
       const elapsed = Date.now() - lastVisitorMessageTime;
-      if (elapsed >= 180000) { // 3 minutes
+      if (elapsed >= 180000) {
+        // 3 minutes
         setShowOfflineSuggestion(true);
       }
     };
@@ -468,7 +486,9 @@ export default function ChatbotWidget() {
     setIsOpen(true);
     setUnreadLiveCount(0);
     if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('portfolio-overlay-change', { detail: { active: 'chatbot' } }));
+      window.dispatchEvent(
+        new CustomEvent('portfolio-overlay-change', { detail: { active: 'chatbot' } })
+      );
     }
   };
 
@@ -479,7 +499,9 @@ export default function ChatbotWidget() {
       setIsOpen(false);
       setIsClosing(false);
       if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('portfolio-overlay-change', { detail: { active: 'none' } }));
+        window.dispatchEvent(
+          new CustomEvent('portfolio-overlay-change', { detail: { active: 'none' } })
+        );
       }
     }, 220);
   }, [isClosing]);
@@ -498,11 +520,20 @@ export default function ChatbotWidget() {
   const handleActionClick = (action) => {
     if (action.type === 'nav') {
       const target = action.target;
+      if (
+        !target ||
+        (!target.startsWith('/') && !target.startsWith('#')) ||
+        target.startsWith('//')
+      ) {
+        return;
+      }
       setIsOpen(false);
       setIsClosing(false);
       if (typeof window !== 'undefined') {
         navState.startRouteNav();
-        window.dispatchEvent(new CustomEvent('portfolio-overlay-change', { detail: { active: 'none' } }));
+        window.dispatchEvent(
+          new CustomEvent('portfolio-overlay-change', { detail: { active: 'none' } })
+        );
       }
       if (target.startsWith('#')) {
         if (pathname !== '/') {
@@ -515,7 +546,14 @@ export default function ChatbotWidget() {
         transitionRouter.push(target);
       }
     } else if (action.type === 'open') {
-      window.open(action.target, '_blank', 'noopener,noreferrer');
+      try {
+        const parsed = new URL(action.target);
+        if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+          window.open(parsed.href, '_blank', 'noopener,noreferrer');
+        }
+      } catch {
+        // Safe fallback
+      }
     }
   };
 
@@ -549,10 +587,15 @@ export default function ChatbotWidget() {
 
     try {
       if (sid) {
+        const token =
+          sessionTokenRef.current ||
+          (typeof window !== 'undefined'
+            ? sessionStorage.getItem('live_chat_session_token_' + sid)
+            : null);
         await fetch('/api/live-chat/end', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId: sid }),
+          body: JSON.stringify({ sessionId: sid, sessionToken: token }),
         });
       }
     } catch (err) {
@@ -653,7 +696,9 @@ export default function ChatbotWidget() {
 
       if (retryMsgId) {
         setLiveMessages((prev) =>
-          prev.map((m) => (m.id === retryMsgId ? { ...m, status: 'sending', time: formatTime() } : m))
+          prev.map((m) =>
+            m.id === retryMsgId ? { ...m, status: 'sending', time: formatTime() } : m
+          )
         );
       } else {
         setLiveMessages((prev) => [...prev, userMessage]);
@@ -676,11 +721,18 @@ export default function ChatbotWidget() {
         'Visitor';
 
       try {
+        const currentToken =
+          sessionTokenRef.current ||
+          (typeof window !== 'undefined'
+            ? sessionStorage.getItem('live_chat_session_token_' + sid)
+            : null);
+
         const res = await fetch('/api/live-chat/send', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             sessionId: sid,
+            sessionToken: currentToken,
             message: query,
             visitorName: effectiveName,
           }),
@@ -705,7 +757,11 @@ export default function ChatbotWidget() {
         }
 
         // Show push notification opt-in prompt if not previously dismissed or subscribed
-        if (typeof window !== 'undefined' && 'Notification' in window && 'serviceWorker' in navigator) {
+        if (
+          typeof window !== 'undefined' &&
+          'Notification' in window &&
+          'serviceWorker' in navigator
+        ) {
           const dismissed = sessionStorage.getItem('live_chat_push_dismissed_' + sid);
           const subscribed = sessionStorage.getItem('live_chat_push_subscribed_' + sid);
           if (!dismissed && !subscribed && Notification.permission === 'default') {
@@ -738,11 +794,18 @@ export default function ChatbotWidget() {
     if (!sid) return;
 
     // Check iOS non-PWA condition
-    const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    const isStandalone = typeof window !== 'undefined' && (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone);
+    const isIOS =
+      typeof navigator !== 'undefined' &&
+      /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+      !window.MSStream;
+    const isStandalone =
+      typeof window !== 'undefined' &&
+      (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone);
 
     if (isIOS && !isStandalone) {
-      setPushTip('ℹ️ On iOS, tap Share → "Add to Home Screen" to receive lock-screen notifications.');
+      setPushTip(
+        'ℹ️ On iOS, tap Share → "Add to Home Screen" to receive lock-screen notifications.'
+      );
       setTimeout(() => setPushTip(null), 8000);
       setShowPushPrompt(false);
       return;
@@ -778,7 +841,9 @@ export default function ChatbotWidget() {
 
       const token =
         sessionTokenRef.current ||
-        (typeof window !== 'undefined' ? sessionStorage.getItem('live_chat_session_token_' + sid) : null);
+        (typeof window !== 'undefined'
+          ? sessionStorage.getItem('live_chat_session_token_' + sid)
+          : null);
 
       const res = await fetch('/api/push/subscribe', {
         method: 'POST',
@@ -821,10 +886,16 @@ export default function ChatbotWidget() {
       const now = Date.now();
       if (now - lastTypingSentRef.current > 4000) {
         lastTypingSentRef.current = now;
+        const currentSid = getOrCreateSessionId();
+        const token =
+          sessionTokenRef.current ||
+          (typeof window !== 'undefined'
+            ? sessionStorage.getItem('live_chat_session_token_' + currentSid)
+            : null);
         fetch('/api/live-chat/typing', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId: getOrCreateSessionId() }),
+          body: JSON.stringify({ sessionId: currentSid, sessionToken: token }),
         }).catch(() => {});
       }
     }
@@ -859,7 +930,9 @@ export default function ChatbotWidget() {
     <div className={styles.widgetWrapper}>
       {/* Floating Trigger Button */}
       {!isOpen && isTriggerVisible && (
-        <div className={`${styles.triggerWrapper} ${isFirstVisit ? styles.firstVisitAttention : ''}`}>
+        <div
+          className={`${styles.triggerWrapper} ${isFirstVisit ? styles.firstVisitAttention : ''}`}
+        >
           <button
             type="button"
             className={styles.triggerBtn}
@@ -869,7 +942,10 @@ export default function ChatbotWidget() {
             title="Ask me anything or chat live with Sonu"
           >
             {unreadLiveCount > 0 && (
-              <span className={styles.unreadCountBadge} title={`${unreadLiveCount} unread message(s)`}>
+              <span
+                className={styles.unreadCountBadge}
+                title={`${unreadLiveCount} unread message(s)`}
+              >
                 {unreadLiveCount}
               </span>
             )}
@@ -941,9 +1017,7 @@ export default function ChatbotWidget() {
               <div className={styles.headerActions}>
                 {chatMode === 'live' && hasStartedLiveChat && (
                   <>
-                    <span className={styles.chattingAsLabel}>
-                      {shortVisitorName}
-                    </span>
+                    <span className={styles.chattingAsLabel}>{shortVisitorName}</span>
                     <button
                       type="button"
                       className={styles.endChatBtn}
@@ -965,7 +1039,16 @@ export default function ChatbotWidget() {
                     title="Reset AI conversation"
                     aria-label="Reset conversation"
                   >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
                       <path d="M21 3v5h-5" />
                       <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
@@ -981,7 +1064,16 @@ export default function ChatbotWidget() {
                   title="Close chat panel (Esc)"
                   aria-label="Close chat panel"
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <line x1="18" y1="6" x2="6" y2="18" />
                     <line x1="6" y1="6" x2="18" y2="18" />
                   </svg>
@@ -1011,7 +1103,9 @@ export default function ChatbotWidget() {
               >
                 <span className={styles.tabIcon}>💬</span>
                 <span>Talk to Sonu</span>
-                {hasUnreadLiveReply && <span className={styles.unreadDot} title="New reply from Sonu" />}
+                {hasUnreadLiveReply && (
+                  <span className={styles.unreadDot} title="New reply from Sonu" />
+                )}
               </button>
               <button
                 type="button"
@@ -1021,7 +1115,9 @@ export default function ChatbotWidget() {
                   setIsClosing(false);
                   if (typeof window !== 'undefined') {
                     navState.startRouteNav();
-                    window.dispatchEvent(new CustomEvent('portfolio-overlay-change', { detail: { active: 'none' } }));
+                    window.dispatchEvent(
+                      new CustomEvent('portfolio-overlay-change', { detail: { active: 'none' } })
+                    );
                   }
                   transitionRouter.push('/space');
                 }}
@@ -1063,7 +1159,16 @@ export default function ChatbotWidget() {
                       disabled={!nameInput.trim()}
                     >
                       <span>Start Chat</span>
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        width="15"
+                        height="15"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <line x1="5" y1="12" x2="19" y2="12" />
                         <polyline points="12 5 19 12 12 19" />
                       </svg>
@@ -1089,7 +1194,9 @@ export default function ChatbotWidget() {
                           <span className={styles.systemBadge}>
                             {isUser ? 'YOU' : 'GENIOUS.EXE'}
                           </span>
-                          <div className={`${styles.bubble} ${isUser ? styles.userBubble : styles.botBubble}`}>
+                          <div
+                            className={`${styles.bubble} ${isUser ? styles.userBubble : styles.botBubble}`}
+                          >
                             <SafeMessageContent content={cleanText} />
 
                             {!isUser && actions.length > 0 && (
@@ -1098,16 +1205,42 @@ export default function ChatbotWidget() {
                                   <button
                                     key={actIdx}
                                     type="button"
-                                    className={action.type === 'nav' ? styles.actionNavBtn : styles.actionOpenBtn}
+                                    className={
+                                      action.type === 'nav'
+                                        ? styles.actionNavBtn
+                                        : styles.actionOpenBtn
+                                    }
                                     onClick={() => handleActionClick(action)}
-                                    title={action.type === 'nav' ? `Navigate to ${action.target}` : `Open ${action.target} in new tab`}
+                                    title={
+                                      action.type === 'nav'
+                                        ? `Navigate to ${action.target}`
+                                        : `Open ${action.target} in new tab`
+                                    }
                                   >
                                     {action.type === 'nav' ? (
-                                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                      <svg
+                                        width="12"
+                                        height="12"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2.5"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      >
                                         <polyline points="9 18 15 12 9 6" />
                                       </svg>
                                     ) : (
-                                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                      <svg
+                                        width="12"
+                                        height="12"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2.5"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      >
                                         <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
                                         <polyline points="15 3 21 3 21 9" />
                                         <line x1="10" y1="14" x2="21" y2="3" />
@@ -1152,12 +1285,18 @@ export default function ChatbotWidget() {
                                   {isUser && (
                                     <>
                                       {msg.status === 'sending' && (
-                                        <span className={styles.bubbleSending} title="Sending message...">
+                                        <span
+                                          className={styles.bubbleSending}
+                                          title="Sending message..."
+                                        >
                                           ⋯
                                         </span>
                                       )}
                                       {(!msg.status || msg.status === 'delivered') && (
-                                        <span className={styles.bubbleTick} title="Delivered to Sonu">
+                                        <span
+                                          className={styles.bubbleTick}
+                                          title="Delivered to Sonu"
+                                        >
                                           ✓✓
                                         </span>
                                       )}
@@ -1207,7 +1346,10 @@ export default function ChatbotWidget() {
                       <span className={styles.waitingNoticeIcon}>⏳</span>
                       <div>
                         <strong>Sent to Sonu · Waiting for reply...</strong>
-                        <div>Sonu isn&apos;t always online 24/7 — he&apos;ll get back to you as soon as he can!</div>
+                        <div>
+                          Sonu isn&apos;t always online 24/7 — he&apos;ll get back to you as soon as
+                          he can!
+                        </div>
                       </div>
                     </div>
                   )}
@@ -1218,7 +1360,10 @@ export default function ChatbotWidget() {
                       <span className={styles.offlineIcon}>💡</span>
                       <div className={styles.offlineContent}>
                         <strong>Waiting for Sonu?</strong>
-                        <p>Sonu might be away or coding. You can get instant answers right now from the AI assistant without losing your live chat place.</p>
+                        <p>
+                          Sonu might be away or coding. You can get instant answers right now from
+                          the AI assistant without losing your live chat place.
+                        </p>
                         <button
                           type="button"
                           className={styles.switchAiBtn}
@@ -1243,7 +1388,11 @@ export default function ChatbotWidget() {
 
                   {/* Web Push Notification Pre-Prompt in Live Mode */}
                   {chatMode === 'live' && showPushPrompt && (
-                    <div className={styles.pushPromptCard} role="region" aria-label="Notification opt-in">
+                    <div
+                      className={styles.pushPromptCard}
+                      role="region"
+                      aria-label="Notification opt-in"
+                    >
                       <div className={styles.pushPromptContent}>
                         <span className={styles.pushPromptIcon}>🔔</span>
                         <div className={styles.pushPromptText}>
@@ -1280,11 +1429,15 @@ export default function ChatbotWidget() {
 
                   {/* Loading indicator */}
                   {isCurrentLoading && (
-                    <div className={`${styles.messageRow} ${chatMode === 'ai' ? styles.botRow : styles.liveSonuRow}`}>
+                    <div
+                      className={`${styles.messageRow} ${chatMode === 'ai' ? styles.botRow : styles.liveSonuRow}`}
+                    >
                       <span className={styles.systemBadge}>
                         {chatMode === 'ai' ? 'GENIOUS.EXE THINKING' : 'DELIVERING MESSAGE'}
                       </span>
-                      <div className={`${styles.bubble} ${chatMode === 'ai' ? styles.botBubble : styles.liveSonuBubble} ${styles.typingIndicator}`}>
+                      <div
+                        className={`${styles.bubble} ${chatMode === 'ai' ? styles.botBubble : styles.liveSonuBubble} ${styles.typingIndicator}`}
+                      >
                         <span className={styles.typingDot} />
                         <span className={styles.typingDot} />
                         <span className={styles.typingDot} />
@@ -1299,18 +1452,24 @@ export default function ChatbotWidget() {
                 <div className={styles.footer}>
                   <form onSubmit={handleFormSubmit} className={styles.inputForm}>
                     {/* One-time Conversation Starter Chip for First-time Live Chat Visitors */}
-                    {chatMode === 'live' && hasStartedLiveChat && liveMessages.filter((m) => m.role === 'user').length === 0 && (
-                      <div className={styles.starterChipRow}>
-                        <button
-                          type="button"
-                          className={styles.starterChipBtn}
-                          onClick={() => handleSendMessage('What are you currently working on?')}
-                        >
-                          <span>💡 Try asking: &ldquo;What are you currently working on?&rdquo;</span>
-                        </button>
-                      </div>
-                    )}
-                    <div className={`${styles.inputRow} ${chatMode === 'live' ? styles.liveInputRow : ''}`}>
+                    {chatMode === 'live' &&
+                      hasStartedLiveChat &&
+                      liveMessages.filter((m) => m.role === 'user').length === 0 && (
+                        <div className={styles.starterChipRow}>
+                          <button
+                            type="button"
+                            className={styles.starterChipBtn}
+                            onClick={() => handleSendMessage('What are you currently working on?')}
+                          >
+                            <span>
+                              💡 Try asking: &ldquo;What are you currently working on?&rdquo;
+                            </span>
+                          </button>
+                        </div>
+                      )}
+                    <div
+                      className={`${styles.inputRow} ${chatMode === 'live' ? styles.liveInputRow : ''}`}
+                    >
                       <input
                         ref={inputRef}
                         type="text"
@@ -1332,7 +1491,16 @@ export default function ChatbotWidget() {
                         disabled={isCurrentLoading || !inputValue.trim()}
                         aria-label="Send message"
                       >
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <svg
+                          width="15"
+                          height="15"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
                           <line x1="22" y1="2" x2="11" y2="13" />
                           <polygon points="22 2 15 22 11 13 2 9 22 2" />
                         </svg>
@@ -1350,8 +1518,8 @@ export default function ChatbotWidget() {
                           remainingChars <= 20
                             ? styles.charCountLimit
                             : isNearLimit
-                            ? styles.charCountWarn
-                            : ''
+                              ? styles.charCountWarn
+                              : ''
                         }
                       >
                         {inputValue.length}/{MAX_CHAR_COUNT}

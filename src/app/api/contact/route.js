@@ -107,11 +107,15 @@ export async function POST(request) {
 
   // 10. Send Email via Resend with Quota Monitoring
   try {
+    const safeSubjectName = String(contentCheck.name || 'Visitor')
+      .replace(/[\r\n\x00-\x1F\x7F]+/g, ' ')
+      .trim();
+
     const { data, error } = await resend.emails.send({
       from: 'Portfolio Contact <onboarding@resend.dev>',
       to: recipient,
       replyTo: body.email.trim(),
-      subject: `[Portfolio Inquiry] New message from ${contentCheck.name}`,
+      subject: `[Portfolio Inquiry] New message from ${safeSubjectName}`,
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; background: #0c1017; border: 1px solid #1f293d; border-radius: 12px; overflow: hidden; color: #e2e8f0;">
           <div style="background: #111827; padding: 20px 24px; border-bottom: 1px solid #1f293d;">
