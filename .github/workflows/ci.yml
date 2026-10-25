@@ -1,0 +1,148 @@
+name: CI Delivery Gates
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  hygiene:
+    name: 'Lane 1: Static Hygiene & Formatting'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Check Formatting (Prettier on Changed Files)
+        run: |
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref || 'main' }}...HEAD 2>/dev/null | grep -E '\.(js|jsx|json|md|css)$' || true)
+          if [ -n "$CHANGED" ]; then
+            echo "$CHANGED" | xargs npx prettier --check
+          else
+            echo "No changed formatting targets detected."
+          fi
+
+      - name: Lint JavaScript & Next.js (ESLint)
+        run: npm run lint
+
+      - name: Lint Markdown
+        run: npx markdownlint-cli "**/*.md" --ignore node_modules --ignore .next --ignore studio-portfolio
+
+  correctness:
+    name: 'Lane 2: Correctness & Empty-Env Build'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Unit Tests (Vitest)
+        run: npx vitest run
+
+      - name: Run Sentry Integration Test Suite
+        run: npm run test:sentry
+
+      - name: Build with Empty Environment (Build Invariant)
+        env:
+          NEXT_PUBLIC_SENTRY_DSN: ''
+          SENTRY_DSN: ''
+        run: npm run build
+
+  security:
+    name: 'Lane 3: Security & Dependency Audit'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Run Gitleaks Secret Scanner
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Semgrep Security Scan (JS, React, Next.js)
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/javascript
+            p/react
+            p/nextjs
+            p/owasp-top-ten
+        continue-on-error: false
+
+      - name: Dependency Audit (npm audit)
+        run: npm audit --audit-level=critical
+
+  risk-gate:
+    name: 'Lane 6: Risk Classification Gate'
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Evaluate Touched Risk Paths
+        id: risk_check
+        run: |
+          HIGH_RISK_PATTERNS="(\.github\/workflows\/|public\/sw\.js|src\/lib\/contactSecurity|src\/lib\/supabaseServer|src\/middleware|firestore\.rules|supabase\/migrations|src\/app\/privacy|src\/app\/terms|next\.config\.mjs)"
+
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          HIGH_RISK_TOUCHED=$(echo "$CHANGED_FILES" | grep -E "$HIGH_RISK_PATTERNS" || true)
+
+          if [ -n "$HIGH_RISK_TOUCHED" ]; then
+            echo "HIGH_RISK=true" >> $GITHUB_OUTPUT
+            echo "High-risk paths detected:"
+            echo "$HIGH_RISK_TOUCHED"
+          else
+            echo "HIGH_RISK=false" >> $GITHUB_OUTPUT
+            echo "No high-risk paths modified."
+          fi
+
+      - name: Verify Owner Approval Label for High-Risk Changes
+        if: steps.risk_check.outputs.HIGH_RISK == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = context.payload.pull_request.labels.map(l => l.name);
+            const hasApproval = labels.includes('approved');
+            if (!hasApproval) {
+              core.setFailed('High-risk paths modified. This pull request requires the "approved" label from a repository administrator before it can be merged.');
+            } else {
+              core.info('Owner "approved" label verified for high-risk changes.');
+            }

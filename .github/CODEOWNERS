@@ -1,0 +1,13 @@
+# Repository Code Owners
+# The repository owner retains final authority over all changes.
+
+* @GeniousSonu
+
+# Security, Environment and Deployment configurations require explicit owner approval
+/.github/ @GeniousSonu
+/public/sw.js @GeniousSonu
+/firestore.rules @GeniousSonu
+/supabase/migrations/ @GeniousSonu
+/next.config.mjs @GeniousSonu
+/src/app/terms/ @GeniousSonu
+/src/app/privacy/ @GeniousSonu

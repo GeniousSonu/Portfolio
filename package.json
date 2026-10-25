@@ -8,10 +8,16 @@
     "build": "node scripts/update-sw-version.mjs && next build --webpack",
     "start": "next start",
     "lint": "eslint",
+    "lint:style": "stylelint \"src/**/*.module.css\"",
+    "lint:md": "markdownlint \"**/*.md\" --ignore node_modules --ignore .next --ignore studio-portfolio",
+    "format:check": "prettier --check .",
+    "format": "prettier --write .",
     "check:routes": "node scripts/check-routes.mjs",
+    "test:unit": "vitest run",
     "test:boot": "node scripts/test-boot-001.mjs",
     "test:t10": "node scripts/test-t10-blog-card.mjs",
-    "test:sentry": "node scripts/test-sentry-suite.mjs"
+    "test:sentry": "node scripts/test-sentry-suite.mjs",
+    "test:ci": "vitest run && node scripts/test-sentry-suite.mjs"
   },
   "allowScripts": {
     "esbuild": true,
@@ -62,8 +68,17 @@
     "web-push": "^3.6.7"
   },
   "devDependencies": {
-    "eslint": "^9",
+    "@axe-core/playwright": "4.10.1",
+    "@commitlint/cli": "19.7.1",
+    "@commitlint/config-conventional": "19.7.1",
+    "eslint": "9.39.4",
     "eslint-config-next": "16.2.9",
-    "playwright": "^1.64.0"
+    "lint-staged": "15.4.3",
+    "markdownlint-cli": "0.44.0",
+    "playwright": "1.64.0",
+    "prettier": "3.5.2",
+    "stylelint": "16.15.0",
+    "stylelint-config-standard": "37.0.0",
+    "vitest": "3.0.7"
   }
 }

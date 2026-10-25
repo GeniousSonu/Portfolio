@@ -1,0 +1,10 @@
+.next
+node_modules
+build
+dist
+public/sw.js
+public/workbox-*
+studio-portfolio
+.private
+.obsidian
+package-lock.json
