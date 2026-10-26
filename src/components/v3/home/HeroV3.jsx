@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import gsap from 'gsap';
 import Emoji3D from '../Emoji3D';
 import { PlayableElement, EditableText } from '@/components/PlaygroundWrappers';
 import { useBootComplete, useMagneticButtons, prefersReducedMotion } from '../motion';
@@ -69,38 +68,28 @@ export default function HeroV3() {
     }
 
     root.classList.add('is-armed');
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-      tl.to('[data-hero-line]', {
-        yPercent: 0,
-        opacity: 1,
-        duration: 0.92,
-        stagger: 0.075,
-      })
-        .to('[data-hero-fade]', { y: 0, opacity: 1, duration: 0.62, stagger: 0.055 }, '-=0.58')
-        .to('.v3-hero-aside > *', { y: 0, opacity: 1, duration: 0.7, stagger: 0.09 }, '-=0.55');
 
-      root.querySelectorAll('[data-stat-target]').forEach((node) => {
+    const nodes = Array.from(root.querySelectorAll('[data-stat-target]'));
+    if (!nodes.length) return undefined;
+
+    const start = performance.now() + 550;
+    const duration = 1100;
+    let frame = 0;
+
+    const tick = (now) => {
+      const elapsed = now - start;
+      const t = Math.min(1, Math.max(0, elapsed / duration));
+      const eased = 1 - (1 - t) * (1 - t);
+      nodes.forEach((node) => {
         const target = Number(node.getAttribute('data-stat-target'));
         const suffix = node.getAttribute('data-stat-suffix') || '';
-        const counter = { value: 0 };
-        node.textContent = `0${suffix}`;
-        tl.to(
-          counter,
-          {
-            value: target,
-            duration: 1.1,
-            ease: 'power2.out',
-            onUpdate: () => {
-              node.textContent = `${Math.round(counter.value)}${suffix}`;
-            },
-          },
-          0.55
-        );
+        node.textContent = `${Math.round(target * eased)}${suffix}`;
       });
-    }, root);
+      if (t < 1) frame = window.requestAnimationFrame(tick);
+    };
 
-    return () => ctx.revert();
+    frame = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frame);
   }, [booted]);
 
   useEffect(() => {

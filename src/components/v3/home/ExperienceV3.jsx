@@ -1,10 +1,42 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import Image from 'next/image';
 import ChapterHeader from '../ChapterHeader';
 import { CURRENT_ROLES, PAST_ROLES } from '@/components/Experience';
 import { useChapterReveal } from '../motion';
+
+function monogram(company) {
+  return company
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join('')
+    .toUpperCase();
+}
+
+function RoleLogo({ src, company, size }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!src || failed) {
+    return (
+      <span className="v3-role-monogram" aria-hidden="true">
+        {monogram(company)}
+      </span>
+    );
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={`${company} logo`}
+      width={size}
+      height={size}
+      style={{ objectFit: 'contain' }}
+      onError={() => setFailed(true)}
+    />
+  );
+}
 
 export default function ExperienceV3() {
   const rootRef = useRef(null);
@@ -62,13 +94,7 @@ export default function ExperienceV3() {
                 <article className="v3-role-card" key={role.company} data-reveal>
                   <div className="v3-role-top">
                     <div className="v3-role-logo">
-                      <Image
-                        src={role.logo}
-                        alt={`${role.company} logo`}
-                        width={44}
-                        height={44}
-                        style={{ objectFit: 'contain' }}
-                      />
+                      <RoleLogo src={role.logo} company={role.company} size={44} />
                     </div>
                     <div className="v3-role-ident">
                       <div className="v3-role-company-row">
@@ -110,13 +136,7 @@ export default function ExperienceV3() {
                   <div className="v3-past-body">
                     <div className="v3-past-head">
                       <div className="v3-past-logo">
-                        <Image
-                          src={role.logo}
-                          alt={`${role.company} logo`}
-                          width={36}
-                          height={36}
-                          style={{ objectFit: 'contain' }}
-                        />
+                        <RoleLogo src={role.logo} company={role.company} size={36} />
                       </div>
                       <div>
                         <h3>{role.company}</h3>

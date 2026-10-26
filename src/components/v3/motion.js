@@ -1,8 +1,16 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
+
+// DESIGN.md caps magnetic displacement at 4px so the control never drifts
+// away from its own hit area or its visible focus ring.
+const MAGNETIC_MAX = 4;
+
+const clamp = (value) => Math.max(-MAGNETIC_MAX, Math.min(MAGNETIC_MAX, value));
 
 export function prefersReducedMotion() {
   if (typeof window === 'undefined') return false;
@@ -13,7 +21,7 @@ export function prefersReducedMotion() {
 }
 
 export function useChapterReveal(scopeRef) {
-  useEffect(() => {
+  useIsoLayoutEffect(() => {
     const scope = scopeRef.current;
     if (!scope || prefersReducedMotion()) return undefined;
 
@@ -37,7 +45,16 @@ export function useChapterReveal(scopeRef) {
       });
     }, scope);
 
-    return () => ctx.revert();
+    const media = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+    const onMediaChange = (event) => {
+      if (event.matches) ctx.revert();
+    };
+    media?.addEventListener?.('change', onMediaChange);
+
+    return () => {
+      media?.removeEventListener?.('change', onMediaChange);
+      ctx.revert();
+    };
   }, [scopeRef]);
 }
 
@@ -102,8 +119,8 @@ export function useMagneticButtons(scopeRef) {
     const cleanups = buttons.map((button) => {
       const move = (event) => {
         const rect = button.getBoundingClientRect();
-        const x = (event.clientX - rect.left - rect.width / 2) * 0.12;
-        const y = (event.clientY - rect.top - rect.height / 2) * 0.18;
+        const x = clamp((event.clientX - rect.left - rect.width / 2) * 0.12);
+        const y = clamp((event.clientY - rect.top - rect.height / 2) * 0.18);
         gsap.to(button, { x, y, duration: 0.35, ease: 'power2.out' });
       };
       const leave = () => {

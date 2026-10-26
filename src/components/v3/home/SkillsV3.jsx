@@ -25,7 +25,7 @@ export default function SkillsV3() {
           subtitle="Technologies I work with across web, infrastructure, AI, and security."
           emoji="brain"
           id="skills-title"
-          aside={<Emoji3D name="sparkles" size={44} alt="" className="v3-head-emoji" />}
+          aside={<Emoji3D name="sparkles" size={56} alt="" className="v3-head-emoji" />}
         />
 
         <div className="v3-skills-board">

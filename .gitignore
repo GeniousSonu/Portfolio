@@ -68,3 +68,6 @@ NOTES*.md
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+# Local camera photos
+Images/

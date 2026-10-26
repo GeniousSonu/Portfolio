@@ -181,10 +181,10 @@ export default function ContactV3() {
               Let&apos;s build something <em>reliable</em>
             </>
           }
-          subtitle="Get in Touch"
+          subtitle="One form, one email, or a terminal session — whichever feels like home."
           emoji="envelope"
           id="contact-title"
-          aside={<Emoji3D name="bulb" size={44} alt="" className="v3-head-emoji" />}
+          aside={<Emoji3D name="bulb" size={56} alt="" className="v3-head-emoji" />}
         />
 
         <div className="v3-contact-grid">

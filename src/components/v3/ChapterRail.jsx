@@ -17,6 +17,7 @@ const CHAPTERS = [
 export default function ChapterRail() {
   const [active, setActive] = useState('hero');
   const progressRef = useRef(null);
+  const topProgressRef = useRef(null);
   const { play } = useSound();
 
   useEffect(() => {
@@ -47,8 +48,13 @@ export default function ChapterRail() {
       const max = doc.scrollHeight - window.innerHeight;
       const progress = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
       const rounded = Math.round(progress * 1000) / 1000;
-      if (rounded !== last && progressRef.current) {
-        progressRef.current.style.setProperty('--v3-progress', rounded);
+      if (rounded !== last) {
+        if (progressRef.current) {
+          progressRef.current.style.setProperty('--v3-progress', rounded);
+        }
+        if (topProgressRef.current) {
+          topProgressRef.current.style.setProperty('--v3-progress', rounded);
+        }
         last = rounded;
       }
     };
@@ -83,26 +89,34 @@ export default function ChapterRail() {
   };
 
   return (
-    <nav className="v3-rail" aria-label="Home chapters">
-      <span className="v3-rail-track" aria-hidden="true">
-        <span ref={progressRef} className="v3-rail-progress" />
-      </span>
-      <ol className="v3-rail-list">
-        {CHAPTERS.map((chapter) => (
-          <li key={chapter.id}>
-            <a
-              href={chapter.id === 'hero' ? '#' : `#${chapter.id}`}
-              className={`v3-rail-link ${active === chapter.id ? 'is-active' : ''}`}
-              aria-current={active === chapter.id ? 'location' : undefined}
-              onClick={(event) => handleClick(event, chapter.id)}
-            >
-              <span className="v3-rail-dot" aria-hidden="true" />
-              <span className="v3-rail-num">{chapter.number}</span>
-              <span className="v3-rail-label">{chapter.label}</span>
-            </a>
-          </li>
-        ))}
-      </ol>
-    </nav>
+    <>
+      <div className="v3-rail-top" aria-hidden="true">
+        <span ref={topProgressRef} className="v3-rail-progress" />
+      </div>
+
+      <nav className="v3-rail" aria-label="Home chapters">
+        <span className="v3-rail-track" aria-hidden="true">
+          <span ref={progressRef} className="v3-rail-progress" />
+        </span>
+        <ol className="v3-rail-list">
+          {CHAPTERS.map((chapter) => (
+            <li key={chapter.id}>
+              <a
+                href={`#${chapter.id}`}
+                className={`v3-rail-link ${active === chapter.id ? 'is-active' : ''}`}
+                aria-current={active === chapter.id ? 'location' : undefined}
+                onClick={(event) => handleClick(event, chapter.id)}
+              >
+                <span className="v3-rail-dot" aria-hidden="true" />
+                <span className="v3-rail-num" aria-hidden="true">
+                  {chapter.number}
+                </span>
+                <span className="v3-rail-label">{chapter.label}</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    </>
   );
 }

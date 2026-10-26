@@ -15,6 +15,7 @@ import CertificationsV3 from './CertificationsV3';
 import ReachV3 from './ReachV3';
 import BlogV3 from './BlogV3';
 import ContactV3 from './ContactV3';
+import CodaV3 from './CodaV3';
 import FooterV3 from './FooterV3';
 
 export default function HomeV3() {
@@ -40,6 +41,7 @@ export default function HomeV3() {
             <ReachV3 />
             <BlogV3 />
             <ContactV3 />
+            <CodaV3 />
           </main>
 
           <FooterV3 />

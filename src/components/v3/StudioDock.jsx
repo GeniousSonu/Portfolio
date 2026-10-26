@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTheme } from './ThemeProvider';
 import { useSound } from './SoundProvider';
 
@@ -83,9 +83,32 @@ function MusicIcon({ off }) {
 export default function StudioDock() {
   const { theme, toggleTheme } = useTheme();
   const { soundEnabled, ambientEnabled, toggleSound, toggleAmbient } = useSound();
+  const [collapsed, setCollapsed] = useState(false);
+  const timerRef = useRef(0);
+
+  const scheduleCollapse = (ms) => {
+    window.clearTimeout(timerRef.current);
+    timerRef.current = window.setTimeout(() => setCollapsed(true), ms);
+  };
+  const wake = () => {
+    window.clearTimeout(timerRef.current);
+    setCollapsed(false);
+  };
+
+  useEffect(() => {
+    scheduleCollapse(6000);
+    return () => window.clearTimeout(timerRef.current);
+  }, []);
 
   return (
-    <aside className="v3-studio" aria-label="Studio controls">
+    <aside
+      className={`v3-studio ${collapsed ? 'is-collapsed' : ''}`}
+      aria-label="Studio controls"
+      onPointerEnter={wake}
+      onPointerLeave={() => scheduleCollapse(1600)}
+      onFocus={wake}
+      onBlur={() => scheduleCollapse(1200)}
+    >
       <span className="v3-studio-label" aria-hidden="true">
         Studio
       </span>

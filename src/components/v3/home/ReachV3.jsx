@@ -33,7 +33,7 @@ export default function ReachV3() {
           subtitle="Based in Kolkata, India — working with teams, agencies, and clients globally."
           emoji="star"
           id="reach-title"
-          aside={<Emoji3D name="compass" size={44} alt="" className="v3-head-emoji" />}
+          aside={<Emoji3D name="compass" size={56} alt="" className="v3-head-emoji" />}
         />
 
         <div className="v3-reach-grid">

@@ -53,14 +53,18 @@ function ProjectGlyph({ type }) {
 }
 
 function ProjectCover({ project, widths, sizes, priority = false }) {
-  if (!project.coverImage) {
+  const [failed, setFailed] = React.useState(false);
+
+  if (!project.coverImage || failed) {
     return (
       <div className="v3-project-cover v3-project-cover--type" aria-hidden="true">
         <span className="v3-type-cover-brand">GeniousSonu</span>
-        <span className="v3-type-cover-title">Site Checkup</span>
+        <span className="v3-type-cover-title">{project.title}</span>
         <span className="v3-type-cover-rule" />
-        <span className="v3-type-cover-stat">64</span>
-        <span className="v3-type-cover-caption">Agency SOP checks · WP security</span>
+        <span className="v3-type-cover-stat">{project.metrics?.[0]?.val ?? '—'}</span>
+        <span className="v3-type-cover-caption">
+          {project.metrics?.[0]?.label ?? 'Shipped system'}
+        </span>
       </div>
     );
   }
@@ -78,6 +82,7 @@ function ProjectCover({ project, widths, sizes, priority = false }) {
         height={Math.round(widths * 0.62)}
         sizes={sizes}
         priority={priority}
+        onError={() => setFailed(true)}
         className="v3-project-img"
       />
     </div>

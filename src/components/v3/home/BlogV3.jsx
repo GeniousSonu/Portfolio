@@ -65,6 +65,31 @@ function Arrow({ direction }) {
   );
 }
 
+function BlogThumb({ post }) {
+  const [failed, setFailed] = useState(false);
+  const url = post.mainImage?.asset?.url;
+
+  if (!url || failed) {
+    return (
+      <div className="v3-blog-thumb v3-blog-thumb--fallback">
+        <span className="v3-label">{post.categories?.[0]?.title || 'Article'}</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="v3-blog-thumb">
+      <Image
+        src={url}
+        alt={post.mainImage.alt || post.title}
+        fill
+        sizes="(max-width: 640px) 86vw, (max-width: 1100px) 46vw, 360px"
+        onError={() => setFailed(true)}
+      />
+    </div>
+  );
+}
+
 export default function BlogV3() {
   const rootRef = useRef(null);
   const carouselRef = useRef(null);
@@ -193,20 +218,7 @@ export default function BlogV3() {
 
               return (
                 <article className="v3-blog-card" key={post._id}>
-                  {post.mainImage?.asset?.url ? (
-                    <div className="v3-blog-thumb">
-                      <Image
-                        src={post.mainImage.asset.url}
-                        alt={post.mainImage.alt || post.title}
-                        fill
-                        sizes="(max-width: 640px) 86vw, (max-width: 1100px) 46vw, 360px"
-                      />
-                    </div>
-                  ) : (
-                    <div className="v3-blog-thumb v3-blog-thumb--fallback">
-                      <span className="v3-label">Article</span>
-                    </div>
-                  )}
+                  <BlogThumb post={post} />
 
                   <div className="v3-blog-body">
                     <div className="v3-blog-meta">
