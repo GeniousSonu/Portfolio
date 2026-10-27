@@ -9,6 +9,7 @@ import InstallAppButton from './InstallAppButton';
 import { useOverlay } from '@/context/OverlayContext';
 import { useTransitionRouter } from '@/context/TransitionContext';
 import { usePlayground } from '@/context/PlaygroundContext';
+import navState from '@/lib/navState';
 import { NAV_GROUPS, NAVIGATION_ITEMS, getNavItemsByGroup } from '@/config/navigation';
 import { useTheme } from '@/components/v3/ThemeProvider';
 import MenuOverlay from './menu/MenuOverlay';
@@ -201,52 +202,67 @@ export default function Navbar() {
       return;
     }
 
-    if (targetHref === '#' || targetHref === '/') {
-      if (pathname === '/') {
-        navState.startAnchorNav();
-        setTimeout(() => {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }, 50);
-      } else {
-        transitionRouter.push('/');
-      }
-      return;
-    }
-
-    if (targetHref.startsWith('/#')) {
-      const anchor = targetHref.replace('/', '');
-      if (pathname === '/') {
-        navState.startAnchorNav();
-        setTimeout(() => {
-          scrollToSectionWithOffset(anchor);
-        }, 60);
-      } else {
-        if (typeof sessionStorage !== 'undefined') {
-          sessionStorage.setItem('portfolio_scroll_target', anchor);
+    try {
+      if (targetHref === '#' || targetHref === '/') {
+        if (pathname === '/') {
+          try {
+            navState?.startAnchorNav?.();
+          } catch {}
+          setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }, 50);
+        } else {
+          transitionRouter.push('/');
         }
+        return;
+      }
+
+      if (targetHref.startsWith('/#')) {
+        const anchor = targetHref.replace('/', '');
+        if (pathname === '/') {
+          try {
+            navState?.startAnchorNav?.();
+          } catch {}
+          setTimeout(() => {
+            scrollToSectionWithOffset(anchor);
+          }, 60);
+        } else {
+          if (typeof sessionStorage !== 'undefined') {
+            sessionStorage.setItem('portfolio_scroll_target', anchor);
+          }
+          transitionRouter.push(targetHref);
+        }
+        return;
+      }
+
+      if (targetHref.startsWith('#')) {
+        if (pathname === '/') {
+          try {
+            navState?.startAnchorNav?.();
+          } catch {}
+          setTimeout(() => {
+            scrollToSectionWithOffset(targetHref);
+          }, 60);
+        } else {
+          if (typeof sessionStorage !== 'undefined') {
+            sessionStorage.setItem('portfolio_scroll_target', targetHref);
+          }
+          transitionRouter.push('/' + targetHref);
+        }
+        return;
+      }
+
+      if (targetHref.startsWith('/')) {
+        try {
+          navState?.startRouteNav?.();
+        } catch {}
         transitionRouter.push(targetHref);
       }
-      return;
-    }
-
-    if (targetHref.startsWith('#')) {
-      if (pathname === '/') {
-        navState.startAnchorNav();
-        setTimeout(() => {
-          scrollToSectionWithOffset(targetHref);
-        }, 60);
-      } else {
-        if (typeof sessionStorage !== 'undefined') {
-          sessionStorage.setItem('portfolio_scroll_target', targetHref);
-        }
-        transitionRouter.push('/' + targetHref);
+    } catch (err) {
+      console.warn('Navbar handleLinkClick error, executing fallback navigation:', err);
+      if (typeof window !== 'undefined') {
+        window.location.assign(targetHref);
       }
-      return;
-    }
-
-    if (targetHref.startsWith('/')) {
-      navState.startRouteNav();
-      transitionRouter.push(targetHref);
     }
   };
 

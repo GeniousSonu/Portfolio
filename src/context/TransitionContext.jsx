@@ -27,6 +27,7 @@ export function TransitionProvider({ children }) {
   const targetRouteRef = useRef(null);
   const activeControllerRef = useRef(null);
   const safetyTimeoutRef = useRef(null);
+  const watchdogTimeoutRef = useRef(null);
   const phaseTimersRef = useRef([]);
   const lastNavRef = useRef({ href: '', time: 0 });
   const isNavigatingRef = useRef(false);
@@ -37,6 +38,10 @@ export function TransitionProvider({ children }) {
     if (safetyTimeoutRef.current) {
       clearTimeout(safetyTimeoutRef.current);
       safetyTimeoutRef.current = null;
+    }
+    if (watchdogTimeoutRef.current) {
+      clearTimeout(watchdogTimeoutRef.current);
+      watchdogTimeoutRef.current = null;
     }
   }, []);
   const clearTimers = clearPhaseTimers;
@@ -64,6 +69,10 @@ export function TransitionProvider({ children }) {
 
   // Settle transition after destination DOM has mounted and painted
   const completeTransition = useCallback((targetPath) => {
+    if (watchdogTimeoutRef.current) {
+      clearTimeout(watchdogTimeoutRef.current);
+      watchdogTimeoutRef.current = null;
+    }
     // Wait 2 animation frames to guarantee the browser has finished painting destination DOM
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -115,6 +124,10 @@ export function TransitionProvider({ children }) {
     if (safetyTimeoutRef.current) {
       clearTimeout(safetyTimeoutRef.current);
       safetyTimeoutRef.current = null;
+    }
+    if (watchdogTimeoutRef.current) {
+      clearTimeout(watchdogTimeoutRef.current);
+      watchdogTimeoutRef.current = null;
     }
 
     // Verify destination route mount before completing
@@ -220,17 +233,35 @@ export function TransitionProvider({ children }) {
         router.push(href);
       });
 
-      // Hard safety timeout guard (450ms): recovers cleanly if pathname doesn't update
+      // Hard safety timeout guard (450ms): soft recovery if transition animation stalls
       safetyTimeoutRef.current = setTimeout(() => {
         if (isNavigatingRef.current) {
+          setWaveformActive(false);
+          setTransitionPhase('idle');
+          setTransitionStatus('idle');
+        }
+      }, 450);
+
+      // Architecture Navigation Watchdog (1500ms):
+      // A transition must NEVER be able to block navigation.
+      // If the destination has not become current within 1500ms, perform a full standard navigation.
+      watchdogTimeoutRef.current = setTimeout(() => {
+        const currentPathNow = typeof window !== 'undefined' ? window.location.pathname : '';
+        if (isNavigatingRef.current || normalize(currentPathNow) !== normalize(targetPath)) {
+          console.warn(
+            `[Navigation Watchdog] Destination ${targetPath} not current within 1500ms. Performing fallback navigation to ${href}`
+          );
           isNavigatingRef.current = false;
           targetRouteRef.current = null;
           clearTimers();
           setWaveformActive(false);
           setTransitionPhase('idle');
           setTransitionStatus('idle');
+          if (typeof window !== 'undefined') {
+            window.location.assign(href);
+          }
         }
-      }, 450);
+      }, 1500);
     },
     [router, clearPhaseTimers, clearTimers]
   );
