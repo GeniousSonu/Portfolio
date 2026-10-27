@@ -242,3 +242,75 @@
   color: var(--text-primary);
   border-color: var(--border-brass);
 }
+
+.filterBar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 2.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  z-index: 1;
+}
+
+.filterBar::-webkit-scrollbar {
+  display: none;
+}
+
+.filterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.9rem;
+  background: var(--surface-1, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.filterChip:hover {
+  color: var(--text-primary);
+  border-color: var(--border-brass);
+  background: rgba(212, 175, 55, 0.04);
+}
+
+.activeFilterChip {
+  background: rgba(212, 175, 55, 0.1);
+  border-color: var(--border-brass);
+  color: var(--gold);
+}
+
+.filterCount {
+  display: inline-block;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.68rem;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+}
+
+.activeFilterChip .filterCount {
+  background: rgba(212, 175, 55, 0.2);
+  color: var(--gold);
+}
+
+.emptyState {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--surface-card);
+  border: 1px dashed var(--border-hairline);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+
