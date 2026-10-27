@@ -181,17 +181,22 @@ export default function HeroV3() {
 
       <div className="v3-shell v3-hero-shell">
         <div className="v3-hero-topline" data-hero-fade>
+          <span className="v3-sub-meta-pill">PORTFOLIO EDITION · VOL. 26</span>
           <span className="v3-eyebrow">
             <span className="v3-pulse-dot" aria-hidden="true" />
             Open to Global Roles · IST (UTC+5:30)
           </span>
           <span className="v3-hero-index" aria-hidden="true">
-            A portfolio in eight chapters.
+            KOLKATA, IN (22.57° N, 88.36° E)
           </span>
         </div>
 
         <div className="v3-hero-grid">
-          <div className="v3-hero-main">
+          <div className="v3-hero-main v3-glass-card">
+            <div className="v3-cover-badge-row" data-hero-fade>
+              <span className="v3-cover-badge">★ COVER STORY</span>
+            </div>
+
             <h1 className="v3-hero-title" id="hero-title">
               <span className="v3-hero-line v3-hero-line--small">
                 <span data-hero-line>SK</span>
@@ -221,14 +226,16 @@ export default function HeroV3() {
             </p>
             <p className="v3-hero-desc" data-hero-fade>
               <EditableText tag="span">
-                Architecting resilient real-time protocols, secure distributed systems, and
+                <span className="v3-serif-accent">Architecting resilient real-time protocols</span>, secure distributed systems, and
                 high-fidelity product interfaces.
               </EditableText>
             </p>
-            <p className="v3-hero-credentials" data-hero-fade>
-              Granted Indian Patentee (IoT Cold-Chain) · Co-Founder at WEFIK · 30+ Verified
-              Credentials.
-            </p>
+
+            <div className="v3-hero-pills" data-hero-fade>
+              <span className="v3-pill-tag v3-pill-tag--pink">Granted Patentee (IoT)</span>
+              <span className="v3-pill-tag v3-pill-tag--lime">Co-Founder @ WEFIK</span>
+              <span className="v3-pill-tag v3-pill-tag--yellow">30+ Verified Credentials</span>
+            </div>
 
             <div className="v3-hero-actions" data-hero-fade>
               <a href="#projects" className="v3-btn v3-btn--primary" data-magnetic>

@@ -14,7 +14,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-family: 'Geist', 'Geist Fallback', system-ui, sans-serif;
+  font-family: var(--body);
   background-color: var(--background);
 }
 

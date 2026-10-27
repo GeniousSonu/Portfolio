@@ -50,8 +50,21 @@ function getGraphemes(text, lang) {
   return Array.from(text);
 }
 
+function getInitialBootState() {
+  if (typeof window !== 'undefined') {
+    const path = window.location.pathname;
+    const isHome = path === '/' || path === '/index.html';
+    const isReplay = window.location.search.includes('intro') || window.location.hash === '#intro';
+    if (!isHome && !isReplay) return BOOT_STATES.DONE;
+    if (window.__skipBootPreloader || document.documentElement.classList.contains('boot-skip') || hasBootedInThisDocument) {
+      if (!isReplay) return BOOT_STATES.DONE;
+    }
+  }
+  return BOOT_STATES.IDLE;
+}
+
 export default function BootPreloader() {
-  const [state, dispatch] = useReducer(bootReducer, BOOT_STATES.IDLE);
+  const [state, dispatch] = useReducer(bootReducer, undefined, getInitialBootState);
 
   // Terminal state
   const [terminalLine1Text, setTerminalLine1Text] = React.useState('');

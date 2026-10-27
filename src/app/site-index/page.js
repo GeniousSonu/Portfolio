@@ -36,7 +36,7 @@ export default function SiteIndexPage() {
   };
 
   return (
-    <PageShell>
+    <PageShell dataRoute="/site-index">
       <PageHeader
         eyebrow="[ SKELETON REVIEW DIRECTORY ]"
         title="Complete Site Topology Index"

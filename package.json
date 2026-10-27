@@ -13,6 +13,7 @@
     "lint:md": "markdownlint \"**/*.md\" --ignore node_modules --ignore .next --ignore studio-portfolio",
     "format:check": "prettier --check .",
     "format": "prettier --write .",
+    "check:fonts": "node scripts/check-hardcoded-fonts.mjs",
     "check:routes": "node scripts/check-routes.mjs",
     "test": "vitest run",
     "test:unit": "vitest run",

@@ -7,7 +7,10 @@
     "color-function-notation": null,
     "alpha-value-notation": null,
     "media-feature-range-notation": null,
-    "declaration-block-no-redundant-longhand-properties": null
+    "declaration-block-no-redundant-longhand-properties": null,
+    "declaration-property-value-disallowed-list": {
+      "font-family": ["/Geist/", "/Brooklyn/", "/Instrument/", "/IBM Plex/", "/Poppins/"]
+    }
   },
   "overrides": [
     {

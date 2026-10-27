@@ -6,7 +6,7 @@
   padding: 7rem 1.5rem 5rem;
   background: #05070c;
   color: #e2e8f0;
-  font-family: 'Brooklyn', 'Geist', 'Geist Fallback', system-ui, -apple-system, sans-serif;
+  font-family: var(--body);
   box-sizing: border-box;
 }
 
@@ -222,7 +222,7 @@
   padding: 0;
   margin: 0;
   color: #f1f5f9;
-  font-family: 'Brooklyn', 'Geist', 'Geist Fallback', system-ui, -apple-system, sans-serif;
+  font-family: var(--body);
   font-size: 0.95rem;
   line-height: 1.7;
   font-weight: 400;

@@ -7,7 +7,13 @@ try {
   if (fs.existsSync(swPath)) {
     let content = fs.readFileSync(swPath, 'utf8');
     const timestamp = Date.now();
-    const gitSha = process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA || '';
+    let gitSha = process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA || '';
+    if (!gitSha) {
+      try {
+        const { execSync } = await import('node:child_process');
+        gitSha = execSync('git rev-parse --short HEAD').toString().trim();
+      } catch {}
+    }
     const newVersion = gitSha ? `v-${gitSha.slice(0, 8)}-${timestamp}` : `v-${timestamp}`;
 
     const updated = content.replace(

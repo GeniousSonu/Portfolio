@@ -117,7 +117,7 @@ export async function POST(request) {
       replyTo: body.email.trim(),
       subject: `[Portfolio Inquiry] New message from ${safeSubjectName}`,
       html: `
-        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; background: #0c1017; border: 1px solid #1f293d; border-radius: 12px; overflow: hidden; color: #e2e8f0;">
+        <div style="font-family: 'Bricolage Grotesque', 'Helvetica Neue', Arial, sans-serif; max-width: 580px; margin: 0 auto; background: #0c1017; border: 1px solid #1f293d; border-radius: 12px; overflow: hidden; color: #e2e8f0;">
           <div style="background: #111827; padding: 20px 24px; border-bottom: 1px solid #1f293d;">
             <h2 style="margin: 0; font-size: 18px; color: #10b981; font-weight: 700; letter-spacing: 0.02em;">
               New Inquiry from Portfolio

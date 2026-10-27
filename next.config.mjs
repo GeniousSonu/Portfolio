@@ -1,6 +1,20 @@
+import { execSync } from 'node:child_process';
 import { withSentryConfig } from '@sentry/nextjs/config';
+
+let gitCommitSha = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) || process.env.NEXT_PUBLIC_BUILD_ID;
+if (!gitCommitSha) {
+  try {
+    gitCommitSha = execSync('git rev-parse --short HEAD').toString().trim();
+  } catch {
+    gitCommitSha = 'dev-' + Math.floor(Date.now() / 1000);
+  }
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  env: {
+    NEXT_PUBLIC_BUILD_ID: gitCommitSha,
+  },
   images: {
     remotePatterns: [
       {

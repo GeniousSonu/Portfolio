@@ -179,7 +179,7 @@ export default function FooterV3() {
             <span className="is-blue">:~$</span>
             <span className="is-muted">
               {' '}
-              echo &quot;Built with precision, deployed with intent.&quot; · {year}
+              echo &quot;Built with precision, deployed with intent.&quot; · {year} · build {process.env.NEXT_PUBLIC_BUILD_ID || 'prod'}
             </span>
           </div>
 

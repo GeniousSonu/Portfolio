@@ -23,6 +23,17 @@ export default function ContactV3() {
   const [feedback, setFeedback] = useState('');
   const [feedbackState, setFeedbackState] = useState('idle');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [copiedEmail, setCopiedEmail] = useState(false);
+
+  const handleCopyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText('sahinurislam520@gmail.com');
+      setCopiedEmail(true);
+      setTimeout(() => setCopiedEmail(false), 2000);
+    } catch {
+      // fallback
+    }
+  };
 
   const formMountedAt = useRef(Date.now());
   const [honeypot, setHoneypot] = useState('');
@@ -187,9 +198,73 @@ export default function ContactV3() {
           aside={<Emoji3D name="bulb" size={56} alt="" className="v3-head-emoji" />}
         />
 
-        <div className="v3-contact-grid">
-          <div className="v3-contact-left" data-reveal>
-            <p className="v3-contact-lede">{INTRO}</p>
+        <div className="v3-contact-frosted-card" data-reveal>
+          {/* Oversized Bold Email Row (design-reference.md) */}
+          <div className="v3-contact-email-row">
+            <span className="v3-contact-email-badge">INQUIRIES //</span>
+            <a href="mailto:sahinurislam520@gmail.com" className="v3-contact-email-address">
+              sahinurislam520@gmail.com
+            </a>
+            <button
+              type="button"
+              onClick={handleCopyEmail}
+              className="v3-brutal-copy-btn"
+              aria-label="Copy email address"
+            >
+              {copiedEmail ? '✓ COPIED' : 'COPY 📋'}
+            </button>
+          </div>
+
+          {/* Action Pills Row */}
+          <div className="v3-contact-action-pills">
+            <a
+              href="https://linkedin.com/in/genioussonu"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="v3-brutal-pill-link"
+              data-v3-sound="confirm"
+            >
+              LinkedIn ↗
+            </a>
+            <a
+              href="https://github.com/GeniousSonu"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="v3-brutal-pill-link"
+              data-v3-sound="confirm"
+            >
+              GitHub ↗
+            </a>
+            <a
+              href="https://t.me/genioussonu"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="v3-brutal-pill-link"
+              data-v3-sound="confirm"
+            >
+              Telegram ↗
+            </a>
+            <a
+              href="https://twitter.com/genioussonu"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="v3-brutal-pill-link"
+              data-v3-sound="confirm"
+            >
+              Twitter/X ↗
+            </a>
+            <Link
+              href="/contact"
+              className="v3-brutal-pill-link v3-brutal-pill-link--lime"
+              data-v3-sound="confirm"
+            >
+              Direct Transmission ⚡
+            </Link>
+          </div>
+
+          <div className="v3-contact-grid">
+            <div className="v3-contact-left">
+              <p className="v3-contact-lede">{INTRO}</p>
 
             <Link href="/contact" className="v3-terminal-link" data-v3-sound="confirm">
               <svg
@@ -387,6 +462,7 @@ export default function ContactV3() {
           </div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
   );
 }

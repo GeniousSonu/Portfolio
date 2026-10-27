@@ -1,67 +1,43 @@
-/* ─── Brooklyn Custom Font ─── */
+/* ─── Script-Coverage OFL Fallback Fonts (Bengali, Devanagari, Japanese, Cyrillic, Arabic) ─── */
 @font-face {
-  font-family: 'Brooklyn';
-  src: url('/fonts/Brooklyn Normal 1.ttf') format('truetype'),
-       url('/fonts/Brooklyn Normal 1.otf') format('opentype');
-  font-weight: 400;
+  font-family: 'Noto Sans Bengali Boot';
+  src: url('/fonts/boot/noto-sans-bengali-subset.woff2') format('woff2');
+  font-weight: 400 800;
   font-style: normal;
   font-display: swap;
+  unicode-range: U+0980-09FF;
 }
 @font-face {
-  font-family: 'Brooklyn';
-  src: url('/fonts/Brooklyn Italic.ttf') format('truetype'),
-       url('/fonts/Brooklyn Italic.otf') format('opentype');
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Brooklyn';
-  src: url('/fonts/Brooklyn SemiBold.ttf') format('truetype'),
-       url('/fonts/Brooklyn SemiBold.otf') format('opentype');
-  font-weight: 600;
+  font-family: 'Noto Sans Devanagari Boot';
+  src: url('/fonts/boot/noto-sans-devanagari-subset.woff2') format('woff2');
+  font-weight: 400 800;
   font-style: normal;
   font-display: swap;
+  unicode-range: U+0900-097F, U+A8E0-A8FF;
 }
 @font-face {
-  font-family: 'Brooklyn';
-  src: url('/fonts/Brooklyn SemiBoldItalic.ttf') format('truetype'),
-       url('/fonts/Brooklyn SemiBoldItalic.otf') format('opentype');
-  font-weight: 600;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Brooklyn';
-  src: url('/fonts/Brooklyn Bold 1.ttf') format('truetype'),
-       url('/fonts/Brooklyn Bold 1.otf') format('opentype');
-  font-weight: 700;
+  font-family: 'Noto Sans JP Boot';
+  src: url('/fonts/boot/noto-sans-jp-subset.woff2') format('woff2');
+  font-weight: 400 900;
   font-style: normal;
   font-display: swap;
+  unicode-range: U+3040-309F, U+30A0-30FF, U+4E00-9FFF;
 }
 @font-face {
-  font-family: 'Brooklyn';
-  src: url('/fonts/Brooklyn BoldItalic.ttf') format('truetype'),
-       url('/fonts/Brooklyn BoldItalic.otf') format('opentype');
-  font-weight: 700;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Brooklyn';
-  src: url('/fonts/Brooklyn Heavy 1.ttf') format('truetype'),
-       url('/fonts/Brooklyn Heavy 1.otf') format('opentype');
-  font-weight: 800;
+  font-family: 'Noto Sans Cyrillic Boot';
+  src: url('/fonts/boot/noto-sans-cyrillic-subset.woff2') format('woff2');
+  font-weight: 400 800;
   font-style: normal;
   font-display: swap;
+  unicode-range: U+0400-04FF;
 }
 @font-face {
-  font-family: 'Brooklyn';
-  src: url('/fonts/Brooklyn HeavyItalic.ttf') format('truetype'),
-       url('/fonts/Brooklyn HeavyItalic.otf') format('opentype');
-  font-weight: 800;
-  font-style: italic;
+  font-family: 'Noto Sans Arabic Boot';
+  src: url('/fonts/boot/noto-sans-arabic-subset.woff2') format('woff2');
+  font-weight: 400 800;
+  font-style: normal;
   font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
 }
 
 /* ─── Self-Hosted OFL Boot Font Subsets (BOOT-001) ─── */
@@ -140,18 +116,80 @@
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-full: 9999px;
-  --font-sans: 'Geist', 'Geist Fallback', system-ui, sans-serif;
-  --font-display: 'Geist', 'Geist Fallback', system-ui, sans-serif;
-  --font-mono: 'Geist', 'Geist Fallback', monospace;
-  --font-poppins: var(--font-poppins), 'Poppins', sans-serif;
-  --font-boot-bn: 'Noto Sans Bengali Boot', system-ui, sans-serif;
-  --font-boot-hi: 'Noto Sans Devanagari Boot', system-ui, sans-serif;
-  --font-boot-ja: 'Noto Sans JP Boot', system-ui, sans-serif;
-  --font-boot-ru: 'Noto Sans Cyrillic Boot', system-ui, sans-serif;
-  --font-boot-ar: 'Noto Sans Arabic Boot', system-ui, sans-serif;
-  --font-boot-en: 'Noto Sans Latin Boot', system-ui, sans-serif;
+  /* ─── Editorial & Neo-Brutalist Typography System (design-reference.md) ─── */
+  --body: "Bricolage Grotesque", "Plus Jakarta Sans", "Helvetica Neue", Arial, sans-serif;
+  --display: var(--font-bebas, "Bebas Neue"), "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --serif: var(--font-serif, "Playfair Display"), "Georgia", serif;
+  --mono: var(--font-space-mono, "Space Mono"), ui-monospace, monospace;
+  --hand: var(--font-shantell, "Shantell Sans"), "Comic Sans MS", cursive;
+
+  /* Token aliases for systemwide compatibility */
+  --font-sans: var(--font-sans-ui, "Plus Jakarta Sans"), var(--body);
+  --font-display: var(--display);
+  --font-serif: var(--serif);
+  --font-mono: var(--mono);
+  --font-hand: var(--hand);
+  --font-boot-bn: 'Noto Sans Bengali Boot', var(--display);
+  --font-boot-hi: 'Noto Sans Devanagari Boot', var(--display);
+  --font-boot-ja: 'Noto Sans JP Boot', var(--display);
+  --font-boot-ru: 'Noto Sans Cyrillic Boot', var(--display);
+  --font-boot-ar: 'Noto Sans Arabic Boot', var(--display);
+  --font-boot-en: 'Noto Sans Latin Boot', var(--display);
+
+  /* ─── Core UI & Neo-Brutalist Tokens (Day Mode Defaults) ─── */
+  --nav-bg: rgba(255, 255, 255, 0.78);
+  --nav-border: rgba(255, 255, 255, 0.9);
+  --nav-text: #0F172A;
+  --nav-active-bg: #0F172A;
+  --nav-active-text: #FFFFFF;
+  --cta-pink: #FF2E93;
+
+  --glass-card-bg: rgba(255, 255, 255, 0.82);
+  --glass-card-border: rgba(255, 255, 255, 0.6);
+  --brutal-border: #0F172A;
+  --brutal-shadow: 3px 3px 0px #0F172A;
+
+  --pill-pink: #FF4D94;
+  --pill-lime: #B4F461;
+  --pill-yellow: #FDE047;
+
+  /* Vibrant Section Palette (Day Mode) */
+  --sec-01-bg: #0F5A47; /* Deep Emerald */
+  --sec-02-bg: #442C6E; /* Royal Indigo */
+  --sec-03-bg: #D91B38; /* Vivid Crimson */
+  --sec-04-bg: #E10686; /* Electric Magenta */
+  --sec-05-bg: #6E1D52; /* Festive Plum */
+  --sec-06-bg: #F9841A; /* Bright Tangerine */
+  --sec-07-bg: #2B3530; /* Tactical Forest Charcoal */
+  --sec-08-bg: #1572B6; /* Ice Cobalt Blue */
+
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+html[data-theme='dark'] {
+  /* ─── Core UI & Neo-Brutalist Tokens (Night Mode) ─── */
+  --nav-bg: rgba(15, 23, 42, 0.78);
+  --nav-border: rgba(255, 255, 255, 0.14);
+  --nav-text: #F8FAFC;
+  --nav-active-bg: #F8FAFC;
+  --nav-active-text: #0F172A;
+  --cta-pink: #FF2E93;
+
+  --glass-card-bg: rgba(15, 23, 42, 0.75);
+  --glass-card-border: rgba(255, 255, 255, 0.15);
+  --brutal-border: #000000;
+  --brutal-shadow: 3px 3px 0px #000000;
+
+  /* Rich Obsidian & Neon-Tinted Section Palette (Night Mode) */
+  --sec-01-bg: #06281F;
+  --sec-02-bg: #19102C;
+  --sec-03-bg: #3B0712;
+  --sec-04-bg: #3D0325;
+  --sec-05-bg: #26091C;
+  --sec-06-bg: #2E1503;
+  --sec-07-bg: #0B0F0D;
+  --sec-08-bg: #072138;
 }
 
 html[data-theme='light'] {
@@ -181,10 +219,11 @@ html {
   -webkit-font-smoothing: antialiased;
   scroll-behavior: auto;
   scroll-padding-top: 80px;
-  font-family: 'Geist', 'Geist Fallback', system-ui, sans-serif;
+  font-family: var(--body);
   font-size: 16px;
   font-weight: 400;
   font-style: normal;
+  font-synthesis: none;
 }
 
 html[data-theme='light'] {
@@ -192,49 +231,22 @@ html[data-theme='light'] {
 }
 body {
   background: var(--void); color: var(--text-primary);
-  font-family: var(--font-sans); overflow-x: hidden; cursor: none;
+  font-family: var(--body); overflow-x: hidden; cursor: none;
   font-size: 16px; font-weight: 400; font-style: normal;
+  font-synthesis: none;
 }
 
-/* ─── Element-Specific Font Rules (Geist) ─── */
-a {
-  font-family: 'Geist', 'Geist Fallback', system-ui, sans-serif;
-  font-size: 14px;
-  font-weight: 300;
-  font-style: normal;
+/* ─── Typography Role Tokens ─── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--display);
+  font-synthesis: none;
 }
-span {
-  font-family: 'Geist', 'Geist Fallback', system-ui, sans-serif;
-  font-weight: 300;
-  font-style: normal;
+code, kbd, samp, pre {
+  font-family: var(--mono);
+  font-synthesis: none;
 }
-svg {
-  font-family: 'Geist', 'Geist Fallback', system-ui, sans-serif;
-  font-weight: 300;
-  font-style: normal;
-}
-button {
-  font-family: Arial, sans-serif;
-  font-size: 13.3333px;
-  font-weight: 400;
-  font-style: normal;
-}
-button span,
-button svg {
-  font-family: Arial, sans-serif;
-  font-weight: 400;
-}
-header {
-  font-family: 'Geist', 'Geist Fallback', system-ui, sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  font-style: normal;
-}
-footer {
-  font-family: 'Geist', 'Geist Fallback', system-ui, sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  font-style: normal;
+button, input, select, textarea {
+  font-family: inherit;
 }
 
 ::selection { background: rgba(212, 175, 55, 0.22); color: var(--gold-bright); }
@@ -400,122 +412,184 @@ input, textarea, select, .form-input {
   transition: transform 0.12s ease !important;
 }
 
-/* ─── NAV ─── */
+/* ─── FLOATING PILL GLASSMORPHIC NAV (design-reference.md) ─── */
 #nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-  padding: 1.25rem 0;
-  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, padding 0.4s var(--ease-out), background 0.4s var(--ease-out), top 0.4s var(--ease-out), width 0.4s var(--ease-out), border-radius 0.4s var(--ease-out);
-  width: 100%;
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(340px, 94%, 1060px);
+  max-width: 1060px;
+  height: 52px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  background: var(--nav-bg);
+  border: 1px solid var(--nav-border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  z-index: 1000;
+  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* Auto-hide scroll behavior: slide up out of view on scroll down, show on scroll up */
 #nav.nav-hidden {
-  transform: translateY(-120%);
+  transform: translateX(-50%) translateY(-130%);
   opacity: 0;
   pointer-events: none;
 }
 
-#nav.scrolled {
-  top: 0.85rem;
-  width: clamp(320px, 92%, 1060px);
-  max-width: 1060px;
-  margin: 0 auto;
-  padding: 0.5rem 0.8rem;
-  background: rgba(10, 12, 16, 0.78);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 9999px;
-  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 0 0 1px rgba(16, 185, 129, 0.15);
-}
-
 .nav-inner {
-  display: flex; align-items: center; justify-content: space-between;
-  max-width: 1280px; margin: 0 auto; padding: 0 clamp(1.2rem, 4vw, 3rem);
-  transition: all 0.4s var(--ease-out);
-}
-#nav.scrolled .nav-inner {
-  padding: 0 0.8rem 0 1rem;
-  gap: 1.5rem;
+  display: flex;
+  align-items: center;
   justify-content: space-between;
   width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0 0.4rem;
+  gap: 1rem;
 }
 
 .nav-logo {
-  font-family: var(--font-mono); font-size: 0.85rem; color: #FFFFFF;
-  text-decoration: none; letter-spacing: 0.05em;
-  display: flex; align-items: center; gap: 0.5rem;
-  transition: transform 0.3s var(--ease-out);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--nav-text);
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: transform 0.25s var(--ease-out);
 }
 
-/* White logo styling */
+.nav-logo:hover {
+  transform: scale(1.03);
+}
+
 .nav-logo-img {
-  height: 28px; width: auto;
-  filter: brightness(0) invert(1); /* pure white logo */
-  transition: height 0.4s var(--ease-out);
+  height: 24px;
+  width: auto;
+  filter: brightness(0) invert(1);
+  transition: height 0.3s var(--ease-out);
 }
-#nav.scrolled .nav-logo-img {
-  height: 22px;
+
+html[data-theme='light'] .nav-logo-img {
+  filter: none;
 }
-.nav-logo-bracket { color: var(--text-muted); }
+
+.nav-logo-bracket {
+  color: var(--text-muted);
+}
 
 .nav-links {
-  display: flex; align-items: center; gap: 2.2rem; list-style: none;
-  transition: all 0.4s var(--ease-out);
-  margin: 0; padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
-#nav.scrolled .nav-links {
-  gap: 1.5rem;
-}
-.nav-links a {
-  font-size: 0.85rem; color: #ffffff; text-decoration: none;
-  letter-spacing: 0.03em;
-  font-family: var(--font-poppins); font-weight: 500;
-  transition: color 0.25s, font-size 0.4s var(--ease-out), text-shadow 0.25s;
-  position: relative;
-  display: inline-flex; align-items: center; line-height: 1;
-}
-#nav.scrolled .nav-links a:not(.nav-cta) {
-  font-size: 0.81rem;
-  color: #ffffff;
-  font-weight: 500;
-}
-.nav-links a::after {
-  content: ''; position: absolute; bottom: -4px; left: 0; right: 0;
-  height: 2px; background: linear-gradient(90deg, #10b981, #34d399);
-  border-radius: 9999px; transform: scaleX(0);
-  transform-origin: right; transition: transform 0.25s var(--ease-out);
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
-}
-.nav-links a:hover {
-  color: #34d399;
-  text-shadow: 0 0 12px rgba(52, 211, 153, 0.35);
-}
-.nav-links a:hover::after { transform: scaleX(1); transform-origin: left; }
 
-/* Contact Button — clean, balanced, perfectly aligned */
-.nav-cta {
-  display: inline-flex; align-items: center; justify-content: center;
-  height: 36px; padding: 0 1.25rem;
-  border: 1px solid var(--gold); border-radius: 9999px;
-  color: var(--gold-bright); font-size: 0.82rem; font-family: var(--font-poppins);
+.nav-links a,
+.nav-dropdown-trigger {
+  font-size: 0.82rem;
+  color: var(--nav-text);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  font-family: var(--font-sans);
   font-weight: 600;
-  text-decoration: none; transition: all 0.25s var(--ease-out); letter-spacing: 0.02em;
-  white-space: nowrap; line-height: 1; vertical-align: middle;
+  padding: 0.35rem 0.8rem;
+  border-radius: 9999px;
+  transition: background 0.2s var(--ease-out), color 0.2s var(--ease-out), transform 0.2s var(--ease-out);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  line-height: 1;
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
-.nav-cta::after { display: none !important; }
-#nav.scrolled .nav-cta {
-  height: 32px; padding: 0 1rem;
-  font-size: 0.78rem;
-  border-color: rgba(16, 185, 129, 0.7);
-  background: rgba(16, 185, 129, 0.1);
+
+.nav-dropdown-trigger:hover,
+.nav-links a:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--nav-text);
 }
-.nav-cta:hover, #nav.scrolled .nav-cta:hover {
-  background: var(--gold); color: var(--void);
-  border-color: var(--gold);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+
+html[data-theme='light'] .nav-dropdown-trigger:hover,
+html[data-theme='light'] .nav-links a:hover {
+  background: rgba(15, 23, 42, 0.08);
 }
+
+/* Active solid pill state */
+.nav-dropdown-trigger.active,
+.nav-links a.active {
+  background: var(--nav-active-bg) !important;
+  color: var(--nav-active-text) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Hot-Pink CTA Pill Button (design-reference.md) */
+.nav-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  height: 36px;
+  padding: 0 1.15rem;
+  border-radius: 9999px;
+  background: var(--cta-pink, #FF2E93) !important;
+  color: #FFFFFF !important;
+  font-size: 0.82rem;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  line-height: 1;
+  box-shadow: 0 4px 16px rgba(255, 46, 147, 0.45);
+  transition: all 0.22s var(--ease-out);
+  border: none !important;
+}
+
+.nav-cta:hover {
+  background: #E10686 !important;
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(255, 46, 147, 0.65);
+}
+
+/* Day/Night Theme Toggle Button */
+.nav-theme-toggle-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-hairline);
+  color: var(--nav-text);
+  cursor: pointer;
+  transition: all 0.2s var(--ease-out);
+  flex-shrink: 0;
+}
+
+html[data-theme='light'] .nav-theme-toggle-btn {
+  background: rgba(15, 23, 42, 0.06);
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+.nav-theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: rotate(18deg) scale(1.06);
+}
+
+html[data-theme='light'] .nav-theme-toggle-btn:hover {
+  background: rgba(15, 23, 42, 0.12);
+}
+
 
 /* ── Explore Dropdown in Navbar (Click-first, Hover-enhanced on Desktop) ── */
 .nav-dropdown-wrapper {
@@ -532,7 +606,7 @@ input, textarea, select, .form-input {
   font-size: 0.85rem;
   color: #ffffff;
   letter-spacing: 0.03em;
-  font-family: var(--font-poppins);
+  font-family: var(--body);
   font-weight: 500;
   display: inline-flex;
   align-items: center;
@@ -676,7 +750,7 @@ input, textarea, select, .form-input {
 }
 
 .nav-dropdown-item-title {
-  font-family: var(--font-poppins);
+  font-family: var(--body);
   font-weight: 600;
   font-size: 0.86rem;
   color: #f1f5f9;
@@ -3603,14 +3677,6 @@ html.reduce-motion .ambientGlow {
 .page-transition-shell {
   min-height: 100vh;
   min-height: 100dvh;
-  transition: opacity 0.12s cubic-bezier(0.2, 0, 0, 1);
-}
-
-.page-transition-shell.transition-out {
-  opacity: 0;
-}
-
-.page-transition-shell.transition-in {
   opacity: 1;
 }
 

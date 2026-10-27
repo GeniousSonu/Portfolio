@@ -13,7 +13,7 @@ export const metadata = buildMetadata({
 
 export default function PlayPage() {
   return (
-    <PageShell>
+    <PageShell dataRoute="/play">
       <PageHeader
         eyebrow="[ EXPERIMENTAL LAB · INTERACTIVE ]"
         title="Play With Me — Audio Nodes & Strategy"

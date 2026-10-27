@@ -52,7 +52,8 @@ export default function ThemeProvider({ children }) {
     const root = document.documentElement;
     root.setAttribute('data-theme', next);
     root.setAttribute('data-v3', 'true');
-    root.setAttribute('data-v3-home', 'true');
+    const isHome = typeof window !== 'undefined' && (window.location.pathname === '/' || window.location.pathname === '/index.html');
+    root.setAttribute('data-v3-home', isHome ? 'true' : 'false');
     syncThemeColor(next);
     setThemeState(next);
   }, []);

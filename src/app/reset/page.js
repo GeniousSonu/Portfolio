@@ -46,7 +46,8 @@ export default function ResetPage() {
   };
 
   return (
-    <div
+    <main
+      data-route="/reset"
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -55,7 +56,7 @@ export default function ResetPage() {
         minHeight: '100dvh',
         backgroundColor: 'var(--void, #050505)',
         color: '#f9fafb',
-        fontFamily: 'monospace',
+        fontFamily: 'var(--mono)',
         padding: '24px',
         boxSizing: 'border-box',
       }}
@@ -170,6 +171,6 @@ export default function ResetPage() {
           </Link>
         )}
       </div>
-    </div>
+    </main>
   );
 }

@@ -16,7 +16,7 @@ export default function DesignLabPage() {
   }
 
   return (
-    <main className={styles.labMain}>
+    <main className={styles.labMain} data-route="/design-lab">
       <header className={styles.labHeader}>
         <div className={styles.telemetryTag}>[ STAGE 5 PILOT // DESIGN SYSTEM SPECIMEN ]</div>
         <h1 className={styles.labTitle}>Design Engineering Laboratory</h1>

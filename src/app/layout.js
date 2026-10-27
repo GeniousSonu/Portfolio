@@ -1,6 +1,7 @@
 import './globals.css';
 import './tailwind.css';
 import './v3.css';
+import { fontClassNames } from '@/lib/fonts';
 
 export const viewport = {
   width: 'device-width',
@@ -239,13 +240,21 @@ import FooterV3 from '@/components/v3/home/FooterV3';
 export default function RootLayout({ children }) {
   const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
+  const buildId = process.env.NEXT_PUBLIC_BUILD_ID || 'prod';
+
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" className={`dark ${fontClassNames}`} data-build-id={buildId} suppressHydrationWarning>
       <head>
         <link rel="icon" href="/logo.svg" type="image/svg+xml" />
         <link rel="shortcut icon" href="/logo.svg" type="image/svg+xml" />
         <link rel="manifest" href="/manifest.webmanifest" />
         <meta name="theme-color" content="#05070c" />
+        <script
+          id="portfolio-build-info"
+          dangerouslySetInnerHTML={{
+            __html: `console.info('[portfolio] build: ${buildId}');`,
+          }}
+        />
         <script
           id="v3-theme-bootstrap"
           dangerouslySetInnerHTML={{
@@ -261,12 +270,6 @@ export default function RootLayout({ children }) {
         <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png" />
         <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
         <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM Technical Summary" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@700;800&family=Noto+Sans+Bengali:wght@700;800&family=Noto+Sans+Devanagari:wght@700;800&family=Noto+Sans+JP:wght@700;900&display=swap"
-        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdGraph) }}
