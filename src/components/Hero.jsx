@@ -230,9 +230,9 @@ export default function Hero() {
               <div className="sysinfo-body">
                 <div className="ssh-prompt">
                   <div className="ssh-line"><span className="ssh-prompt-str">operator:~$</span><span className="ssh-cmd">telemetry --status</span></div>
-                  <div className="ssh-line ssh-out">  PATENT: App No. 202431057476 (Granted Jan 2025)</div>
-                  <div className="ssh-line ssh-out">  TITLE: IoT Cold-Chain Tamper-Proof Cryptography</div>
-                  <div className="ssh-line ssh-out">  HARDWARE: Microchip ATECC608B + ESP32-S3 + LoRaWAN</div>
+                  <div className="ssh-line ssh-out">  PATENT: IN 544062 · App No. 202531060002 A (Jul 2025)</div>
+                  <div className="ssh-line ssh-out">  TITLE: Solar IoT Vaccine Preservation System</div>
+                  <div className="ssh-line ssh-out">  HARDWARE: NodeMCU ESP8266 + MQTT + Peltier Cooling</div>
                   <div className="ssh-line ssh-out">  STACK: Next.js 16 · Supabase · Sanity v3 · WebRTC</div>
                   <div className="ssh-line ssh-out">  LOCATION: Kolkata, WB, IN (22.5726° N, 88.3639° E)</div>
                   <div className="ssh-line"><span className="ssh-prompt-str">operator:~$</span><span className="ssh-cmd">whoami</span></div>

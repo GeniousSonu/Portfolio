@@ -4,7 +4,7 @@ import React, { useRef } from 'react';
 import Image from 'next/image';
 import ChapterHeader from '../ChapterHeader';
 import { useChapterReveal } from '../motion';
-import { PROJECTS } from '@/components/Projects';
+import { PROJECTS } from '@/data/projects';
 import { buildCloudinaryUrl } from '@/lib/cloudinaryClient';
 
 function ProjectGlyph({ type }) {

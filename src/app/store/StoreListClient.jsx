@@ -96,6 +96,30 @@ function TechIcon({ type }) {
   }
 }
 
+function ProductVisual({ product, imageUrl, imageAlt }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!imageUrl || failed) {
+    return (
+      <div className={styles.techIconBox}>
+        <TechIcon type={product.icon || 'monitor'} />
+        <span className={styles.techIconLabel}>{product.category || 'Hardware'}</span>
+      </div>
+    );
+  }
+
+  return (
+    <Image
+      src={imageUrl}
+      alt={imageAlt}
+      fill
+      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      className={styles.productImage}
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
 export default function StoreListClient({ initialProducts = [] }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -205,20 +229,12 @@ export default function StoreListClient({ initialProducts = [] }) {
                     <span className={styles.categoryTag}>{product.category}</span>
                   )}
 
-                  {imageUrl ? (
-                    <Image
-                      src={imageUrl}
-                      alt={imageAlt}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      className={styles.productImage}
-                    />
-                  ) : (
-                    <div className={styles.techIconBox}>
-                      <TechIcon type={product.icon || 'monitor'} />
-                      <span className={styles.techIconLabel}>{product.category || 'Hardware'}</span>
-                    </div>
-                  )}
+                  <ProductVisual
+                    key={product._id}
+                    product={product}
+                    imageUrl={imageUrl}
+                    imageAlt={imageAlt}
+                  />
                 </div>
 
                 <div className={styles.cardBody}>

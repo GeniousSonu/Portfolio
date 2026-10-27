@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:tele": "node scripts/dev-telegram-poller.mjs",
-    "build": "node scripts/update-sw-version.mjs && next build --webpack",
+    "build": "node scripts/update-sw-version.mjs && NODE_OPTIONS=--max-old-space-size=4096 next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "lint:style": "stylelint \"src/**/*.module.css\"",

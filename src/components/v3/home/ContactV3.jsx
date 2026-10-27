@@ -192,7 +192,20 @@ export default function ContactV3() {
             <p className="v3-contact-lede">{INTRO}</p>
 
             <Link href="/contact" className="v3-terminal-link" data-v3-sound="confirm">
-              <span aria-hidden="true">⚡</span> Establish Direct Connection Terminal
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                width="15"
+                height="15"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12L13 2Z" />
+              </svg>{' '}
+              Establish Direct Connection Terminal
               <span aria-hidden="true">→</span>
             </Link>
 

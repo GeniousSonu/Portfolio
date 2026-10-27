@@ -21,9 +21,9 @@ const STATS = [
 ];
 
 const TELEMETRY = [
-  ['PATENT', 'App No. 202431057476 (Granted Jan 2025)'],
-  ['TITLE', 'IoT Cold-Chain Tamper-Proof Cryptography'],
-  ['HARDWARE', 'Microchip ATECC608B + ESP32-S3 + LoRaWAN'],
+  ['PATENT', 'IN 544062 · App No. 202531060002 A (Jul 2025)'],
+  ['TITLE', 'Solar IoT Vaccine Preservation System'],
+  ['HARDWARE', 'NodeMCU ESP8266 + MQTT + Peltier Cooling'],
   ['STACK', 'Next.js 16 · Supabase · Sanity v3 · WebRTC'],
   ['LOCATION', 'Kolkata, WB, IN (22.5726° N, 88.3639° E)'],
 ];

@@ -10,11 +10,11 @@ import { FooterLogo, SOCIAL_LINKS } from '@/components/Footer';
 import { NAV_GROUPS, getNavItemsByGroup, FOOTER_LEGAL_ITEMS } from '@/config/navigation';
 
 const SYSTEM_ROWS = [
-  { key: 'uptime', val: '99.9%' },
-  { key: 'kernel', val: '6.8.0-49-generic' },
-  { key: 'load avg', val: '0.42, 0.38, 0.41' },
-  { key: 'processes', val: '247 running' },
+  { key: 'role', val: 'Design Engineer' },
+  { key: 'stack', val: 'Next.js · Node · Linux' },
+  { key: 'patent', val: 'IN 544062 · Granted' },
   { key: 'location', val: 'Kolkata, IN' },
+  { key: 'timezone', val: 'Asia/Kolkata' },
 ];
 
 export default function FooterV3() {

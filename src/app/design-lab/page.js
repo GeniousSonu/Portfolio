@@ -117,8 +117,8 @@ export default function DesignLabPage() {
               Technical Monospace Telemetry (13px / tabular numerals)
             </span>
             <p className={styles.codeTelemetry}>
-              PATENT_APP_NO: 202431057476 // STATUS: GRANTED_2025 // ATECC608B: READY // LATENCY:
-              14.2ms
+              PATENT_APP_NO: 202531060002 A // PATENT_NO: 544062 // STATUS: GRANTED_JUL_2025 //
+              TELEMETRY: MQTT_TLS
             </p>
           </div>
         </div>

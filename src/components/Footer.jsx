@@ -303,11 +303,11 @@ export default function Footer() {
                     </span>
                   </div>
                   {[
-                    { key: 'uptime', val: '99.9%' },
-                    { key: 'kernel', val: '6.8.0-49-generic' },
-                    { key: 'load avg', val: '0.42, 0.38, 0.41' },
-                    { key: 'processes', val: '247 running' },
+                    { key: 'role', val: 'Design Engineer' },
+                    { key: 'stack', val: 'Next.js · Node · Linux' },
+                    { key: 'patent', val: 'IN 544062 · Granted' },
                     { key: 'location', val: 'Kolkata, IN' },
+                    { key: 'timezone', val: 'Asia/Kolkata' },
                   ].map(({ key, val }) => (
                     <div key={key} className="footer-sys-row">
                       <span className="footer-sys-key">{key}</span>

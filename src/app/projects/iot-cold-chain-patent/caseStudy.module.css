@@ -4,7 +4,8 @@
   color: var(--text-primary);
   max-width: 1200px;
   margin: 0 auto;
-  padding: clamp(2rem, 5vw, 4rem) clamp(1.25rem, 4vw, 3rem);
+  padding: calc(var(--nav-height, 72px) + clamp(2rem, 5vw, 4rem)) clamp(1.25rem, 4vw, 3rem)
+    clamp(2rem, 5vw, 4rem);
 }
 
 .backNav {

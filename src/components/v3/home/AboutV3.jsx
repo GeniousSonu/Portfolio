@@ -43,14 +43,14 @@ export default function AboutV3() {
                 <div
                   className="v3-print-composition"
                   role="img"
-                  aria-label="Studio portrait placeholder awaiting the owner's photograph"
+                  aria-label="Studio monogram composition for Sahinur Islam"
                 >
                   <span className="v3-print-sun" aria-hidden="true" />
                   <span className="v3-print-horizon" aria-hidden="true" />
                   <span className="v3-print-thread" aria-hidden="true" />
                   <span className="v3-print-monogram">SI</span>
                 </div>
-                <span className="v3-print-note">Portrait pending</span>
+                <span className="v3-print-note">Kolkata Studio</span>
               </div>
               <figcaption>
                 <span>Sahinur Islam</span>
@@ -141,7 +141,7 @@ export default function AboutV3() {
                 Peltier Cooling
               </h3>
               <p className="v3-patent-meta">
-                Patent No. 202531060002 A · Filed &amp; Granted Jul 4, 2025
+                App No. 202531060002 A · Patent No. 544062 · Granted Jul 4, 2025
               </p>
               <a
                 href="https://drive.google.com/drive/folders/1SXCzHl1WOz646EWjiQHYuhG6BGNPTMfJ?usp=sharing"

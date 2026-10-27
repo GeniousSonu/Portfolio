@@ -8,6 +8,10 @@ export default function CustomCursor() {
     const ring = document.getElementById('cursor-ring');
     if (!cursor || !ring) return;
 
+    const finePointer = window.matchMedia('(pointer: fine)');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (!finePointer.matches || reducedMotion.matches) return;
+
     let mx = -100, my = -100, rx = -100, ry = -100;
     let isVisible = false;
 
@@ -53,6 +57,7 @@ export default function CustomCursor() {
       document.documentElement.removeEventListener('mouseleave', handleMouseLeave);
       document.documentElement.removeEventListener('mouseenter', handleMouseEnter);
       cancelAnimationFrame(animationFrameId);
+      gsap.killTweensOf(cursor);
     };
   }, []);
 
