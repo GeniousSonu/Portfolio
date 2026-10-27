@@ -116,6 +116,8 @@ export default function ProjectsV3() {
                 '--card-bg': theme.bgVar,
                 '--card-accent': theme.accent,
                 '--card-dark-border': theme.darkBorder,
+                '--card-index': index,
+                '--card-total': PROJECTS.length,
               }}
               data-reveal
             >
@@ -207,6 +209,8 @@ export default function ProjectsV3() {
             </article>
           );
         })}
+        {/* Scroll runway ensures the final card (P.07) pins full screen and stacks over P.06 before releasing */}
+        <div className="v3-stacked-cards-runway" aria-hidden="true" />
       </div>
     </section>
   );
