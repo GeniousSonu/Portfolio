@@ -1,6 +1,4 @@
 import React from 'react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import { client } from '@/sanity/client';
 import { PRODUCTS_QUERY } from '@/sanity/queries';
 import { getCuratedGearProducts, AMAZON_AFFILIATE_TAG } from '@/data/gearProducts';
@@ -81,9 +79,7 @@ export default async function StorePage() {
   };
 
   return (
-    <main className={styles.storePage}>
-      <Navbar />
-
+    <main className={styles.storePage} data-route="/store">
       {/* Ambient background glow */}
       <div className={styles.ambientGlow} />
 
@@ -123,8 +119,6 @@ export default async function StorePage() {
         {/* Dynamic Store Filter & Listing */}
         <StoreListClient initialProducts={products || []} />
       </div>
-
-      <Footer />
     </main>
   );
 }

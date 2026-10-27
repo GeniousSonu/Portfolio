@@ -21,7 +21,7 @@ export default function NotFound() {
       <div id="grid-overlay" style={{ opacity: 0.15 }} aria-hidden="true" />
       <div id="scan-line" style={{ opacity: 0.3 }} aria-hidden="true" />
 
-      <main style={{
+      <main data-route="/404" style={{
         zIndex: 10,
         maxWidth: '560px',
         textAlign: 'center',

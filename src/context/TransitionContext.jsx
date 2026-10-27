@@ -1,8 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback, startTransition } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import PageTransitionWaveform from '@/components/PageTransitionWaveform';
+import navState from '@/lib/navState';
 
 const TransitionContext = createContext(null);
 
@@ -15,12 +16,11 @@ export function TransitionProvider({ children }) {
   const [announcement, setAnnouncement] = useState('');
 
   // Refs for tracking in-flight transitions and timeouts
-  const activeTransitionRef = useRef(null);
   const activeControllerRef = useRef(null);
-  const transitionResolverRef = useRef(null);
   const activeTimeoutRef = useRef(null);
   const phaseTimersRef = useRef([]);
   const lastNavRef = useRef({ href: '', time: 0 });
+  const isNavigatingRef = useRef(false);
 
   const clearPhaseTimers = useCallback(() => {
     phaseTimersRef.current.forEach((id) => clearTimeout(id));
@@ -48,42 +48,71 @@ export function TransitionProvider({ children }) {
     };
   }, []);
 
-  // When pathname changes, settle pending transition, move focus, and announce new title
+  // When pathname changes, wait 2 animation frames to ensure new page has painted, then reveal and reset scroll
   useEffect(() => {
-    if (transitionResolverRef.current) {
-      transitionResolverRef.current();
-      transitionResolverRef.current = null;
-    }
     if (activeTimeoutRef.current) {
       clearTimeout(activeTimeoutRef.current);
       activeTimeoutRef.current = null;
     }
 
-    // Announce route change to screen readers
-    const pageTitle = document.title || 'Page';
-    setAnnouncement(`Navigated to ${pageTitle}`);
+    // Only process transition settle if we were actively transitioning
+    if (isNavigatingRef.current) {
+      isNavigatingRef.current = false;
 
-    // Accessibility: Move focus to main landmark or h1
-    setTimeout(() => {
-      const mainEl = document.querySelector('main') || document.querySelector('h1');
-      if (mainEl) {
-        if (!mainEl.hasAttribute('tabindex')) {
-          mainEl.setAttribute('tabindex', '-1');
-        }
-        mainEl.focus({ preventScroll: true });
+      // Wait 2 animation frames for browser paint of destination DOM
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          // Reset scroll strictly AFTER the new route has mounted and painted
+          if (navState.lenis) {
+            try {
+              navState.lenis.scrollTo(0, { immediate: true });
+            } catch {}
+          } else {
+            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+          }
+
+          const shell = document.querySelector('.page-transition-shell');
+          if (shell) {
+            shell.classList.remove('transition-out');
+            shell.classList.add('transition-in');
+          }
+
+          setTransitionPhase('fade-in');
+
+          // Announce route change to screen readers
+          const pageTitle = document.title || 'Page';
+          setAnnouncement(`Navigated to ${pageTitle}`);
+
+          // Accessibility: Move focus to main landmark or h1
+          const mainEl = document.querySelector('main') || document.querySelector('h1');
+          if (mainEl) {
+            if (!mainEl.hasAttribute('tabindex')) {
+              mainEl.setAttribute('tabindex', '-1');
+            }
+            mainEl.focus({ preventScroll: true });
+          }
+
+          const settleTimer = setTimeout(() => {
+            if (shell) {
+              shell.classList.remove('transition-in', 'transition-out');
+            }
+            setTransitionStatus('idle');
+            setTransitionPhase('idle');
+            setWaveformActive(false);
+          }, 140);
+          phaseTimersRef.current.push(settleTimer);
+        });
+      });
+    } else {
+      // Direct load or browser back/forward without transitionNavigate
+      const shell = document.querySelector('.page-transition-shell');
+      if (shell) {
+        shell.classList.remove('transition-out', 'transition-in');
       }
-    }, 60);
-
-    setTransitionStatus('completed');
-    setTransitionPhase('fade-in');
-
-    const settleTimer = setTimeout(() => {
       setTransitionStatus('idle');
       setTransitionPhase('idle');
       setWaveformActive(false);
-    }, 180);
-
-    return () => clearTimeout(settleTimer);
+    }
   }, [pathname]);
 
   const transitionNavigate = useCallback((href) => {
@@ -120,21 +149,11 @@ export function TransitionProvider({ children }) {
     }
     lastNavRef.current = { href, time: now };
 
-    // 2. Rapid navigation interruption: cleanly abort prior in-flight transition
+    // 2. Rapid navigation interruption: cleanly abort prior in-flight timers
     clearPhaseTimers();
     if (activeTimeoutRef.current) {
       clearTimeout(activeTimeoutRef.current);
       activeTimeoutRef.current = null;
-    }
-    if (transitionResolverRef.current) {
-      transitionResolverRef.current();
-      transitionResolverRef.current = null;
-    }
-    if (activeTransitionRef.current) {
-      try {
-        activeTransitionRef.current.skipTransition?.();
-      } catch {}
-      activeTransitionRef.current = null;
     }
     if (activeControllerRef.current) {
       activeControllerRef.current.abort();
@@ -153,83 +172,47 @@ export function TransitionProvider({ children }) {
       setTransitionStatus('completed');
       setTransitionPhase('idle');
       setWaveformActive(false);
-      router.push(href);
+      startTransition(() => {
+        router.push(href);
+      });
       return;
     }
 
-    // 4. Waveform + Fade Sequence (380ms total duration, 450ms hard safety ceiling)
+    // 4. Waveform + Fade Sequence: Keep old page visible while fading out under waveform
+    isNavigatingRef.current = true;
     setTransitionStatus('transitioning');
     setWaveformActive(true);
     setTransitionPhase('fade-out');
 
-    // Update root classes for CSS fade coordination
     const shell = document.querySelector('.page-transition-shell');
     if (shell) {
       shell.classList.add('transition-out');
       shell.classList.remove('transition-in');
     }
 
-    // 100ms: Waveform sweep left to right across center
+    // 80ms: Waveform sweeps across center
     const sweepTimer = setTimeout(() => {
       if (controller.signal.aborted) return;
       setTransitionPhase('sweep');
-    }, 100);
+    }, 80);
     phaseTimersRef.current.push(sweepTimer);
 
-    // 200ms: Route execution & new content fade-in
-    const navExecuteTimer = setTimeout(() => {
-      if (controller.signal.aborted) return;
-      setTransitionPhase('fade-in');
+    // Start route transition inside React transition (App Router asynchronous queue)
+    startTransition(() => {
+      router.push(href);
+    });
 
-      // Native View Transitions check
-      const supportsViewTransitions = typeof document !== 'undefined' && 'startViewTransition' in document;
-      if (supportsViewTransitions) {
-        try {
-          const transition = document.startViewTransition(() => {
-            router.push(href);
-          });
-          activeTransitionRef.current = transition;
-          transition.finished
-            ?.then(() => {
-              activeTransitionRef.current = null;
-            })
-            ?.catch(() => {
-              activeTransitionRef.current = null;
-            });
-        } catch {
-          router.push(href);
-        }
-      } else {
-        router.push(href);
-      }
-
-      if (shell) {
-        shell.classList.remove('transition-out');
-        shell.classList.add('transition-in');
-      }
-    }, 200);
-    phaseTimersRef.current.push(navExecuteTimer);
-
-    // 380ms: Final completion and waveform removal
-    const completeTimer = setTimeout(() => {
-      if (controller.signal.aborted) return;
-      setWaveformActive(false);
-      setTransitionPhase('idle');
-      setTransitionStatus('completed');
-      if (shell) {
-        shell.classList.remove('transition-in', 'transition-out');
-      }
-    }, 380);
-    phaseTimersRef.current.push(completeTimer);
-
-    // 450ms: Hard safety timeout (guarantees interactivity never blocked)
+    // Hard safety timeout guard (450ms): if pathname doesn't update, recover cleanly
     const timeoutId = setTimeout(() => {
-      clearPhaseTimers();
-      setWaveformActive(false);
-      setTransitionPhase('idle');
-      setTransitionStatus('completed');
-      if (shell) {
-        shell.classList.remove('transition-in', 'transition-out');
+      if (isNavigatingRef.current) {
+        isNavigatingRef.current = false;
+        clearPhaseTimers();
+        if (shell) {
+          shell.classList.remove('transition-out', 'transition-in');
+        }
+        setWaveformActive(false);
+        setTransitionPhase('idle');
+        setTransitionStatus('idle');
       }
     }, 450);
     activeTimeoutRef.current = timeoutId;

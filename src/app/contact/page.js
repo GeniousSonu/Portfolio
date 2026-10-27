@@ -1,6 +1,4 @@
 import React from 'react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import ContactView from './ContactView';
 
 export const metadata = {
@@ -28,11 +26,5 @@ export const metadata = {
 };
 
 export default function ContactPage() {
-  return (
-    <>
-      <Navbar />
-      <ContactView />
-      <Footer />
-    </>
-  );
+  return <ContactView />;
 }

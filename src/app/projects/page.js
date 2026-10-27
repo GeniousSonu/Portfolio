@@ -1,7 +1,5 @@
 import React from 'react';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import { PROJECTS } from '@/data/projects';
 import styles from './projects.module.css';
 
@@ -16,9 +14,7 @@ export default function ProjectsPage() {
   const ordered = patent ? [patent, ...PROJECTS.filter((project) => project !== patent)] : PROJECTS;
 
   return (
-    <>
-      <Navbar />
-      <main className={styles.pageContainer}>
+    <main className={styles.pageContainer} data-route="/projects">
         <div className={styles.ambientGlow} aria-hidden="true" />
         <div className={styles.inner}>
           <header className={styles.header}>
@@ -98,7 +94,5 @@ export default function ProjectsPage() {
           </div>
         </div>
       </main>
-      <Footer />
-    </>
   );
 }

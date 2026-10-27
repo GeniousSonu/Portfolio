@@ -1,8 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import { PLUGIN_CONFIG, ALL_PLUGINS } from '@/config/plugin';
 import styles from '../../plugin.module.css';
 
@@ -49,9 +47,8 @@ export default async function PluginSupportPage({ params }) {
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.ambientGlow} aria-hidden="true" />
-      <Navbar />
 
-      <main className={styles.container}>
+      <main className={styles.container} data-route="/plugin/[slug]/support">
         {/* Breadcrumb Navigation */}
         <nav className={styles.breadcrumbs} aria-label="Breadcrumb">
           <Link href="/" className={styles.breadcrumbLink}>
@@ -277,8 +274,6 @@ export default async function PluginSupportPage({ params }) {
           </ol>
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 }

@@ -122,7 +122,7 @@ export default function SpaceLanding() {
   };
 
   return (
-    <main className={styles.container}>
+    <main className={styles.container} data-route="/space">
       <div className={styles.inner}>
         {/* Hero Section */}
         <section className={styles.landingHero}>

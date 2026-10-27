@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 
 export default function ConfessionPage() {
   const [note, setNote] = useState('');
@@ -51,9 +49,7 @@ export default function ConfessionPage() {
   };
 
   return (
-    <>
-      <Navbar />
-      <main className="site-container" style={{ paddingTop: '130px', paddingBottom: '80px', minHeight: '85vh' }}>
+    <main className="site-container" data-route="/confession" style={{ paddingTop: '130px', paddingBottom: '80px', minHeight: '85vh' }}>
         <div style={{ maxWidth: '680px', margin: '0 auto' }}>
           {/* Header Badge */}
           <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
@@ -265,7 +261,5 @@ export default function ConfessionPage() {
           </div>
         </div>
       </main>
-      <Footer />
-    </>
   );
 }

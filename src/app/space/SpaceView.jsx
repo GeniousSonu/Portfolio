@@ -645,10 +645,12 @@ export default function SpaceView({ roomId = null }) {
     return `${Math.floor(diffHour / 24)}d ago`;
   };
 
+  const currentRoute = roomId ? '/space/[roomId]' : '/space';
+
   // ── Render Loading State (Prevents flash before room check completes) ──
   if (roomId && loading) {
     return (
-      <main className={styles.container}>
+      <main className={styles.container} data-route={currentRoute}>
         <div className={styles.inner}>
           <div className={styles.roomLoadingSkeleton}>
             <div className={styles.loadingSpinner} />
@@ -662,7 +664,7 @@ export default function SpaceView({ roomId = null }) {
   // ── Render 404 Not Found State ──
   if (isNotFoundRoom) {
     return (
-      <main className={styles.container}>
+      <main className={styles.container} data-route={currentRoute}>
         <div className={styles.inner}>
           <div className={styles.expiredCard}>
             <div className={styles.expiredIcon} aria-hidden="true">🔍</div>
@@ -696,7 +698,7 @@ export default function SpaceView({ roomId = null }) {
   // ── Render 410 Expired State ──
   if (isExpiredRoom) {
     return (
-      <main className={styles.container}>
+      <main className={styles.container} data-route={currentRoute}>
         <div className={styles.inner}>
           <div className={styles.expiredCard}>
             <div className={styles.expiredIcon} aria-hidden="true">⏳</div>
@@ -730,7 +732,7 @@ export default function SpaceView({ roomId = null }) {
   const isRoomMode = Boolean(roomId);
 
   return (
-    <main className={styles.container}>
+    <main className={styles.container} data-route={currentRoute}>
       <div className={styles.inner}>
         {/* ─── Back Navigation (if in a room) ─── */}
         {isRoomMode && (

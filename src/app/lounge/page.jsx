@@ -1,6 +1,4 @@
 import React from 'react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import LoungeLanding from './LoungeLanding';
 
 export const metadata = {
@@ -22,11 +20,5 @@ export const metadata = {
 };
 
 export default function LoungePage() {
-  return (
-    <>
-      <Navbar />
-      <LoungeLanding />
-      <Footer />
-    </>
-  );
+  return <LoungeLanding />;
 }

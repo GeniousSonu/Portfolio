@@ -1,8 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import { PLUGIN_CONFIG, ALL_PLUGINS } from '@/config/plugin';
 import { DOCS_TOPICS } from '@/data/pluginDocs';
 import { SOP_SECTIONS, PLUGIN_TASKS } from '@/data/pluginTasks';
@@ -85,9 +83,8 @@ export default async function PluginDocsTopicPage({ params }) {
   return (
     <div className={styles.docsWrapper}>
       <div className={styles.ambientGlow} aria-hidden="true" />
-      <Navbar />
 
-      <main className={styles.container}>
+      <main className={styles.container} data-route="/plugin/[slug]/docs/[topic]">
         {/* Breadcrumb Navigation */}
         <nav className={styles.breadcrumbs} aria-label="Breadcrumb">
           <Link href="/" className={styles.breadcrumbLink}>
@@ -527,8 +524,6 @@ export default async function PluginDocsTopicPage({ params }) {
           </article>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

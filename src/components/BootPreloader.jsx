@@ -7,13 +7,13 @@ import {
   BOOT_EVENTS,
   BOOT_TRANSITIONS,
   BOOT_TIMING,
+  BOOT_STORAGE,
   TERMINAL_CONTENT,
   BOOT_GREETINGS,
 } from '@/config/boot';
 import { bootFontVariables } from '@/lib/bootFonts';
 
 // Track already played in this document in-memory (NOT in sessionStorage/localStorage)
-// Plays on every full document load or reload, but NEVER on client route transitions.
 let hasBootedInThisDocument = false;
 
 /**
@@ -105,6 +105,9 @@ export default function BootPreloader() {
     if (hasFinishedRef.current) return;
     hasFinishedRef.current = true;
     hasBootedInThisDocument = true;
+    try {
+      localStorage.setItem(BOOT_STORAGE.key, String(Date.now()));
+    } catch {}
     clearAllTimers();
     releaseScrollLock();
 
@@ -132,25 +135,58 @@ export default function BootPreloader() {
     registerTimer(finishBoot, 250);
   }, [clearAllTimers, finishBoot, registerTimer]);
 
-  // Main lifecycle effect
+  // Main lifecycle effect (SITEWIDE-UNIFY-001 Step 6)
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // 1. Inspect navigation type: play for 'navigate', 'reload', 'prerender'
-    // Do NOT play for 'back_forward' or bfcache restore
+    const path = window.location.pathname;
+    const isHome = path === '/' || path === '/index.html';
+    const isReplay = window.location.search.includes('intro') || window.location.hash === '#intro';
+
+    // Rule 1: Show ONLY on full document load of Home route (or explicit ?intro replay)
+    if (!isHome && !isReplay) {
+      finishBoot();
+      return;
+    }
+
+    // Rule 2: Early skip flag from inline script (or already booted in this doc)
+    if ((window.__skipBootPreloader || document.documentElement.classList.contains('boot-skip') || hasBootedInThisDocument) && !isReplay) {
+      finishBoot();
+      return;
+    }
+
+    // Rule 3: Inspect navigation type: do NOT play on 'back_forward' or bfcache restore
     const navEntries = performance.getEntriesByType?.('navigation');
     const navEntry = navEntries && navEntries[0];
     const navType = navEntry ? navEntry.type : 'navigate';
     const isBackForward = navType === 'back_forward';
 
-    if (isBackForward || hasBootedInThisDocument) {
+    if (isBackForward && !isReplay) {
       finishBoot();
       return;
     }
 
+    // Rule 4: Timestamp check in safe storage (12 hours TTL)
+    if (!isReplay) {
+      try {
+        const raw = localStorage.getItem(BOOT_STORAGE.key);
+        if (raw) {
+          const ts = parseInt(raw, 10);
+          if (!isNaN(ts) && (Date.now() - ts) < BOOT_STORAGE.durationMs) {
+            finishBoot();
+            return;
+          }
+        }
+      } catch {
+        // Safe skip if storage is corrupted or unavailable
+        finishBoot();
+        return;
+      }
+    }
+
     hasBootedInThisDocument = true;
 
-    // 2. bfcache protection (pageshow with event.persisted === true)
+    // bfcache protection (pageshow with event.persisted === true)
     const handlePageShow = (e) => {
       if (e.persisted) {
         finishBoot();

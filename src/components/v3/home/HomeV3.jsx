@@ -1,9 +1,6 @@
 'use client';
 
 import React from 'react';
-import Navbar from '@/components/Navbar';
-import ThemeProvider from '../ThemeProvider';
-import SoundProvider from '../SoundProvider';
 import ChapterRail from '../ChapterRail';
 import StudioDock from '../StudioDock';
 import HeroV3 from './HeroV3';
@@ -16,37 +13,29 @@ import ReachV3 from './ReachV3';
 import BlogV3 from './BlogV3';
 import ContactV3 from './ContactV3';
 import CodaV3 from './CodaV3';
-import FooterV3 from './FooterV3';
 
 export default function HomeV3() {
   return (
-    <ThemeProvider>
-      <SoundProvider>
-        <div className="v3" data-v3-page="home">
-          <a className="v3-skip" href="#main-content">
-            Skip to content
-          </a>
+    <div className="v3" data-v3-page="home">
+      <a className="v3-skip" href="#main-content">
+        Skip to content
+      </a>
 
-          <Navbar />
-          <ChapterRail />
-          <StudioDock />
+      <ChapterRail />
+      <StudioDock />
 
-          <main id="main-content" className="v3-main">
-            <HeroV3 />
-            <AboutV3 />
-            <ExperienceV3 />
-            <ProjectsV3 />
-            <SkillsV3 />
-            <CertificationsV3 />
-            <ReachV3 />
-            <BlogV3 />
-            <ContactV3 />
-            <CodaV3 />
-          </main>
-
-          <FooterV3 />
-        </div>
-      </SoundProvider>
-    </ThemeProvider>
+      <main id="main-content" className="v3-main" data-route="/">
+        <HeroV3 />
+        <AboutV3 />
+        <ExperienceV3 />
+        <ProjectsV3 />
+        <SkillsV3 />
+        <CertificationsV3 />
+        <ReachV3 />
+        <BlogV3 />
+        <ContactV3 />
+        <CodaV3 />
+      </main>
+    </div>
   );
 }

@@ -1,8 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import { PLUGIN_CONFIG, ALL_PLUGINS } from '@/config/plugin';
 import { getWordPressOrgPluginData } from '@/lib/wporg';
 import styles from '../plugin.module.css';
@@ -119,9 +117,8 @@ export default async function PluginLandingPage({ params }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className={styles.ambientGlow} aria-hidden="true" />
-      <Navbar />
 
-      <main className={styles.container}>
+      <main className={styles.container} data-route="/plugin/[slug]">
         {/* Breadcrumb Navigation */}
         <nav className={styles.breadcrumbs} aria-label="Breadcrumb">
           <Link href="/" className={styles.breadcrumbLink}>
@@ -676,8 +673,6 @@ export default async function PluginLandingPage({ params }) {
           </div>
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 }

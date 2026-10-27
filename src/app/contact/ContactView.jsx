@@ -412,7 +412,7 @@ export default function ContactView() {
       <div className={styles.ambientGlowTop} aria-hidden="true" />
       <div className={styles.ambientGlowBottom} aria-hidden="true" />
 
-      <main className={styles.mainContent}>
+      <main className={styles.mainContent} data-route="/contact">
         {/* Header */}
         <header className={styles.headerSection}>
           <div className={styles.breadcrumbBar}>

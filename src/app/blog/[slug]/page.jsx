@@ -2,8 +2,6 @@ import React from 'react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import PortableTextRenderer from '@/components/PortableTextRenderer';
 import { client } from '@/sanity/client';
 import { getOptimizedImageUrl } from '@/sanity/image';
@@ -115,9 +113,8 @@ export default async function BlogPostPage({ params }) {
     .replace(/&/g, '\\u0026');
 
   return (
-    <article className={styles.articlePage}>
+    <main className={styles.articlePage} data-route="/blog/[slug]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd }} />
-      <Navbar />
 
       {/* Ambient background glow */}
       <div className={styles.ambientGlow} />
@@ -256,8 +253,6 @@ export default async function BlogPostPage({ params }) {
           <ShareButtons title={post.title} slug={slug} />
         </footer>
       </div>
-
-      <Footer />
-    </article>
+    </main>
   );
 }

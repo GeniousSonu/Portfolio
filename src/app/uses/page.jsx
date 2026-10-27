@@ -1,8 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import { client } from '@/sanity/client';
 import { USES_PRODUCTS_QUERY } from '@/sanity/queries';
 import { getOptimizedImageUrl } from '@/sanity/image';
@@ -147,9 +145,8 @@ export default async function UsesPage() {
   return (
     <div className={styles.pageContainer}>
       <div className={styles.ambientGlow} aria-hidden="true" />
-      <Navbar />
 
-      <main className={styles.inner}>
+      <main className={styles.inner} data-route="/uses">
         <header className={styles.header}>
           <div className={styles.eyebrow}>
             <span className={styles.pulseDot} aria-hidden="true" />
@@ -307,8 +304,6 @@ export default async function UsesPage() {
           </section>
         )}
       </main>
-
-      <Footer />
     </div>
   );
 }

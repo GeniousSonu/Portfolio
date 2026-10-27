@@ -13,7 +13,7 @@ export const metadata = buildMetadata({
 
 export default function AboutPage() {
   return (
-    <PageShell>
+    <PageShell dataRoute="/about">
       <PageHeader
         eyebrow="[ BIOGRAPHICAL DOSSIER · SPEC 01 ]"
         title="Engineering at the intersection of systems, code & craft."

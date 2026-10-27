@@ -34,7 +34,7 @@ const CASE_STUDIES = [
 
 export default function WefikPage() {
   return (
-    <PageShell>
+    <PageShell dataRoute="/wefik">
       <PageHeader
         eyebrow="[ VENTURE DOSSIER · CO-FOUNDER ]"
         title="WEFIK — Web Era for Innovation & Knowledge"

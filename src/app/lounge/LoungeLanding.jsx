@@ -300,7 +300,7 @@ export default function LoungeLanding() {
         </div>
       )}
 
-      <main className={styles.landingMain}>
+      <main className={styles.landingMain} data-route="/lounge">
         <header className={styles.headerSection}>
           <div className={styles.badge}>
             <span className={styles.beaconDot} />

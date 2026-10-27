@@ -126,3 +126,14 @@ export const BOOT_TIMING = Object.freeze({
   reducedMotionStaticMs: 900,
   reducedMotionFadeMs: 200,
 });
+
+/**
+ * Boot Preloader Storage Gate Configuration (TASK SITEWIDE-UNIFY-001 Step 6)
+ * - Single configuration value for window duration (default 12 hours)
+ * - Versioned storage key
+ */
+export const BOOT_STORAGE = Object.freeze({
+  key: 'sks_boot_seen_v1',
+  durationMs: 12 * 60 * 60 * 1000, // 12 hours
+});
+

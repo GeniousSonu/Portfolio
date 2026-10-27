@@ -145,7 +145,7 @@ const VAULT_CATEGORIES = [
 
 export default function VaultPage() {
   return (
-    <PageShell>
+    <PageShell dataRoute="/vault">
       <PageHeader
         eyebrow="[ CULTURAL REPOSITORY · ARCHIVE ]"
         title="The Vault — Curated Media & Knowledge"

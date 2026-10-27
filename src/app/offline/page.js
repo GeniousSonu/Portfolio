@@ -13,7 +13,7 @@ export const metadata = buildMetadata({
 
 export default function OfflinePage() {
   return (
-    <PageShell>
+    <PageShell dataRoute="/offline">
       <PageHeader
         eyebrow="[ PWA TELEMETRY · DISCONNECTED ]"
         title="Offline Mode Active"

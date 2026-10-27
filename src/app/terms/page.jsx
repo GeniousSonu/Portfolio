@@ -1,7 +1,5 @@
 import React from 'react';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import styles from '../legal.module.css';
 
 export const metadata = {
@@ -98,8 +96,7 @@ export default function TermsPage() {
   ];
 
   return (
-    <main className={styles.legalPage}>
-      <Navbar />
+    <main className={styles.legalPage} data-route="/terms">
       <div className={styles.ambientGlow} />
 
       <script
@@ -407,8 +404,6 @@ export default function TermsPage() {
           </Link>
         </div>
       </div>
-
-      <Footer />
     </main>
   );
 }

@@ -1,7 +1,5 @@
 import React from 'react';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import { client } from '@/sanity/client';
 import { CHANGELOG_QUERY } from '@/sanity/queries';
 import { PortableText } from '@portabletext/react';
@@ -33,9 +31,8 @@ export default async function ChangelogPage() {
   return (
     <div className={styles.pageContainer}>
       <div className={styles.ambientGlow} aria-hidden="true" />
-      <Navbar />
 
-      <main className={styles.inner}>
+      <main className={styles.inner} data-route="/changelog">
         <header className={styles.header}>
           <div className={styles.eyebrow}>
             <span className={styles.pulseDot} aria-hidden="true" />
@@ -108,8 +105,6 @@ export default async function ChangelogPage() {
           </div>
         )}
       </main>
-
-      <Footer />
     </div>
   );
 }

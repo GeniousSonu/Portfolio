@@ -1,6 +1,4 @@
 import React from 'react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import { getServiceSupabase } from '@/lib/supabaseServer';
 import styles from './status.module.css';
 
@@ -149,9 +147,8 @@ export default async function StatusPage() {
   return (
     <div className={styles.pageContainer}>
       <div className={styles.ambientGlow} aria-hidden="true" />
-      <Navbar />
 
-      <main className={styles.inner}>
+      <main className={styles.inner} data-route="/status">
         <header className={styles.header}>
           <div className={styles.eyebrow}>
             <span className={styles.pulseDot} aria-hidden="true" />
@@ -234,8 +231,6 @@ export default async function StatusPage() {
           </p>
         </aside>
       </main>
-
-      <Footer />
     </div>
   );
 }

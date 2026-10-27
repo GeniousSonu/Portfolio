@@ -8,11 +8,11 @@ import styles from './layout.module.css';
  * Universal Page Shell (React Server Component)
  * Provides consistent navbar, main content boundaries, and footer wrapper.
  */
-export function PageShell({ children, showNavbar = true, showFooter = true, className = '' }) {
+export function PageShell({ children, showNavbar = false, showFooter = false, className = '', dataRoute }) {
   return (
     <div className={`${styles.shell} ${className}`.trim()}>
       {showNavbar && <Navbar />}
-      <main className={styles.mainContent}>
+      <main className={styles.mainContent} data-route={dataRoute}>
         {children}
       </main>
       {showFooter && <Footer />}

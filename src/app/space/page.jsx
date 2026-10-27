@@ -1,6 +1,4 @@
 import React from 'react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import SpaceLanding from './SpaceLanding';
 import SpaceView from './SpaceView';
 
@@ -35,11 +33,5 @@ export default async function SpacePage({ searchParams }) {
   const { mode } = (await searchParams) || {};
   const isSyncLanding = mode === 'sync';
 
-  return (
-    <>
-      <Navbar />
-      {isSyncLanding ? <SpaceLanding /> : <SpaceView />}
-      <Footer />
-    </>
-  );
+  return isSyncLanding ? <SpaceLanding /> : <SpaceView />;
 }

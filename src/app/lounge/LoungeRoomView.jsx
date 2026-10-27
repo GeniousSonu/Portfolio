@@ -1023,7 +1023,7 @@ export default function LoungeRoomView({ roomId }) {
     return (
       <div className={styles.pageContainer}>
         <LoungeParticleCanvas />
-        <main className={styles.landingMain} style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <main className={styles.landingMain} data-route="/lounge/[roomId]" style={{ justifyContent: 'center', alignItems: 'center' }}>
           <div className={styles.duplicateTabCard}>
             <div className={styles.duplicateTabIcon}>📑</div>
             <h2 className={styles.cardTitle}>You&apos;re Already in this Room</h2>
@@ -1078,7 +1078,7 @@ export default function LoungeRoomView({ roomId }) {
     return (
       <div className={styles.pageContainer}>
         <LoungeParticleCanvas />
-        <main className={styles.landingMain} style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <main className={styles.landingMain} data-route="/lounge/[roomId]" style={{ justifyContent: 'center', alignItems: 'center' }}>
           <div className={styles.card} style={{ maxWidth: 520, textAlign: 'center', alignItems: 'center' }}>
             <div className={styles.cardIcon} style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#f87171' }}>
               ✕
@@ -1258,7 +1258,7 @@ export default function LoungeRoomView({ roomId }) {
         </div>
       )}
 
-      <main className={styles.roomMain}>
+      <main className={styles.roomMain} data-route="/lounge/[roomId]">
         {/* Room Top Bar Controls */}
         <header className={styles.roomTopBar}>
           <div className={styles.roomIdentity}>

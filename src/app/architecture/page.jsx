@@ -1,6 +1,4 @@
 import React from 'react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import styles from './architecture.module.css';
 
 export const metadata = {
@@ -50,9 +48,8 @@ export default function ArchitecturePage() {
   return (
     <div className={styles.pageContainer}>
       <div className={styles.ambientGlow} aria-hidden="true" />
-      <Navbar />
 
-      <main className={styles.inner}>
+      <main className={styles.inner} data-route="/architecture">
         <header className={styles.header}>
           <div className={styles.eyebrow}>
             <span className={styles.pulseDot} aria-hidden="true" />
@@ -258,8 +255,6 @@ export default function ArchitecturePage() {
           </article>
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 }

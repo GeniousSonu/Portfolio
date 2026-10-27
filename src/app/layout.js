@@ -231,6 +231,10 @@ import SiteMenuModal from '@/components/SiteMenuModal';
 import BootPreloader from '@/components/BootPreloader';
 import LoadingBar from '@/components/LoadingBar';
 import SelfHealInit from '@/components/SelfHealInit';
+import ThemeProvider from '@/components/v3/ThemeProvider';
+import SoundProvider from '@/components/v3/SoundProvider';
+import Navbar from '@/components/Navbar';
+import FooterV3 from '@/components/v3/home/FooterV3';
 
 export default function RootLayout({ children }) {
   const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
@@ -245,7 +249,7 @@ export default function RootLayout({ children }) {
         <script
           id="v3-theme-bootstrap"
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var root=document.documentElement;var path=location.pathname;var isHome=path==='/'||path==='/index.html';if(!isHome){return;}var stored=localStorage.getItem('v3-theme');var theme=stored==='light'||stored==='dark'?stored:(window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');root.setAttribute('data-theme',theme);root.setAttribute('data-v3-home','true');var color=theme==='light'?'#F4EFE4':'#070B14';var metas=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<metas.length;i++){metas[i].setAttribute('content',color);}}catch(e){}})();`,
+            __html: `(function(){try{var root=document.documentElement;var path=location.pathname;var search=location.search;var isHome=path==='/'||path==='/index.html';var isReplay=search.indexOf('intro')!==-1||location.hash==='#intro';var stored=localStorage.getItem('v3-theme');var theme=stored==='light'||stored==='dark'?stored:(window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');root.setAttribute('data-theme',theme);root.setAttribute('data-v3','true');root.setAttribute('data-v3-home',isHome?'true':'false');var color=theme==='light'?'#F4EFE4':'#070B14';var metas=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<metas.length;i++){metas[i].setAttribute('content',color);}if(!isHome&&!isReplay){root.classList.add('boot-skip');window.__skipBootPreloader=true;}else if(!isReplay){try{var raw=localStorage.getItem('sks_boot_seen_v1');if(raw){var ts=parseInt(raw,10);if(!isNaN(ts)&&(Date.now()-ts)<43200000){root.classList.add('boot-skip');window.__skipBootPreloader=true;}}}catch(err){root.classList.add('boot-skip');window.__skipBootPreloader=true;}}}catch(e){try{document.documentElement.classList.add('boot-skip');window.__skipBootPreloader=true;}catch(_){}}})();`,
           }}
         />
         <meta name="mobile-web-app-capable" content="yes" />
@@ -403,26 +407,32 @@ export default function RootLayout({ children }) {
       </head>
       <body suppressHydrationWarning>
         <SelfHealInit />
-        <OverlayProvider>
-          <TransitionProvider>
-            <PlaygroundProvider>
-              <LoadingBar />
-              <BootPreloader />
-              <SmoothScrollProvider />
-              <PWARegistration />
-              <UserPreferences />
-              <CustomCursor />
-              <div className="page-transition-shell">{children}</div>
-              <ConsentAnalyticsGate />
-              <SiteVisitTracker />
-              <CookieConsentBanner />
-              <MobileBottomCTA />
-              <ChatbotWidget />
-              <CommandPalette />
-              <SiteMenuModal />
-            </PlaygroundProvider>
-          </TransitionProvider>
-        </OverlayProvider>
+        <ThemeProvider>
+          <SoundProvider>
+            <OverlayProvider>
+              <TransitionProvider>
+                <PlaygroundProvider>
+                  <LoadingBar />
+                  <BootPreloader />
+                  <SmoothScrollProvider />
+                  <PWARegistration />
+                  <UserPreferences />
+                  <CustomCursor />
+                  <Navbar />
+                  <div className="page-transition-shell">{children}</div>
+                  <FooterV3 />
+                  <ConsentAnalyticsGate />
+                  <SiteVisitTracker />
+                  <CookieConsentBanner />
+                  <MobileBottomCTA />
+                  <ChatbotWidget />
+                  <CommandPalette />
+                  <SiteMenuModal />
+                </PlaygroundProvider>
+              </TransitionProvider>
+            </OverlayProvider>
+          </SoundProvider>
+        </ThemeProvider>
         {/* Google Tag (detected by Google Tag Assistant & Analytics on page load) */}
         {gaId && <GoogleAnalytics gaId={gaId} />}
       </body>

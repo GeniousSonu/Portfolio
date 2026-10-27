@@ -51,6 +51,7 @@ export default function ThemeProvider({ children }) {
   const applyTheme = useCallback((next) => {
     const root = document.documentElement;
     root.setAttribute('data-theme', next);
+    root.setAttribute('data-v3', 'true');
     root.setAttribute('data-v3-home', 'true');
     syncThemeColor(next);
     setThemeState(next);
@@ -73,9 +74,6 @@ export default function ThemeProvider({ children }) {
       clearTimeout(veilTimerRef.current);
       const root = document.documentElement;
       root.classList.remove('v3-theme-transition');
-      root.removeAttribute('data-v3-home');
-      root.setAttribute('data-theme', 'dark');
-      syncThemeColor('dark');
     };
   }, [applyTheme]);
 

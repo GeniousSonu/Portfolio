@@ -13,7 +13,7 @@ export const metadata = buildMetadata({
 
 export default function WikiPage() {
   return (
-    <PageShell>
+    <PageShell dataRoute="/wiki">
       <PageHeader
         eyebrow="[ DIGITAL GARDEN · KNOWLEDGE BASE ]"
         title="Personal Wiki & Systems Knowledge Base"

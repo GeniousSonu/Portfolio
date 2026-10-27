@@ -1,6 +1,4 @@
 import React from 'react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import SpaceView from '../SpaceView';
 
 export const dynamic = 'force-dynamic';
@@ -27,11 +25,5 @@ export async function generateMetadata({ params }) {
 export default async function SpaceRoomPage({ params }) {
   const { roomId } = await params;
 
-  return (
-    <>
-      <Navbar />
-      <SpaceView roomId={roomId} />
-      <Footer />
-    </>
-  );
+  return <SpaceView roomId={roomId} />;
 }

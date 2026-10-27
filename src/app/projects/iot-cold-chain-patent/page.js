@@ -1,7 +1,5 @@
 import React from 'react';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import styles from './caseStudy.module.css';
 
 export const metadata = {
@@ -15,9 +13,7 @@ const PATENT_DOCUMENT_URL =
 
 export default function PatentCaseStudyPage() {
   return (
-    <>
-      <Navbar />
-      <article className={styles.caseStudyArticle}>
+    <main className={styles.caseStudyArticle} data-route="/projects/iot-cold-chain-patent">
         <nav className={styles.backNav} aria-label="Breadcrumb navigation">
           <Link href="/projects" className={styles.backLink}>
             <span aria-hidden="true">←</span> Return to Flagship Works
@@ -256,8 +252,6 @@ export default function PatentCaseStudyPage() {
             View Official Patent Document ↗
           </a>
         </footer>
-      </article>
-      <Footer />
-    </>
+      </main>
   );
 }

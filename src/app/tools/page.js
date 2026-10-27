@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 
 export default function ToolsPage() {
   const [activeTab, setActiveTab] = useState('jwt'); // 'jwt' | 'cron' | 'base64' | 'hash' | 'json'
@@ -199,9 +197,7 @@ export default function ToolsPage() {
   };
 
   return (
-    <>
-      <Navbar />
-      <main className="site-container" style={{ paddingTop: '120px', minHeight: '80vh', paddingBottom: '4rem' }}>
+    <main className="site-container" data-route="/tools" style={{ paddingTop: '120px', minHeight: '80vh', paddingBottom: '4rem' }}>
         <div style={{ marginBottom: '2rem' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.25rem 0.75rem', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.1)', color: 'var(--blue, #38bdf8)', fontSize: '0.8rem', fontFamily: 'monospace', marginBottom: '0.75rem' }}>
             <span>$ SYS_TOOLS_V2.0</span>
@@ -625,7 +621,5 @@ export default function ToolsPage() {
           </div>
         )}
       </main>
-      <Footer />
-    </>
   );
 }

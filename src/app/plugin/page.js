@@ -1,8 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import { ALL_PLUGINS } from '@/config/plugin';
 import styles from './plugin.module.css';
 
@@ -33,9 +31,8 @@ export default function PluginIndexPage() {
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.ambientGlow} aria-hidden="true" />
-      <Navbar />
 
-      <main className={styles.container}>
+      <main className={styles.container} data-route="/plugin">
         {/* Breadcrumb Navigation */}
         <nav className={styles.breadcrumbs} aria-label="Breadcrumb">
           <Link href="/" className={styles.breadcrumbLink}>
@@ -127,8 +124,6 @@ export default function PluginIndexPage() {
           ))}
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 }

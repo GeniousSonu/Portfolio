@@ -1,6 +1,4 @@
 import React from 'react'
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
 import { client } from '@/sanity/client'
 import { POSTS_QUERY } from '@/sanity/queries'
 import BlogListClient from './BlogListClient'
@@ -46,9 +44,7 @@ export default async function BlogPage() {
   }
 
   return (
-    <main className={styles.blogPage}>
-      <Navbar />
-
+    <main className={styles.blogPage} data-route="/blog">
       {/* Ambient background glow */}
       <div className={styles.ambientGlow} />
 
@@ -68,8 +64,6 @@ export default async function BlogPage() {
         {/* Dynamic Blog Filter & Listing */}
         <BlogListClient initialPosts={posts || []} />
       </div>
-
-      <Footer />
     </main>
   )
 }
