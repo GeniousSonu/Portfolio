@@ -278,3 +278,67 @@
     padding-left: 1.25rem;
   }
 }
+
+/* ─── Day Mode (Light Theme) Overrides for Status ─── */
+:global(html[data-theme='light']) .overallBanner,
+:global(:root[data-theme='light']) .overallBanner {
+  background: rgba(5, 150, 105, 0.08);
+  border-color: rgba(5, 150, 105, 0.25);
+}
+
+:global(html[data-theme='light']) .overallTitle,
+:global(:root[data-theme='light']) .overallTitle {
+  color: var(--text-primary, #16130f);
+}
+
+:global(html[data-theme='light']) .lastUpdated,
+:global(:root[data-theme='light']) .lastUpdated {
+  color: var(--text-muted, #64748B);
+}
+
+:global(html[data-theme='light']) .servicesCard,
+:global(:root[data-theme='light']) .servicesCard {
+  background: var(--surface-card, #FFFFFF);
+  border: 1px solid var(--border-hairline, rgba(22, 19, 15, 0.14));
+  box-shadow: 0 16px 40px -10px rgba(22, 19, 15, 0.08);
+}
+
+:global(html[data-theme='light']) .serviceRow,
+:global(:root[data-theme='light']) .serviceRow {
+  border-bottom: 1px solid var(--border-dim, rgba(22, 19, 15, 0.08));
+}
+
+:global(html[data-theme='light']) .serviceRow:hover,
+:global(:root[data-theme='light']) .serviceRow:hover {
+  background: rgba(22, 19, 15, 0.02);
+}
+
+:global(html[data-theme='light']) .serviceName,
+:global(:root[data-theme='light']) .serviceName {
+  color: var(--text-primary, #16130f);
+}
+
+:global(html[data-theme='light']) .serviceDescription,
+:global(:root[data-theme='light']) .serviceDescription {
+  color: var(--text-secondary, #475569);
+}
+
+:global(html[data-theme='light']) .statusNeutral,
+:global(:root[data-theme='light']) .statusNeutral {
+  color: #475569;
+  background: rgba(22, 19, 15, 0.06);
+  border-color: rgba(22, 19, 15, 0.12);
+}
+
+:global(html[data-theme='light']) .policyNotice,
+:global(:root[data-theme='light']) .policyNotice {
+  background: #F8F6F1;
+  border: 1px solid rgba(22, 19, 15, 0.1);
+  color: #475569;
+}
+
+:global(html[data-theme='light']) .policyTitle,
+:global(:root[data-theme='light']) .policyTitle {
+  color: #1E293B;
+}
+
