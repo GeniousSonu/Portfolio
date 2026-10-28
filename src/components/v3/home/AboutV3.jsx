@@ -54,7 +54,7 @@ export default function AboutV3() {
               </div>
               <figcaption>
                 <span>Sahinur Islam</span>
-                <span>Design Engineer</span>
+                <span>Senior Web Application Developer</span>
               </figcaption>
             </figure>
 

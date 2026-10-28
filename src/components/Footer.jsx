@@ -303,7 +303,7 @@ export default function Footer() {
                     </span>
                   </div>
                   {[
-                    { key: 'role', val: 'Design Engineer' },
+                    { key: 'role', val: 'Senior Web Application Developer' },
                     { key: 'stack', val: 'Next.js · Node · Linux' },
                     { key: 'patent', val: 'IN 544062 · Granted' },
                     { key: 'location', val: 'Kolkata, IN' },

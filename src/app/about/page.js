@@ -17,7 +17,7 @@ export default function AboutPage() {
       <PageHeader
         eyebrow="[ BIOGRAPHICAL DOSSIER · SPEC 01 ]"
         title="Engineering at the intersection of systems, code & craft."
-        summary="Design Engineer & Systems Architect based in Kolkata, India. Bridging high-concurrency real-time protocols, Linux infrastructure, patent-granted hardware cryptography, and high-craft digital products."
+        summary="Senior Web Application Developer & Systems Architect based in Kolkata, India. Bridging high-concurrency real-time protocols, Linux infrastructure, patent-granted hardware cryptography, and high-craft digital products."
       />
 
       <Section className={styles.wrapper}>
@@ -49,7 +49,7 @@ export default function AboutPage() {
                 </div>
                 <div className={styles.telemetryRow}>
                   <span className={styles.telemetryLabel}>Primary Role</span>
-                  <span className={styles.telemetryValue}>Design Engineer</span>
+                  <span className={styles.telemetryValue}>Senior Web Application Developer</span>
                 </div>
                 <div className={styles.telemetryRow}>
                   <span className={styles.telemetryLabel}>Organization</span>

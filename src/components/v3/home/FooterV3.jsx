@@ -10,7 +10,7 @@ import { FooterLogo, SOCIAL_LINKS } from '@/components/Footer';
 import { NAV_GROUPS, getNavItemsByGroup, FOOTER_LEGAL_ITEMS } from '@/config/navigation';
 
 const SYSTEM_ROWS = [
-  { key: 'role', val: 'Design Engineer' },
+  { key: 'role', val: 'Senior Web Application Developer' },
   { key: 'stack', val: 'Next.js · Node · Linux' },
   { key: 'patent', val: 'IN 544062 · Granted' },
   { key: 'location', val: 'Kolkata, IN' },
