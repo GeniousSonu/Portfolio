@@ -273,6 +273,17 @@ export const FOOTER_LEGAL_ITEMS = [
     keywords: ['bot', 'telegram', 'privacy'],
     icon: 'bot',
   },
+  {
+    id: 'nav-imprint',
+    label: 'Imprint',
+    href: '/imprint',
+    type: 'page',
+    group: 'legal',
+    description: 'Official statutory disclosure, legal entity, and regulatory channels',
+    status: 'live',
+    keywords: ['imprint', 'legal', 'operator', 'impressum', 'statutory'],
+    icon: 'info',
+  },
 ];
 
 export const EXCLUDED_FROM_NAV = [
