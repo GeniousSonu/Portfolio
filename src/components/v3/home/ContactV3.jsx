@@ -202,8 +202,8 @@ export default function ContactV3() {
           {/* Oversized Bold Email Row (design-reference.md) */}
           <div className="v3-contact-email-row">
             <span className="v3-contact-email-badge">INQUIRIES //</span>
-            <a href="mailto:sahinurislam520@gmail.com" className="v3-contact-email-address">
-              sahinurislam520@gmail.com
+            <a href="mailto:sahinurislamm2002@gmail.com" className="v3-contact-email-address">
+              sahinurislamm2002@gmail.com
             </a>
             <button
               type="button"
@@ -266,203 +266,186 @@ export default function ContactV3() {
             <div className="v3-contact-left">
               <p className="v3-contact-lede">{INTRO}</p>
 
-            <Link href="/contact" className="v3-terminal-link" data-v3-sound="confirm">
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                width="15"
-                height="15"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12L13 2Z" />
-              </svg>{' '}
-              Establish Direct Connection Terminal
-              <span aria-hidden="true">→</span>
-            </Link>
+              <Link href="/contact" className="v3-terminal-link" data-v3-sound="confirm">
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  width="15"
+                  height="15"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12L13 2Z" />
+                </svg>{' '}
+                Establish Direct Connection Terminal
+                <span aria-hidden="true">→</span>
+              </Link>
 
-            <div className="v3-contact-links">
-              {CONTACT_LINKS.map(
-                ({ href, Icon, iconBg, iconBorder, iconColor, label, value, external }) => {
-                  const isDirect = label === 'Direct Inquiry';
-                  return (
-                    <a
-                      key={label}
-                      href={href}
-                      onClick={isDirect ? focusComposer : undefined}
-                      className="v3-contact-link"
-                      {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                      data-v3-sound="confirm"
-                    >
-                      <span
-                        className="v3-contact-icon"
-                        style={{ background: iconBg, border: iconBorder, color: iconColor }}
-                        aria-hidden="true"
+              <div className="v3-contact-links">
+                {CONTACT_LINKS.map(
+                  ({ href, Icon, iconBg, iconBorder, iconColor, label, value, external }) => {
+                    const isDirect = label === 'Direct Inquiry';
+                    return (
+                      <a
+                        key={label}
+                        href={href}
+                        onClick={isDirect ? focusComposer : undefined}
+                        className="v3-contact-link"
+                        {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                        data-v3-sound="confirm"
                       >
-                        <Icon />
-                      </span>
-                      <span className="v3-contact-link-body">
-                        <span className="v3-contact-link-label">{label}</span>
-                        <span className="v3-contact-link-value">{value}</span>
-                      </span>
-                      <span className="v3-contact-arrow" aria-hidden="true">
-                        →
-                      </span>
-                    </a>
-                  );
-                }
-              )}
-            </div>
-
-            <div className="v3-term v3-term--socials">
-              <div className="v3-term-head">
-                <span className="v3-term-dots" aria-hidden="true">
-                  <span />
-                  <span />
-                  <span />
-                </span>
-                <span className="v3-term-title">linktree.sh --list</span>
+                        <span
+                          className="v3-contact-icon"
+                          style={{ background: iconBg, border: iconBorder, color: iconColor }}
+                          aria-hidden="true"
+                        >
+                          <Icon />
+                        </span>
+                        <span className="v3-contact-link-body">
+                          <span className="v3-contact-link-label">{label}</span>
+                          <span className="v3-contact-link-value">{value}</span>
+                        </span>
+                        <span className="v3-contact-arrow" aria-hidden="true">
+                          →
+                        </span>
+                      </a>
+                    );
+                  }
+                )}
               </div>
-              <div className="v3-term-body">
-                <div className="v3-socials-grid">
-                  {LINKTREE_SOCIALS.map(({ href, Icon, label, color }) => (
-                    <a
-                      key={label}
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="v3-social-tile"
-                      aria-label={label}
-                      data-v3-sound="confirm"
-                    >
-                      <span className="v3-social-icon" style={{ color }}>
-                        <Icon />
-                      </span>
-                      <span>{label}</span>
-                    </a>
-                  ))}
+
+              <div className="v3-term v3-term--socials">
+                <div className="v3-term-head">
+                  <span className="v3-term-dots" aria-hidden="true">
+                    <span />
+                    <span />
+                    <span />
+                  </span>
+                  <span className="v3-term-title">linktree.sh --list</span>
+                </div>
+                <div className="v3-term-body">
+                  <div className="v3-socials-grid">
+                    {LINKTREE_SOCIALS.map(({ href, Icon, label, color }) => (
+                      <a
+                        key={label}
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="v3-social-tile"
+                        aria-label={label}
+                        data-v3-sound="confirm"
+                      >
+                        <span className="v3-social-icon" style={{ color }}>
+                          <Icon />
+                        </span>
+                        <span>{label}</span>
+                      </a>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="v3-contact-right" data-reveal>
-            <div className="v3-term v3-term--form">
-              <div className="v3-term-head">
-                <span className="v3-term-dots" aria-hidden="true">
-                  <span />
-                  <span />
-                  <span />
-                </span>
-                <span className="v3-term-title">send-message.sh</span>
-              </div>
+            <div className="v3-contact-right" data-reveal>
+              <div className="v3-term v3-term--form">
+                <div className="v3-term-head">
+                  <span className="v3-term-dots" aria-hidden="true">
+                    <span />
+                    <span />
+                    <span />
+                  </span>
+                  <span className="v3-term-title">send-message.sh</span>
+                </div>
 
-              <div className="v3-term-body">
-                <form className="v3-form" onSubmit={handleSubmit} noValidate>
-                  <div className="v3-honeypot" aria-hidden="true">
-                    <label htmlFor="home_confirm_subject_ref">Leave empty</label>
-                    <input
-                      id="home_confirm_subject_ref"
-                      type="text"
-                      name="confirm_subject_ref"
-                      value={honeypot}
-                      onChange={(event) => setHoneypot(event.target.value)}
-                      tabIndex={-1}
-                      autoComplete="off"
-                    />
-                  </div>
+                <div className="v3-term-body">
+                  <form className="v3-form" onSubmit={handleSubmit} noValidate>
+                    <div className="v3-honeypot" aria-hidden="true">
+                      <label htmlFor="home_confirm_subject_ref">Leave empty</label>
+                      <input
+                        id="home_confirm_subject_ref"
+                        type="text"
+                        name="confirm_subject_ref"
+                        value={honeypot}
+                        onChange={(event) => setHoneypot(event.target.value)}
+                        tabIndex={-1}
+                        autoComplete="off"
+                      />
+                    </div>
 
-                  <div className="v3-field">
-                    <label className="v3-field-label" htmlFor="name-field">
-                      your_name
-                    </label>
-                    <input
-                      type="text"
-                      id="name-field"
-                      className="v3-input"
-                      placeholder="John Doe"
-                      autoComplete="name"
-                      value={name}
-                      onChange={(event) => setName(event.target.value)}
-                    />
-                  </div>
+                    <div className="v3-field">
+                      <label className="v3-field-label" htmlFor="name-field">
+                        your_name
+                      </label>
+                      <input
+                        type="text"
+                        id="name-field"
+                        className="v3-input"
+                        placeholder="John Doe"
+                        autoComplete="name"
+                        value={name}
+                        onChange={(event) => setName(event.target.value)}
+                      />
+                    </div>
 
-                  <div className="v3-field">
-                    <label className="v3-field-label" htmlFor="email-field">
-                      your_email
-                    </label>
-                    <input
-                      type="email"
-                      id="email-field"
-                      className="v3-input"
-                      placeholder="john@company.com"
-                      autoComplete="email"
-                      value={email}
-                      onChange={(event) => setEmail(event.target.value)}
-                    />
-                  </div>
+                    <div className="v3-field">
+                      <label className="v3-field-label" htmlFor="email-field">
+                        your_email
+                      </label>
+                      <input
+                        type="email"
+                        id="email-field"
+                        className="v3-input"
+                        placeholder="john@company.com"
+                        autoComplete="email"
+                        value={email}
+                        onChange={(event) => setEmail(event.target.value)}
+                      />
+                    </div>
 
-                  <div className="v3-field">
-                    <label className="v3-field-label" htmlFor="msg-field">
-                      message
-                    </label>
-                    <textarea
-                      id="msg-field"
-                      className="v3-input v3-textarea"
-                      placeholder="Hi Sahinur, I need help with..."
-                      value={message}
-                      onChange={(event) => setMessage(event.target.value)}
-                    />
-                  </div>
+                    <div className="v3-field">
+                      <label className="v3-field-label" htmlFor="msg-field">
+                        message
+                      </label>
+                      <textarea
+                        id="msg-field"
+                        className="v3-input v3-textarea"
+                        placeholder="Hi Sahinur, I need help with..."
+                        value={message}
+                        onChange={(event) => setMessage(event.target.value)}
+                      />
+                    </div>
 
-                  {turnstileSiteKey ? (
-                    <div className="v3-turnstile" ref={turnstileContainerRef} />
-                  ) : null}
+                    {turnstileSiteKey ? (
+                      <div className="v3-turnstile" ref={turnstileContainerRef} />
+                    ) : null}
 
-                  <button
-                    type="submit"
-                    className="v3-submit"
-                    disabled={isSubmitting}
-                    data-v3-sound="confirm"
-                  >
-                    {isSubmitting ? 'Sending Message...' : 'Send Message →'}
-                  </button>
+                    <button
+                      type="submit"
+                      className="v3-btn v3-btn--primary v3-submit"
+                      disabled={isSubmitting}
+                      data-v3-sound="confirm"
+                    >
+                      {isSubmitting ? 'Sending Message...' : 'Send Message →'}
+                    </button>
 
-                  <div
-                    id="form-feedback"
-                    className={`v3-form-feedback is-${feedbackState}`}
-                    role="status"
-                    aria-live="polite"
-                  >
-                    {feedback}
-                  </div>
-                </form>
-              </div>
-            </div>
-
-            <div className="v3-receipt">
-              <div className="v3-receipt-line">
-                <span className="v3-receipt-prompt">sahinur@dev:~$</span>
-                <span className="v3-receipt-cmd">ping -c 1 genioussonu.me</span>
-              </div>
-              <div className="v3-receipt-line is-out">PING genioussonu.me: 56 data bytes</div>
-              <div className="v3-receipt-line is-out">64 bytes: icmp_seq=0 ttl=64 time=12ms</div>
-              <div className="v3-receipt-line is-ok">
-                ✓ 1 packet transmitted, 1 received, 0% packet loss
-              </div>
-              <div className="v3-receipt-line is-launch">
-                <Link href="/contact" className="v3-receipt-link" data-v3-sound="confirm">
-                  &gt; launch_terminal_page --fullscreen <span aria-hidden="true">→</span>
-                </Link>
+                    <div
+                      id="form-feedback"
+                      className={`v3-form-feedback is-${feedbackState}`}
+                      role="status"
+                      aria-live="polite"
+                    >
+                      {feedback}
+                    </div>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
   );
 }
