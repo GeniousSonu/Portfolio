@@ -27,9 +27,9 @@ export default function GlobalError({ error, reset }) {
         style={{
           margin: 0,
           padding: '24px',
-          backgroundColor: '#050505',
-          color: '#f9fafb',
-          fontFamily: 'monospace',
+          backgroundColor: 'var(--void, #050505)',
+          color: 'var(--text-primary, #f9fafb)',
+          fontFamily: 'var(--font-mono, monospace)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -42,9 +42,9 @@ export default function GlobalError({ error, reset }) {
           style={{
             maxWidth: '480px',
             width: '100%',
-            backgroundColor: '#0f1115',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
-            borderRadius: '12px',
+            backgroundColor: 'var(--surface-card, #0f1115)',
+            border: '1px solid var(--border-hairline, rgba(255, 255, 255, 0.12))',
+            borderRadius: 'var(--radius-md, 12px)',
             padding: '32px 24px',
             textAlign: 'center',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
@@ -60,7 +60,7 @@ export default function GlobalError({ error, reset }) {
               borderRadius: '50%',
               backgroundColor: 'rgba(239, 68, 68, 0.12)',
               border: '1px solid rgba(239, 68, 68, 0.3)',
-              color: '#ef4444',
+              color: 'var(--red, #ef4444)',
               fontSize: '20px',
               marginBottom: '16px',
             }}
@@ -73,7 +73,7 @@ export default function GlobalError({ error, reset }) {
               fontSize: '18px',
               fontWeight: 600,
               marginBottom: '10px',
-              color: '#ffffff',
+              color: 'var(--text-primary, #ffffff)',
             }}
           >
             System Recovery Mode
@@ -83,7 +83,7 @@ export default function GlobalError({ error, reset }) {
             style={{
               fontSize: '13px',
               lineHeight: 1.6,
-              color: '#9ca3af',
+              color: 'var(--text-secondary, #9ca3af)',
               marginBottom: '24px',
             }}
           >
@@ -113,10 +113,10 @@ export default function GlobalError({ error, reset }) {
               }}
               style={{
                 padding: '10px 18px',
-                backgroundColor: '#10b981',
-                color: '#050505',
+                backgroundColor: 'var(--signal, #10b981)',
+                color: 'var(--void, #050505)',
                 border: 'none',
-                borderRadius: '8px',
+                borderRadius: 'var(--radius-sm, 8px)',
                 fontSize: '13px',
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -131,9 +131,9 @@ export default function GlobalError({ error, reset }) {
               style={{
                 padding: '10px 18px',
                 backgroundColor: 'rgba(255, 255, 255, 0.06)',
-                color: '#d1d5db',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                borderRadius: '8px',
+                color: 'var(--text-primary, #d1d5db)',
+                border: '1px solid var(--border-hairline, rgba(255, 255, 255, 0.12))',
+                borderRadius: 'var(--radius-sm, 8px)',
                 fontSize: '13px',
                 fontWeight: 500,
                 textDecoration: 'none',

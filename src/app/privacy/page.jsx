@@ -413,6 +413,9 @@ export default function PrivacyPage() {
             <Link href="/privacy" className={`${styles.legalNavLink} ${styles.legalNavLinkActive}`}>
               Privacy Policy
             </Link>
+            <Link href="/imprint" className={styles.legalNavLink}>
+              Imprint &amp; Notice
+            </Link>
             <Link href="/bot/privacy-policy" className={styles.legalNavLink}>
               Bot Privacy Policy
             </Link>
