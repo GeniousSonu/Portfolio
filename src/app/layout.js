@@ -243,12 +243,12 @@ export default function RootLayout({ children }) {
   const buildId = process.env.NEXT_PUBLIC_BUILD_ID || 'prod';
 
   return (
-    <html lang="en" className={`dark ${fontClassNames}`} data-build-id={buildId} suppressHydrationWarning>
+    <html lang="en" className={`light ${fontClassNames}`} data-build-id={buildId} suppressHydrationWarning>
       <head>
         <link rel="icon" href="/logo.svg" type="image/svg+xml" />
         <link rel="shortcut icon" href="/logo.svg" type="image/svg+xml" />
         <link rel="manifest" href="/manifest.webmanifest" />
-        <meta name="theme-color" content="#05070c" />
+        <meta name="theme-color" content="#F4EFE4" />
         <script
           id="portfolio-build-info"
           dangerouslySetInnerHTML={{
@@ -258,7 +258,7 @@ export default function RootLayout({ children }) {
         <script
           id="v3-theme-bootstrap"
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var root=document.documentElement;var path=location.pathname;var search=location.search;var isHome=path==='/'||path==='/index.html';var isReplay=search.indexOf('intro')!==-1||location.hash==='#intro';var stored=localStorage.getItem('v3-theme');var theme=stored==='light'||stored==='dark'?stored:(window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');root.setAttribute('data-theme',theme);root.setAttribute('data-v3','true');root.setAttribute('data-v3-home',isHome?'true':'false');var color=theme==='light'?'#F4EFE4':'#070B14';var metas=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<metas.length;i++){metas[i].setAttribute('content',color);}if(!isHome&&!isReplay){root.classList.add('boot-skip');window.__skipBootPreloader=true;}else if(!isReplay){try{var raw=localStorage.getItem('sks_boot_seen_v1');if(raw){var ts=parseInt(raw,10);if(!isNaN(ts)&&(Date.now()-ts)<43200000){root.classList.add('boot-skip');window.__skipBootPreloader=true;}}}catch(err){root.classList.add('boot-skip');window.__skipBootPreloader=true;}}}catch(e){try{document.documentElement.classList.add('boot-skip');window.__skipBootPreloader=true;}catch(_){}}})();`,
+            __html: `(function(){try{var root=document.documentElement;var path=location.pathname;var search=location.search;var isHome=path==='/'||path==='/index.html';var isReplay=search.indexOf('intro')!==-1||location.hash==='#intro';var stored=localStorage.getItem('v3-theme');var theme=stored==='light'||stored==='dark'?stored:'light';root.setAttribute('data-theme',theme);root.setAttribute('data-v3','true');root.setAttribute('data-v3-home',isHome?'true':'false');var color=theme==='light'?'#F4EFE4':'#070B14';var metas=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<metas.length;i++){metas[i].setAttribute('content',color);}if(!isHome&&!isReplay){root.classList.add('boot-skip');window.__skipBootPreloader=true;}else if(!isReplay){try{var raw=localStorage.getItem('sks_boot_seen_v1');if(raw){var ts=parseInt(raw,10);if(!isNaN(ts)&&(Date.now()-ts)<43200000){root.classList.add('boot-skip');window.__skipBootPreloader=true;}}}catch(err){root.classList.add('boot-skip');window.__skipBootPreloader=true;}}}catch(e){try{document.documentElement.classList.add('boot-skip');window.__skipBootPreloader=true;}catch(_){}}})();`,
           }}
         />
         <meta name="mobile-web-app-capable" content="yes" />

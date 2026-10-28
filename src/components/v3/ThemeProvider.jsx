@@ -43,7 +43,7 @@ export function useTheme() {
 }
 
 export default function ThemeProvider({ children }) {
-  const [theme, setThemeState] = useState('dark');
+  const [theme, setThemeState] = useState('light');
   const [mounted, setMounted] = useState(false);
   const veilRef = useRef(null);
   const veilTimerRef = useRef(null);
@@ -60,7 +60,7 @@ export default function ThemeProvider({ children }) {
 
   useEffect(() => {
     const stored = readStoredTheme();
-    const next = stored || systemTheme();
+    const next = stored || 'light';
     applyTheme(next);
     setMounted(true);
 

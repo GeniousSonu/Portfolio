@@ -39,11 +39,10 @@ export default function MenuAllPagesList({ onNavigate }) {
           href={item.href}
           className={styles.flatRow}
           onClick={(e) => handleClick(e, item.href)}
-          aria-label={`${item.label} — ${item.href}`}
+          aria-label={item.label}
         >
           <div className={styles.flatLeft}>
             <span className={styles.flatTitle}>{item.label}</span>
-            <span className={styles.flatMeta}>{item.href}</span>
           </div>
 
           <svg

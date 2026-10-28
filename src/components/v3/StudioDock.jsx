@@ -1,41 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { useTheme } from './ThemeProvider';
 import { useSound } from './SoundProvider';
-
-function SunIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinecap="round"
-      aria-hidden="true"
-    >
-      <circle cx="12" cy="12" r="4.2" />
-      <path d="M12 2.4v2.2M12 19.4v2.2M2.4 12h2.2M19.4 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6" />
-    </svg>
-  );
-}
-
-function MoonIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M20.1 14.2A8.2 8.2 0 0 1 9.8 3.9 8.2 8.2 0 1 0 20.1 14.2Z" />
-      <path d="M17.2 4.3v2.4M16 5.5h2.4" />
-    </svg>
-  );
-}
 
 function SoundIcon({ off }) {
   return (
@@ -81,7 +47,6 @@ function MusicIcon({ off }) {
 }
 
 export default function StudioDock() {
-  const { theme, toggleTheme } = useTheme();
   const { soundEnabled, ambientEnabled, toggleSound, toggleAmbient } = useSound();
   const [collapsed, setCollapsed] = useState(false);
   const timerRef = useRef(0);
@@ -113,22 +78,6 @@ export default function StudioDock() {
         Studio
       </span>
       <div className="v3-studio-buttons">
-        <button
-          type="button"
-          className="v3-studio-btn v3-studio-theme"
-          onClick={toggleTheme}
-          data-v3-sound="confirm"
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
-          title={`Switch to ${theme === 'light' ? 'Night Signal' : 'Sunday Studio'} theme`}
-        >
-          <span className="v3-studio-icon v3-studio-icon--sun">
-            <SunIcon />
-          </span>
-          <span className="v3-studio-icon v3-studio-icon--moon">
-            <MoonIcon />
-          </span>
-          <span className="v3-studio-text">Theme</span>
-        </button>
 
         <button
           type="button"
