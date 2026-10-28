@@ -50,7 +50,6 @@ export default function CertificationsV3() {
           className="v3-cert-rail"
           role="region"
           aria-label="Certifications carousel"
-          data-lenis-prevent
         >
           <div className="v3-cert-track">
             {CERTS.map((cert, index) => (

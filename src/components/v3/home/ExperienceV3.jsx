@@ -2,6 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import ChapterHeader from '../ChapterHeader';
 import { CURRENT_ROLES, PAST_ROLES } from '@/components/Experience';
 import { useChapterReveal } from '../motion';
@@ -115,6 +116,23 @@ export default function ExperienceV3() {
                       <li key={tag}>{tag}</li>
                     ))}
                   </ul>
+                  {role.company === 'WEFIK' && (
+                    <div className="v3-role-actions">
+                      <Link href="/wefik" className="v3-role-link-btn" data-v3-sound="confirm">
+                        <span>Explore Venture Dossier</span>
+                        <span aria-hidden="true">→</span>
+                      </Link>
+                      <a
+                        href="https://www.wefik.in/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="v3-role-link-btn v3-role-link-btn--ghost"
+                      >
+                        <span>Official Agency Site</span>
+                        <span aria-hidden="true">↗</span>
+                      </a>
+                    </div>
+                  )}
                   <span className="v3-role-index" aria-hidden="true">
                     0{index + 1}
                   </span>
