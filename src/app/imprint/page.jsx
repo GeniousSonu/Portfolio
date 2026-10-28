@@ -38,7 +38,7 @@ export default function ImprintPage() {
       name: 'SK Sahinur Islam',
       alternateName: 'Genious Sonu',
       url: 'https://genioussonu.me',
-      email: 'sahinurislam520@gmail.com',
+      email: 'sahinurislamm2002@gmail.com',
     },
   };
 
@@ -134,8 +134,8 @@ export default function ImprintPage() {
             <ul className={styles.bulletList}>
               <li className={styles.bulletItem}>
                 <strong className={styles.highlightText}>Direct Electronic Mail:</strong>{' '}
-                <a href="mailto:sahinurislam520@gmail.com" className={styles.breadcrumbLink}>
-                  sahinurislam520@gmail.com
+                <a href="mailto:sahinurislamm2002@gmail.com" className={styles.breadcrumbLink}>
+                  sahinurislamm2002@gmail.com
                 </a>{' '}
                 / <a href="mailto:talk2sahinur@gmail.com" className={styles.breadcrumbLink}>talk2sahinur@gmail.com</a>
               </li>

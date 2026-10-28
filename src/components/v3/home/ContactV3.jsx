@@ -27,7 +27,7 @@ export default function ContactV3() {
 
   const handleCopyEmail = async () => {
     try {
-      await navigator.clipboard.writeText('sahinurislam520@gmail.com');
+      await navigator.clipboard.writeText('sahinurislamm2002@gmail.com');
       setCopiedEmail(true);
       setTimeout(() => setCopiedEmail(false), 2000);
     } catch {

@@ -169,8 +169,8 @@ export default function FooterV3() {
           <SiteStatusStrip />
         </div>
 
-        <div className="v3-footer-wordmark" aria-label="SAHINUR">
-          SAHINUR
+        <div className="v3-footer-wordmark" aria-label="SAHINUR ISLAM">
+          SAHINUR ISLAM
         </div>
 
         <div className="v3-footer-bottom" data-build-id={process.env.NEXT_PUBLIC_BUILD_ID || 'prod'}>

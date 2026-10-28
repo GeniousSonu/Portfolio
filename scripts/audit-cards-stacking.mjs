@@ -24,13 +24,14 @@ async function runStackingAudit() {
     const page = await context.newPage();
 
     // Skip boot intro
-    await page.goto(`${BASE_URL}/`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${BASE_URL}/?intro=0`, { waitUntil: 'domcontentloaded' });
     await page.evaluate(() => {
       try {
         localStorage.setItem('sks_boot_seen_v1', '1');
       } catch {}
     });
-    await page.waitForTimeout(500);
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(600);
 
     // Find all cards
     const cardData = await page.evaluate(() => {
@@ -100,7 +101,7 @@ async function runStackingAudit() {
       const passed =
         metrics &&
         (vp.width < 500
-          ? metrics.rectHeight > 400 && metrics.ctaVisible
+          ? metrics.position === 'sticky' && metrics.rectHeight > 350 && metrics.ctaVisible
           : metrics.position === 'sticky' && metrics.isFullScreen && metrics.titleVisible);
 
       console.log(
@@ -149,9 +150,14 @@ async function runStackingAudit() {
       `P.07 full-screen: ${p6p7Stack?.c7FullScreen ? 'YES' : 'NO'}`
     );
 
+    if (!p6p7Stack?.c7StacksOverC6) {
+      console.error('  FAILED P.06 / P.07 stacking assertion!');
+      allPassed = false;
+    }
+
     if (vp.width >= 500) {
-      if (!p6p7Stack?.c7StacksOverC6 || !p6p7Stack?.c7FullScreen) {
-        console.error('  FAILED P.06 / P.07 stacking assertion!');
+      if (!p6p7Stack?.c7FullScreen) {
+        console.error('  FAILED P.07 full-screen assertion!');
         allPassed = false;
       }
 
@@ -174,7 +180,7 @@ async function runStackingAudit() {
         allPassed = false;
       }
     } else {
-      console.log('  ✓ Mobile card architecture: Natural height & unclipped layout verified.');
+      console.log('  ✓ Mobile card architecture: Sticky position & stacking order verified.');
     }
 
     await context.close();
