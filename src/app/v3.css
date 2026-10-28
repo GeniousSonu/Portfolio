@@ -2626,11 +2626,22 @@ html.v3-theme-transition::view-transition-new(root) {
   flex: none;
   width: 44px;
   height: 44px;
-  object-fit: contain;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
   padding: 4px;
   border: var(--v3-hairline) solid var(--v3-border-strong);
   border-radius: var(--v3-radius-sm);
   background: var(--v3-surface);
+}
+
+.v3-role-logo img,
+.v3-past-logo img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  border-radius: calc(var(--v3-radius-sm) - 2px);
 }
 
 .v3-past-logo {
@@ -2738,6 +2749,47 @@ html.v3-theme-transition::view-transition-new(root) {
   font-size: 0.94rem;
   line-height: 1.7;
   color: var(--v3-text-muted);
+}
+
+.v3-role-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.v3-role-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--v3-font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--v3-radius-sm);
+  border: var(--v3-hairline) solid var(--v3-accent);
+  background: var(--v3-accent-tint, rgba(212, 175, 55, 0.12));
+  color: var(--v3-accent-ink, var(--v3-text-bright));
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.v3-role-link-btn:hover {
+  background: var(--v3-accent);
+  color: var(--v3-bg-deep);
+  transform: translateY(-1px);
+}
+
+.v3-role-link-btn--ghost {
+  border-color: var(--v3-border-strong);
+  background: transparent;
+  color: var(--v3-text-muted);
+}
+
+.v3-role-link-btn--ghost:hover {
+  border-color: var(--v3-accent);
+  color: var(--v3-accent-ink, var(--v3-text-bright));
+  background: var(--v3-accent-tint, rgba(212, 175, 55, 0.08));
 }
 
 /* past track record -------------------------------------------- */
