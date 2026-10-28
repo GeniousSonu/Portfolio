@@ -191,13 +191,16 @@ export default function Navbar() {
   };
 
   const handleLinkClick = (e, targetHref) => {
-    e.preventDefault();
-    closeOverlay('nav');
+    e?.preventDefault?.();
     setOpenGroup(null);
 
-    if (!targetHref) return;
+    if (!targetHref) {
+      closeOverlay('nav');
+      return;
+    }
 
     if (targetHref.startsWith('http://') || targetHref.startsWith('https://')) {
+      closeOverlay('nav');
       window.open(targetHref, '_blank', 'noopener,noreferrer');
       return;
     }
@@ -205,6 +208,7 @@ export default function Navbar() {
     try {
       if (targetHref === '#' || targetHref === '/') {
         if (pathname === '/') {
+          closeOverlay('nav');
           try {
             navState?.startAnchorNav?.();
           } catch {}
@@ -213,6 +217,9 @@ export default function Navbar() {
           }, 50);
         } else {
           transitionRouter.push('/');
+          setTimeout(() => {
+            closeOverlay('nav');
+          }, 60);
         }
         return;
       }
@@ -220,6 +227,7 @@ export default function Navbar() {
       if (targetHref.startsWith('/#')) {
         const anchor = targetHref.replace('/', '');
         if (pathname === '/') {
+          closeOverlay('nav');
           try {
             navState?.startAnchorNav?.();
           } catch {}
@@ -231,12 +239,16 @@ export default function Navbar() {
             sessionStorage.setItem('portfolio_scroll_target', anchor);
           }
           transitionRouter.push(targetHref);
+          setTimeout(() => {
+            closeOverlay('nav');
+          }, 60);
         }
         return;
       }
 
       if (targetHref.startsWith('#')) {
         if (pathname === '/') {
+          closeOverlay('nav');
           try {
             navState?.startAnchorNav?.();
           } catch {}
@@ -248,6 +260,9 @@ export default function Navbar() {
             sessionStorage.setItem('portfolio_scroll_target', targetHref);
           }
           transitionRouter.push('/' + targetHref);
+          setTimeout(() => {
+            closeOverlay('nav');
+          }, 60);
         }
         return;
       }
@@ -257,9 +272,13 @@ export default function Navbar() {
           navState?.startRouteNav?.();
         } catch {}
         transitionRouter.push(targetHref);
+        setTimeout(() => {
+          closeOverlay('nav');
+        }, 60);
       }
     } catch (err) {
       console.warn('Navbar handleLinkClick error, executing fallback navigation:', err);
+      closeOverlay('nav');
       if (typeof window !== 'undefined') {
         window.location.assign(targetHref);
       }
