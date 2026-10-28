@@ -198,7 +198,7 @@ export default function BlogV3() {
           ← Swipe to explore articles →
         </p>
 
-        <div className="v3-blog-rail" data-lenis-prevent>
+        <div className="v3-blog-rail">
           <div
             className={`v3-blog-track ${isSingle ? 'is-single' : ''}`}
             ref={carouselRef}

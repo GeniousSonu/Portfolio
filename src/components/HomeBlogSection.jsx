@@ -213,13 +213,12 @@ export default function HomeBlogSection() {
         )}
 
         {/* Horizontal Carousel Track */}
-        <div className="home-blog-scroll-wrapper" data-lenis-prevent>
+        <div className="home-blog-scroll-wrapper">
           <div
             ref={carouselRef}
             className={`home-blog-carousel ${isSingle ? 'is-single' : ''}`}
             role="region"
             aria-label="Blog posts carousel"
-            data-lenis-prevent
           >
             {loading && posts.length === 0 ? (
               <>
