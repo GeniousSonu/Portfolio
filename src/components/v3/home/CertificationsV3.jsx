@@ -53,7 +53,18 @@ export default function CertificationsV3() {
         >
           <div className="v3-cert-track">
             {CERTS.map((cert, index) => (
-              <article className="v3-cert-ticket" key={`${cert.title}-${cert.date}`} data-reveal>
+              <a
+                href={
+                  cert.credId && cert.credId.startsWith('THM')
+                    ? 'https://tryhackme.com/p/GeniousSonu'
+                    : 'https://www.linkedin.com/in/sksahinurislam/details/certifications/'
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+                className="v3-cert-ticket"
+                key={`${cert.title}-${cert.date}`}
+                data-reveal
+              >
                 <div className="v3-cert-top">
                   <span
                     className="v3-cert-logo"
@@ -81,7 +92,7 @@ export default function CertificationsV3() {
                     </span>
                   )}
                 </div>
-              </article>
+              </a>
             ))}
           </div>
         </div>
@@ -97,9 +108,18 @@ export default function CertificationsV3() {
             href="https://www.linkedin.com/in/sksahinurislam/details/certifications/"
             target="_blank"
             rel="noopener noreferrer"
-            className="v3-text-link"
+            className="v3-btn v3-btn--linkedin"
             data-v3-sound="confirm"
           >
+            <svg
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9h2.8v8.37h-2.8v-8.37M7.86 6.54a1.62 1.62 0 0 0-1.62 1.62c0 .9.72 1.62 1.62 1.62a1.62 1.62 0 0 0 1.62-1.62 1.62 1.62 0 0 0-1.62-1.62" />
+            </svg>
             Verify All on LinkedIn <span aria-hidden="true">↗</span>
           </a>
         </div>

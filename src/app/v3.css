@@ -3365,6 +3365,8 @@ html.v3-theme-transition::view-transition-new(root) {
   background: var(--v3-surface-raised);
   box-shadow: var(--v3-shadow-hard-sm);
   scroll-snap-align: start;
+  text-decoration: none;
+  color: inherit;
   transition:
     transform var(--v3-dur-2) var(--v3-ease-out),
     box-shadow var(--v3-dur-2) var(--v3-ease-out);
@@ -3491,6 +3493,32 @@ html.v3-theme-transition::view-transition-new(root) {
   gap: 1rem;
   flex-wrap: wrap;
   margin-top: 2rem;
+}
+
+.v3-btn--linkedin {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #0a66c2 !important;
+  color: #ffffff !important;
+  min-height: 44px;
+  padding: 0 1.4rem;
+  border-radius: var(--v3-radius-pill);
+  font-family: var(--v3-font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(10, 102, 194, 0.35);
+  transition:
+    transform var(--v3-dur-2) var(--v3-ease-out),
+    box-shadow var(--v3-dur-2) var(--v3-ease-out);
+}
+
+.v3-btn--linkedin:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(10, 102, 194, 0.45);
+  color: #ffffff !important;
 }
 
 /* ─── 24. Chapter 07 — The Reach (globe) ──────────────────────── */
@@ -4338,81 +4366,74 @@ html.v3-theme-transition::view-transition-new(root) {
   color: var(--v3-error);
 }
 
-/* signal receipt ------------------------------------------------ */
+/* contact forms & terminals ----------------------------------- */
 
-.v3-receipt {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-  padding: 1.1rem 1.25rem;
-  border: var(--v3-rule) dashed var(--v3-border-strong);
-  border-radius: var(--v3-radius-md);
+.v3-term--form {
+  background: var(--v3-surface);
+  border: var(--v3-rule) solid var(--v3-border-strong);
+}
+
+:root[data-theme='light'] .v3-term--form {
   background: var(--v3-surface-raised);
-  font-family: var(--v3-font-mono);
-  font-size: 0.74rem;
-  line-height: 1.7;
+  border-color: var(--v3-border-strong);
+}
+
+:root[data-theme='light'] .v3-term--form .v3-term-head {
+  background: var(--v3-bg-deep);
+  border-bottom: var(--v3-hairline) solid var(--v3-border);
+}
+
+:root[data-theme='light'] .v3-term--form .v3-term-title {
   color: var(--v3-text-muted);
 }
 
-.v3-receipt-line {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-}
-
-.v3-receipt-line.is-out::before {
-  content: '→';
+:root[data-theme='light'] .v3-term--form .v3-field-label {
   color: var(--v3-text-muted);
 }
-.v3-receipt-line.is-ok::before {
-  content: '✓';
-  color: var(--v3-success);
-}
-.v3-receipt-line.is-launch::before {
-  content: '⌁';
-  color: var(--v3-accent-ink);
-}
 
-:root[data-theme='dark'] .v3-receipt-line.is-launch::before {
-  color: var(--v3-accent);
-}
-
-.v3-receipt-prompt {
-  color: var(--v3-accent-ink);
-  font-weight: 600;
-}
-
-:root[data-theme='dark'] .v3-receipt-prompt {
-  color: var(--v3-accent);
-}
-
-.v3-receipt-cmd {
+:root[data-theme='light'] .v3-term--form .v3-input,
+:root[data-theme='light'] .v3-term--form .v3-textarea {
+  background: var(--v3-surface-raised);
   color: var(--v3-text);
+  border-color: var(--v3-border-strong);
 }
 
-.v3-receipt-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-height: 44px;
-  margin-top: 0.35rem;
+:root[data-theme='light'] .v3-term--form .v3-input::placeholder,
+:root[data-theme='light'] .v3-term--form .v3-textarea::placeholder {
+  color: var(--v3-text-muted);
+  opacity: 0.85;
+}
+
+:root[data-theme='light'] .v3-term--socials .v3-term-head {
+  background: var(--v3-bg-deep);
+  border-bottom: var(--v3-hairline) solid var(--v3-border);
+}
+
+:root[data-theme='light'] .v3-term--socials .v3-term-title {
+  color: var(--v3-text-muted);
+}
+
+:root[data-theme='dark'] .v3-term--form {
+  background: var(--v3-surface);
+  border-color: var(--v3-border-strong);
+}
+
+:root[data-theme='dark'] .v3-term--form .v3-term-head {
+  background: var(--v3-term-head);
+  border-bottom: var(--v3-hairline) solid var(--v3-border);
+}
+
+:root[data-theme='dark'] .v3-term--form .v3-input,
+:root[data-theme='dark'] .v3-term--form .v3-textarea {
+  background: var(--v3-surface-raised);
   color: var(--v3-text);
-  text-decoration: none;
-  border-bottom: 1.5px solid var(--v3-border-strong);
-  align-self: flex-start;
-  transition:
-    color var(--v3-dur-1) var(--v3-ease-out),
-    border-color var(--v3-dur-1) var(--v3-ease-out);
+  border-color: var(--v3-border-strong);
 }
 
-.v3-receipt-link:hover {
-  color: var(--v3-accent-ink);
-  border-color: var(--v3-accent-ink);
-}
-
-:root[data-theme='dark'] .v3-receipt-link:hover {
-  color: var(--v3-accent);
-  border-color: var(--v3-accent);
+:root[data-theme='dark'] .v3-term--form .v3-input::placeholder,
+:root[data-theme='dark'] .v3-term--form .v3-textarea::placeholder {
+  color: var(--v3-text-muted);
+  opacity: 0.75;
 }
 
 /* ─── 27. Coda + footer ───────────────────────────────────────── */
@@ -5544,11 +5565,15 @@ html[data-theme='dark'] .v3-stacked-card {
     font-size: clamp(1.4rem, 4.2vw, 1.85rem) !important;
     line-height: 0.92 !important;
     margin: 0 0 0.3rem !important;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    min-width: 0;
   }
   .v3-showcase-metadata {
     font-size: 0.65rem;
     margin-bottom: 0.35rem;
     gap: 0.35rem;
+    flex-wrap: wrap;
   }
   .v3-showcase-context-box {
     padding: 0.45rem 0.75rem;
@@ -5607,9 +5632,14 @@ html[data-theme='dark'] .v3-stacked-card {
   }
   .v3-frame-footer-bar {
     padding: 0.35rem 0.65rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
   .v3-frame-footer-title {
     font-size: 0.72rem;
+    white-space: normal;
+    word-break: break-word;
+    min-width: 0;
   }
   .v3-frame-cta-btn {
     padding: 0.25rem 0.65rem;
@@ -5669,6 +5699,7 @@ html[data-theme='dark'] .v3-stacked-card {
   display: flex;
   flex-direction: column;
   color: #FFFFFF;
+  min-width: 0;
 }
 
 .v3-showcase-index-row {
@@ -5704,6 +5735,9 @@ html[data-theme='dark'] .v3-stacked-card {
   color: #FFFFFF;
   letter-spacing: -0.02em;
   margin: 0 0 0.85rem;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  min-width: 0;
 }
 
 .is-tangerine .v3-showcase-title {
@@ -5768,6 +5802,7 @@ html[data-theme='dark'] .is-tangerine .v3-bullet-val {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
   margin-bottom: 1.15rem;
 }
 
