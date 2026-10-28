@@ -4,8 +4,12 @@ import { usePathname } from 'next/navigation';
 import gsap from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 
+import { useTransitionRouter } from '@/context/TransitionContext';
+import navState from '@/lib/navState';
+
 export default function MobileBottomCTA() {
   const pathname = usePathname();
+  const transitionRouter = useTransitionRouter();
   const [visible, setVisible] = useState(false);
   const [inContact, setInContact] = useState(false);
 
@@ -33,6 +37,8 @@ export default function MobileBottomCTA() {
           );
           observer.observe(contactEl);
         }
+      } else {
+        setInContact(false);
       }
     };
 
@@ -57,13 +63,29 @@ export default function MobileBottomCTA() {
 
   const handleContactClick = (e) => {
     e.preventDefault();
+    const isHome = pathname === '/' || pathname === '/index.html';
     const target = document.getElementById('contact');
-    if (target) {
-      gsap.to(window, {
-        scrollTo: { y: target, offsetY: 40 },
-        duration: 0.9,
-        ease: 'power3.inOut'
-      });
+
+    if (isHome && target) {
+      if (navState.lenis) {
+        try {
+          navState.lenis.scrollTo(target, { offset: -40 });
+        } catch {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      } else {
+        try {
+          gsap.to(window, {
+            scrollTo: { y: target, offsetY: 40 },
+            duration: 0.7,
+            ease: 'power3.out'
+          });
+        } catch {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    } else {
+      transitionRouter.push('/contact');
     }
   };
 

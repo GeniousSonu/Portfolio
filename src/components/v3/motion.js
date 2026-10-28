@@ -41,6 +41,7 @@ export function useChapterReveal(scopeRef) {
             ease: 'power3.out',
             stagger: 0.06,
             overwrite: true,
+            clearProps: 'transform',
           }),
       });
     }, scope);
