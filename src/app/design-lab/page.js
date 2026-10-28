@@ -98,7 +98,7 @@ export default function DesignLabPage() {
           </div>
           <div className={styles.typeRow}>
             <span className={styles.typeMeta}>Headline XL (48px / -0.035em)</span>
-            <h2 className={styles.headlineXl}>Design Engineer &amp; Patentee</h2>
+            <h2 className={styles.headlineXl}>Senior Web Application Developer &amp; Patentee</h2>
           </div>
           <div className={styles.typeRow}>
             <span className={styles.typeMeta}>Headline LG (32px / -0.03em)</span>

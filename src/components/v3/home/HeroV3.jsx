@@ -213,12 +213,12 @@ export default function HeroV3() {
                 </span>
               </span>
               <span className="sr-only">
-                (Genious Sonu) — Design Engineer &amp; Systems Architect
+                (Genious Sonu) — Senior Web Application Developer &amp; Systems Architect
               </span>
             </h1>
 
             <p className="v3-hero-role" data-hero-fade>
-              <EditableText tag="span">Design Engineer &amp; Systems Architect</EditableText>
+              <EditableText tag="span">Senior Web Application Developer &amp; Systems Architect</EditableText>
             </p>
             <p className="v3-hero-desc" data-hero-fade>
               <EditableText tag="span">
@@ -296,7 +296,7 @@ export default function HeroV3() {
                     </dd>
                   </div>
                   <div className="v3-terminal-output">
-                    SK Sahinur Islam // Design Engineer &amp; Co-Founder
+                    SK Sahinur Islam // Senior Web Application Developer &amp; Co-Founder
                   </div>
                 </dl>
               </div>

@@ -160,16 +160,16 @@ export default function Hero() {
             </div>
 
             <PlayableElement>
-              <h1 className="hero-name" aria-label="SK Sahinur Islam (Genious Sonu) — Design Engineer & Systems Architect" ref={nameRef}>
+              <h1 className="hero-name" aria-label="SK Sahinur Islam (Genious Sonu) — Senior Web Application Developer & Systems Architect" ref={nameRef}>
                 <span className="hero-name-line"><span><EditableText>SK</EditableText></span></span>
                 <span className="hero-name-line"><span><EditableText>Sahinur</EditableText></span></span>
                 <span className="hero-name-line"><span><EditableText>Islam</EditableText></span></span>
-                <span className="sr-only"> (Genious Sonu) — Design Engineer &amp; Systems Architect</span>
+                <span className="sr-only"> (Genious Sonu) — Senior Web Application Developer &amp; Systems Architect</span>
               </h1>
             </PlayableElement>
 
             <PlayableElement>
-              <p className="hero-role" id="hero-role" ref={roleRef}><EditableText>Design Engineer &amp; Systems Architect</EditableText></p>
+              <p className="hero-role" id="hero-role" ref={roleRef}><EditableText>Senior Web Application Developer &amp; Systems Architect</EditableText></p>
             </PlayableElement>
 
             <PlayableElement>
@@ -236,7 +236,7 @@ export default function Hero() {
                   <div className="ssh-line ssh-out">  STACK: Next.js 16 · Supabase · Sanity v3 · WebRTC</div>
                   <div className="ssh-line ssh-out">  LOCATION: Kolkata, WB, IN (22.5726° N, 88.3639° E)</div>
                   <div className="ssh-line"><span className="ssh-prompt-str">operator:~$</span><span className="ssh-cmd">whoami</span></div>
-                  <div className="ssh-line ssh-out">  SK Sahinur Islam // Design Engineer &amp; Co-Founder</div>
+                  <div className="ssh-line ssh-out">  SK Sahinur Islam // Senior Web Application Developer &amp; Co-Founder</div>
                   <div className="ssh-line">
                     <span className="ssh-prompt-str">operator:~$</span>
                     <span id="terminal-typing" className="ssh-cmd" ref={typingRef}></span>
