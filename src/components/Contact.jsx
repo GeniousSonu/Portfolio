@@ -106,9 +106,9 @@ export const CONTACT_LINKS = [
   {
     href: 'https://github.com/GeniousSonu',
     Icon: IconGitHub,
-    iconBg: 'rgba(139,148,158,0.1)',
-    iconBorder: '1px solid rgba(139,148,158,0.2)',
-    iconColor: '#e6edf3',
+    iconBg: 'rgba(139,148,158,0.15)',
+    iconBorder: '1px solid rgba(139,148,158,0.3)',
+    iconColor: 'var(--text-primary)',
     label: 'GitHub',
     value: 'github.com/GeniousSonu',
     external: true,

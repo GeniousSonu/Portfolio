@@ -181,13 +181,9 @@ export default function HeroV3() {
 
       <div className="v3-shell v3-hero-shell">
         <div className="v3-hero-topline" data-hero-fade>
-          <span className="v3-sub-meta-pill">PORTFOLIO EDITION · VOL. 26</span>
           <span className="v3-eyebrow">
             <span className="v3-pulse-dot" aria-hidden="true" />
             Open to Global Roles · IST (UTC+5:30)
-          </span>
-          <span className="v3-hero-index" aria-hidden="true">
-            KOLKATA, IN (22.57° N, 88.36° E)
           </span>
         </div>
 

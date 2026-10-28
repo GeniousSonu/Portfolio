@@ -169,18 +169,13 @@ export default function FooterV3() {
           <SiteStatusStrip />
         </div>
 
-        <div className="v3-footer-wordmark" aria-hidden="true">
-          Sahinur Islam
+        <div className="v3-footer-wordmark" aria-label="SAHINUR">
+          SAHINUR
         </div>
 
-        <div className="v3-footer-bottom">
-          <div className="v3-footer-cmd">
-            <span className="is-red">root@sahinur-dev</span>
-            <span className="is-blue">:~$</span>
-            <span className="is-muted">
-              {' '}
-              echo &quot;Built with precision, deployed with intent.&quot; · {year} · build {process.env.NEXT_PUBLIC_BUILD_ID || 'prod'}
-            </span>
+        <div className="v3-footer-bottom" data-build-id={process.env.NEXT_PUBLIC_BUILD_ID || 'prod'}>
+          <div className="v3-footer-legal-notice">
+            &copy; {year} SK Sahinur Islam. All rights reserved.
           </div>
 
           <div className="v3-footer-legal">

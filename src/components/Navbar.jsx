@@ -26,6 +26,23 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [openGroup, setOpenGroup] = useState(null); // active dropdown group ID: 'work' | 'knowledge' | 'lab' | 'about'
+  const [shouldCueTheme, setShouldCueTheme] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem('sks_theme_cue_seen')) {
+        setShouldCueTheme(true);
+      }
+    } catch {}
+  }, []);
+
+  const handleThemeToggle = (e) => {
+    try {
+      localStorage.setItem('sks_theme_cue_seen', '1');
+      setShouldCueTheme(false);
+    } catch {}
+    toggleTheme(e);
+  };
   const navRef = useRef(null);
   const dropdownTimerRef = useRef(null);
   const hamburgerBtnRef = useRef(null);
@@ -461,8 +478,8 @@ export default function Navbar() {
           {/* Day/Night Theme Toggle */}
           <button
             type="button"
-            className="nav-theme-toggle-btn"
-            onClick={toggleTheme}
+            className={`nav-theme-toggle-btn${shouldCueTheme ? ' theme-cue-bounce' : ''}`}
+            onClick={handleThemeToggle}
             aria-label={`Switch to ${theme === 'dark' ? 'Day' : 'Night'} Mode`}
             title={`Switch to ${theme === 'dark' ? 'Day' : 'Night'} Mode`}
           >

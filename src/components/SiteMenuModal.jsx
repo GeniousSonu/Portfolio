@@ -125,12 +125,11 @@ export default function SiteMenuModal() {
                             <span className={styles.itemArrow}>↗</span>
                           </div>
                           <span className={styles.itemDesc}>{item.description}</span>
-                          <div className={styles.itemMeta}>
-                            <span className={styles.itemHref}>{item.href}</span>
-                            {item.status === 'stub' && (
+                          {item.status === 'stub' && (
+                            <div className={styles.itemMeta}>
                               <span className={styles.stubBadge}>STUB</span>
-                            )}
-                          </div>
+                            </div>
+                          )}
                         </a>
                       </li>
                     ))}
@@ -160,9 +159,6 @@ export default function SiteMenuModal() {
                         <span className={styles.itemArrow}>↗</span>
                       </div>
                       <span className={styles.itemDesc}>{item.description}</span>
-                      <div className={styles.itemMeta}>
-                        <span className={styles.itemHref}>{item.href}</span>
-                      </div>
                     </a>
                   </li>
                 ))}

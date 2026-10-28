@@ -135,6 +135,7 @@ async function main() {
       const start = performance.now();
       await getInTouchBtn.tap({ timeout: 1500 });
       const elapsed = performance.now() - start;
+      await sleep(700);
       const scrollY = await ctaPage.evaluate(() => window.scrollY);
       if (scrollY > 1000 && elapsed <= 1500) {
         console.log(`  ✓ "Get in Touch" tap scrolled smoothly to contact (scrollY=${scrollY}, ${Math.round(elapsed)}ms <= 1.5s)`);

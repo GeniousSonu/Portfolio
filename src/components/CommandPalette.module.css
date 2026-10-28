@@ -276,3 +276,77 @@
     display: none;
   }
 }
+
+/* Light theme support */
+:global(html[data-theme='light']) .backdrop {
+  background: rgba(22, 19, 15, 0.45);
+}
+
+:global(html[data-theme='light']) .dialog {
+  background: var(--v3-surface-raised, #fffdf8);
+  border-color: var(--v3-border-strong, #16130f);
+  box-shadow: 0 24px 64px -12px rgba(22, 19, 15, 0.25), 0 0 0 1px rgba(22, 19, 15, 0.15);
+}
+
+:global(html[data-theme='light']) .inputWrapper {
+  background: var(--v3-bg, #f4efe4);
+  border-bottom: 1px solid var(--v3-border, rgba(22, 19, 15, 0.16));
+}
+
+:global(html[data-theme='light']) .searchIcon {
+  color: var(--v3-accent-ink, #a93a20);
+}
+
+:global(html[data-theme='light']) .input {
+  color: var(--v3-text, #16130f);
+}
+
+:global(html[data-theme='light']) .input::placeholder {
+  color: var(--v3-text-muted, #5c5449);
+}
+
+:global(html[data-theme='light']) .escBadge {
+  color: var(--v3-text-muted, #5c5449);
+  background: var(--v3-bg-deep, #ede5d6);
+  border-color: var(--v3-border, rgba(22, 19, 15, 0.16));
+}
+
+:global(html[data-theme='light']) .groupHeading {
+  color: var(--v3-accent-ink, #a93a20);
+}
+
+:global(html[data-theme='light']) .item {
+  color: var(--v3-text, #16130f);
+}
+
+:global(html[data-theme='light']) .item[data-selected="true"] {
+  background: var(--v3-bg-deep, #ede5d6);
+  color: var(--v3-text, #16130f);
+  box-shadow: inset 0 0 0 1px var(--v3-border-strong, #16130f);
+}
+
+:global(html[data-theme='light']) .item[data-selected="true"] .itemIcon {
+  color: var(--v3-accent-ink, #a93a20);
+}
+
+:global(html[data-theme='light']) .itemTag {
+  color: var(--v3-text-muted, #5c5449);
+  background: var(--v3-bg-deep, #ede5d6);
+}
+
+:global(html[data-theme='light']) .item[data-selected="true"] .itemTag {
+  color: var(--v3-accent-ink, #a93a20);
+  background: var(--v3-bg, #f4efe4);
+}
+
+:global(html[data-theme='light']) .footer {
+  background: var(--v3-bg, #f4efe4);
+  border-top-color: var(--v3-border, rgba(22, 19, 15, 0.16));
+  color: var(--v3-text-muted, #5c5449);
+}
+
+:global(html[data-theme='light']) .shortcut kbd {
+  background: var(--v3-bg-deep, #ede5d6);
+  border-color: var(--v3-border, rgba(22, 19, 15, 0.16));
+  color: var(--v3-text, #16130f);
+}
