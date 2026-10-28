@@ -425,8 +425,8 @@ input, textarea, select, .form-input {
   border-radius: 9999px;
   background: var(--nav-bg);
   border: 1px solid var(--nav-border);
-  backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
   box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.15);
   z-index: 1000;
   transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
@@ -668,8 +668,8 @@ html[data-theme='light'] .nav-theme-toggle-btn:hover {
   transform: translateX(-50%);
   width: 330px;
   background: rgba(13, 17, 23, 0.96);
-  backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 14px;
   padding: 0.5rem;
@@ -1065,8 +1065,8 @@ html.js-motion:not(.reduce-motion) .hero-stats {
 
 .current-role-card {
   background: rgba(15, 17, 21, 0.7);
-  backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 2rem 2.25rem;
@@ -2095,7 +2095,6 @@ html.js-motion:not(.reduce-motion) .stagger-child { opacity: 0; transform: trans
     display: flex !important;
     overflow-x: auto !important;
     scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
     gap: 1rem !important;
     padding: 0.5rem 0 1.25rem !important;
@@ -2201,8 +2200,8 @@ body.mobile-nav-active [class*="backdrop"] {
     gap: 0.75rem;
     padding: 0.75rem 1.2rem max(0.75rem, env(safe-area-inset-bottom));
     background: rgba(5, 7, 12, 0.95);
-    backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
     border-top: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.7);
     transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
@@ -2282,6 +2281,7 @@ body.preloader-locked .site-grain {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  -webkit-user-select: none;
   user-select: none;
   pointer-events: auto;
   view-transition-name: none !important;
@@ -2298,8 +2298,8 @@ html.boot-skip #boot-preloader {
 
 /* Exit wipe transition (clip-path upwards wipe - 0.4s) */
 #boot-preloader.boot-exit-wipe {
-  clip-path: inset(0 0 100% 0);
   -webkit-clip-path: inset(0 0 100% 0);
+  clip-path: inset(0 0 100% 0);
   transition: clip-path 0.4s cubic-bezier(0.77, 0, 0.175, 1), -webkit-clip-path 0.4s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.4s ease;
   pointer-events: none;
 }
@@ -2348,8 +2348,8 @@ html.boot-skip #boot-preloader {
   border: 1px solid var(--border);
   border-radius: 12px;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
   overflow: hidden;
   will-change: transform, opacity, filter;
   transition: opacity 0.15s ease, filter 0.15s ease, transform 0.15s ease;
@@ -2575,7 +2575,7 @@ html.boot-skip #boot-preloader {
     font-size: clamp(0.62rem, 2.8vh, 0.72rem);
     line-height: 1.35;
     gap: 0.2rem;
-    min-height: auto;
+    min-height: 0;
   }
   .boot-name-text {
     font-size: clamp(1.6rem, 8vh, 2.8rem);
@@ -2658,6 +2658,7 @@ html.boot-skip #boot-preloader {
   border: 1px solid var(--border-dim);
   border-radius: 16px;
   background: rgba(15, 17, 21, 0.4);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 #globe-container {
@@ -2736,7 +2737,6 @@ html.boot-skip #boot-preloader {
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
   padding: 0.5rem 0.25rem 1.5rem;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -2800,6 +2800,7 @@ html.boot-skip #boot-preloader {
   border: 1px solid var(--border);
   border-radius: 16px;
   overflow: hidden;
+  -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
   transition: transform 0.3s var(--ease-out), border-color 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
   height: 100%;
@@ -3043,6 +3044,7 @@ html.boot-skip #boot-preloader {
   font-size: 0.95rem;
   font-weight: 600;
   text-decoration: none;
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -3117,8 +3119,8 @@ html.boot-skip #boot-preloader {
   position: fixed;
   inset: 0;
   background: rgba(4, 6, 10, 0.78);
-  backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   z-index: 100000;
   display: flex;
   align-items: center;
@@ -3324,8 +3326,8 @@ html.boot-skip #boot-preloader {
 .cookie-banner-inner {
   padding: 1.1rem 1.25rem;
   background: rgba(13, 17, 26, 0.94);
-  backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
   border: 1px solid rgba(16, 185, 129, 0.28);
   border-radius: 12px;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7), 0 0 20px rgba(16, 185, 129, 0.08);
@@ -3528,6 +3530,7 @@ html.reduce-motion .ambientGlow {
   font-family: var(--font-mono);
   font-size: 0.68rem;
   color: var(--text-muted);
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -3658,18 +3661,18 @@ html.reduce-motion .ambientGlow {
 
 @keyframes waveformSweepAnim {
   0% {
-    clip-path: inset(0 100% 0 0);
     -webkit-clip-path: inset(0 100% 0 0);
+    clip-path: inset(0 100% 0 0);
     transform: scaleY(0.6);
   }
   50% {
-    clip-path: inset(0 0 0 0);
     -webkit-clip-path: inset(0 0 0 0);
+    clip-path: inset(0 0 0 0);
     transform: scaleY(1);
   }
   100% {
-    clip-path: inset(0 0 0 100%);
     -webkit-clip-path: inset(0 0 0 100%);
+    clip-path: inset(0 0 0 100%);
     transform: scaleY(0.5);
   }
 }

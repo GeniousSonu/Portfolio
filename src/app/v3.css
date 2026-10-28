@@ -311,8 +311,8 @@ html[data-v3='true'] #nav.scrolled {
   border: var(--v3-hairline) solid var(--v3-border-strong);
   box-shadow: var(--v3-shadow-hard-sm);
   border-radius: var(--v3-radius-pill);
-  backdrop-filter: none;
   -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 html[data-v3='true'] .nav-logo-img,
@@ -780,6 +780,7 @@ html[data-v3='true'] [class*='triggerBtn'] {
   display: inline-block;
   flex: none;
   object-fit: contain;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -1533,8 +1534,8 @@ html.v3-theme-transition::view-transition-new(root) {
     linear-gradient(to right, var(--v3-grid-line) 1px, transparent 1px),
     linear-gradient(to bottom, var(--v3-grid-line) 1px, transparent 1px);
   background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, #000 30%, transparent 78%);
   -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, #000 30%, transparent 78%);
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, #000 30%, transparent 78%);
 }
 
 .v3-hero-sun-halo {
@@ -3302,7 +3303,6 @@ html.v3-theme-transition::view-transition-new(root) {
   padding-inline: var(--v3-gutter);
   overflow-x: auto;
   overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
   scrollbar-width: thin;
   scrollbar-color: var(--v3-border-strong) transparent;
@@ -3750,7 +3750,6 @@ html.v3-theme-transition::view-transition-new(root) {
   padding-inline: var(--v3-gutter);
   overflow-x: auto;
   overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
   scroll-snap-type: x proximity;
   scrollbar-width: thin;
@@ -4777,6 +4776,7 @@ html.v3-theme-transition::view-transition-new(root) {
   text-align: center;
   color: var(--v3-text);
   opacity: 0.09;
+  -webkit-user-select: none;
   user-select: none;
   overflow: hidden;
   white-space: nowrap;
@@ -4845,7 +4845,7 @@ html.v3-theme-transition::view-transition-new(root) {
   }
 
   .v3-hero {
-    min-height: auto;
+    min-height: 0;
     padding-top: clamp(5.5rem, 20vh, 7rem);
   }
 
@@ -5308,6 +5308,7 @@ html[data-theme='light'] .v3-sub-meta-pill {
   border: 2px solid #0F172A;
   box-shadow: 3px 3px 0px #0F172A;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -5696,6 +5697,7 @@ html[data-theme='dark'] .is-tangerine .v3-bullet-val {
   border-radius: 14px;
   padding: 1.15rem;
   margin-bottom: 1.25rem;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 
@@ -5754,6 +5756,7 @@ html[data-theme='dark'] .is-tangerine .v3-bullet-val {
   padding: 0.3rem 0.8rem;
   border-radius: 9999px;
   box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.25);
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -5820,6 +5823,7 @@ html[data-theme='dark'] .is-tangerine .v3-bullet-val {
   align-items: center;
   gap: 0.45rem;
   background: rgba(15, 23, 42, 0.88);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 9999px;
@@ -5940,8 +5944,8 @@ html[data-theme='dark'] .is-tangerine .v3-bullet-val {
 /* ── Frosted Glass Contact Card (design-reference.md) ── */
 .v3-contact-frosted-card {
   background: rgba(20, 24, 33, 0.78);
-  backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 32px;
   padding: clamp(2rem, 4.5vw, 3.5rem);
@@ -6008,6 +6012,7 @@ html[data-theme='light'] .v3-contact-email-address {
   box-shadow: 3px 3px 0px #0F172A;
   cursor: pointer;
   transition: all 0.18s ease;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -6044,6 +6049,7 @@ html[data-theme='light'] .v3-contact-email-address {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  -webkit-user-select: none;
   user-select: none;
 }
 
