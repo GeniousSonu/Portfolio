@@ -236,7 +236,6 @@ import { TransitionProvider } from '@/context/TransitionContext';
 import { PlaygroundProvider } from '@/context/PlaygroundContext';
 import CommandPalette from '@/components/CommandPalette';
 import SiteMenuModal from '@/components/SiteMenuModal';
-import BootPreloader from '@/components/BootPreloader';
 import LoadingBar from '@/components/LoadingBar';
 import SelfHealInit from '@/components/SelfHealInit';
 import ThemeProvider from '@/components/v3/ThemeProvider';
@@ -265,7 +264,7 @@ export default function RootLayout({ children }) {
         <script
           id="v3-theme-bootstrap"
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var root=document.documentElement;var path=location.pathname;var search=location.search;var isHome=path==='/'||path==='/index.html';var isReplay=search.indexOf('intro')!==-1||location.hash==='#intro';var stored=localStorage.getItem('v3-theme');var theme=stored==='light'||stored==='dark'?stored:'light';root.setAttribute('data-theme',theme);root.setAttribute('data-v3','true');root.setAttribute('data-v3-home',isHome?'true':'false');var color=theme==='light'?'#F4EFE4':'#070B14';var metas=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<metas.length;i++){metas[i].setAttribute('content',color);}if(!isHome&&!isReplay){root.classList.add('boot-skip');window.__skipBootPreloader=true;}else if(!isReplay){try{var raw=localStorage.getItem('sks_boot_seen_v1');if(raw){var ts=parseInt(raw,10);if(!isNaN(ts)&&(Date.now()-ts)<43200000){root.classList.add('boot-skip');window.__skipBootPreloader=true;}}}catch(err){root.classList.add('boot-skip');window.__skipBootPreloader=true;}}}catch(e){try{document.documentElement.classList.add('boot-skip');window.__skipBootPreloader=true;}catch(_){}}})();`,
+            __html: `(function(){try{var root=document.documentElement;var path=location.pathname;var isHome=path==='/'||path==='/index.html';var stored=localStorage.getItem('v3-theme');var theme=stored==='light'||stored==='dark'?stored:'light';root.setAttribute('data-theme',theme);root.setAttribute('data-v3','true');root.setAttribute('data-v3-home',isHome?'true':'false');var color=theme==='light'?'#F4EFE4':'#070B14';var metas=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<metas.length;i++){metas[i].setAttribute('content',color);}}catch(e){}})();`,
           }}
         />
         <meta name="mobile-web-app-capable" content="yes" />
@@ -280,55 +279,6 @@ export default function RootLayout({ children }) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdGraph) }}
-        />
-        {/* Self-Hosted OFL Boot Font Preloads (BOOT-001) */}
-        <link
-          rel="preload"
-          href="/fonts/boot/noto-sans-bengali-subset.woff2"
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preload"
-          href="/fonts/boot/noto-sans-devanagari-subset.woff2"
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preload"
-          href="/fonts/boot/noto-sans-jp-subset.woff2"
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preload"
-          href="/fonts/boot/noto-sans-cyrillic-subset.woff2"
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preload"
-          href="/fonts/boot/noto-sans-arabic-subset.woff2"
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preload"
-          href="/fonts/boot/noto-sans-latin-subset.woff2"
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
-        <script
-          id="sks-boot-skip-detect"
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var nav=performance.getEntriesByType&&performance.getEntriesByType('navigation')[0];if(nav&&nav.type==='back_forward'){document.documentElement.classList.add('boot-skip');}}catch(e){}})();`,
-          }}
         />
         {/* Incident INC-001 Resilience Bootstrap (Early ChunkLoadError catcher & js-motion gate) */}
         <script
@@ -423,7 +373,6 @@ export default function RootLayout({ children }) {
               <TransitionProvider>
                 <PlaygroundProvider>
                   <LoadingBar />
-                  <BootPreloader />
                   <SmoothScrollProvider />
                   <PWARegistration />
                   <UserPreferences />

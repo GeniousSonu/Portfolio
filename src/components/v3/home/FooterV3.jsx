@@ -179,19 +179,6 @@ export default function FooterV3() {
           </div>
 
           <div className="v3-footer-legal">
-            <Link
-              href="/?intro=1"
-              onClick={() => {
-                try {
-                  localStorage.removeItem('sks_boot_seen_v1');
-                } catch {}
-              }}
-              className="v3-footer-link"
-              data-v3-sound="confirm"
-              title="Replay console boot sequence"
-            >
-              Replay Intro
-            </Link>
             {FOOTER_LEGAL_ITEMS.map((item) => (
               <Link
                 key={item.id}

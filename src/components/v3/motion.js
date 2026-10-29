@@ -67,44 +67,7 @@ export function useBootComplete(callback) {
   }, [callback]);
 
   useEffect(() => {
-    let finished = false;
-    let timeoutId = null;
-    let observer = null;
-
-    const fire = () => {
-      if (finished) return;
-      finished = true;
-      if (timeoutId) clearTimeout(timeoutId);
-      observer?.disconnect();
-      callbackRef.current?.();
-    };
-
-    const bootDone = () => {
-      const root = document.documentElement;
-      return (
-        root.classList.contains('boot-complete') ||
-        root.classList.contains('boot-skip') ||
-        !document.getElementById('boot-preloader')
-      );
-    };
-
-    if (bootDone()) {
-      fire();
-      return undefined;
-    }
-
-    observer = new MutationObserver(() => {
-      if (bootDone()) fire();
-    });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-
-    // Boot's own ceiling is 4.5s; never leave the hero armed longer than that.
-    timeoutId = setTimeout(fire, 5000);
-
-    return () => {
-      observer?.disconnect();
-      clearTimeout(timeoutId);
-    };
+    callbackRef.current?.();
   }, []);
 }
 

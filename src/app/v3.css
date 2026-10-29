@@ -529,23 +529,6 @@ html[data-v3='true'] #boot-preloader .boot-accent-cursor {
   background: var(--v3-term-accent);
 }
 
-html[data-v3='true'] #boot-preloader .boot-name-text {
-  font-family: var(--v3-font-display), var(--v3-font-body);
-  font-weight: 400;
-  color: var(--v3-text);
-  text-shadow: none;
-  letter-spacing: -0.01em;
-}
-
-html[data-v3='true'] #boot-preloader .boot-skip-hint {
-  color: var(--v3-text-muted);
-  font-family: var(--v3-font-mono);
-}
-
-html[data-v3='true'] #boot-preloader .boot-reduced-motion-view {
-  color: var(--v3-text);
-}
-
 /* ─── 10. Chrome: page transition waveform ────────────────────── */
 
 html[data-v3='true'] .transition-waveform-container .transition-waveform-svg {
