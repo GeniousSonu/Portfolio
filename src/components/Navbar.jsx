@@ -12,6 +12,7 @@ import { usePlayground } from '@/context/PlaygroundContext';
 import navState from '@/lib/navState';
 import { NAV_GROUPS, NAVIGATION_ITEMS, getNavItemsByGroup } from '@/config/navigation';
 import { useTheme } from '@/components/v3/ThemeProvider';
+import SoundFeelControl from '@/components/v3/audio/SoundFeelControl';
 import MenuOverlay from './menu/MenuOverlay';
 import styles from './Navbar.module.css';
 
@@ -501,6 +502,9 @@ export default function Navbar() {
               </svg>
             )}
           </button>
+
+          {/* Sound & Feel Control (TASK SOUND-FEEL-001) */}
+          <SoundFeelControl />
 
           {/* Install App Button */}
           <InstallAppButton />

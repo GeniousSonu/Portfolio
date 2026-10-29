@@ -2,7 +2,7 @@
 // Built for Next.js 16 App Router & Zero-Stale Navigation Architecture
 // Incident INC-001 Hardened: Navigations are strictly Network-First with Offline fallback only
 
-const CACHE_VERSION = 'v-1f19faa-1793257700312';
+const CACHE_VERSION = 'v-86e20b4-1793261025195';
 const STATIC_CACHE = `sks-static-${CACHE_VERSION}`;
 const OFFLINE_CACHE = `sks-offline-${CACHE_VERSION}`;
 

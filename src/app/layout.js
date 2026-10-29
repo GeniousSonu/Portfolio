@@ -240,6 +240,8 @@ import LoadingBar from '@/components/LoadingBar';
 import SelfHealInit from '@/components/SelfHealInit';
 import ThemeProvider from '@/components/v3/ThemeProvider';
 import SoundProvider from '@/components/v3/SoundProvider';
+import SoundOptInPrompt from '@/components/v3/audio/SoundOptInPrompt';
+import SoundCreditsModal from '@/components/v3/audio/SoundCreditsModal';
 import Navbar from '@/components/Navbar';
 import FooterV3 from '@/components/v3/home/FooterV3';
 import { Analytics } from '@vercel/analytics/react';
@@ -389,6 +391,8 @@ export default function RootLayout({ children }) {
                   <ChatbotWidget />
                   <CommandPalette />
                   <SiteMenuModal />
+                  <SoundOptInPrompt />
+                  <SoundCreditsModal />
                 </PlaygroundProvider>
               </TransitionProvider>
             </OverlayProvider>
