@@ -6,8 +6,8 @@ const ThemeContext = createContext(null);
 const STORAGE_KEY = 'v3-theme';
 
 const THEME_BG = {
-  light: '#F4EFE4',
-  dark: '#070B14',
+  light: '#FAF4EE',
+  dark: '#060A12',
 };
 
 function systemTheme() {
@@ -30,6 +30,14 @@ function syncThemeColor(theme) {
   document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
     meta.setAttribute('content', color);
   });
+}
+
+function syncFavicon(theme) {
+  if (typeof document === 'undefined') return;
+  const iconLink = document.querySelector('link[rel*="icon"]');
+  if (iconLink) {
+    iconLink.setAttribute('href', theme === 'light' ? '/favicon-sun.svg' : '/favicon-moon.svg');
+  }
 }
 
 export function useTheme() {
@@ -55,6 +63,7 @@ export default function ThemeProvider({ children }) {
     const isHome = typeof window !== 'undefined' && (window.location.pathname === '/' || window.location.pathname === '/index.html');
     root.setAttribute('data-v3-home', isHome ? 'true' : 'false');
     syncThemeColor(next);
+    syncFavicon(next);
     setThemeState(next);
   }, []);
 

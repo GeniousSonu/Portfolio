@@ -190,6 +190,24 @@ html[data-theme='dark'] {
   --sec-06-bg: #2E1503;
   --sec-07-bg: #0B0F0D;
   --sec-08-bg: #072138;
+
+  /* ─── The Solar Node Tokens (Midnight Signal) ─── */
+  --sn-sky-top: #03060B;
+  --sn-sky-bottom: #0A1120;
+  --sn-scene-overlay: rgba(6, 10, 18, 0.45);
+  --sn-orb-core: #E2E8F0;
+  --sn-orb-glow: rgba(41, 240, 212, 0.45);
+  --sn-orb-accent: #29F0D4;
+  --sn-card-bg: rgba(10, 17, 32, 0.72);
+  --sn-card-border: rgba(41, 240, 212, 0.2);
+  --sn-text-primary: #F8FAFC;
+  --sn-text-secondary: #94A3B8;
+  --sn-text-accent: #29F0D4;
+  --sn-pill-bg: rgba(41, 240, 212, 0.12);
+  --sn-pill-text: #5EEAD4;
+  --sn-pill-border: rgba(41, 240, 212, 0.3);
+  --sn-stat-bg: rgba(19, 31, 55, 0.65);
+  --sn-stat-border: rgba(41, 240, 212, 0.15);
 }
 
 html[data-theme='light'] {
@@ -212,6 +230,24 @@ html[data-theme='light'] {
   --gold-bright: #b8860b;
   --signal: #0b8058;
   --signal-dim: #056644;
+
+  /* ─── The Solar Node Tokens (Golden Hour) ─── */
+  --sn-sky-top: #FDF6EE;
+  --sn-sky-bottom: #F3E3CE;
+  --sn-scene-overlay: rgba(253, 246, 238, 0.25);
+  --sn-orb-core: #E08A22;
+  --sn-orb-glow: rgba(224, 138, 34, 0.45);
+  --sn-orb-accent: #F7C268;
+  --sn-card-bg: rgba(255, 255, 255, 0.76);
+  --sn-card-border: rgba(217, 90, 50, 0.18);
+  --sn-text-primary: #1C1917;
+  --sn-text-secondary: #57534E;
+  --sn-text-accent: #B45309;
+  --sn-pill-bg: rgba(247, 194, 104, 0.24);
+  --sn-pill-text: #92400E;
+  --sn-pill-border: rgba(224, 138, 34, 0.35);
+  --sn-stat-bg: rgba(255, 255, 255, 0.7);
+  --sn-stat-border: rgba(217, 90, 50, 0.14);
 }
 
 html {
