@@ -7,7 +7,10 @@ export const viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
-  themeColor: '#05070c',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#FAF4EE' },
+    { media: '(prefers-color-scheme: dark)', color: '#060A12' },
+  ],
 };
 
 export const metadata = {
@@ -65,10 +68,10 @@ export const metadata = {
       'Official portfolio of SK Sahinur Islam (Genious Sonu, Sahinur) — Senior Web Application Developer at Ib Arts, Co-Founder of WEFIK, and IoT Patent Holder.',
     images: [
       {
-        url: '/icon-512.png',
-        width: 512,
-        height: 512,
-        alt: 'SK Sahinur Islam (Genious Sonu) — Full Stack Developer & IT Engineer',
+        url: '/hero/og-solar-node.png',
+        width: 1200,
+        height: 630,
+        alt: 'SK Sahinur Islam (Genious Sonu) — The Solar Node',
       },
     ],
     siteName: 'SK Sahinur Islam (Genious Sonu) Portfolio',
@@ -85,7 +88,7 @@ export const metadata = {
     description:
       'Official portfolio of SK Sahinur Islam (Genious Sonu, Sahinur) — Senior Web Application Developer at Ib Arts, Co-Founder of WEFIK, and IoT Patent Holder.',
     creator: '@GeniousSonu',
-    images: ['/icon-512.png'],
+    images: ['/hero/og-solar-node.png'],
   },
   manifest: '/manifest.webmanifest',
   appleWebApp: {
@@ -94,7 +97,11 @@ export const metadata = {
     title: 'SONU',
   },
   icons: {
-    icon: '/logo.svg',
+    icon: [
+      { url: '/favicon-sun.svg', media: '(prefers-color-scheme: light)' },
+      { url: '/favicon-moon.svg', media: '(prefers-color-scheme: dark)' },
+      { url: '/logo.svg' },
+    ],
     apple: '/apple-touch-icon.png',
   },
 };

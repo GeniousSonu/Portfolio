@@ -5,6 +5,7 @@ import {
   Bebas_Neue,
   Playfair_Display,
   Plus_Jakarta_Sans,
+  Anek_Bangla,
 } from 'next/font/google';
 
 /**
@@ -14,6 +15,7 @@ import {
  * 3. Technical Monospace: Space Mono (Metadata, stats, command strips)
  * 4. UI Sans: Plus Jakarta Sans / Bricolage Grotesque (Clean body & navigation)
  * 5. Accent Hand: Shantell Sans (Playful annotations)
+ * 6. Regional Display / Bengali Subset: Anek Bangla (Local cultural accents)
  *
  * Self-hosted build-time via next/font (zero runtime third-party requests).
  */
@@ -72,6 +74,15 @@ export const fontHand = Shantell_Sans({
   adjustFontFallback: true,
 });
 
+export const fontBengali = Anek_Bangla({
+  subsets: ['bengali'],
+  weight: ['400', '600', '700'],
+  display: 'swap',
+  preload: false,
+  variable: '--font-bengali',
+  adjustFontFallback: true,
+});
+
 export const fontClassNames = [
   fontBodyDisplay.variable,
   fontDisplay.variable,
@@ -79,5 +90,6 @@ export const fontClassNames = [
   fontSans.variable,
   fontMono.variable,
   fontHand.variable,
+  fontBengali.variable,
 ].join(' ');
 
