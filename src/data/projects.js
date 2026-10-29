@@ -4,6 +4,7 @@ export const PROJECTS = [
     title: 'GeniousSonu Site Checkup — WP Security Checklist',
     category: '2026 · WordPress · Security',
     dotColor: '#10B981',
+    coverImage: '/projects/genioussonu-site-checkup/cover.webp',
     desc: 'Automated WordPress security hardening checklist and vulnerability audit plugin. Features 64 agency SOP checks, 1-click safe fixes with diff preview, and client audit reporting.',
     stack: ['PHP', 'WordPress', 'Security Hardening', 'REST API', 'JavaScript'],
     metrics: [
@@ -20,6 +21,7 @@ export const PROJECTS = [
     title: 'LearnAI — Adaptive Intelligent Tutoring',
     category: '2024 · AI/ML',
     dotColor: '#A78BFA',
+    coverImage: '/projects/learnai/cover.webp',
     desc: 'AI-powered tutoring platform that profiles users, adapts content difficulty in real-time, and uses NLP for contextual feedback. Built on MERN + Python ML microservices.',
     stack: ['React', 'Node.js', 'MongoDB', 'Python', 'scikit-learn', 'OpenAI API', 'FastAPI'],
     metrics: [
@@ -37,6 +39,7 @@ export const PROJECTS = [
     isPatent: true,
     category: '2025 · IoT · Hardware',
     dotColor: '#4ADE80',
+    coverImage: '/projects/iot-cold-chain-patent/cover.webp',
     patentRibbon: 'OFFICIALLY GRANTED PATENT · JUL 2025',
     patentNumber: 'Patent #202531060002 A',
     desc: 'Patented solar-powered IoT cold chain system replacing expensive RFID stickers. NodeMCU + ESP8266, MQTT telemetry, DS18B20 sensors, zone-wise Peltier cooling for off-grid healthcare.',
@@ -56,6 +59,7 @@ export const PROJECTS = [
     title: 'Personal Website v4 — Gatsby Edition',
     category: '2024 · Web',
     dotColor: '#059669',
+    coverImage: '/projects/portfolio-v4/cover.webp',
     desc: 'Fourth complete rewrite of my personal site. Gatsby + GraphQL + MDX, Lighthouse 100 across all metrics, GSAP scroll animations, terminal-inspired dark theme.',
     stack: ['Gatsby', 'React', 'GraphQL', 'GSAP', 'MDX', 'CI/CD'],
     metrics: [
@@ -71,6 +75,7 @@ export const PROJECTS = [
     title: 'WEFIK Digital Agency Platform',
     category: '2021 · Web · SaaS',
     dotColor: '#60A5FA',
+    coverImage: '/projects/wefik-platform/cover.webp',
     desc: 'Internal business platform for WEFIK — client portal, real-time project tracking, invoice generation, team management. MERN stack with WebSocket notifications and RBAC.',
     stack: ['React', 'Node.js', 'MongoDB', 'Socket.io', 'Redis', 'AWS S3'],
     metrics: [
@@ -86,6 +91,7 @@ export const PROJECTS = [
     title: 'STAY — Full Stack Hotel Booking Web App',
     category: '2024 · Full Stack · Web',
     dotColor: '#e34c26',
+    coverImage: '/projects/stay-hotel-booking/cover.webp',
     desc: 'A hotel booking web application built with HTML, CSS, JavaScript, Node.js, Express.js, MongoDB, and Bootstrap, offering a seamless user experience and secure payment integration.',
     stack: ['Node.js', 'Express.js', 'MongoDB', 'JavaScript', 'Bootstrap', 'HTML/CSS'],
     metrics: [
@@ -102,6 +108,7 @@ export const PROJECTS = [
     title: 'JobHunt — Job Application Tracker Portal',
     category: '2024 · Web · Portal',
     dotColor: '#f1e05a',
+    coverImage: '/projects/jobhunt-portal/cover.webp',
     desc: 'A job search and recruitment management portal featuring job postings, user profiles, applicant tracking, and recruiter dashboards built with MERN stack.',
     stack: ['React', 'Node.js', 'MongoDB', 'Express.js', 'Tailwind CSS'],
     metrics: [

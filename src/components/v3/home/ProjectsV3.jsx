@@ -58,14 +58,22 @@ function ProjectCover({ project, widths, sizes, priority = false }) {
     );
   }
 
+  const isCloudinary =
+    typeof project.coverImage === 'string' &&
+    (project.coverImage.startsWith('portfolio/') || project.coverImage.includes('cloudinary'));
+
+  const src = isCloudinary
+    ? buildCloudinaryUrl(project.coverImage, {
+        width: widths,
+        height: Math.round(widths * 0.62),
+        crop: 'fill',
+      })
+    : project.coverImage;
+
   return (
     <div className="v3-showcase-cover">
       <Image
-        src={buildCloudinaryUrl(project.coverImage, {
-          width: widths,
-          height: Math.round(widths * 0.62),
-          crop: 'fill',
-        })}
+        src={src}
         alt={`${project.title} — project showcase`}
         width={widths}
         height={Math.round(widths * 0.62)}
