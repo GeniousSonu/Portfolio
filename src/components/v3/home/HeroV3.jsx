@@ -1,34 +1,17 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import Emoji3D from '../Emoji3D';
-import { PlayableElement, EditableText } from '@/components/PlaygroundWrappers';
+import CelestialOrb from './CelestialOrb';
 import { useBootComplete, useMagneticButtons, prefersReducedMotion } from '../motion';
 
-const COMMANDS = [
-  'ls -la /projects/',
-  'git log --oneline -5',
-  'sudo systemctl status nginx',
-  'ssh root@192.168.1.1',
-  'cat /etc/hosts',
-];
-
 const STATS = [
-  { target: 1, suffix: '', label: 'Granted Patent', meta: '2025' },
+  { target: 1, suffix: '', label: 'Granted Patent', meta: 'IN 544062 · 2025' },
   { target: 30, suffix: '+', label: 'Verified Certifications', meta: 'CompTIA · IBM · THM' },
-  { target: 40, suffix: '+', label: 'Shipped Systems', meta: 'Production' },
-  { target: 5, suffix: '+', label: 'Years Engineering', meta: 'Since 2021' },
+  { target: 40, suffix: '+', label: 'Shipped Systems', meta: 'Production Applications' },
+  { target: 5, suffix: '+', label: 'Years Engineering', meta: 'Systems & Web Architecture' },
 ];
 
-const TELEMETRY = [
-  ['PATENT', 'IN 544062 · App No. 202531060002 A (Jul 2025)'],
-  ['TITLE', 'Solar IoT Vaccine Preservation System'],
-  ['HARDWARE', 'NodeMCU ESP8266 + MQTT + Peltier Cooling'],
-  ['STACK', 'Next.js 16 · Supabase · Sanity v3 · WebRTC'],
-  ['LOCATION', 'Kolkata, WB, IN (22.5726° N, 88.3639° E)'],
-];
-
-function localTime() {
+function getISTTime() {
   try {
     return new Date().toLocaleTimeString('en-GB', {
       timeZone: 'Asia/Kolkata',
@@ -37,26 +20,27 @@ function localTime() {
       hour12: false,
     });
   } catch {
-    return '';
+    return '11:30';
   }
 }
 
 export default function HeroV3() {
   const rootRef = useRef(null);
   const [booted, setBooted] = useState(false);
-  const [clock, setClock] = useState('');
-  const [typed, setTyped] = useState(COMMANDS[0]);
+  const [clock, setClock] = useState(getISTTime);
 
   useBootComplete(() => setBooted(true));
   useMagneticButtons(rootRef);
 
+  // Sync live IST clock periodically
   useEffect(() => {
-    const tick = () => setClock(localTime());
+    const tick = () => setClock(getISTTime());
     tick();
-    const id = window.setInterval(tick, 30000);
-    return () => window.clearInterval(id);
+    const timer = window.setInterval(tick, 30000);
+    return () => window.clearInterval(timer);
   }, []);
 
+  // Stats count-up animation only executes post-boot, respecting reduced motion
   useEffect(() => {
     if (!booted) return undefined;
     const root = rootRef.current;
@@ -72,14 +56,15 @@ export default function HeroV3() {
     const nodes = Array.from(root.querySelectorAll('[data-stat-target]'));
     if (!nodes.length) return undefined;
 
-    const start = performance.now() + 550;
-    const duration = 1100;
+    const start = performance.now() + 300;
+    const duration = 1000;
     let frame = 0;
 
     const tick = (now) => {
       const elapsed = now - start;
       const t = Math.min(1, Math.max(0, elapsed / duration));
-      const eased = 1 - (1 - t) * (1 - t);
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - t, 3);
       nodes.forEach((node) => {
         const target = Number(node.getAttribute('data-stat-target'));
         const suffix = node.getAttribute('data-stat-suffix') || '';
@@ -92,243 +77,161 @@ export default function HeroV3() {
     return () => window.cancelAnimationFrame(frame);
   }, [booted]);
 
-  useEffect(() => {
-    if (!booted || prefersReducedMotion()) return undefined;
-
-    let disposed = false;
-    let timer = null;
-    let index = 0;
-    let chars = 0;
-    let deleting = false;
-    let visible = true;
-
-    const terminal = rootRef.current?.querySelector('.v3-terminal');
-    let observer = null;
-    if (terminal) {
-      observer = new IntersectionObserver(
-        ([entry]) => {
-          visible = entry.isIntersecting;
-        },
-        { threshold: 0.1 }
-      );
-      observer.observe(terminal);
-    }
-
-    const step = () => {
-      if (disposed) return;
-      if (!visible || document.visibilityState === 'hidden') {
-        timer = window.setTimeout(step, 700);
-        return;
-      }
-
-      const command = COMMANDS[index];
-      if (!deleting) {
-        chars += 1;
-        setTyped(command.slice(0, chars));
-        if (chars >= command.length) {
-          deleting = true;
-          timer = window.setTimeout(step, 1700);
-          return;
-        }
-        timer = window.setTimeout(step, 52 + Math.random() * 36);
-      } else {
-        chars -= 2;
-        setTyped(command.slice(0, Math.max(0, chars)));
-        if (chars <= 0) {
-          deleting = false;
-          index = (index + 1) % COMMANDS.length;
-          chars = 0;
-          timer = window.setTimeout(step, 420);
-          return;
-        }
-        timer = window.setTimeout(step, 26);
-      }
-    };
-
-    timer = window.setTimeout(step, 800);
-    return () => {
-      disposed = true;
-      observer?.disconnect();
-      window.clearTimeout(timer);
-    };
-  }, [booted]);
-
   return (
-    <section id="hero" className="v3-hero" ref={rootRef} aria-labelledby="hero-title">
-      <div className="v3-hero-atmosphere" aria-hidden="true">
-        <span className="v3-hero-sun-halo" />
-        <span className="v3-hero-grid" />
-        <svg
-          className="v3-hero-thread"
-          viewBox="0 0 1000 700"
-          fill="none"
-          preserveAspectRatio="none"
-        >
-          <path
-            d="M-20 120C120 120 160 40 290 40c150 0 150 150 300 150 160 0 180-120 430-120"
-            stroke="currentColor"
-            strokeWidth="1"
-            vectorEffect="non-scaling-stroke"
+    <section id="hero" className="sn-hero" ref={rootRef} aria-labelledby="hero-title">
+      {/* ─── DUAL SCENE DOM LAYERS (CSS-Only Theme Switching) ─── */}
+      <div className="sn-scene-wrap" aria-hidden="true">
+        {/* Light Theme: Golden Hour Sunrise */}
+        <picture className="sn-scene sn-scene--light">
+          <source
+            media="(max-width: 767px)"
+            srcSet="/hero/mobile-light.webp"
+            type="image/webp"
           />
-          <path
-            d="M-20 660c170 0 210-90 360-90 170 0 170 90 330 90 150 0 190-70 350-70"
-            stroke="currentColor"
-            strokeWidth="1"
-            vectorEffect="non-scaling-stroke"
+          <source
+            media="(max-width: 767px)"
+            srcSet="/hero/mobile-light.jpg"
+            type="image/jpeg"
           />
-        </svg>
+          <source srcSet="/hero/desktop-light.webp" type="image/webp" />
+          <img
+            src="/hero/desktop-light.jpg"
+            alt=""
+            fetchPriority="high"
+            className="sn-scene-img"
+          />
+        </picture>
+
+        {/* Dark Theme: Midnight Signal */}
+        <picture className="sn-scene sn-scene--dark">
+          <source
+            media="(max-width: 767px)"
+            srcSet="/hero/mobile-dark.webp"
+            type="image/webp"
+          />
+          <source
+            media="(max-width: 767px)"
+            srcSet="/hero/mobile-dark.jpg"
+            type="image/jpeg"
+          />
+          <source srcSet="/hero/desktop-dark.webp" type="image/webp" />
+          <img
+            src="/hero/desktop-dark.jpg"
+            alt=""
+            fetchPriority="high"
+            className="sn-scene-img"
+          />
+        </picture>
+
+        {/* Ambient atmospheric gradients & vignette */}
+        <div className="sn-scene-overlay" />
+        <div className="sn-scene-vignette" />
       </div>
 
-      <div className="v3-shell v3-hero-shell">
-        <div className="v3-hero-topline" data-hero-fade>
-          <span className="v3-eyebrow">
-            <span className="v3-pulse-dot" aria-hidden="true" />
-            Open to Global Roles · IST (UTC+5:30)
-          </span>
+      {/* ─── HERO CONTENT SHELL ─── */}
+      <div className="sn-shell">
+        {/* Top Status Strip with Live Clock & Celestial Orb */}
+        <div className="sn-topbar">
+          <div className="sn-status-badge">
+            <span className="sn-pulse-dot" aria-hidden="true" />
+            <span className="sn-status-text">
+              Open to Global Roles · Kolkata, India{' '}
+              <span className="sn-bengali-accent" title="Kolkata in Bengali">
+                (কলকাতা)
+              </span>
+            </span>
+            <span className="sn-status-time" suppressHydrationWarning>
+              {clock} <span className="sn-status-tz">IST</span>
+            </span>
+          </div>
+
+          <div className="sn-orb-slot">
+            <CelestialOrb size="large" />
+          </div>
         </div>
 
-        <div className="v3-hero-grid">
-          <div className="v3-hero-main v3-glass-card">
-            <div className="v3-cover-badge-row" data-hero-fade>
-              <span className="v3-cover-badge">★ COVER STORY</span>
+        {/* Main Stage Grid */}
+        <div className="sn-stage">
+          <div className="sn-narrative-card">
+            <div className="sn-eyebrow-row">
+              <span className="sn-eyebrow-badge">★ THE SOLAR NODE</span>
+              <span className="sn-badge-meta">EST. 2021 · KOLKATA</span>
             </div>
 
-            <h1 className="v3-hero-title" id="hero-title">
-              <span className="v3-hero-line v3-hero-line--small">
-                <span data-hero-line>SK</span>
-              </span>
-              <span className="v3-hero-line">
-                <span data-hero-line>
-                  <EditableText tag="span" className="v3-hero-name-serif">
-                    Sahinur
-                  </EditableText>
-                </span>
-              </span>
-              <span className="v3-hero-line v3-hero-line--italic">
-                <span data-hero-line>
-                  <EditableText tag="span" className="v3-hero-name-italic">
-                    Islam
-                  </EditableText>
-                  <span className="v3-hero-period">.</span>
-                </span>
+            <h1 className="sn-headline" id="hero-title">
+              <span className="sn-headline-author">SK Sahinur Islam</span>
+              <span className="sn-headline-lead">
+                Architecting{' '}
+                <span className="sn-serif-accent">resilient distributed systems</span>,
+                real-time protocols, and high-fidelity web applications.
               </span>
               <span className="sr-only">
                 (Genious Sonu) — Senior Web Application Developer &amp; Systems Architect
               </span>
             </h1>
 
-            <p className="v3-hero-role" data-hero-fade>
-              <EditableText tag="span">Senior Web Application Developer &amp; Systems Architect</EditableText>
-            </p>
-            <p className="v3-hero-desc" data-hero-fade>
-              <EditableText tag="span">
-                <span className="v3-serif-accent">Architecting resilient real-time protocols</span>, secure distributed systems, and
-                high-fidelity product interfaces.
-              </EditableText>
+            <p className="sn-role-desc">
+              Senior Web Application Developer &amp; Systems Architect. Co-Founder @ WEFIK.
+              Grantee of Indian Patent IN 544062 for IoT Vaccine Cold-Chain Preservation.
             </p>
 
-            <div className="v3-hero-pills" data-hero-fade>
-              <span className="v3-pill-tag v3-pill-tag--pink">Granted Patentee (IoT)</span>
-              <span className="v3-pill-tag v3-pill-tag--lime">Co-Founder @ WEFIK</span>
-              <span className="v3-pill-tag v3-pill-tag--yellow">30+ Verified Credentials</span>
+            <div className="sn-pills-row">
+              <span className="sn-pill sn-pill--patent">
+                <span className="sn-pill-icon" aria-hidden="true">⚡</span>
+                Granted Patentee (IoT)
+              </span>
+              <span className="sn-pill sn-pill--agency">
+                <span className="sn-pill-icon" aria-hidden="true">✦</span>
+                Co-Founder @ WEFIK
+              </span>
+              <span className="sn-pill sn-pill--certs">
+                <span className="sn-pill-icon" aria-hidden="true">✓</span>
+                30+ Verified Credentials
+              </span>
             </div>
 
-            <div className="v3-hero-actions" data-hero-fade>
-              <a href="#projects" className="v3-btn v3-btn--primary" data-magnetic>
+            <div className="sn-actions">
+              <a href="#projects" className="sn-btn sn-btn--primary" data-magnetic>
                 <span>Selected Works</span>
-                <span aria-hidden="true">↓</span>
+                <span className="sn-btn-arrow" aria-hidden="true">↓</span>
               </a>
               <a
                 href="/projects/iot-cold-chain-patent"
-                className="v3-btn v3-btn--ghost"
+                className="sn-btn sn-btn--ghost"
                 data-magnetic
               >
                 <span>Patent Blueprint</span>
-                <span aria-hidden="true">→</span>
+                <span className="sn-btn-arrow" aria-hidden="true">→</span>
               </a>
             </div>
           </div>
-
-          <aside className="v3-hero-aside">
-            <div className="v3-orbit-card">
-              <div className="v3-orbit-visual" aria-hidden="true">
-                <span className="v3-orbit-ring v3-orbit-ring--one" />
-                <span className="v3-orbit-ring v3-orbit-ring--two" />
-                <Emoji3D name="sun" size={92} priority className="v3-orbit-sun" />
-              </div>
-              <div className="v3-orbit-copy">
-                <span className="v3-mono-label">Based in</span>
-                <strong>Kolkata, India</strong>
-                <span className="v3-orbit-time">
-                  {clock ? (
-                    <>
-                      {clock} <span>IST</span>
-                    </>
-                  ) : (
-                    'UTC+5:30'
-                  )}
-                </span>
-              </div>
-            </div>
-
-            <PlayableElement className="v3-terminal-wrap">
-              <div className="v3-terminal">
-                <div className="v3-terminal-head">
-                  <span className="v3-terminal-dots" aria-hidden="true">
-                    <span />
-                    <span />
-                    <span />
-                  </span>
-                  <span className="v3-terminal-title">sahinur.is // systems-telemetry</span>
-                </div>
-                <dl className="v3-terminal-body">
-                  {TELEMETRY.map(([key, value]) => (
-                    <div key={key} className="v3-terminal-row">
-                      <dt>{key}</dt>
-                      <dd>{value}</dd>
-                    </div>
-                  ))}
-                  <div className="v3-terminal-row v3-terminal-row--command">
-                    <dt>$</dt>
-                    <dd>
-                      {typed}
-                      <span className="v3-caret" aria-hidden="true" />
-                    </dd>
-                  </div>
-                  <div className="v3-terminal-output">
-                    SK Sahinur Islam // Senior Web Application Developer &amp; Co-Founder
-                  </div>
-                </dl>
-              </div>
-            </PlayableElement>
-          </aside>
         </div>
 
-        <dl className="v3-hero-stats" data-hero-fade aria-label="Career statistics">
+        {/* Stats Strip — Server-rendered final values for zero hydration mismatch */}
+        <dl className="sn-stats-strip" aria-label="Career statistics">
           {STATS.map((stat) => (
-            <div key={stat.label} className="v3-stat">
+            <div key={stat.label} className="sn-stat-card">
               <dd
-                className="v3-stat-num"
+                className="sn-stat-num"
                 data-stat-target={stat.target}
                 data-stat-suffix={stat.suffix}
               >
                 {stat.target}
                 {stat.suffix}
               </dd>
-              <dt className="v3-stat-label">{stat.label}</dt>
-              <span className="v3-stat-meta">{stat.meta}</span>
+              <dt className="sn-stat-label">{stat.label}</dt>
+              <span className="sn-stat-meta">{stat.meta}</span>
             </div>
           ))}
         </dl>
 
-        <div className="v3-hero-foot" data-hero-fade>
-          <a href="#about" className="v3-scroll-cue" data-v3-sound="tick">
-            <span className="v3-scroll-line" aria-hidden="true">
-              <span />
-            </span>
-            Scroll to follow the thread.
+        {/* Scroll Cue */}
+        <div className="sn-foot">
+          <a href="#about" className="sn-scroll-cue">
+            <span className="sn-scroll-bar" aria-hidden="true" />
+            <span>Scroll to explore the architecture</span>
           </a>
-          <span className="v3-hero-footnote">01 — Arrival</span>
+          <span className="sn-foot-chapter">01 — Arrival</span>
         </div>
       </div>
     </section>
