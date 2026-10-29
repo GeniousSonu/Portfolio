@@ -68,7 +68,7 @@ const SHORTLIST = [
   {
     id: 'track-6',
     title: 'Dreamy Night',
-    artist: 'Meydän',
+    artist: 'Meydan',
     bpm: '75 BPM',
     mood: 'Warm atmospheric pads and gentle kick-snare heartbeat',
     bestFor: 'Night / Dark Focus',
@@ -79,27 +79,83 @@ const SHORTLIST = [
   },
 ];
 
+function PlayIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <polygon points="5 3 19 12 5 21 5 3" />
+    </svg>
+  );
+}
+
+function StopIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <rect x="4" y="4" width="16" height="16" rx="2" />
+    </svg>
+  );
+}
+
 export default function SoundAuditionClient() {
   const { theme, toggleTheme } = useTheme();
-  const { play, vibrate } = useSound();
+  const { play, vibrate, toggleMusic, musicPlaying } = useSound();
   const [activeTrack, setActiveTrack] = useState('track-1');
-  const [isPlaying, setIsPlaying] = useState(false);
 
   const handleTestSfx = (kind, haptic) => {
     play(kind);
     vibrate(haptic);
   };
 
+  const handleToggleAudition = (trackId) => {
+    setActiveTrack(trackId);
+    toggleMusic();
+  };
+
   return (
-    <main className="sn-audition-page" style={{ minHeight: '100svh', padding: '120px 24px 80px', maxWidth: '1000px', margin: '0 auto' }}>
+    <main
+      className="sn-audition-page"
+      style={{
+        minHeight: '100svh',
+        padding: '120px 24px 80px',
+        maxWidth: '1000px',
+        margin: '0 auto',
+      }}
+    >
       <header style={{ marginBottom: '40px' }}>
-        <div style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '100px', background: 'var(--sn-surface-2)', border: '1px solid var(--sn-card-border)', fontSize: '12px', fontWeight: '600', letterSpacing: '0.05em', color: 'var(--sn-text-secondary)', marginBottom: '12px' }}>
+        <div
+          style={{
+            display: 'inline-block',
+            padding: '4px 12px',
+            borderRadius: '100px',
+            background: 'var(--sn-surface-2)',
+            border: '1px solid var(--sn-card-border)',
+            fontSize: '12px',
+            fontWeight: '600',
+            letterSpacing: '0.05em',
+            color: 'var(--sn-text-secondary)',
+            marginBottom: '12px',
+          }}
+        >
           INTERNAL AUDITION ROOM • TASK SOUND-FEEL-001
         </div>
-        <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: '800', letterSpacing: '-0.02em', color: 'var(--sn-text-primary)', marginBottom: '12px' }}>
-          Lofi Music & Sound Sourcing Lab
+        <h1
+          style={{
+            fontSize: 'clamp(2rem, 4vw, 3rem)',
+            fontWeight: '800',
+            letterSpacing: '-0.02em',
+            color: 'var(--sn-text-primary)',
+            marginBottom: '12px',
+          }}
+        >
+          Lofi Music &amp; Sound Sourcing Lab
         </h1>
-        <p style={{ fontSize: '1.05rem', color: 'var(--sn-text-secondary)', maxWidth: '680px', lineHeight: '1.6' }}>
+        <p
+          style={{
+            fontSize: '1.05rem',
+            color: 'var(--sn-text-secondary)',
+            maxWidth: '680px',
+            lineHeight: '1.6',
+          }}
+        >
           Audition the 6 shortlisted lofi tracks in both Light and Dark themes. Test how interactive tactile clicks and haptics sound over the background bed.
         </p>
 
@@ -120,37 +176,113 @@ export default function SoundAuditionClient() {
               gap: '8px',
             }}
           >
-            <span>Current Theme: <strong>{theme === 'dark' ? 'Night (Dark)' : 'Day (Light)'}</strong></span>
+            <span>
+              Current Theme: <strong>{theme === 'dark' ? 'Night (Dark)' : 'Day (Light)'}</strong>
+            </span>
             <span>(Click to toggle)</span>
           </button>
         </div>
       </header>
 
       {/* SFX Sandbox */}
-      <section style={{ padding: '24px', borderRadius: '16px', background: 'var(--sn-surface-1)', border: '1px solid var(--sn-card-border)', marginBottom: '40px' }}>
+      <section
+        style={{
+          padding: '24px',
+          borderRadius: '16px',
+          background: 'var(--sn-surface-1)',
+          border: '1px solid var(--sn-card-border)',
+          marginBottom: '40px',
+        }}
+      >
         <h2 style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--sn-text-primary)', marginBottom: '16px' }}>
-          Tactile SFX & Haptic Sandbox
+          Tactile SFX &amp; Haptic Sandbox
         </h2>
         <p style={{ fontSize: '0.9rem', color: 'var(--sn-text-secondary)', marginBottom: '16px' }}>
           Click below to test each synthesized sound effect and ducking response:
         </p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-          <button type="button" onClick={() => handleTestSfx('tick', 'light')} style={{ padding: '8px 16px', borderRadius: '6px', background: 'var(--sn-surface-2)', border: '1px solid var(--sn-card-border)', color: 'var(--sn-text-primary)', cursor: 'pointer' }}>
+          <button
+            type="button"
+            onClick={() => handleTestSfx('tick', 'light')}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '6px',
+              background: 'var(--sn-surface-2)',
+              border: '1px solid var(--sn-card-border)',
+              color: 'var(--sn-text-primary)',
+              cursor: 'pointer',
+            }}
+          >
             Primary Click (tick)
           </button>
-          <button type="button" onClick={() => handleTestSfx('nav', 'light')} style={{ padding: '8px 16px', borderRadius: '6px', background: 'var(--sn-surface-2)', border: '1px solid var(--sn-card-border)', color: 'var(--sn-text-primary)', cursor: 'pointer' }}>
+          <button
+            type="button"
+            onClick={() => handleTestSfx('nav', 'light')}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '6px',
+              background: 'var(--sn-surface-2)',
+              border: '1px solid var(--sn-card-border)',
+              color: 'var(--sn-text-primary)',
+              cursor: 'pointer',
+            }}
+          >
             Navigation Slide (nav)
           </button>
-          <button type="button" onClick={() => handleTestSfx('toggle', 'toggle')} style={{ padding: '8px 16px', borderRadius: '6px', background: 'var(--sn-surface-2)', border: '1px solid var(--sn-card-border)', color: 'var(--sn-text-primary)', cursor: 'pointer' }}>
+          <button
+            type="button"
+            onClick={() => handleTestSfx('toggle', 'toggle')}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '6px',
+              background: 'var(--sn-surface-2)',
+              border: '1px solid var(--sn-card-border)',
+              color: 'var(--sn-text-primary)',
+              cursor: 'pointer',
+            }}
+          >
             Toggle Snap (toggle)
           </button>
-          <button type="button" onClick={() => handleTestSfx('confirm', 'confirm')} style={{ padding: '8px 16px', borderRadius: '6px', background: 'var(--sn-surface-2)', border: '1px solid var(--sn-card-border)', color: 'var(--sn-text-primary)', cursor: 'pointer' }}>
+          <button
+            type="button"
+            onClick={() => handleTestSfx('confirm', 'confirm')}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '6px',
+              background: 'var(--sn-surface-2)',
+              border: '1px solid var(--sn-card-border)',
+              color: 'var(--sn-text-primary)',
+              cursor: 'pointer',
+            }}
+          >
             Warm Bell (confirm)
           </button>
-          <button type="button" onClick={() => handleTestSfx('copy-success', 'success')} style={{ padding: '8px 16px', borderRadius: '6px', background: 'var(--sn-surface-2)', border: '1px solid var(--sn-card-border)', color: 'var(--sn-text-primary)', cursor: 'pointer' }}>
+          <button
+            type="button"
+            onClick={() => handleTestSfx('copy-success', 'success')}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '6px',
+              background: 'var(--sn-surface-2)',
+              border: '1px solid var(--sn-card-border)',
+              color: 'var(--sn-text-primary)',
+              cursor: 'pointer',
+            }}
+          >
             Copy Chime (success)
           </button>
-          <button type="button" onClick={() => handleTestSfx('chapter', 'none')} style={{ padding: '8px 16px', borderRadius: '6px', background: 'var(--sn-surface-2)', border: '1px solid var(--sn-card-border)', color: 'var(--sn-text-primary)', cursor: 'pointer' }}>
+          <button
+            type="button"
+            onClick={() => handleTestSfx('chapter', 'none')}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '6px',
+              background: 'var(--sn-surface-2)',
+              border: '1px solid var(--sn-card-border)',
+              color: 'var(--sn-text-primary)',
+              cursor: 'pointer',
+            }}
+          >
             Chapter Swell (breath)
           </button>
         </div>
@@ -172,7 +304,7 @@ export default function SoundAuditionClient() {
                   padding: '24px',
                   borderRadius: '16px',
                   background: isSelected ? 'var(--sn-surface-2)' : 'var(--sn-surface-1)',
-                  border: isSelected ? '2px solid var(--sn-accent-gold, #29f0d4)' : '1px solid var(--sn-card-border)',
+                  border: isSelected ? '2px solid var(--sn-accent-gold)' : '1px solid var(--sn-card-border)',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
@@ -181,10 +313,27 @@ export default function SoundAuditionClient() {
               >
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--sn-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    <span
+                      style={{
+                        fontSize: '0.8rem',
+                        fontWeight: '700',
+                        color: 'var(--sn-text-secondary)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.08em',
+                      }}
+                    >
                       {track.bestFor}
                     </span>
-                    <span style={{ fontSize: '0.8rem', background: 'var(--sn-surface-1)', padding: '2px 8px', borderRadius: '4px', border: '1px solid var(--sn-card-border)', color: 'var(--sn-text-secondary)' }}>
+                    <span
+                      style={{
+                        fontSize: '0.8rem',
+                        background: 'var(--sn-surface-1)',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        border: '1px solid var(--sn-card-border)',
+                        color: 'var(--sn-text-secondary)',
+                      }}
+                    >
                       {track.bpm}
                     </span>
                   </div>
@@ -203,28 +352,46 @@ export default function SoundAuditionClient() {
 
                 <div style={{ borderTop: '1px solid var(--sn-card-border)', paddingTop: '16px', marginTop: '12px' }}>
                   <div style={{ fontSize: '0.8rem', color: 'var(--sn-text-secondary)', marginBottom: '12px' }}>
-                    License: <a href={track.licenseUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--sn-accent-gold, #29f0d4)', textDecoration: 'underline' }}>{track.license}</a>
+                    License:{' '}
+                    <a
+                      href={track.licenseUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: 'var(--sn-accent-gold)', textDecoration: 'underline' }}
+                    >
+                      {track.license}
+                    </a>
                   </div>
 
                   <button
                     type="button"
-                    onClick={() => {
-                      setActiveTrack(track.id);
-                      setIsPlaying((prev) => (activeTrack === track.id ? !prev : true));
-                      play('tick');
-                    }}
+                    onClick={() => handleToggleAudition(track.id)}
                     style={{
                       width: '100%',
                       padding: '12px',
                       borderRadius: '8px',
-                      background: isSelected && isPlaying ? 'var(--sn-accent-gold, #29f0d4)' : 'var(--sn-surface-2)',
-                      color: isSelected && isPlaying ? '#0B132B' : 'var(--sn-text-primary)',
+                      background: isSelected && musicPlaying ? 'var(--sn-accent-gold)' : 'var(--sn-surface-2)',
+                      color: isSelected && musicPlaying ? 'var(--void)' : 'var(--sn-text-primary)',
                       border: '1px solid var(--sn-card-border)',
                       fontWeight: '700',
                       cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
                     }}
                   >
-                    {isSelected && isPlaying ? '■ Stop Audition' : '▶ Audition Track'}
+                    {isSelected && musicPlaying ? (
+                      <>
+                        <StopIcon />
+                        <span>Stop Audition</span>
+                      </>
+                    ) : (
+                      <>
+                        <PlayIcon />
+                        <span>Audition Track</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
