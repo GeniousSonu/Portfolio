@@ -236,7 +236,7 @@ export default function HeroV3() {
                     src="/Image/sonu-sticker.png"
                     alt="SK Sahinur Islam sticker portrait"
                     width={320}
-                    height={494}
+                    height={414}
                     priority
                     sizes="(max-width: 767px) 160px, (max-width: 1200px) 260px, 300px"
                     className="sn-sticker-img"
