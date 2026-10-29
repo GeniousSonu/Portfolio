@@ -320,11 +320,17 @@ function stopAmbientNodes() {
   if (!ambientNodes) return;
   const nodes = ambientNodes;
   ambientNodes = null;
+
+  const gainToClean = ambientGain;
+  const filterToClean = ambientFilter;
+  ambientGain = null;
+  ambientFilter = null;
+
   const now = ctx ? ctx.currentTime : 0;
   try {
-    if (ambientGain) {
-      ambientGain.gain.cancelScheduledValues(now);
-      ambientGain.gain.setTargetAtTime(0, now, 0.1);
+    if (gainToClean) {
+      gainToClean.gain.cancelScheduledValues(now);
+      gainToClean.gain.setTargetAtTime(0, now, 0.1);
     }
   } catch {}
   setTimeout(() => {
@@ -336,10 +342,8 @@ function stopAmbientNodes() {
       try { lfoGain.disconnect(); } catch {}
       try { swellGain?.disconnect(); } catch {}
     });
-    try { ambientFilter?.disconnect(); } catch {}
-    try { ambientGain?.disconnect(); } catch {}
-    ambientFilter = null;
-    ambientGain = null;
+    try { filterToClean?.disconnect(); } catch {}
+    try { gainToClean?.disconnect(); } catch {}
   }, 450);
 }
 

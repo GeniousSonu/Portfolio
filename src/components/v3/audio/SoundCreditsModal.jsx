@@ -6,16 +6,52 @@ import { useSound } from '../SoundProvider';
 export default function SoundCreditsModal() {
   const { showCredits, setShowCredits } = useSound();
   const modalRef = useRef(null);
+  const previousFocusRef = useRef(null);
 
   useEffect(() => {
     if (!showCredits) return;
+
+    previousFocusRef.current = document.activeElement;
+    modalRef.current?.focus();
+
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
+        e.preventDefault();
         setShowCredits(false);
+        return;
+      }
+
+      // Trap focus within modal dialog
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusables = modalRef.current.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusables.length === 0) return;
+
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === first || document.activeElement === modalRef.current) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
       }
     };
+
     document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      if (previousFocusRef.current && typeof previousFocusRef.current.focus === 'function') {
+        previousFocusRef.current.focus();
+      }
+    };
   }, [showCredits, setShowCredits]);
 
   if (!showCredits) return null;
@@ -31,13 +67,15 @@ export default function SoundCreditsModal() {
         role="dialog"
         aria-modal="true"
         aria-label="Audio Licensing & Credits"
+        tabIndex={-1}
         ref={modalRef}
         onClick={(e) => e.stopPropagation()}
+        style={{ outline: 'none' }}
       >
         <div className="sn-sound-modal-header">
           <div>
-            <h3 className="sn-modal-title">Audio & Sound Credits</h3>
-            <p className="sn-modal-subtitle">Creative Commons & Permissively Licensed Assets</p>
+            <h3 className="sn-modal-title">Audio &amp; Sound Credits</h3>
+            <p className="sn-modal-subtitle">Creative Commons &amp; Permissively Licensed Assets</p>
           </div>
           <button
             type="button"
@@ -45,7 +83,10 @@ export default function SoundCreditsModal() {
             onClick={() => setShowCredits(false)}
             aria-label="Close audio credits"
           >
-            ✕
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
           </button>
         </div>
 
@@ -67,7 +108,7 @@ export default function SoundCreditsModal() {
           </section>
 
           <section className="sn-credits-section">
-            <h4 className="sn-credits-heading">Interactive Sound Effects & Synthesis</h4>
+            <h4 className="sn-credits-heading">Interactive Sound Effects &amp; Synthesis</h4>
             <p className="sn-credits-text">
               All UI clicks, chimes, swell effects, and tactile sound design are synthesized dynamically in real-time using the native HTML5 Web Audio API. 100% zero external audio files, zero network bandwidth, and zero tracking.
             </p>

@@ -70,6 +70,7 @@ export default function SoundProvider({ children }) {
   const effectsEnabledRef = useRef(true);
   const hapticsEnabledRef = useRef(true);
   const masterMutedRef = useRef(false);
+  const musicVolumeRef = useRef(0.25);
   const themeRef = useRef(theme);
   const hoverAtRef = useRef(0);
 
@@ -91,6 +92,7 @@ export default function SoundProvider({ children }) {
         mod.setMasterMuted(masterMutedRef.current);
         mod.setSfxMuted(!effectsEnabledRef.current);
         mod.setMusicMuted(!musicPlayingRef.current);
+        mod.setMusicVolume(musicVolumeRef.current);
         setEngineReady(true);
         return mod;
       })
@@ -102,48 +104,56 @@ export default function SoundProvider({ children }) {
   // Safe localStorage hydration
   useEffect(() => {
     try {
+      const storedSettings = window.localStorage.getItem(SETTINGS_KEY);
+      let parsedSettings = null;
+      if (storedSettings) {
+        try {
+          parsedSettings = JSON.parse(storedSettings);
+        } catch {}
+      }
+
       const storedOptIn = window.localStorage.getItem(OPT_IN_KEY);
       if (storedOptIn === 'on' || storedOptIn === 'off') {
         setOptInStatus(storedOptIn);
         optInRef.current = storedOptIn;
-        if (storedOptIn === 'on') {
-          setMusicPlaying(true);
-          musicPlayingRef.current = true;
-        } else {
-          setMusicPlaying(false);
-          musicPlayingRef.current = false;
+
+        let playing = storedOptIn === 'on';
+        if (parsedSettings && typeof parsedSettings.musicPlaying === 'boolean') {
+          playing = storedOptIn === 'on' && parsedSettings.musicPlaying;
         }
+        setMusicPlaying(playing);
+        musicPlayingRef.current = playing;
       } else {
         setOptInStatus('pending');
         optInRef.current = 'pending';
       }
 
-      const storedSettings = window.localStorage.getItem(SETTINGS_KEY);
-      if (storedSettings) {
-        const parsed = JSON.parse(storedSettings);
-        if (typeof parsed.effectsEnabled === 'boolean') {
-          setEffectsEnabled(parsed.effectsEnabled);
-          effectsEnabledRef.current = parsed.effectsEnabled;
+      if (parsedSettings) {
+        if (typeof parsedSettings.effectsEnabled === 'boolean') {
+          setEffectsEnabled(parsedSettings.effectsEnabled);
+          effectsEnabledRef.current = parsedSettings.effectsEnabled;
         }
-        if (typeof parsed.hapticsEnabled === 'boolean') {
-          setHapticsEnabled(parsed.hapticsEnabled);
-          hapticsEnabledRef.current = parsed.hapticsEnabled;
+        if (typeof parsedSettings.hapticsEnabled === 'boolean') {
+          setHapticsEnabled(parsedSettings.hapticsEnabled);
+          hapticsEnabledRef.current = parsedSettings.hapticsEnabled;
         }
-        if (typeof parsed.masterMuted === 'boolean') {
-          setMasterMuted(parsed.masterMuted);
-          masterMutedRef.current = parsed.masterMuted;
+        if (typeof parsedSettings.masterMuted === 'boolean') {
+          setMasterMuted(parsedSettings.masterMuted);
+          masterMutedRef.current = parsedSettings.masterMuted;
         }
-        if (typeof parsed.musicVolume === 'number') {
-          setMusicVolumeState(parsed.musicVolume);
+        if (typeof parsedSettings.musicVolume === 'number' && Number.isFinite(parsedSettings.musicVolume)) {
+          const clamped = Math.max(0, Math.min(1, parsedSettings.musicVolume));
+          setMusicVolumeState(clamped);
+          musicVolumeRef.current = clamped;
         }
       }
     } catch {}
   }, []);
 
-  // Synchronize across tabs via storage event
+  // Synchronize across tabs via storage event (validating values)
   useEffect(() => {
     const onStorage = (e) => {
-      if (e.key === OPT_IN_KEY && e.newValue) {
+      if (e.key === OPT_IN_KEY && (e.newValue === 'on' || e.newValue === 'off')) {
         setOptInStatus(e.newValue);
         optInRef.current = e.newValue;
         const isOn = e.newValue === 'on';
@@ -159,7 +169,7 @@ export default function SoundProvider({ children }) {
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
-  // Unlock AudioContext on first user gesture if opted in
+  // Unlock AudioContext on first user gesture if opted in, retaining listeners until opted-in gesture
   useEffect(() => {
     const onFirstGesture = () => {
       if (optInRef.current === 'on') {
@@ -170,9 +180,9 @@ export default function SoundProvider({ children }) {
             mod.startAmbient(themeRef.current);
           }
         });
+        window.removeEventListener('pointerdown', onFirstGesture, true);
+        window.removeEventListener('keydown', onFirstGesture, true);
       }
-      window.removeEventListener('pointerdown', onFirstGesture, true);
-      window.removeEventListener('keydown', onFirstGesture, true);
     };
 
     window.addEventListener('pointerdown', onFirstGesture, true);
@@ -190,6 +200,18 @@ export default function SoundProvider({ children }) {
     };
     document.addEventListener('visibilitychange', onVisibility);
     return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, []);
+
+  // Trigger Haptic Feedback through centralized gate
+  const vibrate = useCallback((pattern = 'light') => {
+    if (!hapticsEnabledRef.current || masterMutedRef.current || isReducedMotion()) return;
+    engineRef.current?.triggerHaptic(pattern);
+  }, []);
+
+  // Play synthesized SFX
+  const play = useCallback((kind) => {
+    if (!effectsEnabledRef.current || masterMutedRef.current || optInRef.current === 'off') return;
+    engineRef.current?.play(kind);
   }, []);
 
   // Handle opt-in choice
@@ -212,9 +234,10 @@ export default function SoundProvider({ children }) {
           mod.setMasterMuted(false);
           mod.setSfxMuted(false);
           mod.setMusicMuted(false);
+          mod.setMusicVolume(musicVolumeRef.current);
           mod.startAmbient(themeRef.current);
           mod.play('confirm');
-          mod.triggerHaptic('confirm');
+          vibrate('confirm');
         });
       } else {
         setMusicPlaying(false);
@@ -222,42 +245,44 @@ export default function SoundProvider({ children }) {
         engineRef.current?.stopAmbient();
       }
     },
-    [loadEngine]
+    [loadEngine, vibrate]
   );
 
-  // Play synthesized SFX
-  const play = useCallback((kind) => {
-    if (!effectsEnabledRef.current || masterMutedRef.current || optInRef.current === 'off') return;
-    engineRef.current?.play(kind);
-  }, []);
-
-  // Trigger Haptic Feedback
-  const vibrate = useCallback((pattern = 'light') => {
-    if (!hapticsEnabledRef.current || masterMutedRef.current || isReducedMotion()) return;
-    engineRef.current?.triggerHaptic(pattern);
-  }, []);
-
-  // Toggle Music (Lofi background)
+  // Toggle Music (Lofi background) — promotes to 'on' and persists musicPlaying
   const toggleMusic = useCallback(() => {
     const next = !musicPlayingRef.current;
     setMusicPlaying(next);
     musicPlayingRef.current = next;
 
     if (next) {
+      if (optInRef.current !== 'on') {
+        optInRef.current = 'on';
+        setOptInStatus('on');
+        try {
+          window.localStorage.setItem(OPT_IN_KEY, 'on');
+        } catch {}
+      }
+
       loadEngine().then((mod) => {
         if (!mod) return;
         mod.unlock();
         mod.setMusicMuted(false);
+        mod.setMusicVolume(musicVolumeRef.current);
         mod.startAmbient(themeRef.current);
         mod.play('toggle');
-        mod.triggerHaptic('toggle');
+        vibrate('toggle');
       });
     } else {
       engineRef.current?.stopAmbient();
       engineRef.current?.play('toggle');
-      engineRef.current?.triggerHaptic('toggle');
+      vibrate('toggle');
     }
-  }, [loadEngine]);
+
+    try {
+      const existing = JSON.parse(window.localStorage.getItem(SETTINGS_KEY) || '{}');
+      window.localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...existing, musicPlaying: next }));
+    } catch {}
+  }, [loadEngine, vibrate]);
 
   // Toggle Sound Effects
   const toggleEffects = useCallback(() => {
@@ -267,13 +292,13 @@ export default function SoundProvider({ children }) {
     engineRef.current?.setSfxMuted(!next);
     if (next) {
       engineRef.current?.play('toggle');
-      engineRef.current?.triggerHaptic('toggle');
+      vibrate('toggle');
     }
     try {
       const existing = JSON.parse(window.localStorage.getItem(SETTINGS_KEY) || '{}');
       window.localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...existing, effectsEnabled: next }));
     } catch {}
-  }, []);
+  }, [vibrate]);
 
   // Toggle Haptics
   const toggleHaptics = useCallback(() => {
@@ -281,14 +306,14 @@ export default function SoundProvider({ children }) {
     setHapticsEnabled(next);
     hapticsEnabledRef.current = next;
     if (next) {
-      engineRef.current?.triggerHaptic('confirm');
+      vibrate('confirm');
       engineRef.current?.play('toggle');
     }
     try {
       const existing = JSON.parse(window.localStorage.getItem(SETTINGS_KEY) || '{}');
       window.localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...existing, hapticsEnabled: next }));
     } catch {}
-  }, []);
+  }, [vibrate]);
 
   // Toggle Master Mute
   const toggleMasterMute = useCallback(() => {
@@ -302,13 +327,16 @@ export default function SoundProvider({ children }) {
     } catch {}
   }, []);
 
-  // Music Volume setter
+  // Music Volume setter with finite check & clamping
   const setMusicVolume = useCallback((vol) => {
-    setMusicVolumeState(vol);
-    engineRef.current?.setMusicVolume(vol);
+    const validVol = typeof vol === 'number' && Number.isFinite(vol) ? vol : 0.25;
+    const clamped = Math.max(0, Math.min(1, validVol));
+    setMusicVolumeState(clamped);
+    musicVolumeRef.current = clamped;
+    engineRef.current?.setMusicVolume(clamped);
     try {
       const existing = JSON.parse(window.localStorage.getItem(SETTINGS_KEY) || '{}');
-      window.localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...existing, musicVolume: vol }));
+      window.localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...existing, musicVolume: clamped }));
     } catch {}
   }, []);
 
@@ -344,7 +372,7 @@ export default function SoundProvider({ children }) {
           engineRef.current?.play(nextTheme === 'light' ? 'theme-light' : 'theme-dark');
         }
         if (hapticsEnabledRef.current && !masterMutedRef.current && !isReducedMotion()) {
-          engineRef.current?.triggerHaptic('toggle');
+          vibrate('toggle');
         }
         return;
       }
@@ -355,7 +383,7 @@ export default function SoundProvider({ children }) {
           engineRef.current?.play('copy-success');
         }
         if (hapticsEnabledRef.current && !masterMutedRef.current && !isReducedMotion()) {
-          engineRef.current?.triggerHaptic('success');
+          vibrate('success');
         }
         return;
       }
@@ -366,7 +394,7 @@ export default function SoundProvider({ children }) {
           engineRef.current?.play(soundKind || 'nav');
         }
         if (hapticsEnabledRef.current && !masterMutedRef.current && !isReducedMotion()) {
-          engineRef.current?.triggerHaptic(hapticPattern || 'light');
+          vibrate(hapticPattern || 'light');
         }
         return;
       }
@@ -377,7 +405,7 @@ export default function SoundProvider({ children }) {
           engineRef.current?.play(soundKind || 'tick');
         }
         if (hapticsEnabledRef.current && !masterMutedRef.current && !isReducedMotion()) {
-          engineRef.current?.triggerHaptic(hapticPattern || 'light');
+          vibrate(hapticPattern || 'light');
         }
       }
     };
@@ -401,7 +429,7 @@ export default function SoundProvider({ children }) {
       document.removeEventListener('click', onClick, true);
       document.removeEventListener('mouseover', onPointerOver, true);
     };
-  }, []);
+  }, [vibrate]);
 
   return (
     <SoundContext.Provider

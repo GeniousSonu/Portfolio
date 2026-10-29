@@ -102,7 +102,9 @@ export default function SoundAuditionClient() {
 
   const handleTestSfx = (kind, haptic) => {
     play(kind);
-    vibrate(haptic);
+    if (haptic && haptic !== 'none') {
+      vibrate(haptic);
+    }
   };
 
   const handleToggleAudition = (trackId) => {
@@ -273,7 +275,7 @@ export default function SoundAuditionClient() {
           </button>
           <button
             type="button"
-            onClick={() => handleTestSfx('chapter', 'none')}
+            onClick={() => handleTestSfx('chapter', null)}
             style={{
               padding: '8px 16px',
               borderRadius: '6px',
