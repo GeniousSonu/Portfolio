@@ -416,6 +416,17 @@ export function startAmbient(theme = 'dark') {
     });
 
     ambientNodes = nodes;
+
+    // Update MediaSession for OS media control centers
+    if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
+      const isDay = theme === 'light';
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: isDay ? 'Morning Coffee' : 'Night City Breeze',
+        artist: isDay ? 'LuKremBo' : 'Purrple Cat',
+        album: 'SK Sahinur Islam Portfolio (Lofi Experience)',
+        artwork: [{ src: '/Image/sonu-sticker.png', sizes: '512x512', type: 'image/png' }],
+      });
+    }
   } catch {}
 }
 
