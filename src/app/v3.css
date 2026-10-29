@@ -2938,6 +2938,159 @@ html.v3-theme-transition::view-transition-new(root) {
   color: var(--v3-text-muted);
 }
 
+/* ─── Behind the Build / Instagram Dispatches ─── */
+.v3-behind-build {
+  margin-top: 2.75rem;
+  padding-top: 2rem;
+  border-top: var(--v3-rule) solid var(--v3-border-strong);
+}
+
+.v3-behind-build-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.4rem;
+}
+
+.v3-behind-build-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.v3-behind-build-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border: var(--v3-rule) solid var(--v3-border-strong);
+  border-radius: var(--v3-radius-pill);
+  background: var(--v3-thread);
+  color: #0B0D0E;
+  font-family: var(--v3-font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  box-shadow: 2px 2px 0 var(--v3-border-strong);
+}
+
+.v3-behind-build-handle {
+  font-family: var(--v3-font-mono);
+  font-size: 0.75rem;
+  color: var(--v3-text-muted);
+  letter-spacing: 0.05em;
+}
+
+.v3-follow-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 1rem;
+  border: var(--v3-rule) solid var(--v3-border-strong);
+  border-radius: var(--v3-radius-pill);
+  background: var(--v3-surface-raised);
+  color: var(--v3-text);
+  font-family: var(--v3-font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 3px 3px 0 var(--v3-border-strong);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.v3-follow-pill:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 var(--v3-border-strong);
+  color: var(--v3-thread);
+}
+
+.v3-behind-build-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.1rem;
+}
+
+.v3-dispatch-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: var(--v3-rule) solid var(--v3-border-strong);
+  border-radius: var(--v3-radius-md);
+  background: var(--v3-surface-raised);
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 4px 4px 0 var(--v3-border-strong);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.v3-dispatch-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--v3-border-strong);
+}
+
+.v3-dispatch-visual {
+  height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0.85rem;
+  border-bottom: 1.5px solid var(--v3-border-strong);
+}
+
+.v3-dispatch-visual--code {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(16, 185, 129, 0.04));
+}
+
+.v3-dispatch-visual--hardware {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(245, 158, 11, 0.04));
+}
+
+.v3-dispatch-visual--agency {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.18), rgba(59, 130, 246, 0.04));
+}
+
+.v3-dispatch-visual--research {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.18), rgba(168, 85, 247, 0.04));
+}
+
+.v3-dispatch-mono {
+  font-family: var(--v3-font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  color: var(--v3-text-muted);
+}
+
+.v3-dispatch-glyph {
+  font-size: 1.6rem;
+  align-self: flex-end;
+}
+
+.v3-dispatch-body {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.v3-dispatch-body h4 {
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0;
+  color: var(--v3-text);
+}
+
+.v3-dispatch-body p {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  margin: 0;
+  color: var(--v3-text-muted);
+}
+
 /* ─── 20. Chapter 03 — The Practice (experience) ──────────────── */
 
 .v3-experience {

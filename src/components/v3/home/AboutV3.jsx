@@ -114,6 +114,14 @@ export default function AboutV3() {
                 LinkedIn <span aria-hidden="true">↗</span>
               </a>
               <a
+                href={process.env.NEXT_PUBLIC_INSTAGRAM_URL || 'https://instagram.com/genious.exe'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="v3-text-link"
+              >
+                Instagram (@genious.exe) <span aria-hidden="true">↗</span>
+              </a>
+              <a
                 href="https://www.upwork.com/freelancers/~0104912246c7c7bdbf"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -152,6 +160,92 @@ export default function AboutV3() {
                 View Patent Document <span aria-hidden="true">→</span>
               </a>
             </article>
+          </div>
+        </div>
+
+        {/* Behind the build / Lab Dispatches Showcase */}
+        <div className="v3-behind-build" data-reveal>
+          <div className="v3-behind-build-header">
+            <div className="v3-behind-build-meta">
+              <span className="v3-behind-build-badge">★ BEHIND THE BUILD</span>
+              <span className="v3-behind-build-handle">Dispatches &amp; Engineering Labs</span>
+            </div>
+            <a
+              href={process.env.NEXT_PUBLIC_INSTAGRAM_URL || 'https://instagram.com/genious.exe'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="v3-follow-pill"
+              title="Visit @genious.exe on Instagram"
+            >
+              <span>Follow @genious.exe</span>
+              <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+
+          <div className="v3-behind-build-strip">
+            <a
+              href="https://instagram.com/genious.exe"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="v3-dispatch-card"
+            >
+              <div className="v3-dispatch-visual v3-dispatch-visual--code" aria-hidden="true">
+                <span className="v3-dispatch-mono">01 // ARCHITECTURE</span>
+                <span className="v3-dispatch-glyph">⚡</span>
+              </div>
+              <div className="v3-dispatch-body">
+                <h4>Distributed Systems &amp; Real-time APIs</h4>
+                <p>Node.js, WebSockets, Redis pub/sub pipelines.</p>
+              </div>
+            </a>
+
+            <a
+              href="https://instagram.com/genious.exe"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="v3-dispatch-card"
+            >
+              <div className="v3-dispatch-visual v3-dispatch-visual--hardware" aria-hidden="true">
+                <span className="v3-dispatch-mono">02 // LAB HARDWARE</span>
+                <span className="v3-dispatch-glyph">◈</span>
+              </div>
+              <div className="v3-dispatch-body">
+                <h4>IoT Solar Cold-Chain Prototyping</h4>
+                <p>ESP8266, Peltier modules, MQTT telemetry.</p>
+              </div>
+            </a>
+
+            <a
+              href="https://instagram.com/genious.exe"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="v3-dispatch-card"
+            >
+              <div className="v3-dispatch-visual v3-dispatch-visual--agency" aria-hidden="true">
+                <span className="v3-dispatch-mono">03 // WEFIK LABS</span>
+                <span className="v3-dispatch-glyph">✦</span>
+              </div>
+              <div className="v3-dispatch-body">
+                <h4>Digital Agency &amp; Product Delivery</h4>
+                <p>High-fidelity client portals and SaaS systems.</p>
+              </div>
+            </a>
+
+            <a
+              href="https://instagram.com/genious.exe"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="v3-dispatch-card"
+            >
+              <div className="v3-dispatch-visual v3-dispatch-visual--research" aria-hidden="true">
+                <span className="v3-dispatch-mono">04 // SECURITY &amp; CERTS</span>
+                <span className="v3-dispatch-glyph">✓</span>
+              </div>
+              <div className="v3-dispatch-body">
+                <h4>Hardening &amp; Threat Verification</h4>
+                <p>CompTIA Security+, TryHackMe Top 1% ranked.</p>
+              </div>
+            </a>
           </div>
         </div>
       </div>

@@ -242,6 +242,8 @@ import ThemeProvider from '@/components/v3/ThemeProvider';
 import SoundProvider from '@/components/v3/SoundProvider';
 import Navbar from '@/components/Navbar';
 import FooterV3 from '@/components/v3/home/FooterV3';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export default function RootLayout({ children }) {
   const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
@@ -394,6 +396,9 @@ export default function RootLayout({ children }) {
         </ThemeProvider>
         {/* Google Tag (detected by Google Tag Assistant & Analytics on page load) */}
         {gaId && <GoogleAnalytics gaId={gaId} />}
+        {/* Official Vercel Platform Analytics & Speed Insights */}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
