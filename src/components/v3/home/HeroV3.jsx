@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import CelestialOrb from './CelestialOrb';
 import { useBootComplete, useMagneticButtons, prefersReducedMotion } from '../motion';
 
@@ -28,6 +29,7 @@ export default function HeroV3() {
   const rootRef = useRef(null);
   const [booted, setBooted] = useState(false);
   const [clock, setClock] = useState(getISTTime);
+  const [stickerError, setStickerError] = useState(false);
 
   useBootComplete(() => setBooted(true));
   useMagneticButtons(rootRef);
@@ -203,6 +205,52 @@ export default function HeroV3() {
                 <span>Patent Blueprint</span>
                 <span className="sn-btn-arrow" aria-hidden="true">→</span>
               </a>
+            </div>
+          </div>
+
+          {/* Sticker Circle Visual with Rotating Text Ring & SI Fallback */}
+          <div className="sn-sticker-card" aria-label="SK Sahinur Islam portrait sticker">
+            <div className="sn-sticker-frame">
+              {/* Rotating Circular Text Ring */}
+              <svg
+                className="sn-sticker-text-ring"
+                viewBox="0 0 320 320"
+                aria-hidden="true"
+              >
+                <path
+                  id="sn-sticker-circle-path"
+                  d="M 160, 160 m -122, 0 a 122,122 0 1,1 244,0 a 122,122 0 1,1 -244,0"
+                  fill="none"
+                />
+                <text className="sn-sticker-text-path">
+                  <textPath href="#sn-sticker-circle-path" startOffset="0%">
+                    SK SAHINUR ISLAM • SYSTEMS ARCHITECT • CO-FOUNDER @ WEFIK •
+                  </textPath>
+                </text>
+              </svg>
+
+              {/* Color Disc (Warm yellow in light, Navy in dark) */}
+              <div className="sn-sticker-disc">
+                {!stickerError ? (
+                  <Image
+                    src="/Image/sonu-sticker.png"
+                    alt="SK Sahinur Islam sticker portrait"
+                    width={320}
+                    height={494}
+                    priority
+                    sizes="(max-width: 767px) 160px, (max-width: 1200px) 260px, 300px"
+                    className="sn-sticker-img"
+                    onError={() => setStickerError(true)}
+                  />
+                ) : (
+                  <div className="sn-sticker-fallback" aria-label="SK Sahinur Islam">
+                    <span>SI</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Die-cut ink rim outline */}
+              <div className="sn-sticker-rim" aria-hidden="true" />
             </div>
           </div>
         </div>
