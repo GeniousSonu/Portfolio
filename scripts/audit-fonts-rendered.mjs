@@ -30,6 +30,7 @@ async function auditFonts() {
   console.log(`Auditing rendered platform fonts across ${ROUTES.length} routes on http://localhost:3555...\n`);
 
   let totalViolations = 0;
+  let failedAudits = 0;
   const routeReports = [];
 
   for (const route of ROUTES) {
@@ -76,6 +77,7 @@ async function auditFonts() {
         usedSample: fontAudit.usedFonts.slice(0, 3).join(' | '),
       });
     } catch (err) {
+      failedAudits += 1;
       routeReports.push({
         route,
         status: 'ERROR',
@@ -89,8 +91,13 @@ async function auditFonts() {
   console.table(routeReports);
 
   console.log('\n--- RENDERED FONT AUDIT SUMMARY ---');
-  if (totalViolations > 0) {
-    console.error(`FAILED: ${totalViolations} forbidden font instances rendered in DOM.`);
+  if (totalViolations > 0 || failedAudits > 0) {
+    if (totalViolations > 0) {
+      console.error(`FAILED: ${totalViolations} forbidden font instances rendered in DOM.`);
+    }
+    if (failedAudits > 0) {
+      console.error(`FAILED: ${failedAudits} route audit(s) encountered an error.`);
+    }
     process.exit(1);
   } else {
     console.log('PASSED: 0 forbidden fonts rendered. Sitewide 3-font system strictly verified in live DOM.');

@@ -162,7 +162,19 @@ async function runNavigationsForBrowser(browserType, name, count, options = {}) 
     currentRoute = await page.evaluate(() => window.location.pathname);
 
     totalFrames += history.length;
-    completedNavs++;
+
+    if (currentRoute !== toRoute) {
+      glitches++;
+      if (glitchDetails.length < 10) {
+        glitchDetails.push({
+          nav: `${fromRoute} -> ${toRoute}`,
+          pathname: currentRoute,
+          error: `Target route mismatch: expected ${toRoute}, got ${currentRoute}`,
+        });
+      }
+    } else {
+      completedNavs++;
+    }
 
     // Analyze frames: a glitch is a frame where:
     // 1. Visible route is neither fromRoute nor toRoute (e.g. wrong route flash / home page flash)

@@ -28,7 +28,7 @@ if (fs.existsSync(DATA_DIR)) {
     const content = fs.readFileSync(fullPath, 'utf-8');
 
     const matches = content.match(/\[\[OWNER:[^\]]+\]\]/g) || [];
-    const isIndexable = content.includes('indexable: true');
+    const isIndexable = /["']?indexable["']?\s*:\s*true\b/.test(content);
 
     if (matches.length > 0) {
       totalPlaceholders += matches.length;
@@ -59,3 +59,4 @@ if (violations > 0) {
   console.log('✅ CI PASSED: All pages with unresolved placeholders are safely guarded with noindex.');
   process.exit(0);
 }
+

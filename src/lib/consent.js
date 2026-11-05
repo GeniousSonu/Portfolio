@@ -186,11 +186,11 @@ export function setConsentStatus(status) {
  * @param {() => void} callback
  */
 export function onAnalyticsConsent(callback) {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined') return () => {};
 
   if (getConsentStatus() === 'granted') {
     callback();
-    return;
+    return () => {};
   }
 
   const listener = (event) => {
@@ -201,4 +201,7 @@ export function onAnalyticsConsent(callback) {
   };
 
   window.addEventListener('analytics-consent-changed', listener);
+  return () => {
+    window.removeEventListener('analytics-consent-changed', listener);
+  };
 }

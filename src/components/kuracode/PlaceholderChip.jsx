@@ -39,3 +39,4 @@ export function resolvePlaceholder(val, fallback = 'To be confirmed') {
   }
   return val;
 }
+

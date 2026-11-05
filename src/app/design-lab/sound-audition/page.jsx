@@ -1,4 +1,5 @@
 import React from 'react';
+import { notFound } from 'next/navigation';
 import SoundAuditionClient from './SoundAuditionClient';
 
 export const metadata = {
@@ -11,5 +12,8 @@ export const metadata = {
 };
 
 export default function SoundAuditionPage() {
+  if (process.env.NODE_ENV === 'production' && process.env.VERCEL_ENV !== 'preview') {
+    notFound();
+  }
   return <SoundAuditionClient />;
 }

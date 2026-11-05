@@ -1,8 +1,15 @@
 import React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import MarkdownIt from 'markdown-it';
 import styles from '../../kuracode.module.css';
 import { KURACODE_DOCS } from '@/data/kuracode/docs';
+
+const md = new MarkdownIt({
+  html: false,
+  linkify: true,
+  typographer: false,
+});
 
 export async function generateStaticParams() {
   return KURACODE_DOCS.map((doc) => ({ slug: doc.slug }));
@@ -51,9 +58,10 @@ export default async function DocTopicPage({ params }) {
           </p>
         </header>
 
-        <div className="prose prose-invert max-w-none text-text-primary text-sm leading-relaxed space-y-4 whitespace-pre-line font-sans">
-          {doc.content.trim()}
-        </div>
+        <div
+          className="prose prose-invert max-w-none text-text-primary text-sm leading-relaxed space-y-4 font-sans"
+          dangerouslySetInnerHTML={{ __html: md.render(doc.content.trim()) }}
+        />
 
         <footer className="mt-12 pt-6 border-t border-border flex justify-between items-center text-xs font-mono text-text-muted">
           <Link href="/extensions/kuracode/docs" className="text-gold hover:underline">
@@ -65,3 +73,4 @@ export default async function DocTopicPage({ params }) {
     </div>
   );
 }
+

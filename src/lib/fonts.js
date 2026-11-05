@@ -43,7 +43,7 @@ export const fontSerif = Playfair_Display({
   subsets: ['latin'],
   display: 'swap',
   preload: false,
-  variable: '--font-serif',
+  variable: '--font-playfair',
   adjustFontFallback: true,
 });
 

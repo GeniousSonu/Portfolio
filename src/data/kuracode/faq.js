@@ -74,7 +74,7 @@ export const KURACODE_FAQS = [
       },
       {
         q: 'How are extension permissions scoped?',
-        a: 'KuraCode follows the principle of least privilege. Permissions are restricted to activeTab and contextMenus to inject the minimal capture interface only when triggered.',
+        a: 'KuraCode follows the principle of least privilege. The extension declares only 4 essential permissions: activeTab (captures highlighted code upon user trigger), contextMenus (right-click save action), storage (persists local settings), and unlimitedStorage (prevents quota eviction for large code libraries). Zero broad host permissions.',
       },
     ],
   },
@@ -106,3 +106,4 @@ export const KURACODE_FAQS = [
 ];
 
 export default KURACODE_FAQS;
+

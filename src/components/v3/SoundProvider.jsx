@@ -1,7 +1,9 @@
 'use client';
 
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { useTheme } from './ThemeProvider';
+import { isQuietRoute } from '@/lib/quietRoutes';
 
 const SoundContext = createContext(null);
 
@@ -73,6 +75,17 @@ export default function SoundProvider({ children }) {
   const musicVolumeRef = useRef(0.25);
   const themeRef = useRef(theme);
   const hoverAtRef = useRef(0);
+  const pathname = usePathname();
+  const pathnameRef = useRef(pathname);
+
+  useEffect(() => {
+    pathnameRef.current = pathname;
+    if (isQuietRoute(pathname)) {
+      engineRef.current?.stopAmbient();
+    } else if (musicPlayingRef.current && optInRef.current === 'on') {
+      engineRef.current?.startAmbient(themeRef.current);
+    }
+  }, [pathname]);
 
   useEffect(() => {
     themeRef.current = theme;
@@ -173,15 +186,17 @@ export default function SoundProvider({ children }) {
   useEffect(() => {
     const onFirstGesture = () => {
       if (optInRef.current === 'on') {
-        loadEngine().then((mod) => {
-          if (!mod) return;
-          mod.unlock();
-          if (musicPlayingRef.current) {
-            mod.startAmbient(themeRef.current);
-          }
-        });
-        window.removeEventListener('pointerdown', onFirstGesture, true);
-        window.removeEventListener('keydown', onFirstGesture, true);
+        if (!isQuietRoute(pathnameRef.current)) {
+          loadEngine().then((mod) => {
+            if (!mod) return;
+            mod.unlock();
+            if (musicPlayingRef.current) {
+              mod.startAmbient(themeRef.current);
+            }
+          });
+          window.removeEventListener('pointerdown', onFirstGesture, true);
+          window.removeEventListener('keydown', onFirstGesture, true);
+        }
       }
     };
 
@@ -231,12 +246,14 @@ export default function SoundProvider({ children }) {
         loadEngine().then((mod) => {
           if (!mod) return;
           mod.unlock();
-          mod.setMasterMuted(false);
-          mod.setSfxMuted(false);
-          mod.setMusicMuted(false);
+          mod.setMasterMuted(masterMutedRef.current);
+          mod.setSfxMuted(!effectsEnabledRef.current);
+          mod.setMusicMuted(!musicPlayingRef.current);
           mod.setMusicVolume(musicVolumeRef.current);
-          mod.startAmbient(themeRef.current);
-          mod.play('confirm');
+          if (!isQuietRoute(pathnameRef.current)) {
+            mod.startAmbient(themeRef.current);
+          }
+          play('confirm');
           vibrate('confirm');
         });
       } else {
@@ -245,7 +262,7 @@ export default function SoundProvider({ children }) {
         engineRef.current?.stopAmbient();
       }
     },
-    [loadEngine, vibrate]
+    [loadEngine, play, vibrate]
   );
 
   // Toggle Music (Lofi background) — promotes to 'on' and persists musicPlaying
@@ -343,8 +360,7 @@ export default function SoundProvider({ children }) {
   // Global Event Delegation for clicks, links, buttons, and haptics
   useEffect(() => {
     const onClick = (event) => {
-      if (!event.isTrusted) return;
-      if (optInRef.current === 'off') return;
+      if (!event.isTrusted || optInRef.current === 'off' || isQuietRoute(pathnameRef.current)) return;
 
       const target = event.target instanceof Element ? event.target : null;
       if (!target) return;
@@ -412,7 +428,7 @@ export default function SoundProvider({ children }) {
 
     // Fine-pointer hover (ultra faint, rate-limited)
     const onPointerOver = (event) => {
-      if (!effectsEnabledRef.current || masterMutedRef.current || optInRef.current === 'off' || !canHover()) return;
+      if (!effectsEnabledRef.current || masterMutedRef.current || optInRef.current === 'off' || !canHover() || isQuietRoute(pathnameRef.current)) return;
       const target = event.target instanceof Element ? event.target : null;
       if (!target || target.closest('[data-v3-silent], [data-sound="none"]')) return;
       if (!target.closest('a, button, [role="button"], summary')) return;

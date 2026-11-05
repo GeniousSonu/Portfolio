@@ -4,6 +4,7 @@ import React, { useRef } from 'react';
 import ChapterHeader from '../ChapterHeader';
 import Emoji3D from '../Emoji3D';
 import { useChapterReveal } from '../motion';
+import { SOCIAL_LINKS } from '@/config/socials';
 
 const PROFILE = [
   ['hostname', 'sahinur-dev.local'],
@@ -106,7 +107,7 @@ export default function AboutV3() {
 
             <div className="v3-about-links" data-reveal>
               <a
-                href="https://www.linkedin.com/in/sksahinurislam/"
+                href={SOCIAL_LINKS.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="v3-text-link"

@@ -114,12 +114,14 @@ export default function CertificationsV3() {
   }, [recalcPin]);
 
   // Keyboard navigation focus handler so focus never lands off-screen
-  const handleCardFocus = (index) => {
-    if (!pinWrapperRef.current || prefersReducedMotion()) return;
+  const handleCardFocus = (e, index) => {
+    if (!pinWrapperRef.current || !isPinActive || prefersReducedMotion()) return;
+    if (e?.target && typeof e.target.matches === 'function' && !e.target.matches(':focus-visible')) return;
     const scrollableDist = pinWrapperRef.current.offsetHeight - window.innerHeight;
     if (scrollableDist <= 0) return;
+    const wrapperTop = pinWrapperRef.current.getBoundingClientRect().top + window.scrollY;
     const targetProgress = index / (CERTS.length - 1);
-    const targetScrollY = pinWrapperRef.current.offsetTop + targetProgress * scrollableDist;
+    const targetScrollY = wrapperTop + targetProgress * scrollableDist;
     window.scrollTo({ top: targetScrollY, behavior: 'smooth' });
   };
 
@@ -148,14 +150,21 @@ export default function CertificationsV3() {
           />
 
           {/* Dynamic Progress Bar & Live Counter */}
-          <div className="v3-cert-status-row" aria-label="Certifications scroll progress">
-            <div className="v3-cert-progress-track">
+          <div className="v3-cert-status-row">
+            <div
+              className="v3-cert-progress-track"
+              role="progressbar"
+              aria-label="Certifications scroll progress"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(progress * 100)}
+            >
               <div
                 className="v3-cert-progress-fill"
                 style={{ width: `${(progress * 100).toFixed(1)}%` }}
               />
             </div>
-            <div className="v3-cert-counter" aria-live="polite">
+            <div className="v3-cert-counter">
               <span className="v3-cert-counter-current">{counter}</span>
               <span className="v3-cert-counter-total">VERIFIED</span>
             </div>
@@ -178,7 +187,7 @@ export default function CertificationsV3() {
                   rel="noopener noreferrer"
                   className="v3-cert-ticket"
                   key={`${cert.title}-${cert.date}`}
-                  onFocus={() => handleCardFocus(index)}
+                  onFocus={(e) => handleCardFocus(e, index)}
                   tabIndex={0}
                   data-reveal
                 >

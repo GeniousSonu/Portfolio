@@ -5,7 +5,7 @@ import styles from '../kuracode.module.css';
 import { KURACODE_FACTS } from '@/data/kuracode/facts';
 
 export const metadata = {
-  title: 'KuraCode Update — What&apos;s New',
+  title: "KuraCode Update — What's New",
   robots: {
     index: false,
     follow: false,
@@ -44,3 +44,4 @@ export default function UpdatePage() {
     </div>
   );
 }
+

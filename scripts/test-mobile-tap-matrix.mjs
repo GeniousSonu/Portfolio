@@ -37,6 +37,7 @@ const TEST_ROUTES = [
 
 async function main() {
   let serverProcess = null;
+  let browser = null;
   let allPassed = true;
 
   try {
@@ -50,11 +51,14 @@ async function main() {
     console.log('Test server ready on port', TEST_PORT);
 
     // Test in Chromium (iPhone 14 emulation)
-    const browser = await chromium.launch({
-      executablePath: '/usr/bin/google-chrome',
+    const launchOptions = {
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    });
+    };
+    if (process.env.CHROME_PATH) {
+      launchOptions.executablePath = process.env.CHROME_PATH;
+    }
+    browser = await chromium.launch(launchOptions);
 
     const context = await browser.newContext({
       ...devices['iPhone 14'],
@@ -237,11 +241,14 @@ async function main() {
     console.log(`======================================================`);
 
     if (allPassed) {
-      process.exit(0);
+      process.exitCode = 0;
     } else {
-      process.exit(1);
+      process.exitCode = 1;
     }
   } finally {
+    if (browser) {
+      try { await browser.close(); } catch {}
+    }
     if (serverProcess) {
       serverProcess.kill('SIGTERM');
       await sleep(500);

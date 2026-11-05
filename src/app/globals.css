@@ -33,9 +33,9 @@
   --radius-lg: 16px;
   --radius-full: 9999px;
   /* ─── Editorial & Neo-Brutalist Typography System (design-reference.md) ─── */
-  --body: "Bricolage Grotesque", "Plus Jakarta Sans", "Helvetica Neue", Arial, sans-serif;
+  --body: var(--font-bricolage, "Bricolage Grotesque"), var(--font-sans-ui, "Plus Jakarta Sans"), "Helvetica Neue", Arial, sans-serif;
   --display: var(--font-bebas, "Bebas Neue"), "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
-  --serif: var(--font-serif, "Playfair Display"), "Georgia", serif;
+  --serif: var(--font-playfair, "Playfair Display"), "Georgia", serif;
   --mono: var(--font-space-mono, "Space Mono"), ui-monospace, monospace;
   --hand: var(--font-shantell, "Shantell Sans"), "Comic Sans MS", cursive;
 
@@ -124,6 +124,9 @@ html[data-theme='dark'] {
   --sn-pill-border: rgba(41, 240, 212, 0.3);
   --sn-stat-bg: rgba(19, 31, 55, 0.65);
   --sn-stat-border: rgba(41, 240, 212, 0.15);
+  --sn-surface-1: #0A1120;
+  --sn-surface-2: #131F37;
+  --sn-accent-gold: #F59E0B;
 }
 
 html[data-theme='light'] {
@@ -164,6 +167,9 @@ html[data-theme='light'] {
   --sn-pill-border: rgba(224, 138, 34, 0.35);
   --sn-stat-bg: rgba(255, 255, 255, 0.7);
   --sn-stat-border: rgba(217, 90, 50, 0.14);
+  --sn-surface-1: #FBF7EE;
+  --sn-surface-2: #F3E3CE;
+  --sn-accent-gold: #B45309;
 }
 
 html {

@@ -126,8 +126,8 @@ async function testHeaderDropdownNavigation(page, originRoute) {
     assert(currentPath === item.targetHref, `URL correctly transitioned to ${item.targetHref} in ${duration}ms`);
     assert(title && title.length > 0, `Page title populated: "${title.slice(0, 30)}..."`);
     assert(
-      dataRoute === item.targetHref || dataRoute !== null,
-      `Main data-route marker valid: "${dataRoute}"`
+      dataRoute === item.targetHref,
+      `Main data-route marker valid: expected "${item.targetHref}", got "${dataRoute}"`
     );
     assert(scrollY <= 50, `Scroll position reset to top (scrollY: ${scrollY})`);
     assert(consoleErrors.length === 0, `Zero console errors on navigation (errors: ${consoleErrors.join(', ') || 'none'})`);
@@ -187,11 +187,10 @@ async function testFooterNavigation(page) {
   await page.waitForTimeout(300);
 
   const footerAboutLink = page.locator('footer a[href="/about"]').first();
-  if (await footerAboutLink.isVisible()) {
-    await footerAboutLink.click();
-    await page.waitForFunction(() => window.location.pathname === '/about', { timeout: 1500 });
-    assert((await page.evaluate(() => window.location.pathname)) === '/about', 'Footer link navigated to /about within 1.5s');
-  }
+  assert(await footerAboutLink.isVisible(), 'Footer link a[href="/about"] is visible in DOM');
+  await footerAboutLink.click();
+  await page.waitForFunction(() => window.location.pathname === '/about', { timeout: 1500 });
+  assert((await page.evaluate(() => window.location.pathname)) === '/about', 'Footer link navigated to /about within 1.5s');
 }
 
 async function testCommandPaletteNavigation(page) {
@@ -202,23 +201,23 @@ async function testCommandPaletteNavigation(page) {
 
   // Open Command Palette via button or keypress
   const cmdkBtn = page.locator('button.nav-cmdk-btn[title*="Search"]');
-  if (await cmdkBtn.isVisible()) {
-    await cmdkBtn.click();
-    await page.waitForTimeout(200);
-    const searchInput = page.locator('input[placeholder*="Search"]').first();
-    if (await searchInput.isVisible()) {
-      await searchInput.fill('wiki');
-      await page.waitForTimeout(200);
-      const wikiItem = page.locator('[cmdk-item]:has-text("Wiki")').first();
-      if (await wikiItem.isVisible()) {
-        await wikiItem.click();
-      } else {
-        await page.keyboard.press('Enter');
-      }
-      await page.waitForFunction(() => window.location.pathname === '/wiki', { timeout: 1500 });
-      assert((await page.evaluate(() => window.location.pathname)) === '/wiki', 'Command palette navigated to /wiki within 1.5s');
-    }
+  assert(await cmdkBtn.isVisible(), 'Command palette toggle button is visible in navbar');
+  await cmdkBtn.click();
+  await page.waitForTimeout(200);
+
+  const searchInput = page.locator('input[placeholder*="Search"]').first();
+  assert(await searchInput.isVisible(), 'Command palette search input is visible upon opening');
+  await searchInput.fill('wiki');
+  await page.waitForTimeout(200);
+
+  const wikiItem = page.locator('[cmdk-item]:has-text("Wiki")').first();
+  if (await wikiItem.isVisible()) {
+    await wikiItem.click();
+  } else {
+    await page.keyboard.press('Enter');
   }
+  await page.waitForFunction(() => window.location.pathname === '/wiki', { timeout: 1500 });
+  assert((await page.evaluate(() => window.location.pathname)) === '/wiki', 'Command palette navigated to /wiki within 1.5s');
 }
 
 async function testRapidClicksAndHistory(page) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { onAnalyticsConsent } from '@/lib/consent';
 import { getOrCreateVisitorId } from '@/lib/visitorId';
@@ -12,6 +12,7 @@ import { isQuietRoute } from '@/lib/quietRoutes';
  */
 export default function SiteVisitTracker() {
   const pathname = usePathname();
+  const subscribedRef = useRef(false);
 
   useEffect(() => {
     // Avoid double-dispatch within the same browser session or on quiet routes
@@ -25,8 +26,11 @@ export default function SiteVisitTracker() {
       // Storage unavailable
     }
 
+    if (subscribedRef.current) return;
+    subscribedRef.current = true;
+
     // Only fire when consent is granted (or once granted via consent banner)
-    onAnalyticsConsent(() => {
+    const unsubscribe = onAnalyticsConsent(() => {
       try {
         if (sessionStorage.getItem('sks_visit_tracked') === '1') {
           return;
@@ -57,6 +61,13 @@ export default function SiteVisitTracker() {
         // Silent graceful fallback
       }
     });
+
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+        subscribedRef.current = false;
+      }
+    };
   }, [pathname]);
 
   return null;

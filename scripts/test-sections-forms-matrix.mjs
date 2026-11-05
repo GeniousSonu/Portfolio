@@ -23,6 +23,8 @@ async function waitForServer(timeoutMs = 25000) {
 
 async function main() {
   let serverProcess = null;
+  let browser = null;
+  let page = null;
   let allPassed = true;
 
   try {
@@ -35,11 +37,14 @@ async function main() {
     if (!ready) throw new Error('Server failed to start on port ' + TEST_PORT);
     console.log('Test server ready on port', TEST_PORT);
 
-    const browser = await chromium.launch({
-      executablePath: '/usr/bin/google-chrome',
+    const launchOptions = {
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    });
+    };
+    if (process.env.CHROME_PATH) {
+      launchOptions.executablePath = process.env.CHROME_PATH;
+    }
+    browser = await chromium.launch(launchOptions);
 
     // 1. Verify Item 12: Certificates on Mobile
     console.log('\n--- Verifying Item 12: Certificates on Mobile & Tap Targets ---');
@@ -214,14 +219,21 @@ async function main() {
     console.log('\n======================================================');
     if (allPassed) {
       console.log('ALL PR C VERIFICATION TESTS PASSED (100%)');
+      process.exitCode = 0;
     } else {
       console.error('SOME PR C TESTS FAILED');
-      process.exit(1);
+      process.exitCode = 1;
     }
     console.log('======================================================\n');
   } finally {
+    if (page) {
+      try { await page.close(); } catch {}
+    }
+    if (browser) {
+      try { await browser.close(); } catch {}
+    }
     if (serverProcess) {
-      serverProcess.kill('SIGKILL');
+      try { serverProcess.kill('SIGKILL'); } catch {}
     }
   }
 }

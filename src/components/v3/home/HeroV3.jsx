@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import CelestialOrb from './CelestialOrb';
+import { useTheme } from '../ThemeProvider';
 import { useBootComplete, useMagneticButtons, prefersReducedMotion } from '../motion';
 
 const STATS = [
@@ -27,6 +28,8 @@ function getISTTime() {
 
 export default function HeroV3() {
   const rootRef = useRef(null);
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [booted, setBooted] = useState(false);
   const [clock, setClock] = useState(getISTTime);
   const [stickerError, setStickerError] = useState(false);
@@ -99,7 +102,8 @@ export default function HeroV3() {
           <img
             src="/hero/desktop-light.jpg"
             alt=""
-            fetchPriority="high"
+            fetchPriority={!isDark ? 'high' : 'low'}
+            loading={!isDark ? 'eager' : 'lazy'}
             className="sn-scene-img"
           />
         </picture>
@@ -120,7 +124,8 @@ export default function HeroV3() {
           <img
             src="/hero/desktop-dark.jpg"
             alt=""
-            fetchPriority="high"
+            fetchPriority={isDark ? 'high' : 'low'}
+            loading={isDark ? 'eager' : 'lazy'}
             className="sn-scene-img"
           />
         </picture>
@@ -259,6 +264,7 @@ export default function HeroV3() {
         <dl className="sn-stats-strip" aria-label="Career statistics">
           {STATS.map((stat) => (
             <div key={stat.label} className="sn-stat-card">
+              <dt className="sn-stat-label">{stat.label}</dt>
               <dd
                 className="sn-stat-num"
                 data-stat-target={stat.target}
@@ -267,8 +273,7 @@ export default function HeroV3() {
                 {stat.target}
                 {stat.suffix}
               </dd>
-              <dt className="sn-stat-label">{stat.label}</dt>
-              <span className="sn-stat-meta">{stat.meta}</span>
+              <dd className="sn-stat-meta">{stat.meta}</dd>
             </div>
           ))}
         </dl>

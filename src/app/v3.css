@@ -567,6 +567,9 @@ html[data-v3='true'] #cursor-ring.hover {
     display: none !important;
     pointer-events: none !important;
   }
+  html[data-v3='true'] body {
+    cursor: auto !important;
+  }
 }
 
 /* ─── 12. Chrome: fixed widgets ───────────────────────────────── */
@@ -2216,6 +2219,7 @@ html.v3-theme-transition::view-transition-new(root) {
 }
 
 .sn-stat-num {
+  order: 1;
   font-family: var(--v3-font-display, var(--font-bebas, sans-serif));
   font-size: clamp(1.6rem, 2.4vw, 2.1rem);
   line-height: 1;
@@ -2225,6 +2229,7 @@ html.v3-theme-transition::view-transition-new(root) {
 }
 
 .sn-stat-label {
+  order: 2;
   font-family: var(--v3-font-sans, sans-serif);
   font-size: 0.8rem;
   font-weight: 600;
@@ -2233,9 +2238,11 @@ html.v3-theme-transition::view-transition-new(root) {
 }
 
 .sn-stat-meta {
+  order: 3;
   font-family: var(--v3-font-mono, monospace);
   font-size: 0.65rem;
   color: var(--sn-text-secondary);
+  margin: 0;
 }
 
 /* ─── Footer Scroll Cue ─── */

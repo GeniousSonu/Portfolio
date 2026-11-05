@@ -45,3 +45,4 @@ export const KURACODE_PERMISSIONS = {
 };
 
 export default KURACODE_PERMISSIONS;
+

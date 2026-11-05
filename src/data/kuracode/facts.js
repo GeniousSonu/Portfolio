@@ -89,3 +89,4 @@ export const KURACODE_FACTS = {
 };
 
 export default KURACODE_FACTS;
+

@@ -21,3 +21,4 @@ export const KURACODE_CHANGELOG = [
 ];
 
 export default KURACODE_CHANGELOG;
+

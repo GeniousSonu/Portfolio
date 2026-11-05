@@ -30,3 +30,4 @@ export const KURACODE_LICENSES = [
 ];
 
 export default KURACODE_LICENSES;
+

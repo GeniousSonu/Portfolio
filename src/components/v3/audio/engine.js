@@ -428,7 +428,7 @@ export function startAmbient(theme = 'dark') {
         title: isDay ? 'Day Mode Ambient Synthesis' : 'Night Mode Ambient Synthesis',
         artist: 'Generative Web Audio Preset',
         album: 'SK Sahinur Islam Portfolio (Ambient Soundscape)',
-        artwork: [{ src: '/Image/sonu-sticker.png', sizes: '512x512', type: 'image/png' }],
+        artwork: [{ src: '/Image/sonu-sticker.webp', sizes: '512x512', type: 'image/webp' }],
       });
     }
   } catch {}

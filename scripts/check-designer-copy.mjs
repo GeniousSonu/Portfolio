@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const SRC_DIR = '/home/dayshift/Music/Portfolio/src';
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const SRC_DIR = join(__dirname, '..', 'src');
 const PROHIBITED_PATTERNS = [
   /\bDesign\s+Engineer\b/i,
   /\bUI\s*\/?\s*UX\s+Designer\b/i,

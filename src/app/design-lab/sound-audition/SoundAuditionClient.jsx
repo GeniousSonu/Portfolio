@@ -107,15 +107,8 @@ export default function SoundAuditionClient() {
     }
   };
 
-  const handleToggleAudition = (trackId) => {
-    if (activeTrack === trackId && musicPlaying) {
-      toggleMusic();
-    } else {
-      setActiveTrack(trackId);
-      if (!musicPlaying) {
-        toggleMusic();
-      }
-    }
+  const handleSelectTrack = (trackId) => {
+    setActiveTrack(trackId);
   };
 
   return (
@@ -167,7 +160,7 @@ export default function SoundAuditionClient() {
           Audition the 6 shortlisted lofi tracks in both Light and Dark themes. Test how interactive tactile clicks and haptics sound over the background bed.
         </p>
 
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginTop: '24px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center', marginTop: '24px' }}>
           <button
             type="button"
             onClick={toggleTheme}
@@ -188,6 +181,26 @@ export default function SoundAuditionClient() {
               Current Theme: <strong>{theme === 'dark' ? 'Night (Dark)' : 'Day (Light)'}</strong>
             </span>
             <span>(Click to toggle)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={toggleMusic}
+            style={{
+              padding: '10px 20px',
+              borderRadius: '8px',
+              background: musicPlaying ? 'var(--sn-accent-gold)' : 'var(--sn-surface-2)',
+              color: musicPlaying ? 'var(--void)' : 'var(--sn-text-primary)',
+              border: '1px solid var(--sn-card-border)',
+              cursor: 'pointer',
+              fontWeight: '700',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+          >
+            {musicPlaying ? <StopIcon /> : <PlayIcon />}
+            <span>{musicPlaying ? 'Stop Ambient Synthesis Bed' : 'Play Ambient Synthesis Bed'}</span>
           </button>
         </div>
       </header>
@@ -373,13 +386,13 @@ export default function SoundAuditionClient() {
 
                   <button
                     type="button"
-                    onClick={() => handleToggleAudition(track.id)}
+                    onClick={() => handleSelectTrack(track.id)}
                     style={{
                       width: '100%',
                       padding: '12px',
                       borderRadius: '8px',
-                      background: isSelected && musicPlaying ? 'var(--sn-accent-gold)' : 'var(--sn-surface-2)',
-                      color: isSelected && musicPlaying ? 'var(--void)' : 'var(--sn-text-primary)',
+                      background: isSelected ? 'var(--sn-accent-gold)' : 'var(--sn-surface-2)',
+                      color: isSelected ? 'var(--void)' : 'var(--sn-text-primary)',
                       border: '1px solid var(--sn-card-border)',
                       fontWeight: '700',
                       cursor: 'pointer',
@@ -389,17 +402,7 @@ export default function SoundAuditionClient() {
                       gap: '8px',
                     }}
                   >
-                    {isSelected && musicPlaying ? (
-                      <>
-                        <StopIcon />
-                        <span>Stop Ambient Bed</span>
-                      </>
-                    ) : (
-                      <>
-                        <PlayIcon />
-                        <span>Play Ambient Bed</span>
-                      </>
-                    )}
+                    <span>{isSelected ? '✓ Selected Track Metadata' : 'View Track Details'}</span>
                   </button>
                 </div>
               </div>

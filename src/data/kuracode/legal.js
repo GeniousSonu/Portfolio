@@ -12,7 +12,7 @@ export const KURACODE_LEGAL = {
     'Local-First Guarantee: Your code snippets, tags, and notes are stored exclusively on your device in local storage. Nothing is transmitted to any external server.',
     'Zero Telemetry & Tracking: KuraCode contains no tracking scripts, no behavioral analytics, and no third-party advertising SDKs.',
     'No Private Browsing Tracking: KuraCode deliberately disables background persistence in incognito or private browsing windows.',
-    'Strictly Scoped Permissions: The extension requests only permissions necessary for active tab selection capture (activeTab) and context menus.',
+    'Strictly Scoped Permissions: The extension requests only 4 declared permissions: activeTab (user-triggered snippet capture), contextMenus (right-click save), storage (local settings), and unlimitedStorage (local library capacity). Zero broad host permissions.',
     'Complete Data Portability: You can export your entire snippet archive at any time in standard JSON or Markdown format, or permanently purge all data locally.',
     'No Sale of User Data: We never sell, rent, monetize, or broker your personal information or code snippets under any circumstances.',
   ],
@@ -43,3 +43,4 @@ export const KURACODE_LEGAL = {
 };
 
 export default KURACODE_LEGAL;
+

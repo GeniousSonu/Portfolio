@@ -7,10 +7,11 @@
 ## 1. Typography System
 
 Import the following Google Fonts (or local equivalents):
-* **Display Condensed (`--font-display`):** `'Anton'`, `'Bebas Neue'`, or `'Impact'` — Uppercase, tight tracking (`-0.02em`), line-height `0.88`.
-* **Editorial Serif (`--font-serif`):** `'Instrument Serif'`, `'Playfair Display'`, or `'Newsreader'` (Italic) — Used for narrative hooks and cover story accent words.
-* **Technical Monospace (`--font-mono`):** `'JetBrains Mono'` or `'Space Mono'` — Uppercase, letter-spacing `0.08em`, font-size `0.75rem`–`0.85rem`.
-* **UI Sans (`--font-sans`):** `'Plus Jakarta Sans'` or `'Inter'` — Clean body copy, navigation links, and bullet points.
+* **Display Condensed (`--font-display`):** `'Bebas Neue'` — Uppercase, tight tracking (`-0.02em`), line-height `0.88`.
+* **Editorial Serif (`--font-serif`):** `'Playfair Display'` (Italic) — Used for narrative hooks and cover story accent words.
+* **Technical Monospace (`--font-mono`):** `'Space Mono'` — Uppercase, letter-spacing `0.08em`, font-size `0.75rem`–`0.85rem`.
+* **UI Sans / Body (`--font-sans`, `--body`):** `'Bricolage Grotesque'` (with `'Plus Jakarta Sans'` fallback) — Clean body copy, navigation links, and bullet points.
+* **Accent Hand (`--font-hand`):** `'Shantell Sans'` — Playful annotations and accent tags.
 
 ---
 

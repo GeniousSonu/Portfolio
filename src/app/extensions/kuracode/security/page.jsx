@@ -36,7 +36,7 @@ export default function SecurityPage() {
             Developers frequently copy configuration blocks that contain sensitive credentials. KuraCode includes a built-in heuristic pattern scanner that evaluates highlighted text before saving:
           </p>
           <ul className="list-disc pl-5 space-y-1 text-text-primary">
-            <li>Private RSA / SSH keys (\`-----BEGIN OPENSSH PRIVATE KEY-----\`).</li>
+            <li>Private RSA / SSH keys (<code className="text-emerald-400 font-mono">-----BEGIN OPENSSH PRIVATE KEY-----</code>).</li>
             <li>Cloud provider tokens (AWS, GCP, DigitalOcean tokens).</li>
             <li>API keys (Stripe, GitHub personal access tokens, OpenAI keys).</li>
             <li>Database connection URIs containing embedded passwords.</li>
@@ -62,3 +62,4 @@ export default function SecurityPage() {
     </div>
   );
 }
+

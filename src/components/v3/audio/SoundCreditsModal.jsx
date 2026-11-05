@@ -97,19 +97,10 @@ export default function SoundCreditsModal() {
 
         <div className="sn-sound-modal-body">
           <section className="sn-credits-section">
-            <h4 className="sn-credits-heading">Lofi Background Stream</h4>
-            <div className="sn-track-item">
-              <span className="sn-track-name">Morning Coffee (Day Mode)</span>
-              <span className="sn-track-meta">By LuKremBo • Creative Commons Attribution 4.0 (CC BY 4.0)</span>
-            </div>
-            <div className="sn-track-item">
-              <span className="sn-track-name">Night City Breeze (Night Mode)</span>
-              <span className="sn-track-meta">By Purrple Cat • Creative Commons Attribution-ShareAlike 4.0 (CC BY-SA 4.0)</span>
-            </div>
-            <div className="sn-track-item">
-              <span className="sn-track-name">Silent Waves (Ambient Drone)</span>
-              <span className="sn-track-meta">By HoliznaCC0 • Creative Commons Zero (CC0 1.0 Universal)</span>
-            </div>
+            <h4 className="sn-credits-heading">Generative Ambient Soundscape</h4>
+            <p className="sn-credits-text">
+              The ambient audio bed is procedurally synthesized in real-time via the HTML5 Web Audio API using harmonic sine and triangle oscillator banks tailored to Day and Night themes. Zero external audio streaming bandwidth and zero third-party audio files.
+            </p>
           </section>
 
           <section className="sn-credits-section">

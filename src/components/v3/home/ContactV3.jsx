@@ -8,6 +8,7 @@ import Emoji3D from '../Emoji3D';
 import { useTheme } from '../ThemeProvider';
 import { useChapterReveal } from '../motion';
 import { CONTACT_LINKS, LINKTREE_SOCIALS } from '@/components/Contact';
+import { SOCIAL_LINKS } from '@/config/socials';
 
 const INTRO =
   "Looking for a developer who understands both the frontend and what's running underneath it? Whether it's a web app, a system integration, or something that involves a Linux terminal and a network diagram — I'm here.";
@@ -24,14 +25,49 @@ export default function ContactV3() {
   const [feedbackState, setFeedbackState] = useState('idle');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const [copyError, setCopyError] = useState(false);
+  const copyTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleCopyEmail = async () => {
+    if (copyTimeoutRef.current) {
+      clearTimeout(copyTimeoutRef.current);
+    }
+    setCopyError(false);
+
     try {
-      await navigator.clipboard.writeText('sahinurislamm2002@gmail.com');
-      setCopiedEmail(true);
-      setTimeout(() => setCopiedEmail(false), 2000);
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        await navigator.clipboard.writeText(SOCIAL_LINKS.email);
+        setCopiedEmail(true);
+        copyTimeoutRef.current = setTimeout(() => setCopiedEmail(false), 2000);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = SOCIAL_LINKS.email;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textarea);
+
+        if (successful) {
+          setCopiedEmail(true);
+          copyTimeoutRef.current = setTimeout(() => setCopiedEmail(false), 2000);
+        } else {
+          setCopyError(true);
+          copyTimeoutRef.current = setTimeout(() => setCopyError(false), 2500);
+        }
+      }
     } catch {
-      // fallback
+      setCopyError(true);
+      copyTimeoutRef.current = setTimeout(() => setCopyError(false), 2500);
     }
   };
 
@@ -202,8 +238,8 @@ export default function ContactV3() {
           {/* Oversized Bold Email Row (design-reference.md) */}
           <div className="v3-contact-email-row">
             <span className="v3-contact-email-badge">INQUIRIES //</span>
-            <a href="mailto:sahinurislamm2002@gmail.com" className="v3-contact-email-address">
-              sahinurislamm2002@gmail.com
+            <a href={`mailto:${SOCIAL_LINKS.email}`} className="v3-contact-email-address">
+              {SOCIAL_LINKS.email}
             </a>
             <button
               type="button"
@@ -211,14 +247,17 @@ export default function ContactV3() {
               className="v3-brutal-copy-btn"
               aria-label="Copy email address"
             >
-              {copiedEmail ? '✓ COPIED' : 'COPY 📋'}
+              {copiedEmail ? '✓ COPIED' : copyError ? '✗ FAILED' : 'COPY 📋'}
             </button>
+            <span className="sr-only" role="status" aria-live="polite">
+              {copiedEmail ? 'Email address copied to clipboard.' : copyError ? 'Failed to copy email address.' : ''}
+            </span>
           </div>
 
           {/* Action Pills Row */}
           <div className="v3-contact-action-pills">
             <a
-              href="https://linkedin.com/in/genioussonu"
+              href={SOCIAL_LINKS.linkedin}
               target="_blank"
               rel="noopener noreferrer"
               className="v3-brutal-pill-link"
@@ -227,7 +266,7 @@ export default function ContactV3() {
               LinkedIn ↗
             </a>
             <a
-              href="https://github.com/GeniousSonu"
+              href={SOCIAL_LINKS.github}
               target="_blank"
               rel="noopener noreferrer"
               className="v3-brutal-pill-link"
@@ -236,7 +275,7 @@ export default function ContactV3() {
               GitHub ↗
             </a>
             <a
-              href="https://t.me/genioussonu"
+              href={SOCIAL_LINKS.telegram}
               target="_blank"
               rel="noopener noreferrer"
               className="v3-brutal-pill-link"
@@ -245,7 +284,7 @@ export default function ContactV3() {
               Telegram ↗
             </a>
             <a
-              href="https://twitter.com/genioussonu"
+              href={SOCIAL_LINKS.twitter}
               target="_blank"
               rel="noopener noreferrer"
               className="v3-brutal-pill-link"
