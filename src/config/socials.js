@@ -15,3 +15,4 @@ export const SOCIAL_LINKS = {
   upwork: 'https://www.upwork.com/freelancers/~0104912246c7c7bdbf',
   tryhackme: 'https://tryhackme.com/p/mrbettle',
 };
+
