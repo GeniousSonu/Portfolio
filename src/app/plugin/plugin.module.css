@@ -58,6 +58,7 @@
 
 .breadcrumbSeparator {
   color: var(--border, #2a2f38);
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -98,6 +99,7 @@
 .titleGradient {
   background: linear-gradient(135deg, #f9fafb 30%, #34d399 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
