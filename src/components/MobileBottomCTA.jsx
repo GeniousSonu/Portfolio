@@ -6,6 +6,7 @@ import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 
 import { useTransitionRouter } from '@/context/TransitionContext';
 import navState from '@/lib/navState';
+import { isQuietRoute } from '@/lib/quietRoutes';
 
 export default function MobileBottomCTA() {
   const pathname = usePathname();
@@ -89,7 +90,7 @@ export default function MobileBottomCTA() {
     }
   };
 
-  if (pathname?.startsWith('/studio')) return null;
+  if (pathname?.startsWith('/studio') || isQuietRoute(pathname)) return null;
 
   const isHidden = !visible || inContact;
 

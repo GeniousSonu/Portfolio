@@ -1,9 +1,15 @@
 "use client";
 import React, { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import gsap from 'gsap';
+import { isQuietRoute } from '@/lib/quietRoutes';
 
 export default function CustomCursor() {
+  const pathname = usePathname();
+  const quiet = isQuietRoute(pathname);
+
   useEffect(() => {
+    if (quiet) return;
     const cursor = document.getElementById('cursor');
     const ring = document.getElementById('cursor-ring');
     if (!cursor || !ring) return;
@@ -59,7 +65,9 @@ export default function CustomCursor() {
       cancelAnimationFrame(animationFrameId);
       gsap.killTweensOf(cursor);
     };
-  }, []);
+  }, [quiet]);
+
+  if (quiet) return null;
 
   return (
     <>

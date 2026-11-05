@@ -425,9 +425,9 @@ export function startAmbient(theme = 'dark') {
     if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
       const isDay = theme === 'light';
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: isDay ? 'Morning Coffee' : 'Night City Breeze',
-        artist: isDay ? 'LuKremBo' : 'Purrple Cat',
-        album: 'SK Sahinur Islam Portfolio (Lofi Experience)',
+        title: isDay ? 'Day Mode Ambient Synthesis' : 'Night Mode Ambient Synthesis',
+        artist: 'Generative Web Audio Preset',
+        album: 'SK Sahinur Islam Portfolio (Ambient Soundscape)',
         artwork: [{ src: '/Image/sonu-sticker.png', sizes: '512x512', type: 'image/png' }],
       });
     }

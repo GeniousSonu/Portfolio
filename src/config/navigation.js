@@ -65,6 +65,17 @@ export const NAVIGATION_ITEMS = [
     icon: 'puzzle',
   },
   {
+    id: 'nav-kuracode',
+    label: 'KuraCode',
+    href: '/extensions/kuracode',
+    type: 'page',
+    group: 'work',
+    description: 'Local-first browser extension to capture, clean, and organize code snippets',
+    status: 'preview',
+    keywords: ['kuracode', 'code', 'snippet', 'extension', 'browser', 'chrome'],
+    icon: 'code',
+  },
+  {
     id: 'nav-store',
     label: 'Store',
     href: '/store',

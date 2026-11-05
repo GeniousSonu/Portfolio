@@ -1,9 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { useSound } from '../SoundProvider';
+import { isQuietRoute } from '@/lib/quietRoutes';
 
 export default function SoundOptInPrompt() {
+  const pathname = usePathname();
   const { optInStatus, soundOptIn } = useSound();
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -19,7 +22,7 @@ export default function SoundOptInPrompt() {
     return () => clearTimeout(timer);
   }, [optInStatus]);
 
-  if (!mounted || optInStatus !== 'pending' || !visible) {
+  if (!mounted || optInStatus !== 'pending' || !visible || isQuietRoute(pathname)) {
     return null;
   }
 

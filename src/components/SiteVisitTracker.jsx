@@ -1,17 +1,21 @@
 "use client";
 
 import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { onAnalyticsConsent } from '@/lib/consent';
 import { getOrCreateVisitorId } from '@/lib/visitorId';
+import { isQuietRoute } from '@/lib/quietRoutes';
 
 /**
  * Executes visit tracking once per browser session, strictly gated on cookie consent.
  * Mounted in root layout to track unique visitors without firing on internal SPA route changes.
  */
 export default function SiteVisitTracker() {
+  const pathname = usePathname();
+
   useEffect(() => {
-    // Avoid double-dispatch within the same browser session
-    if (typeof window === 'undefined') return;
+    // Avoid double-dispatch within the same browser session or on quiet routes
+    if (typeof window === 'undefined' || isQuietRoute(pathname)) return;
 
     try {
       if (sessionStorage.getItem('sks_visit_tracked') === '1') {
@@ -53,7 +57,7 @@ export default function SiteVisitTracker() {
         // Silent graceful fallback
       }
     });
-  }, []);
+  }, [pathname]);
 
   return null;
 }

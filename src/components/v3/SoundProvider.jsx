@@ -204,7 +204,7 @@ export default function SoundProvider({ children }) {
 
   // Trigger Haptic Feedback through centralized gate
   const vibrate = useCallback((pattern = 'light') => {
-    if (!hapticsEnabledRef.current || masterMutedRef.current || isReducedMotion()) return;
+    if (!hapticsEnabledRef.current || masterMutedRef.current || optInRef.current === 'off' || isReducedMotion()) return;
     engineRef.current?.triggerHaptic(pattern);
   }, []);
 

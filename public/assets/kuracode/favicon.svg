@@ -24,14 +24,14 @@
       <stop offset="1" stop-color="#009d63"/>
     </linearGradient>
   </defs>
-  <!-- Vertical stem -->
+  
   <path d="M467 42 H644 V804 H467 Z" fill="url(#bar)"/>
-  <!-- Bright upper-left diagonal ribbon -->
+  
   <path d="M1029 36 L1100 101 L560 583 L490 522 Z" fill="url(#mint)"/>
-  <!-- Bright lower-left diagonal ribbon -->
+  
   <path d="M490 522 L560 583 L943 793 L868 862 Z" fill="url(#mintLower)"/>
-  <!-- Inner dark folded chevron -->
+  
   <path d="M1110 113 L1190 180 L837 505 L1142 789 L1059 862 L677 506 Z" fill="url(#deep)"/>
-  <!-- Outer right diamond / chevron ribbon -->
+  
   <path d="M1207 205 L1504 496 L1199 784 L1124 716 L1352 496 L1128 279 Z" fill="url(#right)"/>
 </svg>

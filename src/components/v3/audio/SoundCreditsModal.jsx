@@ -6,13 +6,18 @@ import { useSound } from '../SoundProvider';
 export default function SoundCreditsModal() {
   const { showCredits, setShowCredits } = useSound();
   const modalRef = useRef(null);
+  const closeBtnRef = useRef(null);
   const previousFocusRef = useRef(null);
 
   useEffect(() => {
     if (!showCredits) return;
 
     previousFocusRef.current = document.activeElement;
-    modalRef.current?.focus();
+    if (closeBtnRef.current) {
+      closeBtnRef.current.focus();
+    } else {
+      modalRef.current?.focus();
+    }
 
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
@@ -70,7 +75,6 @@ export default function SoundCreditsModal() {
         tabIndex={-1}
         ref={modalRef}
         onClick={(e) => e.stopPropagation()}
-        style={{ outline: 'none' }}
       >
         <div className="sn-sound-modal-header">
           <div>
@@ -79,6 +83,7 @@ export default function SoundCreditsModal() {
           </div>
           <button
             type="button"
+            ref={closeBtnRef}
             className="sn-modal-close-btn"
             onClick={() => setShowCredits(false)}
             aria-label="Close audio credits"

@@ -7,6 +7,7 @@ import { useOverlay } from '@/context/OverlayContext';
 import { useTransitionRouter } from '@/context/TransitionContext';
 import { NAVIGATION_ITEMS, FOOTER_LEGAL_ITEMS } from '@/config/navigation';
 import styles from './CommandPalette.module.css';
+import { isQuietRoute } from '@/lib/quietRoutes';
 
 // SVG Icons
 const SearchIcon = () => (
@@ -97,8 +98,9 @@ export default function CommandPalette() {
     }, 2500);
   }, []);
 
-  // Global shortcut listener (Cmd+K / Ctrl+K)
+  // Global shortcut listener (Cmd+K / Ctrl+K) - disabled on quiet routes
   useEffect(() => {
+    if (isQuietRoute(pathname)) return;
     const handleKeyDown = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
@@ -112,7 +114,7 @@ export default function CommandPalette() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, openOverlay, closeOverlay]);
+  }, [isOpen, openOverlay, closeOverlay, pathname]);
 
   useEffect(() => {
     return () => {
@@ -203,7 +205,7 @@ export default function CommandPalette() {
 
 
 
-  if (!isOpen) return null;
+  if (!isOpen || isQuietRoute(pathname)) return null;
 
   // Filter items by type from single source of truth
   const anchorItems = NAVIGATION_ITEMS.filter((item) => item.type === 'anchor');

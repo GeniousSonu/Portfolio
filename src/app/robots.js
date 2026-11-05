@@ -3,7 +3,17 @@ export default function robots() {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/studio/', '/api/', '/space'],
+      disallow: [
+        '/studio/',
+        '/api/',
+        '/space',
+        '/reset',
+        '/site-index',
+        '/extensions/kuracode/welcome',
+        '/extensions/kuracode/update',
+        '/extensions/kuracode/review',
+        '/extensions/kuracode/demo',
+      ],
     },
     sitemap: 'https://genioussonu.me/sitemap.xml',
   };

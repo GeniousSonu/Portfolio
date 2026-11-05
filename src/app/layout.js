@@ -2,6 +2,7 @@ import './globals.css';
 import './tailwind.css';
 import './v3.css';
 import { fontClassNames } from '@/lib/fonts';
+import { buildRootGraph } from '@/lib/jsonLd';
 
 export const viewport = {
   width: 'device-width',
@@ -106,120 +107,7 @@ export const metadata = {
   },
 };
 
-const jsonLdGraph = {
-  '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'Person',
-      '@id': 'https://genioussonu.me/#person',
-      name: 'SK Sahinur Islam',
-      alternateName: [
-        'Genious Sonu',
-        'Sonu',
-        'Sahinur Islam',
-        'Sahinur',
-        'GeniousSonu',
-        'SK Sahinur',
-      ],
-      url: 'https://genioussonu.me',
-      image: 'https://genioussonu.me/icon-512.png',
-      email: 'mailto:sahinurislamm2002@gmail.com',
-      jobTitle: 'Senior Web Application Developer & Full Stack IT Engineer',
-      description:
-        'Senior Web Application Developer at Ib Arts, Co-Founder of WEFIK, IT Engineer, and IoT Patent Holder.',
-      worksFor: [
-        {
-          '@type': 'Organization',
-          name: 'Ib Arts',
-          role: 'Senior Web Application Developer',
-          startDate: '2026-07',
-        },
-        {
-          '@type': 'Organization',
-          name: 'WEFIK',
-          role: 'Co-Founder',
-          startDate: '2021-03',
-        },
-      ],
-      alumniOf: {
-        '@type': 'EducationalOrganization',
-        name: 'Guru Nanak Institute of Technology, Kolkata',
-        sameAs: 'https://www.gnit.ac.in/',
-      },
-      address: {
-        '@type': 'PostalAddress',
-        addressLocality: 'Kolkata',
-        addressRegion: 'West Bengal',
-        addressCountry: 'IN',
-      },
-      sameAs: [
-        'https://www.linkedin.com/in/sksahinurislam/',
-        'https://github.com/GeniousSonu',
-        'https://x.com/GeniousSonu',
-        'https://twitter.com/GeniousSonu',
-        'https://instagram.com/genious.exe',
-        'https://www.youtube.com/@GeniousSonu',
-        'https://www.upwork.com/freelancers/~0104912246c7c7bdbf',
-        'https://linktr.ee/sksahinurislam',
-        'https://www.facebook.com/profile.php?id=61561884613549',
-        'https://t.me/genious_sonu',
-        'https://tryhackme.com/p/mrbettle',
-      ],
-      knowsAbout: [
-        'Full-Stack Development',
-        'Backend Architecture',
-        'DevOps',
-        'React',
-        'Next.js',
-        'Node.js',
-        'Express',
-        'MongoDB',
-        'MySQL',
-        'PostgreSQL',
-        'Docker',
-        'Linux Server Administration',
-        'Cybersecurity',
-        'IoT & Embedded Systems',
-        'MQTT Telemetry',
-        'Python',
-      ],
-      hasCredential: [
-        {
-          '@type': 'EducationalOccupationalCredential',
-          name: 'Indian Patent No. 544062 (IoT Real-Time Vaccine Storage Monitoring)',
-        },
-        { '@type': 'EducationalOccupationalCredential', name: 'CompTIA A+' },
-        {
-          '@type': 'EducationalOccupationalCredential',
-          name: 'TryHackMe Pre Security Certification',
-        },
-        {
-          '@type': 'EducationalOccupationalCredential',
-          name: 'CoCubes Certified Coding & Aptitude',
-        },
-        {
-          '@type': 'EducationalOccupationalCredential',
-          name: 'IBM Machine Learning with Python (Honors)',
-        },
-      ],
-    },
-    {
-      '@type': 'WebSite',
-      '@id': 'https://genioussonu.me/#website',
-      url: 'https://genioussonu.me',
-      name: 'SK Sahinur Islam (Genious Sonu) Portfolio',
-      publisher: { '@id': 'https://genioussonu.me/#person' },
-      inLanguage: 'en-US',
-    },
-    {
-      '@type': 'ProfilePage',
-      '@id': 'https://genioussonu.me/#profilepage',
-      url: 'https://genioussonu.me',
-      name: 'SK Sahinur Islam (Genious Sonu) — Official Portfolio & Engineering Resume',
-      mainEntity: { '@id': 'https://genioussonu.me/#person' },
-    },
-  ],
-};
+const jsonLdGraph = buildRootGraph();
 
 import CustomCursor from '@/components/CustomCursor';
 import MobileBottomCTA from '@/components/MobileBottomCTA';

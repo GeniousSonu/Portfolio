@@ -15,6 +15,7 @@
     "format": "prettier --write .",
     "check:fonts": "node scripts/check-hardcoded-fonts.mjs",
     "check:routes": "node scripts/check-routes.mjs",
+    "check:placeholders": "node scripts/check-placeholders.mjs",
     "test": "vitest run",
     "test:unit": "vitest run",
     "test:boot": "node scripts/test-boot-001.mjs",

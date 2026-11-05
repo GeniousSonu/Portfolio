@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { getConsentStatus, getConsentChoice, setConsentChoice } from "@/lib/consent";
+import { isQuietRoute } from "@/lib/quietRoutes";
 
 export default function CookieConsentBanner() {
   const pathname = usePathname();
@@ -73,7 +74,7 @@ export default function CookieConsentBanner() {
     setVisible(false);
   };
 
-  if (!visible) {
+  if (!visible || isQuietRoute(pathname)) {
     return null;
   }
 

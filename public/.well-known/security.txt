@@ -2,8 +2,8 @@
 # RFC 9116 Compliant
 
 Contact: mailto:contact@genioussonu.me
-Contact: https://genioussonu.me#contact
-Expires: 2027-12-31T23:59:59.000Z
+Contact: https://genioussonu.me/contact
+Expires: 2027-10-31T23:59:59.000Z
 Preferred-Languages: en
 Canonical: https://genioussonu.me/.well-known/security.txt
 Policy: https://genioussonu.me/privacy

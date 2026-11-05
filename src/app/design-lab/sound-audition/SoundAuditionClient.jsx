@@ -108,8 +108,14 @@ export default function SoundAuditionClient() {
   };
 
   const handleToggleAudition = (trackId) => {
-    setActiveTrack(trackId);
-    toggleMusic();
+    if (activeTrack === trackId && musicPlaying) {
+      toggleMusic();
+    } else {
+      setActiveTrack(trackId);
+      if (!musicPlaying) {
+        toggleMusic();
+      }
+    }
   };
 
   return (
@@ -386,12 +392,12 @@ export default function SoundAuditionClient() {
                     {isSelected && musicPlaying ? (
                       <>
                         <StopIcon />
-                        <span>Stop Audition</span>
+                        <span>Stop Ambient Bed</span>
                       </>
                     ) : (
                       <>
                         <PlayIcon />
-                        <span>Audition Track</span>
+                        <span>Play Ambient Bed</span>
                       </>
                     )}
                   </button>

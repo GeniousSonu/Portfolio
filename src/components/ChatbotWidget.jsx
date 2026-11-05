@@ -6,6 +6,7 @@ import { useTransitionRouter } from '@/context/TransitionContext';
 import styles from './ChatbotWidget.module.css';
 import { supabase } from '@/lib/supabaseClient';
 import navState from '@/lib/navState';
+import { isQuietRoute } from '@/lib/quietRoutes';
 
 const MAX_CHAR_COUNT = 500;
 const SESSION_EXPIRY_MS = 6 * 60 * 60 * 1000; // 6 hours
@@ -918,8 +919,8 @@ export default function ChatbotWidget() {
   const remainingChars = MAX_CHAR_COUNT - inputValue.length;
   const isNearLimit = remainingChars < 50;
 
-  // Exclude widget from Sanity Studio routes or when mobile nav is open
-  if (pathname?.startsWith('/studio') || isNavOpen) {
+  // Exclude widget from Sanity Studio routes, quiet extension routes, or when mobile nav is open
+  if (pathname?.startsWith('/studio') || isQuietRoute(pathname) || isNavOpen) {
     return null;
   }
 
