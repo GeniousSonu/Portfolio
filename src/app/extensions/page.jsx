@@ -13,7 +13,7 @@ export const metadata = {
 
 export default function ExtensionsIndexPage() {
   return (
-    <div className={styles.wrapper}>
+    <main className={styles.wrapper} data-route="/extensions">
       <div className={styles.ambientGlow} aria-hidden="true" />
       <div className={styles.container}>
         {/* Breadcrumb */}
@@ -62,7 +62,7 @@ export default function ExtensionsIndexPage() {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
 

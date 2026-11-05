@@ -145,6 +145,7 @@ export function TransitionProvider({ children }) {
         !activeRoute ||
         activeRoute === target ||
         (target.startsWith('/plugin') && activeRoute.startsWith('/plugin')) ||
+        (target.startsWith('/extensions') && activeRoute.startsWith('/extensions')) ||
         (target.startsWith('/blog') && activeRoute.startsWith('/blog')) ||
         (target.startsWith('/space') && activeRoute.startsWith('/space')) ||
         (target.startsWith('/lounge') && activeRoute.startsWith('/lounge'));

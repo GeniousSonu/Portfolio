@@ -65,6 +65,17 @@ export const NAVIGATION_ITEMS = [
     icon: 'puzzle',
   },
   {
+    id: 'nav-extension',
+    label: 'Extension',
+    href: '/extensions',
+    type: 'page',
+    group: 'work',
+    description: 'Browser extensions suite for developer productivity and web engineering',
+    status: 'live',
+    keywords: ['extension', 'extensions', 'chrome', 'browser', 'kuracode', 'tools'],
+    icon: 'blocks',
+  },
+  {
     id: 'nav-kuracode',
     label: 'KuraCode',
     href: '/extensions/kuracode',

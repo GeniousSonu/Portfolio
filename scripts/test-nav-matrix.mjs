@@ -26,6 +26,7 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:3555';
 const CORE_ROUTES = [
   '/',
   '/plugin',
+  '/extensions',
   '/projects',
   '/store',
   '/blog',
@@ -37,6 +38,7 @@ const CORE_ROUTES = [
 
 const DROPDOWN_TESTS = [
   { group: 'work', linkText: 'Plugin', targetHref: '/plugin' },
+  { group: 'work', linkText: 'Extension', targetHref: '/extensions' },
   { group: 'work', linkText: 'Store', targetHref: '/store' },
   { group: 'work', linkText: 'WEFIK', targetHref: '/wefik' },
   { group: 'knowledge', linkText: 'Blog', targetHref: '/blog' },

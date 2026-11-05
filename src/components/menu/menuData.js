@@ -3,6 +3,7 @@ import {
   History,
   Globe,
   Puzzle,
+  Blocks,
   ShoppingBag,
   PenLine,
   BookOpen,
@@ -24,7 +25,7 @@ export const MENU_SECTIONS = [
   {
     id: 'work',
     name: 'WORK',
-    count: '05',
+    count: '06',
     items: [
       {
         id: 'projects',
@@ -52,6 +53,13 @@ export const MENU_SECTIONS = [
         title: 'Plugin',
         href: '/plugin',
         icon: Puzzle,
+        isExternal: false,
+      },
+      {
+        id: 'extension',
+        title: 'Extension',
+        href: '/extensions',
+        icon: Blocks,
         isExternal: false,
       },
       {
