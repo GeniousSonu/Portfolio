@@ -176,14 +176,14 @@ export default function PlayClient() {
         </button>
       </div>
 
-      {/* Experiment 2: Competitive Chess Telemetry */}
+      {/* Experiment 2: Competitive Chess Ratings */}
       <div className={styles.labCard}>
         <div className={styles.cardHeader}>
-          <span className={styles.cardTag}>Protocol 02 · Strategy Engine</span>
+          <span className={styles.cardTag}>Strategy &amp; Chess</span>
           <span className={styles.cardStatus}>VERIFIED RATINGS</span>
         </div>
 
-        <h2 className={styles.cardTitle}>Chess Telemetry &amp; Challenges</h2>
+        <h2 className={styles.cardTitle}>Chess Ratings &amp; Challenges</h2>
         <p className={styles.cardDesc}>
           Competitive ratings and tactical puzzle metrics across online platforms. Challenge my
           handle directly to an asynchronous or live rapid match.
@@ -230,7 +230,7 @@ export default function PlayClient() {
         </div>
       </div>
 
-      {/* Experiment 3: Esports Telemetry & Match Request */}
+      {/* Experiment 3: Esports Stats & Match Request */}
       <div className={styles.fullWidthCard}>
         <div className={styles.cardHeader} style={{ justifyContent: 'center' }}>
           <span className={styles.cardTag}>Tactical FPS</span>
