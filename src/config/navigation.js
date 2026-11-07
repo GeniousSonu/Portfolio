@@ -12,9 +12,13 @@
 
 export const NAV_GROUPS = [
   { id: 'work', label: 'Work', description: 'Production code, agency platforms & hardware gear' },
-  { id: 'knowledge', label: 'Knowledge', description: 'Essays, system topology & engineering garden' },
+  {
+    id: 'knowledge',
+    label: 'Knowledge',
+    description: 'Essays, system topology & engineering garden',
+  },
   { id: 'lab', label: 'Lab', description: 'Collaborative rooms, experiments & developer tools' },
-  { id: 'about', label: 'About', description: 'Operator profile, verified credentials & telemetry' },
+  { id: 'about', label: 'About', description: 'Background, work experience, and IoT patent' },
   { id: 'contact', label: 'Contact', description: 'Direct transmission channel & lead ingestion' },
 ];
 
@@ -241,9 +245,9 @@ export const NAVIGATION_ITEMS = [
     href: '/status',
     type: 'page',
     group: 'about',
-    description: 'Real-time telemetry, server health & third-party service probes',
+    description: 'System status, server health & service uptime',
     status: 'live',
-    keywords: ['status', 'uptime', 'health', 'telemetry', 'ping', 'infrastructure'],
+    keywords: ['status', 'uptime', 'health', 'system', 'ping', 'infrastructure'],
     icon: 'activity',
   },
 

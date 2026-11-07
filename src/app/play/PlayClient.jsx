@@ -72,19 +72,13 @@ export default function PlayClient() {
   // Live adjustments while playing
   useEffect(() => {
     if (isPlaying && oscNodeRef.current && audioCtxRef.current) {
-      oscNodeRef.current.frequency.setValueAtTime(
-        frequency,
-        audioCtxRef.current.currentTime
-      );
+      oscNodeRef.current.frequency.setValueAtTime(frequency, audioCtxRef.current.currentTime);
     }
   }, [frequency, isPlaying]);
 
   useEffect(() => {
     if (isPlaying && gainNodeRef.current && audioCtxRef.current) {
-      gainNodeRef.current.gain.setValueAtTime(
-        volume,
-        audioCtxRef.current.currentTime
-      );
+      gainNodeRef.current.gain.setValueAtTime(volume, audioCtxRef.current.currentTime);
     }
   }, [volume, isPlaying]);
 
@@ -110,9 +104,7 @@ export default function PlayClient() {
       <div className={styles.labCard}>
         <div className={styles.cardHeader}>
           <span className={styles.cardTag}>Node 01 · Web Audio Experiment</span>
-          <span className={styles.cardStatus}>
-            {isPlaying ? '● OSCILLATING' : '○ STANDBY'}
-          </span>
+          <span className={styles.cardStatus}>{isPlaying ? '● OSCILLATING' : '○ STANDBY'}</span>
         </div>
 
         <h2 className={styles.cardTitle}>Acoustic Frequency Synthesizer</h2>
@@ -133,9 +125,7 @@ export default function PlayClient() {
                   key={type}
                   type="button"
                   onClick={() => setWaveform(type)}
-                  className={`${styles.waveBtn} ${
-                    waveform === type ? styles.waveBtnActive : ''
-                  }`}
+                  className={`${styles.waveBtn} ${waveform === type ? styles.waveBtnActive : ''}`}
                 >
                   {type}
                 </button>
@@ -195,8 +185,8 @@ export default function PlayClient() {
 
         <h2 className={styles.cardTitle}>Chess Telemetry &amp; Challenges</h2>
         <p className={styles.cardDesc}>
-          Competitive ratings and tactical puzzle metrics across online platforms. Challenge my handle
-          directly to an asynchronous or live rapid match.
+          Competitive ratings and tactical puzzle metrics across online platforms. Challenge my
+          handle directly to an asynchronous or live rapid match.
         </p>
 
         <div className={styles.statsList}>
@@ -243,12 +233,13 @@ export default function PlayClient() {
       {/* Experiment 3: Esports Telemetry & Match Request */}
       <div className={styles.fullWidthCard}>
         <div className={styles.cardHeader} style={{ justifyContent: 'center' }}>
-          <span className={styles.cardTag}>Protocol 03 · Tactical FPS</span>
+          <span className={styles.cardTag}>Tactical FPS</span>
         </div>
-        <h2 className={styles.cardTitle}>Valorant Competitive Telemetry</h2>
+        <h2 className={styles.cardTitle}>Valorant Competitive Stats</h2>
         <p className={styles.cardDesc} style={{ margin: '0 auto 1.5rem', maxWidth: '580px' }}>
-          Tactical FPS telemetry tracking: Rank <strong>Diamond 2</strong>. Main agents: <em>Omen, Killjoy, Cypher</em>.
-          Workstation display: 144Hz high-refresh IPS with sub-millisecond input lag.
+          Tactical FPS stats: Rank <strong>Diamond 2</strong>. Main agents:{' '}
+          <em>Omen, Killjoy, Cypher</em>. Workstation display: 144Hz high-refresh IPS with
+          sub-millisecond input lag.
         </p>
 
         <Link

@@ -92,7 +92,7 @@ export const PROJECTS = [
     category: '2024 · Full Stack · Web',
     dotColor: '#e34c26',
     coverImage: '/projects/stay-hotel-booking/cover.webp',
-    desc: 'A hotel booking web application built with HTML, CSS, JavaScript, Node.js, Express.js, MongoDB, and Bootstrap, offering a seamless user experience and secure payment integration.',
+    desc: 'A hotel booking web application built with HTML, CSS, JavaScript, Node.js, Express.js, MongoDB, and Bootstrap, with room availability filtering and payment processing.',
     stack: ['Node.js', 'Express.js', 'MongoDB', 'JavaScript', 'Bootstrap', 'HTML/CSS'],
     metrics: [
       { val: '99.9%', label: 'Uptime' },

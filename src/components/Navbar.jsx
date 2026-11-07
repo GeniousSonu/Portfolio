@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -75,13 +75,19 @@ export default function Navbar() {
   };
 
   const handleGroupMouseEnter = (groupId) => {
-    if (typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    if (
+      typeof window !== 'undefined' &&
+      window.matchMedia('(hover: hover) and (pointer: fine)').matches
+    ) {
       openDropdown(groupId);
     }
   };
 
   const handleGroupMouseLeave = () => {
-    if (typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    if (
+      typeof window !== 'undefined' &&
+      window.matchMedia('(hover: hover) and (pointer: fine)').matches
+    ) {
       dropdownTimerRef.current = setTimeout(() => {
         setOpenGroup(null);
       }, 200);
@@ -189,9 +195,13 @@ export default function Navbar() {
   useEffect(() => {
     if (!mobileOpen) return;
     const timer = setTimeout(() => {
-      const routeItems = NAVIGATION_ITEMS.filter((item) => item.type === 'page').map((item) => item.href);
+      const routeItems = NAVIGATION_ITEMS.filter((item) => item.type === 'page').map(
+        (item) => item.href
+      );
       routeItems.forEach((href) => {
-        try { router.prefetch(href); } catch {}
+        try {
+          router.prefetch(href);
+        } catch {}
       });
     }, 150);
     return () => clearTimeout(timer);
@@ -306,7 +316,10 @@ export default function Navbar() {
   // Scroll to section when arriving on homepage
   useEffect(() => {
     if (pathname === '/') {
-      const storedTarget = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('portfolio_scroll_target') : null;
+      const storedTarget =
+        typeof sessionStorage !== 'undefined'
+          ? sessionStorage.getItem('portfolio_scroll_target')
+          : null;
       const hashTarget = window.location.hash;
       const target = storedTarget || hashTarget;
       if (target && target.startsWith('#')) {
@@ -338,7 +351,14 @@ export default function Navbar() {
             className="nav-logo"
             aria-label="SK Sahinur Islam — Home"
           >
-            <Image src="/logo.svg" alt="SONU" width={90} height={26} priority className="nav-logo-img" />
+            <Image
+              src="/logo.svg"
+              alt="SONU"
+              width={90}
+              height={26}
+              priority
+              className="nav-logo-img"
+            />
           </Link>
 
           {/* Desktop Links (5 Groups + All Pages + Contact CTA) */}
@@ -346,7 +366,8 @@ export default function Navbar() {
             {triggerGroups.map((group) => {
               const groupItems = getNavItemsByGroup(group.id);
               const isGroupActive = groupItems.some((item) => {
-                if (item.type === 'page') return pathname === item.href || pathname.startsWith(item.href + '/');
+                if (item.type === 'page')
+                  return pathname === item.href || pathname.startsWith(item.href + '/');
                 return false;
               });
               const isOpen = openGroup === group.id;
@@ -406,7 +427,9 @@ export default function Navbar() {
                           <div className={styles.itemTop}>
                             <span className={styles.itemLabel}>{item.label}</span>
                             {item.status === 'stub' ? (
-                              <span className={`${styles.itemTag} ${styles.itemTagStub}`}>STUB</span>
+                              <span className={`${styles.itemTag} ${styles.itemTagStub}`}>
+                                STUB
+                              </span>
                             ) : item.type === 'anchor' ? (
                               <span className={styles.itemTag}>#section</span>
                             ) : null}
@@ -427,10 +450,9 @@ export default function Navbar() {
                 className={styles.allPagesBtn}
                 onClick={() => openOverlay('site_menu')}
                 aria-label="Open all pages directory"
-                title="View complete site directory"
+                title="View all pages directory"
               >
-                <span>Index</span>
-                <span className={styles.itemTag}>All</span>
+                <span>All pages</span>
               </button>
             </li>
 
@@ -451,10 +473,20 @@ export default function Navbar() {
             <button
               className={`nav-cmdk-btn ${isPlaygroundActive ? 'ring-2 ring-emerald-500 text-emerald-400' : ''}`}
               onClick={togglePlayground}
-              aria-label="Toggle Playground Mode"
-              title="Playground Mode (Editable & Draggable)"
+              aria-label="Toggle Playground mode (interactive canvas)"
+              title="Playground mode: inspect and drag interface elements"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
               </svg>
             </button>
@@ -469,7 +501,17 @@ export default function Navbar() {
             aria-label="Open Command Palette (Cmd+K)"
             title="Search & Commands (⌘K)"
           >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
@@ -485,7 +527,17 @@ export default function Navbar() {
             title={`Switch to ${theme === 'dark' ? 'Day' : 'Night'} Mode`}
           >
             {theme === 'dark' ? (
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
                 <circle cx="12" cy="12" r="5" />
                 <line x1="12" y1="1" x2="12" y2="3" />
                 <line x1="12" y1="21" x2="12" y2="23" />
@@ -497,7 +549,17 @@ export default function Navbar() {
                 <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
               </svg>
             ) : (
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
               </svg>
             )}

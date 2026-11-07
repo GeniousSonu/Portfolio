@@ -1,8 +1,8 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
-import { getConsentStatus, getConsentChoice, setConsentChoice } from "@/lib/consent";
-import { isQuietRoute } from "@/lib/quietRoutes";
+'use client';
+import React, { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+import { getConsentStatus, getConsentChoice, setConsentChoice } from '@/lib/consent';
+import { isQuietRoute } from '@/lib/quietRoutes';
 
 export default function CookieConsentBanner() {
   const pathname = usePathname();
@@ -14,7 +14,7 @@ export default function CookieConsentBanner() {
     // Only show banner if user has not yet made a choice
     const choice = getConsentChoice();
     const status = getConsentStatus();
-    if (choice === "none" && status === "pending") {
+    if (choice === 'none' && status === 'pending') {
       // Small delay after preloader completes so it doesn't disrupt initial boot animation
       const scheduleConsent = () => {
         const timer = setTimeout(() => {
@@ -23,9 +23,12 @@ export default function CookieConsentBanner() {
         return () => clearTimeout(timer);
       };
 
-      if (typeof window !== "undefined" && (window.__preloaderActive || document.body.classList.contains("preloader-locked"))) {
+      if (
+        typeof window !== 'undefined' &&
+        (window.__preloaderActive || document.body.classList.contains('preloader-locked'))
+      ) {
         const poll = setInterval(() => {
-          if (!window.__preloaderActive && !document.body.classList.contains("preloader-locked")) {
+          if (!window.__preloaderActive && !document.body.classList.contains('preloader-locked')) {
             clearInterval(poll);
             scheduleConsent();
           }
@@ -35,7 +38,7 @@ export default function CookieConsentBanner() {
         return scheduleConsent();
       }
     } else {
-      setAnalyticsEnabled(status === "granted");
+      setAnalyticsEnabled(status === 'granted');
     }
   }, []);
 
@@ -43,34 +46,34 @@ export default function CookieConsentBanner() {
   useEffect(() => {
     const handleOpenPrefs = () => {
       const status = getConsentStatus();
-      setAnalyticsEnabled(status === "granted");
+      setAnalyticsEnabled(status === 'granted');
       setShowPreferences(true);
       setVisible(true);
     };
 
-    window.addEventListener("open-cookie-preferences", handleOpenPrefs);
-    return () => window.removeEventListener("open-cookie-preferences", handleOpenPrefs);
+    window.addEventListener('open-cookie-preferences', handleOpenPrefs);
+    return () => window.removeEventListener('open-cookie-preferences', handleOpenPrefs);
   }, []);
 
   // Strictly do NOT render cookie banner on /studio or /studio-login
-  if (pathname?.startsWith("/studio")) {
+  if (pathname?.startsWith('/studio')) {
     return null;
   }
 
   const handleAcceptAll = () => {
-    setConsentChoice("accept_all", true);
+    setConsentChoice('accept_all', true);
     setAnalyticsEnabled(true);
     setVisible(false);
   };
 
   const handleDecline = () => {
-    setConsentChoice("reject", false);
+    setConsentChoice('reject', false);
     setAnalyticsEnabled(false);
     setVisible(false);
   };
 
   const handleSavePreferences = () => {
-    setConsentChoice("custom", analyticsEnabled);
+    setConsentChoice('custom', analyticsEnabled);
     setVisible(false);
   };
 
@@ -79,15 +82,21 @@ export default function CookieConsentBanner() {
   }
 
   return (
-    <div
-      className="cookie-banner-wrapper"
-      role="region"
-      aria-label="Privacy & Cookie Preferences"
-    >
+    <div className="cookie-banner-wrapper" role="region" aria-label="Privacy & Cookie Preferences">
       <div className="cookie-banner-inner">
         <div className="cookie-banner-header">
           <div className="cookie-banner-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
             </svg>
           </div>
@@ -97,7 +106,8 @@ export default function CookieConsentBanner() {
         {!showPreferences ? (
           <>
             <p className="cookie-banner-text">
-              We use anonymous telemetry &amp; caching to measure site performance and ensure fast repeat loads. No personally identifiable info is ever sold or tracked.
+              We use anonymous performance analytics to measure site speed and page load
+              performance. No personal data is ever sold or tracked.
             </p>
 
             <div className="cookie-banner-actions">

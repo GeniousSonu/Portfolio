@@ -2,22 +2,23 @@ import React from 'react';
 import ContactView from './ContactView';
 
 export const metadata = {
-  title: 'Establish Connection · Terminal Handshake — SK Sahinur Islam',
+  title: 'Contact — SK Sahinur Islam',
   description:
-    'Direct terminal handshake, secure transmission protocol, and low-latency communication channel to SK Sahinur Islam (Genious Sonu). Engineering contracts, architectural consulting, and full stack inquiries.',
+    'Send a message to SK Sahinur Islam for software engineering projects, backend architecture, server administration, or general inquiries.',
   openGraph: {
-    title: 'Establish Connection — SK Sahinur Islam (Genious Sonu)',
+    title: 'Contact — SK Sahinur Islam',
     description:
-      'Direct terminal handshake, secure transmission protocol, and low-latency communication channel to SK Sahinur Islam (Genious Sonu).',
+      'Send a message to SK Sahinur Islam for software engineering projects, backend architecture, or general inquiries.',
     url: 'https://genioussonu.me/contact',
-    siteName: 'SK Sahinur Islam (Genious Sonu)',
+    siteName: 'SK Sahinur Islam',
     locale: 'en_US',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Establish Connection · SK Sahinur Islam',
-    description: 'Low-latency direct terminal handshake and encrypted communication channel to SK Sahinur Islam.',
+    title: 'Contact — SK Sahinur Islam',
+    description:
+      'Send a message to SK Sahinur Islam for software engineering projects or general inquiries.',
     creator: '@GeniousSonu',
   },
   alternates: {

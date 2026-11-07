@@ -6,173 +6,313 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-8, 2.5rem);
-  margin-top: 2rem;
+  margin-top: 1.5rem;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 960px) {
   .dossierGrid {
-    grid-template-columns: 320px 1fr;
+    grid-template-columns: 340px 1fr;
     align-items: start;
+    gap: 3rem;
   }
 }
 
-.telemetryCard {
+/* ─── Quick Facts Sidebar ─── */
+.quickFactsCard {
   background: var(--surface-1, rgba(255, 255, 255, 0.02));
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 1.5rem;
   position: sticky;
-  top: 100px;
+  top: 96px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
-.telemetryHeader {
+.profileHeader {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding-bottom: 0.75rem;
+  gap: 1.25rem;
+  padding-bottom: 1.25rem;
   border-bottom: 1px solid var(--border-color);
-  margin-bottom: 1rem;
 }
 
-.telemetryTitle {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.statusDot {
-  width: 8px;
-  height: 8px;
+.avatarWrap {
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
-  background: var(--signal);
-  box-shadow: 0 0 8px var(--signal);
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 2px solid var(--border-color);
+  background: var(--surface-2, rgba(255, 255, 255, 0.05));
 }
 
-.telemetryRows {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-}
-
-.telemetryRow {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.telemetryLabel {
-  color: var(--text-muted);
-}
-
-.telemetryValue {
-  color: var(--text);
-  font-weight: 500;
-  text-align: right;
-}
-
-.badgeHighlight {
-  color: var(--signal, var(--gold));
-}
-
-.linksList {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border-color);
-}
-
-.operatorLink {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.5rem 0.75rem;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  color: var(--text);
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  text-decoration: none;
-  transition: all 0.2s ease;
-}
-
-.operatorLink:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: var(--signal, var(--gold));
-  color: var(--signal, var(--gold));
-}
-
-.narrative {
-  display: flex;
-  flex-direction: column;
-  gap: 2.5rem;
-}
-
-.chapterBlock {
-  background: var(--surface-1, rgba(255, 255, 255, 0.02));
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: clamp(1.5rem, 3vw, 2.25rem);
-}
-
-.chapterTag {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--signal, var(--gold));
-  margin-bottom: 0.5rem;
+.avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
 }
 
-.chapterTitle {
-  font-size: clamp(1.3rem, 2.5vw, 1.75rem);
-  color: var(--text);
-  margin-bottom: 1.25rem;
-  line-height: 1.3;
+.profileMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
 }
 
-.chapterContent {
+.ownerName {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.25;
+  margin: 0;
+}
+
+.ownerRole {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Semantic Definition List */
+.factsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+  padding: 0;
+}
+
+@media (max-width: 600px) {
+  .factsList {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+}
+
+.factItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px dashed var(--border-color);
+}
+
+@media (min-width: 601px) {
+  .factItem {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+  }
+}
+
+.factLabel {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.factValue {
+  font-size: 0.85rem;
+  color: var(--text);
+  font-weight: 500;
+  margin: 0;
+}
+
+.inlineCertLink {
+  color: var(--signal, var(--gold));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.inlineCertLink:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Links & Actions */
+.linksGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 44px;
+  padding: 0.6rem 0.9rem;
+  background: var(--surface-2, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease;
+}
+
+.actionBtn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--signal, var(--gold));
+  color: var(--signal, var(--gold));
+  transform: translateY(-1px);
+}
+
+.actionBtn:focus-visible {
+  outline: 2px solid var(--signal, var(--gold));
+  outline-offset: 2px;
+}
+
+.externalArrow {
+  margin-left: auto;
+  opacity: 0.6;
+  font-size: 0.9rem;
+}
+
+.primaryContactBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.65rem 1rem;
+  background: var(--signal, var(--gold));
+  color: var(--void);
+  font-weight: 600;
+  font-size: 0.88rem;
+  border-radius: 8px;
+  text-decoration: none;
+  margin-top: 0.4rem;
+  transition:
+    opacity 0.2s ease,
+    transform 0.15s ease;
+}
+
+.primaryContactBtn:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.primaryContactBtn:focus-visible {
+  outline: 2px solid var(--signal, var(--gold));
+  outline-offset: 2px;
+}
+
+/* ─── Narrative Content Blocks ─── */
+.narrative {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  min-width: 0;
+}
+
+.sectionCard {
+  background: var(--surface-1, rgba(255, 255, 255, 0.02));
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: clamp(1.5rem, 3.5vw, 2.25rem);
+}
+
+.sectionCategory {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--signal, var(--gold));
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.sectionTitle {
+  font-size: clamp(1.25rem, 2.4vw, 1.65rem);
+  color: var(--text);
+  line-height: 1.35;
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+.sectionBody {
   font-size: 0.98rem;
   line-height: 1.75;
   color: var(--text-muted);
 }
 
-.chapterContent p + p {
+.sectionBody p + p {
   margin-top: 1rem;
 }
 
-.patentBox {
-  margin-top: 1.5rem;
-  padding: 1.25rem;
-  background: rgba(16, 185, 129, 0.05);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  border-radius: 8px;
-}
-
-.patentHeader {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  color: var(--emerald);
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-
-.patentBody {
-  font-size: 0.9rem;
-  line-height: 1.6;
+.sectionBody strong {
   color: var(--text);
 }
 
+/* Patent Information Card */
+.patentInfoCard {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 10px;
+}
+
+.patentCardHeader {
+  margin-bottom: 0.85rem;
+}
+
+.patentBadge {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--emerald);
+}
+
+.patentDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin: 0;
+}
+
+.patentDetailRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+@media (min-width: 640px) {
+  .patentDetailRow {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 1rem;
+  }
+}
+
+.patentDetailRow dt {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.patentDetailRow dd {
+  margin: 0;
+  color: var(--text);
+}
+
+/* Certifications */
 .certPills {
   display: flex;
   flex-wrap: wrap;
@@ -182,9 +322,9 @@
 
 .certPill {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   padding: 0.35rem 0.75rem;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--surface-2, rgba(255, 255, 255, 0.04));
   border: 1px solid var(--border-color);
   border-radius: 999px;
   color: var(--text);

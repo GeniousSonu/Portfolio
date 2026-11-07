@@ -6,7 +6,8 @@ import styles from './offline.module.css';
 
 export const metadata = buildMetadata({
   title: 'Offline — Network Disconnected',
-  description: 'You are currently browsing without an active internet connection. Cached pages and offline resources remain accessible.',
+  description:
+    'You are currently browsing without an active internet connection. Cached pages and offline resources remain accessible.',
   path: '/offline',
   noIndex: true,
 });
@@ -17,7 +18,7 @@ export default function OfflinePage() {
       <PageHeader
         eyebrow="[ PWA TELEMETRY · DISCONNECTED ]"
         title="Offline Mode Active"
-        summary="Service Worker is serving local assets. Reconnect to a network to synchronize real-time telemetry, live chat, and collaborative spaces."
+        summary="Cached pages remain available offline. Reconnect to a network to view live updates, send messages, and access interactive tools."
       />
       <Section className={styles.wrapper}>
         <Container>

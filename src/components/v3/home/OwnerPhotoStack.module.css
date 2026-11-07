@@ -1,0 +1,186 @@
+.stackContainer {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+  perspective: 900px;
+  user-select: none;
+}
+
+.tiltFrame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1.15;
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
+  will-change: transform;
+}
+
+.tapeTopLeft,
+.tapeTopRight {
+  position: absolute;
+  width: 76px;
+  height: 24px;
+  background: var(--v3-tape, rgba(235, 230, 215, 0.65));
+  border: var(--v3-hairline, 1px) solid rgba(22, 19, 15, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.tapeTopLeft {
+  top: -10px;
+  left: 12%;
+  transform: rotate(-4deg);
+}
+
+.tapeTopRight {
+  top: -10px;
+  right: 12%;
+  transform: rotate(3.5deg);
+}
+
+/* Stack cards */
+.cardsStack {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.cardItem {
+  position: absolute;
+  inset: 0;
+  background: var(--v3-print-paper);
+  border: var(--v3-rule, 1.5px) solid var(--v3-border-strong, rgba(255, 255, 255, 0.15));
+  border-radius: var(--v3-radius-sm, 6px);
+  padding: 0.75rem 0.75rem 1.25rem;
+  box-shadow: var(--v3-shadow-hard, 0 8px 24px rgba(0, 0, 0, 0.4));
+  cursor: pointer;
+  transition:
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    z-index 0.45s ease;
+  will-change: transform, opacity;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardItem:focus-visible {
+  outline: 2px solid var(--v3-accent, var(--signal));
+  outline-offset: 4px;
+}
+
+.imageWrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--v3-bg-deep);
+  border: 1px solid var(--v3-border-subtle, rgba(255, 255, 255, 0.08));
+}
+
+.photoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.65rem;
+  padding-inline: 0.2rem;
+  font-family: var(--v3-font-mono, monospace);
+  font-size: 0.7rem;
+  color: var(--v3-text-muted);
+  letter-spacing: 0.04em;
+}
+
+.photoLocation {
+  font-weight: 500;
+  color: var(--v3-text);
+}
+
+.photoCounter {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+
+/* Controls below stack */
+.controlsBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1rem;
+  padding: 0.35rem 0.5rem;
+  background: var(--v3-surface-raised, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--v3-border-strong, rgba(255, 255, 255, 0.12));
+  border-radius: 999px;
+}
+
+.navBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--v3-border-subtle, rgba(255, 255, 255, 0.1));
+  background: transparent;
+  color: var(--v3-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.navBtn:hover {
+  background: var(--v3-surface-hover, rgba(255, 255, 255, 0.1));
+  border-color: var(--v3-text);
+}
+
+.navBtn:focus-visible {
+  outline: 2px solid var(--v3-accent, var(--signal));
+  outline-offset: 2px;
+}
+
+.dotsWrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dotBtn {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: var(--v3-border-strong, rgba(255, 255, 255, 0.2));
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.dotBtn.activeDot {
+  background: var(--v3-accent, var(--signal));
+  width: 20px;
+  border-radius: 4px;
+}
+
+.dotBtn:focus-visible {
+  outline: 2px solid var(--v3-accent, var(--signal));
+  outline-offset: 2px;
+}
+
+.srLive {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

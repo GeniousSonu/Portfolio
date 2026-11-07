@@ -1,0 +1,38 @@
+[
+  {
+    "id": "owner-1",
+    "src": "/assets/owner/owner-1.webp",
+    "srcSm": "/assets/owner/owner-1-sm.webp",
+    "alt": "SK Sahinur Islam portrait",
+    "blurDataURL": "data:image/webp;base64,UklGRtAAAABXRUJQVlA4IMQAAAAwBQCdASoYABgAPzmSv1mvKaajqAgB4CcJbACxHtpAnOVOesOLr5VvYVUAL8K84sj8QAD+vdOCbMeKFMw1NaBW3kqYnbdBikM4rYtUY72TVmq1gWeFuy2G5G0svIsH23qa7NR/Qer9mqEsrGJYP1BlLmYDunjIaa+93rFHxGmgD0WEPexjJ64LNWtffHXwi2GQj6MUK+TeA8Wr8bUMf3QbrXYR53zg4U+2ifHlRKi1CPhI48jVFmS799N6AOkRGttZMAAA",
+    "width": 800,
+    "height": 800
+  },
+  {
+    "id": "owner-2",
+    "src": "/assets/owner/owner-2.webp",
+    "srcSm": "/assets/owner/owner-2-sm.webp",
+    "alt": "SK Sahinur Islam outdoor portrait",
+    "blurDataURL": "data:image/webp;base64,UklGRpQAAABXRUJQVlA4IIgAAACwBACdASoYABgAPzl+uFOvJ6Uit/VYAeAnCWgAy0mAAYfSO2mbteUQqgB6QRuAAP7KqDDuQHkxDERDk6FNYQ2/qU/3r+Qx1RtKwwQWXv6Ler+/m/JS16aiGEV4Ds79Y6t/c44qGXfDr1+/oPm/JLVQaFbG5l3+hT2sopJkg/BGaz/dePmvAAAA",
+    "width": 800,
+    "height": 800
+  },
+  {
+    "id": "owner-3",
+    "src": "/assets/owner/owner-3.webp",
+    "srcSm": "/assets/owner/owner-3-sm.webp",
+    "alt": "SK Sahinur Islam casual portrait",
+    "blurDataURL": "data:image/webp;base64,UklGRn4AAABXRUJQVlA4IHIAAADwBACdASoYABgAPzmOuVavKaUjqA1R4CcJYwDFyBEc20iNcnF4Q63nI8u6Mlq0fAAA/ujMuOvzbxTWbMF6n6z5LcIahxozNCbcMbO0aUeXzmOklmLbgsSxHikNJs/uqOHUg/hlgTEEk6erUmp504gMAAA=",
+    "width": 800,
+    "height": 800
+  },
+  {
+    "id": "owner-4",
+    "src": "/assets/owner/owner-4.webp",
+    "srcSm": "/assets/owner/owner-4-sm.webp",
+    "alt": "SK Sahinur Islam portrait",
+    "blurDataURL": "data:image/webp;base64,UklGRnAAAABXRUJQVlA4IGQAAADwBACdASoYABgAPzmGvVavKCYjsBgIAeAnCWUAxzAQ7+/8S/MIa+Am++CqPRAK9AAA/ujabx/tXbpRYj5F5NCKeoJpeeEIX2eq2bESoACnJlup4beyY5+Bc0y5FOsYNSD4AAAA",
+    "width": 800,
+    "height": 800
+  }
+]

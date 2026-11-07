@@ -15,7 +15,7 @@ const INITIAL_AI_MESSAGE = {
   id: 'ai-init-0',
   role: 'model',
   sender: 'ai',
-  text: "Hey! I'm genious.exe, Sahinur's portfolio systems assistant. Ask me anything about his engineering career, tech stack, IoT vaccine patent, projects, favorite books, or hobbies.",
+  text: "Hello! I can answer questions about Sahinur's engineering experience, backend tech stack, IoT vaccine patent, and projects. Ask a question below or switch to live chat to send him a note.",
   time: '',
 };
 
@@ -931,48 +931,36 @@ export default function ChatbotWidget() {
     <div className={styles.widgetWrapper}>
       {/* Floating Trigger Button */}
       {!isOpen && isTriggerVisible && (
-        <div
-          className={`${styles.triggerWrapper} ${isFirstVisit ? styles.firstVisitAttention : ''}`}
-        >
+        <div className={styles.triggerWrapper}>
           <button
             type="button"
             className={styles.triggerBtn}
             onClick={handleOpen}
             aria-expanded={isOpen}
-            aria-label="Open chat assistant"
-            title="Ask me anything or chat live with Sonu"
+            aria-label="Open chat"
+            title="Open chat"
+            data-sound="click"
+            data-haptic="light"
           >
             {unreadLiveCount > 0 && (
               <span
                 className={styles.unreadCountBadge}
                 title={`${unreadLiveCount} unread message(s)`}
+                aria-label={`${unreadLiveCount} unread messages`}
               >
                 {unreadLiveCount}
               </span>
             )}
-            <div className={styles.botFigureWrap} aria-hidden="true">
-              <div
-                className={styles.botBobbingFigure}
-                style={{ animationPlayState: isTabVisible ? 'running' : 'paused' }}
-              >
-                <img
-                  src="/Image/bot.svg"
-                  alt=""
-                  width={34}
-                  height={34}
-                  className={styles.botAvatarImg}
-                  loading="eager"
-                />
-              </div>
-              <div
-                className={styles.botShadow}
-                style={{ animationPlayState: isTabVisible ? 'running' : 'paused' }}
-                aria-hidden="true"
+            <div className={styles.avatarCircle} aria-hidden="true">
+              <img
+                src="/assets/owner/avatar.webp"
+                alt=""
+                width={44}
+                height={44}
+                className={styles.avatarLauncherImg}
+                loading="eager"
               />
-              <span className={styles.pulseDot} aria-hidden="true" />
             </div>
-
-            <span className={styles.triggerText}>Chat with me</span>
           </button>
         </div>
       )}

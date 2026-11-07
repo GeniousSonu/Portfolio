@@ -8,7 +8,13 @@ import styles from './layout.module.css';
  * Universal Page Shell (React Server Component)
  * Provides consistent navbar, main content boundaries, and footer wrapper.
  */
-export function PageShell({ children, showNavbar = false, showFooter = false, className = '', dataRoute }) {
+export function PageShell({
+  children,
+  showNavbar = false,
+  showFooter = false,
+  className = '',
+  dataRoute,
+}) {
   return (
     <div className={`${styles.shell} ${className}`.trim()}>
       {showNavbar && <Navbar />}
@@ -47,12 +53,9 @@ export function PageHeader({ eyebrow, title, summary, meta, className = '' }) {
  * Shared Container (React Server Component)
  */
 export function Container({ children, size = 'default', className = '' }) {
-  const sizeClass = size === 'narrow' ? styles.containerNarrow : size === 'wide' ? styles.containerWide : '';
-  return (
-    <div className={`${styles.container} ${sizeClass} ${className}`.trim()}>
-      {children}
-    </div>
-  );
+  const sizeClass =
+    size === 'narrow' ? styles.containerNarrow : size === 'wide' ? styles.containerWide : '';
+  return <div className={`${styles.container} ${sizeClass} ${className}`.trim()}>{children}</div>;
 }
 
 /**
@@ -60,7 +63,10 @@ export function Container({ children, size = 'default', className = '' }) {
  */
 export function Section({ children, bordered = false, className = '', id }) {
   return (
-    <section id={id} className={`${styles.section} ${bordered ? styles.sectionBordered : ''} ${className}`.trim()}>
+    <section
+      id={id}
+      className={`${styles.section} ${bordered ? styles.sectionBordered : ''} ${className}`.trim()}
+    >
       {children}
     </section>
   );
@@ -82,12 +88,13 @@ export function PageStub({ title, summary, status = 'stub', routeHref = '/' }) {
         <div className={styles.stubCard}>
           <h2 className={styles.stubTitle}>{title}</h2>
           <p className={styles.stubDesc}>
-            {summary || 'This section is currently being architected as part of the Phase R0 skeleton. Complete content and system telemetry will be deployed in an upcoming release cycle.'}
+            {summary ||
+              'This section is currently being prepared. Complete content will be published shortly.'}
           </p>
 
           <div className={styles.stubActions}>
             <Link href="/" className={styles.stubBackBtn}>
-              <span>← Return to Operator Console</span>
+              <span>← Return to Home</span>
             </Link>
             <Link href="/site-index" className={styles.stubIndexBtn}>
               <span>View Site Topology Index</span>

@@ -72,8 +72,8 @@ export default function OfflineView() {
 
       <p className={styles.cardDesc}>
         {isOnline
-          ? 'Your connection to the network has been restored. You can now reload to stream live telemetry and interactive spaces.'
-          : 'You are currently browsing without an active network connection. Cached pages and Service Worker assets remain available locally.'}
+          ? 'Your network connection has been restored. You can now reload to view live updates and interactive features.'
+          : 'You are currently browsing without an active network connection. Cached pages remain available locally.'}
       </p>
 
       {pingMessage && <div className={styles.pingResult}>{pingMessage}</div>}
@@ -89,11 +89,7 @@ export default function OfflineView() {
           {checking ? 'Probing Gateway...' : 'Check Connection'}
         </button>
 
-        <button
-          type="button"
-          onClick={() => window.location.reload()}
-          className="btn btn-ghost"
-        >
+        <button type="button" onClick={() => window.location.reload()} className="btn btn-ghost">
           Reload Page ↻
         </button>
       </div>

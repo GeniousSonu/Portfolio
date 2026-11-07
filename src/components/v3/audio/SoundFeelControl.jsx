@@ -56,23 +56,54 @@ export default function SoundFeelControl() {
         aria-label="Sound and Feel controls"
         aria-expanded={isOpen}
         aria-haspopup="dialog"
-        title={isAudioActive ? 'Lofi Music: Playing (Click for controls)' : 'Sound & Music Controls'}
+        title={
+          isAudioActive ? 'Lofi Music: Playing (Click for controls)' : 'Sound & Music Controls'
+        }
         data-sound="none"
       >
-        <span className="sn-equalizer-bars" aria-hidden="true">
-          <span className="sn-eq-bar bar-1" />
-          <span className="sn-eq-bar bar-2" />
-          <span className="sn-eq-bar bar-3" />
-          <span className="sn-eq-bar bar-4" />
-        </span>
+        {masterMuted ? (
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+            <line x1="23" y1="9" x2="17" y2="15" />
+            <line x1="17" y1="9" x2="23" y2="15" />
+          </svg>
+        ) : isAudioActive ? (
+          <span className="sn-equalizer-bars" aria-hidden="true">
+            <span className="sn-eq-bar bar-1" />
+            <span className="sn-eq-bar bar-2" />
+            <span className="sn-eq-bar bar-3" />
+            <span className="sn-eq-bar bar-4" />
+          </span>
+        ) : (
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+          </svg>
+        )}
       </button>
 
       {isOpen && (
-        <div
-          className="sn-sound-popover"
-          role="dialog"
-          aria-label="Sound and Haptic Settings"
-        >
+        <div className="sn-sound-popover" role="dialog" aria-label="Sound and Haptic Settings">
           <div className="sn-sound-popover-header">
             <div className="sn-sound-title-row">
               <span className="sn-sound-title">Sound & Feel</span>

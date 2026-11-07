@@ -61,7 +61,7 @@ export default async function UsesPage() {
     },
     {
       name: 'AMD AM4 High-Performance Motherboard',
-      desc: 'Stable workstation foundation equipped with PCIe 4.0 data channels, robust VRM power delivery, and multi-drive NVMe storage support.',
+      desc: 'Stable workstation foundation equipped with PCIe 4.0 data channels, stable VRM power delivery, and multi-drive NVMe storage support.',
       tag: 'Motherboard',
       url: 'https://link.amazon/B0apuvRvA',
     },
@@ -154,21 +154,34 @@ export default async function UsesPage() {
           </div>
           <h1 className={styles.title}>What I Use Daily</h1>
           <p className={styles.subtitle}>
-            A transparent inventory of the physical hardware components, dual-display monitors, storage hierarchy, and developer tooling that power my daily engineering workflow.
+            A transparent inventory of the physical hardware components, dual-display monitors,
+            storage hierarchy, and developer tooling that power my daily engineering workflow.
           </p>
         </header>
 
         {/* Amazon Associate Legal Disclosure Banner */}
         <aside className={styles.disclosureBanner} aria-label="Affiliate link disclosure">
           <div className={styles.disclosureIcon} aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="16" x2="12" y2="12" />
               <line x1="12" y1="8" x2="12.01" y2="8" />
             </svg>
           </div>
           <p className={styles.disclosureText}>
-            <span className={styles.disclosureHighlight}>Amazon Associate Disclosure:</span> As an Amazon Associate, I earn from qualifying purchases (Tracking ID: <code>{AMAZON_AFFILIATE_TAG}</code>). Verified gear items link directly to Amazon. Unlinked items are actively part of my rig and will have links updated as available.
+            <span className={styles.disclosureHighlight}>Amazon Associate Disclosure:</span> As an
+            Amazon Associate, I earn from qualifying purchases (Tracking ID:{' '}
+            <code>{AMAZON_AFFILIATE_TAG}</code>). Verified gear items link directly to Amazon.
+            Unlinked items are actively part of my rig and will have links updated as available.
           </p>
         </aside>
 
@@ -209,7 +222,8 @@ export default async function UsesPage() {
             <div>
               <h3 className={styles.storeCalloutTitle}>Explore the Full Gear Catalog</h3>
               <p className={styles.storeCalloutDesc}>
-                Browse filtered categories, technical specs, and status of all components in my custom store showcase.
+                Browse filtered categories, technical specs, and status of all components in my
+                custom store showcase.
               </p>
             </div>
             <Link href="/store" className={styles.storeCalloutBtn}>

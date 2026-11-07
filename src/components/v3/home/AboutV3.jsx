@@ -5,6 +5,7 @@ import ChapterHeader from '../ChapterHeader';
 import Emoji3D from '../Emoji3D';
 import { useChapterReveal } from '../motion';
 import { SOCIAL_LINKS } from '@/config/socials';
+import OwnerPhotoStack from './OwnerPhotoStack';
 
 const PROFILE = [
   ['hostname', 'sahinur-dev.local'],
@@ -39,25 +40,7 @@ export default function AboutV3() {
 
         <div className="v3-about-grid">
           <div className="v3-about-left" data-reveal>
-            <figure className="v3-print">
-              <div className="v3-print-frame">
-                <div
-                  className="v3-print-composition"
-                  role="img"
-                  aria-label="Studio monogram composition for Sahinur Islam"
-                >
-                  <span className="v3-print-sun" aria-hidden="true" />
-                  <span className="v3-print-horizon" aria-hidden="true" />
-                  <span className="v3-print-thread" aria-hidden="true" />
-                  <span className="v3-print-monogram">SI</span>
-                </div>
-                <span className="v3-print-note">Kolkata Studio</span>
-              </div>
-              <figcaption>
-                <span>Sahinur Islam</span>
-                <span>Senior Web Application Developer</span>
-              </figcaption>
-            </figure>
+            <OwnerPhotoStack />
 
             <div className="v3-profile">
               <div className="v3-profile-head">

@@ -3,10 +3,12 @@ import styles from './architecture.module.css';
 
 export const metadata = {
   title: 'System Architecture & Data Flows — SK Sahinur Islam',
-  description: 'Technical topology, request flow diagrams, and architectural rationale behind the infrastructure powering genioussonu.me.',
+  description:
+    'Technical topology, request flow diagrams, and architectural rationale behind the infrastructure powering genioussonu.me.',
   openGraph: {
     title: 'System Architecture — SK Sahinur Islam',
-    description: 'Technical topology, serverless relays, and engineering decisions powering this portfolio.',
+    description:
+      'Technical topology, serverless relays, and engineering decisions powering this portfolio.',
     url: 'https://genioussonu.me/architecture',
   },
 };
@@ -57,7 +59,8 @@ export default function ArchitecturePage() {
           </div>
           <h1 className={styles.title}>System Architecture &amp; Data Flow</h1>
           <p className={styles.subtitle}>
-            A transparent, technical breakdown of how real-time communication, intelligent routing, and content infrastructure interact across this platform.
+            A transparent, technical breakdown of how real-time communication, intelligent routing,
+            and content infrastructure interact across this platform.
           </p>
         </header>
 
@@ -91,7 +94,8 @@ export default function ArchitecturePage() {
           <div className={styles.flowContainer}>
             <h3 className={styles.flowTitle}>Flow A: Direct Contact Submission</h3>
             <p className={styles.flowDesc}>
-              How a message submitted through the contact form transitions from client validation to verified inbox delivery.
+              How a message submitted through the contact form transitions from client validation to
+              verified inbox delivery.
             </p>
 
             <div className={styles.flowSteps}>
@@ -103,23 +107,29 @@ export default function ArchitecturePage() {
                 </span>
               </div>
 
-              <div className={styles.flowArrow} aria-hidden="true">→</div>
+              <div className={styles.flowArrow} aria-hidden="true">
+                →
+              </div>
 
               <div className={styles.stepCard}>
                 <span className={styles.stepIndex}>Step 2 · Edge API</span>
                 <span className={styles.stepLabel}>Abuse &amp; Rate Guards</span>
                 <span className={styles.stepDetail}>
-                  Serverless function validates payload integrity, sanitizes input strings, and checks rate limits.
+                  Serverless function validates payload integrity, sanitizes input strings, and
+                  checks rate limits.
                 </span>
               </div>
 
-              <div className={styles.flowArrow} aria-hidden="true">→</div>
+              <div className={styles.flowArrow} aria-hidden="true">
+                →
+              </div>
 
               <div className={styles.stepCard}>
                 <span className={styles.stepIndex}>Step 3 · Delivery</span>
                 <span className={styles.stepLabel}>Resend API Dispatch</span>
                 <span className={styles.stepDetail}>
-                  Payload is rendered into structured HTML and dispatched to my personal inbox with delivery confirmation.
+                  Payload is rendered into structured HTML and dispatched to my personal inbox with
+                  delivery confirmation.
                 </span>
               </div>
             </div>
@@ -129,7 +139,8 @@ export default function ArchitecturePage() {
           <div className={styles.flowContainer}>
             <h3 className={styles.flowTitle}>Flow B: Autonomous Systems Assistant (genious.exe)</h3>
             <p className={styles.flowDesc}>
-              How user queries are filtered, semantically matched, and routed across resilient LLM providers.
+              How user queries are filtered, semantically matched, and routed across resilient LLM
+              providers.
             </p>
 
             <div className={styles.flowSteps}>
@@ -137,27 +148,34 @@ export default function ArchitecturePage() {
                 <span className={styles.stepIndex}>Step 1 · Ingestion</span>
                 <span className={styles.stepLabel}>Input &amp; Guardrails</span>
                 <span className={styles.stepDetail}>
-                  Validates origin headers, checks server-side rate limits, and sanitizes multi-turn message history.
+                  Validates origin headers, checks server-side rate limits, and sanitizes multi-turn
+                  message history.
                 </span>
               </div>
 
-              <div className={styles.flowArrow} aria-hidden="true">→</div>
+              <div className={styles.flowArrow} aria-hidden="true">
+                →
+              </div>
 
               <div className={styles.stepCard}>
                 <span className={styles.stepIndex}>Step 2 · Knowledge Router</span>
                 <span className={styles.stepLabel}>Semantic Matching</span>
                 <span className={styles.stepDetail}>
-                  Evaluates question intent against indexed portfolio knowledge to construct targeted context.
+                  Evaluates question intent against indexed portfolio knowledge to construct
+                  targeted context.
                 </span>
               </div>
 
-              <div className={styles.flowArrow} aria-hidden="true">→</div>
+              <div className={styles.flowArrow} aria-hidden="true">
+                →
+              </div>
 
               <div className={styles.stepCard}>
                 <span className={styles.stepIndex}>Step 3 · Inference</span>
                 <span className={styles.stepLabel}>Dual-Provider Fallback</span>
                 <span className={styles.stepDetail}>
-                  Executes inference via primary model (Gemini 1.5 Flash), automatically failing over to secondary models if limits are reached.
+                  Executes inference via primary model (Gemini 1.5 Flash), automatically failing
+                  over to secondary models if limits are reached.
                 </span>
               </div>
             </div>
@@ -167,7 +185,8 @@ export default function ArchitecturePage() {
           <div className={styles.flowContainer}>
             <h3 className={styles.flowTitle}>Flow C: Zero-Polling Live Chat Relay</h3>
             <p className={styles.flowDesc}>
-              Bi-directional, zero-polling communication between a web visitor and my personal mobile device.
+              Bi-directional, zero-polling communication between a web visitor and my personal
+              mobile device.
             </p>
 
             <div className={styles.flowSteps}>
@@ -175,27 +194,34 @@ export default function ArchitecturePage() {
                 <span className={styles.stepIndex}>Step 1 · Visitor</span>
                 <span className={styles.stepLabel}>Realtime Session Join</span>
                 <span className={styles.stepDetail}>
-                  Visitor browser subscribes to a scoped Supabase Realtime channel keyed by an unguessable session ID.
+                  Visitor browser subscribes to a scoped Supabase Realtime channel keyed by an
+                  unguessable session ID.
                 </span>
               </div>
 
-              <div className={styles.flowArrow} aria-hidden="true">→</div>
+              <div className={styles.flowArrow} aria-hidden="true">
+                →
+              </div>
 
               <div className={styles.stepCard}>
                 <span className={styles.stepIndex}>Step 2 · Relay</span>
                 <span className={styles.stepLabel}>Telegram Bot Push</span>
                 <span className={styles.stepDetail}>
-                  Server forwards the message to Telegram Bot API with quick-reply action buttons sent directly to my phone.
+                  Server forwards the message to Telegram Bot API with quick-reply action buttons
+                  sent directly to my phone.
                 </span>
               </div>
 
-              <div className={styles.flowArrow} aria-hidden="true">→</div>
+              <div className={styles.flowArrow} aria-hidden="true">
+                →
+              </div>
 
               <div className={styles.stepCard}>
                 <span className={styles.stepIndex}>Step 3 · Response</span>
                 <span className={styles.stepLabel}>Webhook to Realtime</span>
                 <span className={styles.stepDetail}>
-                  My mobile reply triggers a verified serverless webhook that immediately broadcasts to the visitor&apos;s channel.
+                  My mobile reply triggers a verified serverless webhook that immediately broadcasts
+                  to the visitor&apos;s channel.
                 </span>
               </div>
             </div>
@@ -210,16 +236,27 @@ export default function ArchitecturePage() {
           </h2>
 
           <article className={styles.narrativeCard}>
-            <h3 className={styles.narrativeTitle}>Why a Hybrid Data Architecture (Sanity + Supabase)?</h3>
+            <h3 className={styles.narrativeTitle}>
+              Why a Hybrid Data Architecture (Sanity + Supabase)?
+            </h3>
             <div className={styles.narrativeBody}>
               <p>
-                Early in the design of this portfolio, I evaluated using a single database for everything. However, editorial content and operational application state have fundamentally divergent access patterns.
+                Early in the design of this portfolio, I evaluated using a single database for
+                everything. However, editorial content and operational application state have
+                fundamentally divergent access patterns.
               </p>
               <p>
-                <span className={styles.highlight}>Sanity CMS</span> excels as an immutable content lake for articles, project write-ups, and changelogs. It provides clean structured schemas and benefits from global CDN caching with Incremental Static Regeneration (ISR).
+                <span className={styles.highlight}>Sanity CMS</span> excels as an immutable content
+                lake for articles, project write-ups, and changelogs. It provides clean structured
+                schemas and benefits from global CDN caching with Incremental Static Regeneration
+                (ISR).
               </p>
               <p>
-                Conversely, <span className={styles.highlight}>Supabase (PostgreSQL)</span> was chosen for dynamic, low-latency workloads: real-time collaborative scratchpads, ephemeral live chat session mapping, rate limit tracking, and privacy-respecting analytics. Isolating dynamic operational state from editorial content keeps both systems fast, robust, and cleanly separated.
+                Conversely, <span className={styles.highlight}>Supabase (PostgreSQL)</span> was
+                chosen for dynamic, low-latency workloads: real-time collaborative scratchpads,
+                ephemeral live chat session mapping, rate limit tracking, and privacy-respecting
+                analytics. Isolating dynamic operational state from editorial content keeps both
+                systems fast, reliable, and cleanly separated.
               </p>
             </div>
           </article>
@@ -228,13 +265,23 @@ export default function ArchitecturePage() {
             <h3 className={styles.narrativeTitle}>Zero-Polling Live Chat via Webhooks</h3>
             <div className={styles.narrativeBody}>
               <p>
-                Most portfolio live chat widgets rely on third-party SaaS embeds (Intercom, Crisp) that inject hundreds of kilobytes of tracking scripts, damage Core Web Vitals, and incur monthly seat subscriptions.
+                Most portfolio live chat widgets rely on third-party SaaS embeds (Intercom, Crisp)
+                that inject hundreds of kilobytes of tracking scripts, damage Core Web Vitals, and
+                incur monthly seat subscriptions.
               </p>
               <p>
-                I engineered a zero-polling relay: when a visitor sends a message, my serverless route relays it to a private <span className={styles.highlight}>Telegram Bot API</span> chat with instant push notifications on my phone. When I reply or tap a quick-reply button in Telegram, an authenticated webhook triggers a broadcast event over <span className={styles.highlight}>Supabase Realtime</span> directly into the visitor&apos;s active channel.
+                I engineered a zero-polling relay: when a visitor sends a message, my serverless
+                route relays it to a private{' '}
+                <span className={styles.highlight}>Telegram Bot API</span> chat with instant push
+                notifications on my phone. When I reply or tap a quick-reply button in Telegram, an
+                authenticated webhook triggers a broadcast event over{' '}
+                <span className={styles.highlight}>Supabase Realtime</span> directly into the
+                visitor&apos;s active channel.
               </p>
               <p>
-                The visitor gets instantaneous answers without long-polling or bulky third-party scripts, and I manage incoming communications from an application I already use daily.
+                The visitor gets instantaneous answers without long-polling or bulky third-party
+                scripts, and I manage incoming communications from an application I already use
+                daily.
               </p>
             </div>
           </article>
@@ -243,13 +290,20 @@ export default function ArchitecturePage() {
             <h3 className={styles.narrativeTitle}>Resilient Multi-Provider AI Routing</h3>
             <div className={styles.narrativeBody}>
               <p>
-                AI service rate limits and downtime are inevitable when relying on a single provider tier. To guarantee that <span className={styles.highlight}>genious.exe</span> remains responsive around the clock, I implemented a tiered routing architecture.
+                AI service rate limits and downtime are inevitable when relying on a single provider
+                tier. To guarantee that <span className={styles.highlight}>genious.exe</span>{' '}
+                remains responsive around the clock, I implemented a tiered routing architecture.
               </p>
               <p>
-                Incoming queries are first evaluated against local portfolio domain knowledge. When high-relevance domain questions are identified, queries route to <span className={styles.highlight}>Google Gemini 1.5 Flash</span>. If rate ceilings or upstream outages occur, the request automatically falls back to secondary open-weights models through <span className={styles.highlight}>OpenRouter</span>.
+                Incoming queries are first evaluated against local portfolio domain knowledge. When
+                high-relevance domain questions are identified, queries route to{' '}
+                <span className={styles.highlight}>Google Gemini 1.5 Flash</span>. If rate ceilings
+                or upstream outages occur, the request automatically falls back to secondary
+                open-weights models through <span className={styles.highlight}>OpenRouter</span>.
               </p>
               <p>
-                This ensures high precision, zero downtime, and strict control over provider quotas without degrading the visitor experience.
+                This ensures high precision, zero downtime, and strict control over provider quotas
+                without degrading the visitor experience.
               </p>
             </div>
           </article>

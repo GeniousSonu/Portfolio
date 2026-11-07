@@ -13,7 +13,7 @@ export const CURRENT_ROLES = [
     date: 'Jul 2026 – Present',
     duration: '2 mos',
     logo: '/logo/ibarts.png',
-    desc: 'Driving backend architecture and DevOps infrastructure for production-grade web applications. Designing scalable RESTful APIs, optimizing CI/CD pipelines, managing containerized deployments, and ensuring high-availability server configurations. Collaborating cross-functionally to bridge frontend delivery with robust backend systems.',
+    desc: 'Driving backend architecture and DevOps infrastructure for production-grade web applications. Designing scalable RESTful APIs, optimizing CI/CD pipelines, managing containerized deployments, and ensuring high-availability server configurations. Collaborating cross-functionally to bridge frontend delivery with reliable backend systems.',
     tags: ['Node.js', 'Express', 'Docker', 'CI/CD', 'AWS', 'MongoDB', 'PostgreSQL', 'DevOps'],
   },
   {

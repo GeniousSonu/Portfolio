@@ -28,7 +28,7 @@ export default function MenuFooter({ onNavigate }) {
         href="/status"
         className={styles.statusLink}
         onClick={handleClick}
-        aria-label="View system status and health telemetry"
+        aria-label="View system status and server health"
       >
         status →
       </a>

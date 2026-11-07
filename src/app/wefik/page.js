@@ -8,7 +8,7 @@ import styles from './wefik.module.css';
 export const metadata = buildMetadata({
   title: 'WEFIK — Agency Co-Founder & Technical Leadership | SK Sahinur Islam',
   description:
-    'Comprehensive venture dossier of WEFIK (Web Era for Innovation & Knowledge), co-founded by SK Sahinur Islam. Real-life genie of your ideas: 30+ production platforms, custom Next.js engineering, UI/UX design, Shopify, and cloud infrastructure.',
+    'Overview of digital technology agency WEFIK (Web Era for Innovation & Knowledge), co-founded by SK Sahinur Islam: 30+ client projects, Next.js web applications, UI/UX, and cloud deployments.',
   path: '/wefik',
 });
 
@@ -121,19 +121,51 @@ const CASE_STUDIES = [
 const TECH_PILLARS = [
   {
     domain: 'Frontend & Frameworks',
-    skills: ['Next.js', 'React.js', 'TypeScript', 'Vanilla CSS Modules', 'Tailwind CSS', 'HTML5 / Semantic UI'],
+    skills: [
+      'Next.js',
+      'React.js',
+      'TypeScript',
+      'Vanilla CSS Modules',
+      'Tailwind CSS',
+      'HTML5 / Semantic UI',
+    ],
   },
   {
     domain: 'Backend & APIs',
-    skills: ['Node.js', 'Express.js', 'Python', 'PHP', 'Laravel', 'RESTful APIs', 'GraphQL', 'WebSockets'],
+    skills: [
+      'Node.js',
+      'Express.js',
+      'Python',
+      'PHP',
+      'Laravel',
+      'RESTful APIs',
+      'GraphQL',
+      'WebSockets',
+    ],
   },
   {
     domain: 'Databases & Cloud',
-    skills: ['PostgreSQL', 'MongoDB', 'MySQL', 'Redis', 'AWS (S3, EC2)', 'Docker', 'Linux VPS', 'Vercel'],
+    skills: [
+      'PostgreSQL',
+      'MongoDB',
+      'MySQL',
+      'Redis',
+      'AWS (S3, EC2)',
+      'Docker',
+      'Linux VPS',
+      'Vercel',
+    ],
   },
   {
     domain: 'E-Commerce & CMS',
-    skills: ['Shopify Liquid', 'Headless WordPress', 'ACF Pro', 'WooCommerce', 'Stripe', 'Razorpay'],
+    skills: [
+      'Shopify Liquid',
+      'Headless WordPress',
+      'ACF Pro',
+      'WooCommerce',
+      'Stripe',
+      'Razorpay',
+    ],
   },
 ];
 
@@ -172,7 +204,8 @@ export default function WefikPage() {
                 </div>
                 <h2 className={styles.agencySlogan}>&ldquo;Real Life Genie of Your Idea&rdquo;</h2>
                 <p className={styles.agencySubhead}>
-                  Full-service web development, bespoke UI/UX design, and scalable cloud software agency.
+                  Full-service web development, bespoke UI/UX design, and scalable cloud software
+                  agency.
                 </p>
               </div>
             </div>
@@ -186,7 +219,9 @@ export default function WefikPage() {
                 className={`${styles.actionBtn} ${styles.actionBtnGold}`}
               >
                 <span>Visit Official Site (wefik.in)</span>
-                <span className={styles.btnArrow} aria-hidden="true">↗</span>
+                <span className={styles.btnArrow} aria-hidden="true">
+                  ↗
+                </span>
               </a>
 
               <a
@@ -196,7 +231,9 @@ export default function WefikPage() {
                 className={`${styles.actionBtn} ${styles.actionBtnGhost}`}
               >
                 <span>Book 30-Min Strategy Call</span>
-                <span className={styles.btnArrow} aria-hidden="true">↗</span>
+                <span className={styles.btnArrow} aria-hidden="true">
+                  ↗
+                </span>
               </a>
 
               <a
@@ -204,7 +241,9 @@ export default function WefikPage() {
                 className={`${styles.actionBtn} ${styles.actionBtnGhost}`}
               >
                 <span>Email: info@wefik.in</span>
-                <span className={styles.btnArrow} aria-hidden="true">✉</span>
+                <span className={styles.btnArrow} aria-hidden="true">
+                  ✉
+                </span>
               </a>
 
               <a
@@ -214,15 +253,16 @@ export default function WefikPage() {
                 className={`${styles.actionBtn} ${styles.actionBtnGhost}`}
               >
                 <span>WhatsApp / Phone</span>
-                <span className={styles.btnArrow} aria-hidden="true">💬</span>
+                <span className={styles.btnArrow} aria-hidden="true">
+                  💬
+                </span>
               </a>
 
-              <Link
-                href="/contact"
-                className={`${styles.actionBtn} ${styles.actionBtnGhost}`}
-              >
+              <Link href="/contact" className={`${styles.actionBtn} ${styles.actionBtnGhost}`}>
                 <span>Discuss with Sonu</span>
-                <span className={styles.btnArrow} aria-hidden="true">→</span>
+                <span className={styles.btnArrow} aria-hidden="true">
+                  →
+                </span>
               </Link>
             </div>
           </div>
@@ -254,21 +294,30 @@ export default function WefikPage() {
           {/* Agency Story & Technical Leadership */}
           <div className={styles.sectionBlock}>
             <span className={styles.blockTag}>Executive Dossier &amp; Architecture</span>
-            <h2 className={styles.blockTitle}>Engineering Reliable Digital Platforms for Global Growth</h2>
+            <h2 className={styles.blockTitle}>
+              Engineering Reliable Digital Platforms for Global Growth
+            </h2>
             <div className={styles.blockText}>
               <p>
-                In March 2021, I co-founded <strong>WEFIK (Web Era for Innovation &amp; Knowledge)</strong> in Kolkata, India,
-                driven by a clear mission: to act as the <em>&ldquo;Real Life Genie of Your Idea&rdquo;</em>, transforming ambitious concepts
-                from founders, enterprises, and growing businesses into production-grade, beautifully crafted digital reality.
+                In March 2021, I co-founded{' '}
+                <strong>WEFIK (Web Era for Innovation &amp; Knowledge)</strong> in Kolkata, India,
+                driven by a clear mission: to act as the{' '}
+                <em>&ldquo;Real Life Genie of Your Idea&rdquo;</em>, transforming ambitious concepts
+                from founders, enterprises, and growing businesses into production-grade,
+                beautifully crafted digital reality.
               </p>
               <p>
-                As <strong>Co-Founder &amp; Principal Systems Architect</strong>, I established the agency&apos;s technical blueprint
-                from ground zero. My direct responsibilities encompass full-stack architecture, backend system design, database modeling,
-                DevOps automation, and mentoring our engineering team on clean code practices, security audits, and sub-second performance.
+                As <strong>Co-Founder &amp; Principal Systems Architect</strong>, I established the
+                agency&apos;s technical blueprint from ground zero. My direct responsibilities
+                encompass full-stack architecture, backend system design, database modeling, DevOps
+                automation, and mentoring our engineering team on clean code practices, security
+                audits, and sub-second performance.
               </p>
               <p>
-                Over more than 5 years of steady execution, WEFIK has partnered with clients across North America, Europe, the Middle East,
-                and India — shipping over 30 bespoke web applications, headless e-commerce platforms, brand identities, and high-performance websites.
+                Over more than 5 years of steady execution, WEFIK has partnered with clients across
+                North America, Europe, the Middle East, and India — shipping over 30 bespoke web
+                applications, headless e-commerce platforms, brand identities, and high-performance
+                websites.
               </p>
             </div>
           </div>
@@ -372,9 +421,10 @@ export default function WefikPage() {
           <div className={styles.quoteBlock}>
             <div className={styles.quoteMark}>“</div>
             <blockquote className={styles.quoteText}>
-              WEFIK delivers an exceptional blend of sharp aesthetic sensitivity and ironclad technical stability.
-              Whether scaling e-commerce catalogs or engineering secure cloud workflows, their execution is disciplined,
-              punctual, and focused on tangible business ROI.
+              WEFIK delivers an exceptional blend of sharp aesthetic sensitivity and ironclad
+              technical stability. Whether scaling e-commerce catalogs or engineering secure cloud
+              workflows, their execution is disciplined, punctual, and focused on tangible business
+              ROI.
             </blockquote>
             <div className={styles.quoteAuthor}>
               <strong>Verified Client Partner</strong>
@@ -387,8 +437,9 @@ export default function WefikPage() {
             <div className={styles.ctaBadge}>Ready to Build?</div>
             <h2 className={styles.ctaTitle}>Transform Your Idea into Production Reality</h2>
             <p className={styles.ctaDesc}>
-              Whether you need a high-performance web platform, a custom Shopify storefront, or dedicated backend engineering,
-              our team at WEFIK and I are ready to architect your next milestone.
+              Whether you need a high-performance web platform, a custom Shopify storefront, or
+              dedicated backend engineering, our team at WEFIK and I are ready to architect your
+              next milestone.
             </p>
             <div className={styles.ctaActions}>
               <a
