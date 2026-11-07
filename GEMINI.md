@@ -1,7 +1,7 @@
 # Antigravity Workspace Directives & Engineering Standards
 
 **Project:** SK Sahinur Islam (Genious Sonu) — Portfolio & Engineering Platform  
-**Environment:** Next.js 16 (App Router) · React 19 · Vanilla CSS Modules · Supabase · Sanity v3 · Firebase  
+**Environment:** Next.js 16 (App Router) · React 19 · Vanilla CSS Modules · Supabase · Sanity v3 · Firebase
 
 ---
 
@@ -44,3 +44,9 @@ Whenever you write, edit, refactor, or complete any code in this repository, you
 
 - **Pre-Execution & Pre-Push Synchronization**: Before starting any task, before staging edits, and before pushing any branch or completing work, agents **MUST** execute `git fetch origin` and pull/rebase against `origin/main` (or active topic branches) to guarantee zero merge conflicts with upstream work.
 - **Conflict Avoidance Invariant**: Never push or draft changes on top of a stale base. Always verify local `HEAD` alignment with `origin/main` prior to concluding operations.
+
+---
+
+## 4. Cloudflare CLI & Tooling Directive
+
+When interacting with Cloudflare, use the `cf` CLI unless the project has a Wrangler configuration file.
