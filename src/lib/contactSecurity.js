@@ -282,8 +282,13 @@ export async function validateEmailIntegrity(rawEmail) {
     try {
       mxRecords = await Promise.race([mxPromise, timeoutPromise]);
     } catch (mxErr) {
-      if (mxErr.message === 'DNS_TIMEOUT') {
-        // Fail open gracefully on DNS timeout — don't block legitimate users on infra flakiness
+      if (
+        mxErr.message === 'DNS_TIMEOUT' ||
+        mxErr.code === 'ECONNREFUSED' ||
+        mxErr.code === 'ESERVFAIL' ||
+        mxErr.code === 'ETIMEOUT'
+      ) {
+        // Fail open gracefully on DNS timeout or resolver errors — don't block legitimate users on infra flakiness
         return { valid: true, domain };
       }
       // If MX threw ENOTFOUND / ENODATA, check RFC 5321 implicit fallback below
@@ -305,7 +310,12 @@ export async function validateEmailIntegrity(rawEmail) {
         return { valid: true, domain, fallback: 'A' };
       }
     } catch (aErr) {
-      if (aErr.message === 'DNS_TIMEOUT') {
+      if (
+        aErr.message === 'DNS_TIMEOUT' ||
+        aErr.code === 'ECONNREFUSED' ||
+        aErr.code === 'ESERVFAIL' ||
+        aErr.code === 'ETIMEOUT'
+      ) {
         return { valid: true, domain };
       }
     }
@@ -320,7 +330,12 @@ export async function validateEmailIntegrity(rawEmail) {
         return { valid: true, domain, fallback: 'AAAA' };
       }
     } catch (aaaaErr) {
-      if (aaaaErr.message === 'DNS_TIMEOUT') {
+      if (
+        aaaaErr.message === 'DNS_TIMEOUT' ||
+        aaaaErr.code === 'ECONNREFUSED' ||
+        aaaaErr.code === 'ESERVFAIL' ||
+        aaaaErr.code === 'ETIMEOUT'
+      ) {
         return { valid: true, domain };
       }
     }
@@ -401,38 +416,41 @@ export function validateContentQuality(rawName, rawMessage) {
  * the request is rejected to prevent bot-induced timeout bypasses.
  */
 export async function verifyTurnstileSecurity(token, clientIp) {
-  const secretKey =
-    process.env.TURNSTILE_SECRET_KEY ||
-    (process.env.NODE_ENV !== 'production' ? '1x0000000000000000000000000000000AA' : '');
-  const isTestingKey = secretKey === '1x0000000000000000000000000000000AA';
+  const secretKey = process.env.TURNSTILE_SECRET_KEY;
+  const isTestingKey = !secretKey || secretKey === '1x0000000000000000000000000000000AA';
   const isProd = process.env.NODE_ENV === 'production';
 
-  // In non-production development with testing keys, allow bypass
-  if (!token) {
-    if (!isProd && isTestingKey) {
-      return { success: true };
+  // 1. If Turnstile is unconfigured on server or using a testing key, safely pass-through.
+  // This prevents complete form breakdown when environment variables are not yet injected.
+  if (isTestingKey) {
+    if (isProd) {
+      console.warn(
+        '[Contact Security] TURNSTILE_SECRET_KEY is not configured in production. Proceeding with multi-layer defense verification.'
+      );
     }
-    return { success: false, reason: 'turnstile_token_missing' };
+    return { success: true, bypassed: true };
   }
 
-  if (isProd && !secretKey) {
-    console.error('[Contact Security] TURNSTILE_SECRET_KEY is not configured in production.');
-    return { success: false, reason: 'turnstile_misconfigured' };
+  // 2. If client supplied a token, verify it against Cloudflare Turnstile API.
+  if (token) {
+    try {
+      const result = await verifyTurnstileToken(token, clientIp);
+      if (!result.success) {
+        return { success: false, reason: 'turnstile_verification_failed' };
+      }
+      return { success: true };
+    } catch (err) {
+      console.warn('[Contact Security] Turnstile siteverify network error:', err?.message);
+      // Gracefully fail open on Cloudflare upstream timeouts/errors so legitimate visitors are not blocked
+      return { success: true, degraded: true };
+    }
   }
 
-  try {
-    const result = await verifyTurnstileToken(token, clientIp);
-    if (!result.success) {
-      return { success: false, reason: 'turnstile_verification_failed' };
-    }
-    return { success: true };
-  } catch (err) {
-    if (!isProd && isTestingKey) {
-      return { success: true };
-    }
-    // Fail closed in production
-    return { success: false, reason: 'turnstile_unavailable' };
-  }
+  // 3. Turnstile secret is configured on server, but no token was received.
+  // This occurs when browser privacy features or content blockers (Brave Shields, uBlock Origin, etc.)
+  // prevent challenges.cloudflare.com scripts from executing.
+  // Allow the request to proceed to the other defense layers (honeypot, timing, rate limits, MX, content).
+  return { success: true, degraded: true, reason: 'turnstile_adblock_fallback' };
 }
 
 /**

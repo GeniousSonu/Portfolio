@@ -45,14 +45,23 @@ export async function POST(request) {
   const timeCheck = validateTimeOnForm(body);
   if (!timeCheck.valid) {
     await logContactAbuse(clientIp, timeCheck.reason, { elapsedMs: timeCheck.elapsedMs });
-    return NextResponse.json({ success: false, error: GENERIC_CLIENT_ERROR }, { status: 400 });
+    return NextResponse.json(
+      { success: false, error: 'Form submitted too quickly. Please take a moment and try again.' },
+      { status: 400 }
+    );
   }
 
-  // 5. Cloudflare Turnstile Verification (Fail-closed in production)
+  // 5. Cloudflare Turnstile Verification
   const turnstileCheck = await verifyTurnstileSecurity(body?.turnstileToken, clientIp);
   if (!turnstileCheck.success) {
     await logContactAbuse(clientIp, turnstileCheck.reason);
-    return NextResponse.json({ success: false, error: GENERIC_CLIENT_ERROR }, { status: 403 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Security verification challenge failed. Please refresh and try again.',
+      },
+      { status: 403 }
+    );
   }
 
   // 6. Atomic Rate Limiting (10m IP, 1h IP, 1m Global Circuit Breaker)
@@ -77,7 +86,13 @@ export async function POST(request) {
   const emailCheck = await validateEmailIntegrity(body?.email);
   if (!emailCheck.valid) {
     await logContactAbuse(clientIp, emailCheck.reason, { domain: emailCheck.domain });
-    return NextResponse.json({ success: false, error: GENERIC_CLIENT_ERROR }, { status: 400 });
+    const emailError =
+      emailCheck.reason === 'disposable_email_domain'
+        ? 'Disposable or temporary email addresses are not accepted.'
+        : emailCheck.reason === 'no_mail_exchange_or_host'
+          ? 'The email domain provided cannot receive emails. Please verify your address.'
+          : 'Please enter a valid email address.';
+    return NextResponse.json({ success: false, error: emailError }, { status: 400 });
   }
 
   // 8. Content Quality & Unicode Anti-Abuse Sanitization
@@ -87,7 +102,19 @@ export async function POST(request) {
       urlCount: contentCheck.urlCount,
       ratio: contentCheck.ratio,
     });
-    return NextResponse.json({ success: false, error: GENERIC_CLIENT_ERROR }, { status: 400 });
+    const contentError =
+      contentCheck.reason === 'name_too_short'
+        ? 'Name must be at least 2 characters.'
+        : contentCheck.reason === 'name_too_long'
+          ? 'Name cannot exceed 100 characters.'
+          : contentCheck.reason === 'message_too_short'
+            ? 'Message must be at least 10 characters.'
+            : contentCheck.reason === 'message_too_long'
+              ? 'Message cannot exceed 5000 characters.'
+              : contentCheck.reason === 'excessive_urls'
+                ? 'Messages cannot contain more than 2 links.'
+                : GENERIC_CLIENT_ERROR;
+    return NextResponse.json({ success: false, error: contentError }, { status: 400 });
   }
 
   // 9. Check Email Service API Credentials
@@ -103,16 +130,23 @@ export async function POST(request) {
     );
   }
 
-  const recipient = process.env.CONTACT_NOTIFICATION_EMAIL || 'sahinurislamm2002@gmail.com';
+  const recipient =
+    process.env.CONTACT_NOTIFICATION_EMAIL ||
+    process.env.ADMIN_EMAIL ||
+    'sahinurislamm2002@gmail.com';
 
-  // 10. Send Email via Resend with Quota Monitoring
+  const defaultFrom = 'Portfolio Contact <onboarding@resend.dev>';
+  const configuredFrom =
+    process.env.CONTACT_FROM_EMAIL || process.env.RESEND_FROM_EMAIL || defaultFrom;
+
+  // 10. Send Email via Resend with Quota Monitoring & Fallback
   try {
     const safeSubjectName = String(contentCheck.name || 'Visitor')
       .replace(/[\r\n\x00-\x1F\x7F]+/g, ' ')
       .trim();
 
-    const { data, error } = await resend.emails.send({
-      from: 'Portfolio Contact <onboarding@resend.dev>',
+    const emailPayload = {
+      from: configuredFrom,
       to: recipient,
       replyTo: body.email.trim(),
       subject: `[Portfolio Inquiry] New message from ${safeSubjectName}`,
@@ -151,7 +185,33 @@ export async function POST(request) {
           </div>
         </div>
       `,
-    });
+    };
+
+    let sendResult = await resend.emails.send(emailPayload);
+
+    // Resilient fallback: If custom sender domain failed (e.g. pending domain verification on Resend),
+    // automatically retry using onboarding@resend.dev
+    if (
+      sendResult?.error &&
+      configuredFrom !== defaultFrom &&
+      (String(sendResult.error.message || '')
+        .toLowerCase()
+        .includes('domain') ||
+        String(sendResult.error.message || '')
+          .toLowerCase()
+          .includes('from'))
+    ) {
+      console.warn(
+        '[Contact API] Custom from address failed, retrying with onboarding@resend.dev:',
+        sendResult.error.message
+      );
+      sendResult = await resend.emails.send({
+        ...emailPayload,
+        from: defaultFrom,
+      });
+    }
+
+    const { data, error } = sendResult || {};
 
     if (error) {
       console.error('[Contact API] Resend API error:', error);
