@@ -21,12 +21,11 @@ export default async function ProjectsPage() {
         <header className={styles.header}>
           <div className={styles.badge}>
             <span className={styles.badgeDot} aria-hidden="true" />
-            Engineering Dossier
+            Selected Projects
           </div>
           <h1 className={styles.title}>Projects &amp; Inventions</h1>
           <p className={styles.lead}>
-            A curated record of production distributed systems, IoT hardware inventions,
-            open-source tooling, and client platforms.
+            A record of production web applications, IoT hardware systems, open-source utilities, and client platforms.
           </p>
         </header>
 

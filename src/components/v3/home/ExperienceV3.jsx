@@ -119,7 +119,7 @@ export default function ExperienceV3() {
                   {role.company === 'WEFIK' && (
                     <div className="v3-role-actions">
                       <Link href="/wefik" className="v3-role-link-btn" data-v3-sound="confirm">
-                        <span>Explore Venture Dossier</span>
+                        <span>View WEFIK Details</span>
                         <span aria-hidden="true">→</span>
                       </Link>
                       <a

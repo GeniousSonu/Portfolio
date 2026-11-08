@@ -74,10 +74,11 @@
 }
 
 .title {
-  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  font-family: var(--font-sans);
+  font-size: clamp(2rem, 4.5vw, 3.4rem);
   font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
   color: var(--text-primary);
   margin-bottom: 1.25rem;
 }

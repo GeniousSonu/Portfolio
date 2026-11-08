@@ -154,7 +154,7 @@ export default async function PluginPrivacyPolicyPage({ params }) {
             </p>
             <div
               style={{
-                background: 'rgba(16, 185, 129, 0.05)',
+                background: 'rgba(212, 175, 55, 0.05)',
                 borderLeft: '4px solid var(--gold)',
                 padding: '1.25rem',
                 borderRadius: '0 8px 8px 0',

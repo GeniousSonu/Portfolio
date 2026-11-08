@@ -99,6 +99,25 @@
   color: var(--gold-bright);
 }
 
+.dropdownItemCurrent {
+  background: rgba(212, 175, 55, 0.08) !important;
+  border-color: rgba(212, 175, 55, 0.3) !important;
+}
+
+.dropdownItemCurrent .itemLabel {
+  color: var(--gold);
+}
+
+.currentDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  display: inline-block;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
 .externalIcon {
   opacity: 0.65;
   flex-shrink: 0;
@@ -127,9 +146,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 36px;
+  height: 34px;
   padding: 0 0.85rem;
-  border-radius: var(--radius-sm, 8px);
+  border-radius: 9999px;
   background: transparent;
   border: 1px solid transparent;
   color: var(--text-secondary);
@@ -147,10 +166,16 @@
 .allPagesBtn:focus-visible {
   color: var(--text-primary);
   border-color: var(--border-hairline);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 :global(html[data-theme='light']) .allPagesBtn:hover,
 :global(html[data-theme='light']) .allPagesBtn:focus-visible {
   background: rgba(22, 19, 15, 0.04);
+}
+
+.playgroundActive {
+  background: rgba(212, 175, 55, 0.12) !important;
+  border-color: var(--gold) !important;
+  color: var(--gold) !important;
 }

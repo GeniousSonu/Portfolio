@@ -181,7 +181,7 @@ export default async function PluginDocsIndexPage({ params }) {
                         marginTop: '1rem',
                         fontFamily: 'var(--font-mono)',
                         fontSize: '0.78rem',
-                        color: 'var(--gold-bright, #34d399)',
+                        color: 'var(--gold-bright, #e5c158)',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.35rem',

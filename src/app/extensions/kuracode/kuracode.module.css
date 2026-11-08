@@ -24,7 +24,7 @@
   transform: translateX(-50%);
   width: min(800px, 90vw);
   height: 360px;
-  background: radial-gradient(circle, rgba(8, 232, 138, 0.08) 0%, rgba(0, 0, 0, 0) 70%);
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, rgba(0, 0, 0, 0) 70%);
   pointer-events: none;
   z-index: 0;
 }
@@ -61,8 +61,8 @@
 }
 
 .breadcrumbCurrent {
-  color: var(--sn-accent-gold, #d4af37);
-  font-weight: 600;
+  color: var(--sn-text-secondary, #94a3b8);
+  font-weight: 500;
 }
 
 /* Sub-Navigation Bar */
@@ -155,7 +155,7 @@
 }
 
 .titleGradient {
-  background: linear-gradient(135deg, var(--sn-text-primary, #f9fafb) 30%, #08e88a 100%);
+  background: linear-gradient(135deg, var(--sn-text-primary, #f9fafb) 40%, var(--gold-bright, #e5c158) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -184,20 +184,20 @@
   align-items: center;
   gap: 8px;
   padding: 14px 28px;
-  border-radius: 10px;
-  background: #08e88a;
-  color: #060a12;
+  border-radius: 9999px;
+  background: var(--gold, #d4af37);
+  color: #070b14 !important;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.95rem;
   text-decoration: none;
   border: none;
   cursor: pointer;
-  transition: transform 0.15s ease, opacity 0.15s ease;
+  transition: transform 0.15s ease, background 0.15s ease;
 }
 
 .primaryBtn:hover {
+  background: var(--gold-bright, #e5c158);
   transform: translateY(-1px);
-  opacity: 0.95;
 }
 
 .secondaryBtn {
@@ -256,7 +256,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #08e88a;
+  color: var(--gold, #d4af37);
   margin-bottom: 16px;
 }
 

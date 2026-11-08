@@ -98,15 +98,15 @@ export default function OfflineView() {
         <div className={styles.cachedTitle}>Locally Available Destinations</div>
         <div className={styles.cachedGrid}>
           <Link href="/" className={styles.cachedLink}>
-            <span>Home Console</span>
+            <span>Home</span>
             <span>↗</span>
           </Link>
           <Link href="/about" className={styles.cachedLink}>
-            <span>About Dossier</span>
+            <span>About</span>
             <span>↗</span>
           </Link>
           <Link href="/uses" className={styles.cachedLink}>
-            <span>Uses Rig</span>
+            <span>Tools &amp; Gear</span>
             <span>↗</span>
           </Link>
           <Link href="/architecture" className={styles.cachedLink}>

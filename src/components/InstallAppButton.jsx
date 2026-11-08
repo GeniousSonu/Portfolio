@@ -222,7 +222,7 @@ export default function InstallAppButton({ className = "", isMobileMenu = false 
           <div className="install-modal-header">
             <div className="install-modal-badge">
               <InstallIcon />
-              <span>INSTALL WEB APP</span>
+              <span>Install Web App</span>
             </div>
             <button
               type="button"
@@ -234,9 +234,9 @@ export default function InstallAppButton({ className = "", isMobileMenu = false 
             </button>
           </div>
 
-          <h3 className="install-modal-title">Install SK Sahinur Islam App</h3>
+          <h3 className="install-modal-title">Install Portfolio App</h3>
           <p className="install-modal-desc">
-            Add this portfolio to your home screen for instant full-screen access, lightning-fast load times, and offline browsing.
+            Add this site to your home screen for quick access and offline reading.
           </p>
 
           {/* Platform Specific Steps */}
@@ -285,9 +285,9 @@ export default function InstallAppButton({ className = "", isMobileMenu = false 
           )}
 
           <div className="install-modal-footer">
-            <span className="install-feature-tag">✓ Fullscreen App</span>
-            <span className="install-feature-tag">✓ Zero Lag</span>
-            <span className="install-feature-tag">✓ Offline Ready</span>
+            <span className="install-feature-tag">✓ Fullscreen view</span>
+            <span className="install-feature-tag">✓ Quick access</span>
+            <span className="install-feature-tag">✓ Offline ready</span>
           </div>
         </div>
       </div>,

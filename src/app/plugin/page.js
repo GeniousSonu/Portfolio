@@ -36,24 +36,21 @@ export default function PluginIndexPage() {
         {/* Breadcrumb Navigation */}
         <nav className={styles.breadcrumbs} aria-label="Breadcrumb">
           <Link href="/" className={styles.breadcrumbLink}>
-            home
+            Home
           </Link>
           <span className={styles.breadcrumbSeparator}>/</span>
-          <span className={styles.breadcrumbCurrent}>plugins</span>
+          <span className={styles.breadcrumbCurrent}>Plugins</span>
         </nav>
 
         {/* Page Header */}
         <header className={styles.pageHeader}>
           <div className={styles.badge}>
             <span>◈</span>
-            <span>WordPress Software Directory</span>
+            <span>WordPress Directory</span>
           </div>
-          <h1 className={styles.title}>
-            Engineered <span className={styles.titleGradient}>Plugins &amp; Tools</span>
-          </h1>
+          <h1 className={styles.title}>WordPress Plugins</h1>
           <p className={styles.subtitle}>
-            Production-grade, zero-bloat WordPress security utilities and agency SOP tools. Developed
-            with enterprise safeguards, strict validation, and compliance with WordPress.org guidelines.
+            Security auditing utilities and site administration tools built for client and production WordPress sites.
           </p>
         </header>
 

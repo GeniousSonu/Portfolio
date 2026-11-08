@@ -109,15 +109,15 @@
   --v3-border: rgba(244, 241, 232, 0.14);
   --v3-border-strong: rgba(244, 241, 232, 0.32);
 
-  --v3-accent: #74f2c6;
-  --v3-accent-ink: #74f2c6;
-  --v3-accent-strong: #9dfade;
-  --v3-warm: #ffb84d;
+  --v3-accent: #f59e0b;
+  --v3-accent-ink: #f59e0b;
+  --v3-accent-strong: #fbbf24;
+  --v3-warm: #f59e0b;
   --v3-coral: #ff7a5c;
   --v3-periwinkle: #9ba8ff;
 
   --v3-focus: #ffb84d;
-  --v3-thread: #74f2c6;
+  --v3-thread: #f59e0b;
   --v3-cobalt: #22347c;
 
   --v3-shadow-color: rgba(0, 0, 0, 0.6);
@@ -125,12 +125,12 @@
   /* derived */
   --v3-ink: #f4f1e8;
   --v3-on-accent: #05080f;
-  --v3-shadow-hard: 6px 6px 0 rgba(116, 242, 198, 0.22);
-  --v3-shadow-hard-sm: 4px 4px 0 rgba(116, 242, 198, 0.18);
+  --v3-shadow-hard: 6px 6px 0 rgba(245, 158, 11, 0.22);
+  --v3-shadow-hard-sm: 4px 4px 0 rgba(245, 158, 11, 0.18);
   --v3-shadow-soft: 0 18px 44px rgba(0, 0, 0, 0.55);
   --v3-grid-line: rgba(244, 241, 232, 0.04);
   --v3-grain-opacity: 0;
-  --v3-halo-a: rgba(116, 242, 198, 0.14);
+  --v3-halo-a: rgba(245, 158, 11, 0.14);
   --v3-halo-b: rgba(155, 168, 255, 0.12);
   --v3-halo-c: rgba(255, 184, 77, 0.08);
   --v3-term-bg: #050810;
@@ -270,16 +270,16 @@ html[data-v3='true'][data-theme='dark'] {
   --surface-card: #121b2e;
   --border: rgba(244, 241, 232, 0.14);
   --border-hairline: rgba(244, 241, 232, 0.1);
-  --border-brass: rgba(116, 242, 198, 0.36);
+  --border-brass: rgba(212, 175, 55, 0.36);
   --border-dim: rgba(244, 241, 232, 0.07);
   --text-primary: #f4f1e8;
   --text-secondary: #cfd6e2;
   --text-muted: #a5b0c4;
-  --gold: #74f2c6;
-  --gold-dim: rgba(116, 242, 198, 0.5);
-  --gold-bright: #9dfade;
-  --signal: #74f2c6;
-  --green: #74f2c6;
+  --gold: #d4af37;
+  --gold-dim: rgba(212, 175, 55, 0.5);
+  --gold-bright: #e5c158;
+  --signal: #10b981;
+  --green: #10b981;
   --amber: #ffb84d;
   --blue: #9ba8ff;
   --red: #ff8a72;
@@ -293,11 +293,11 @@ html[data-v3='true'][data-theme='dark'] {
   --menu-overlay-bg: rgba(7, 11, 20, 0.97);
   --menu-card-bg: #0d1422;
   --menu-card-border: rgba(244, 241, 232, 0.14);
-  --menu-accent: #74f2c6;
-  --menu-accent-25: rgba(116, 242, 198, 0.25);
-  --menu-accent-50: rgba(116, 242, 198, 0.5);
-  --menu-accent-70: rgba(116, 242, 198, 0.7);
-  --menu-accent-80: rgba(116, 242, 198, 0.8);
+  --menu-accent: #f59e0b;
+  --menu-accent-25: rgba(245, 158, 11, 0.25);
+  --menu-accent-50: rgba(245, 158, 11, 0.5);
+  --menu-accent-70: rgba(245, 158, 11, 0.7);
+  --menu-accent-80: rgba(245, 158, 11, 0.8);
   --menu-text-title: #f4f1e8;
   --menu-text-muted: #a5b0c4;
 }

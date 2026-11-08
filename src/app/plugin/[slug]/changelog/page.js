@@ -168,7 +168,7 @@ export default async function PluginChangelogPage({ params }) {
               key={rel.version}
               style={{
                 background: 'var(--graphite, #0f1115)',
-                border: idx === 0 ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid var(--border, #2a2f38)',
+                border: idx === 0 ? '1px solid rgba(212, 175, 55, 0.4)' : '1px solid var(--border, #2a2f38)',
                 borderRadius: '16px',
                 padding: '2rem',
                 position: 'relative',
@@ -193,7 +193,7 @@ export default async function PluginChangelogPage({ params }) {
                   {idx === 0 && (
                     <span
                       style={{
-                        background: 'rgba(16, 185, 129, 0.2)',
+                        background: 'rgba(212, 175, 55, 0.2)',
                         color: 'var(--gold-bright)',
                         fontFamily: 'var(--font-mono)',
                         fontSize: '0.72rem',
@@ -231,7 +231,7 @@ export default async function PluginChangelogPage({ params }) {
                   let tagBg = 'rgba(255, 255, 255, 0.08)';
                   let tagColor = 'var(--text-primary)';
                   if (ch.type === 'Feature') {
-                    tagBg = 'rgba(16, 185, 129, 0.15)';
+                    tagBg = 'rgba(212, 175, 55, 0.15)';
                     tagColor = 'var(--gold-bright)';
                   } else if (ch.type === 'Fix') {
                     tagBg = 'rgba(96, 165, 250, 0.15)';

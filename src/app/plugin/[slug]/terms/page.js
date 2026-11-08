@@ -248,8 +248,8 @@ export default async function PluginTermsPage({ params }) {
             </ul>
             <div
               style={{
-                background: 'rgba(16, 185, 129, 0.06)',
-                border: '1px solid rgba(16, 185, 129, 0.25)',
+                background: 'rgba(212, 175, 55, 0.06)',
+                border: '1px solid rgba(212, 175, 55, 0.25)',
                 borderRadius: '8px',
                 padding: '1.25rem 1.5rem',
                 marginBottom: '1rem',

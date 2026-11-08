@@ -16,19 +16,19 @@ const AGENCY_SERVICES = [
   {
     title: 'Custom Web Application Development',
     badge: 'Engineering',
-    desc: 'Engineering resilient, scalable web applications with sub-second page loads, modular React/Next.js frontends, and hardened Node.js/Express backends built for high concurrent traffic.',
+    desc: 'Building responsive web applications with React, Next.js, and Node.js backends. Structured for clean maintenance, fast load times, and clear data flows.',
     deliverables: [
       'Single-Page (SPA) & SSR Portals',
       'High-throughput REST & GraphQL APIs',
       'Role-based access control (RBAC)',
-      'Sub-100ms edge caching & microservices',
+      'Edge caching & microservices',
     ],
     stack: ['Next.js', 'React', 'Node.js', 'Express', 'PostgreSQL', 'Docker'],
   },
   {
     title: 'UI/UX & Product Design Systems',
     badge: 'Design',
-    desc: 'Translating complex user journeys into intuitive, elegant digital interfaces. We craft end-to-end design systems in Figma that maintain strict consistency from wireframe to code.',
+    desc: 'Developing component libraries and design tokens in Figma and code, ensuring consistent interfaces across screens and WCAG accessibility standards.',
     deliverables: [
       'Interactive Figma prototypes & wireframes',
       'Component design systems & token libraries',
@@ -40,7 +40,7 @@ const AGENCY_SERVICES = [
   {
     title: 'Shopify & Headless E-Commerce',
     badge: 'Commerce',
-    desc: 'Building high-converting digital storefronts and bespoke Shopify experiences engineered to optimize checkout conversion, sync real-time inventories, and scale internationally.',
+    desc: 'Building online stores with Shopify and headless setups, integrating payment gateways, product catalogs, and inventory feeds.',
     deliverables: [
       'Custom Shopify theme & Liquid development',
       'Headless commerce architecture',
@@ -50,21 +50,21 @@ const AGENCY_SERVICES = [
     stack: ['Shopify Liquid', 'Storefront API', 'Hydrogen', 'Stripe'],
   },
   {
-    title: 'WordPress & Bespoke CMS Engineering',
+    title: 'WordPress & CMS Engineering',
     badge: 'CMS',
-    desc: 'Zero-bloat, bespoke WordPress engineering designed for speed, editorial freedom, and ironclad security. Custom Gutenberg blocks and headless CMS setups tailored to each brand.',
+    desc: 'Custom WordPress themes and Gutenberg blocks with minimal dependencies, structured for fast load times and clean content editing.',
     deliverables: [
-      'Custom themes with zero third-party bloat',
+      'Custom themes with minimal dependencies',
       'Custom Gutenberg block development',
       'Headless WordPress with Next.js frontend',
-      'Enterprise security & performance audits',
+      'Security & performance audits',
     ],
     stack: ['WordPress', 'PHP', 'ACF Pro', 'WP REST API', 'MySQL'],
   },
   {
     title: 'Brand Identity & Visual Direction',
     badge: 'Branding',
-    desc: 'Crafting distinctive brand personalities that command authority. From logo marks and bespoke color palettes to comprehensive brand books and digital marketing assets.',
+    desc: 'Developing logo marks, typography standards, and digital visual assets for client brands and web products.',
     deliverables: [
       'Primary & secondary logo marks',
       'Brand style guides & typography rules',
@@ -76,7 +76,7 @@ const AGENCY_SERVICES = [
   {
     title: 'Technical SEO & Performance Tuning',
     badge: 'Growth',
-    desc: 'Data-driven search engine optimization and Core Web Vitals optimization engineered to achieve top search rankings and drive sustainable organic acquisition.',
+    desc: 'Core Web Vitals audits, page speed tuning, and structured data implementation to improve performance and search indexing.',
     deliverables: [
       'Complete Core Web Vitals overhauls',
       'Schema.org structured data implementation',
@@ -173,9 +173,9 @@ export default function WefikPage() {
   return (
     <PageShell dataRoute="/wefik">
       <PageHeader
-        eyebrow="[ VENTURE DOSSIER · CO-FOUNDER & TECHNICAL LEAD ]"
+        eyebrow="Co-Founder & Technical Lead"
         title="WEFIK — Web Era for Innovation & Knowledge"
-        summary="Turning ambitious concepts into digital reality. Co-founded in March 2021 as a premier digital engineering and design agency in Kolkata, delivering 30+ production systems for global clients."
+        summary="Digital engineering agency co-founded in March 2021 in Kolkata, delivering web applications, e-commerce stores, and client platforms."
       />
 
       <Section className={styles.wrapper}>
@@ -204,8 +204,7 @@ export default function WefikPage() {
                 </div>
                 <h2 className={styles.agencySlogan}>&ldquo;Real Life Genie of Your Idea&rdquo;</h2>
                 <p className={styles.agencySubhead}>
-                  Full-service web development, bespoke UI/UX design, and scalable cloud software
-                  agency.
+                  Full-stack web application development, UI implementation, and cloud deployment agency.
                 </p>
               </div>
             </div>
@@ -293,7 +292,7 @@ export default function WefikPage() {
 
           {/* Agency Story & Technical Leadership */}
           <div className={styles.sectionBlock}>
-            <span className={styles.blockTag}>Executive Dossier &amp; Architecture</span>
+            <span className={styles.blockTag}>Agency Background</span>
             <h2 className={styles.blockTitle}>
               Engineering Reliable Digital Platforms for Global Growth
             </h2>
@@ -302,20 +301,18 @@ export default function WefikPage() {
                 In March 2021, I co-founded{' '}
                 <strong>WEFIK (Web Era for Innovation &amp; Knowledge)</strong> in Kolkata, India,
                 driven by a clear mission: to act as the{' '}
-                <em>&ldquo;Real Life Genie of Your Idea&rdquo;</em>, transforming ambitious concepts
-                from founders, enterprises, and growing businesses into production-grade,
-                beautifully crafted digital reality.
+                <em>&ldquo;Real Life Genie of Your Idea&rdquo;</em>, transforming product concepts
+                from founders, enterprises, and growing businesses into production systems.
               </p>
               <p>
-                As <strong>Co-Founder &amp; Principal Systems Architect</strong>, I established the
-                agency&apos;s technical blueprint from ground zero. My direct responsibilities
+                As <strong>Co-Founder &amp; Technical Lead</strong>, I established the
+                agency&apos;s technical foundations. My direct responsibilities
                 encompass full-stack architecture, backend system design, database modeling, DevOps
-                automation, and mentoring our engineering team on clean code practices, security
-                audits, and sub-second performance.
+                automation, and ensuring clean code practices, security audits, and high performance.
               </p>
               <p>
                 Over more than 5 years of steady execution, WEFIK has partnered with clients across
-                North America, Europe, the Middle East, and India — shipping over 30 bespoke web
+                North America, Europe, the Middle East, and India — shipping over 30 web
                 applications, headless e-commerce platforms, brand identities, and high-performance
                 websites.
               </p>

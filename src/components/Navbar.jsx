@@ -483,37 +483,49 @@ export default function Navbar() {
                       onMouseLeave={handleGroupMouseLeave}
                       onKeyDown={(e) => handlePanelKeyDown(e, group.id)}
                     >
-                      {groupItems.map((item) => (
-                        <a
-                          key={item.id}
-                          href={item.href}
-                          role="menuitem"
-                          className={styles.dropdownItem}
-                          onClick={(e) => handleLinkClick(e, item.href)}
-                        >
-                          <div className={styles.itemTitleRow}>
-                            <span className={styles.itemLabel}>{item.label}</span>
-                            {item.targetAppHost && (
-                              <svg
-                                className={styles.externalIcon}
-                                width="11"
-                                height="11"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                aria-hidden="true"
-                              >
-                                <line x1="7" y1="17" x2="17" y2="7" />
-                                <polyline points="7 7 17 7 17 17" />
-                              </svg>
-                            )}
-                          </div>
-                          {item.blurb && <span className={styles.itemDesc}>{item.blurb}</span>}
-                        </a>
-                      ))}
+                      {groupItems.map((item) => {
+                        const isCurrentItem =
+                          pathname === item.href ||
+                          (item.href !== '/' &&
+                            item.type === 'page' &&
+                            pathname.startsWith(item.href + '/'));
+
+                        return (
+                          <a
+                            key={item.id}
+                            href={item.href}
+                            role="menuitem"
+                            aria-current={isCurrentItem ? 'page' : undefined}
+                            className={`${styles.dropdownItem} ${isCurrentItem ? styles.dropdownItemCurrent : ''}`}
+                            onClick={(e) => handleLinkClick(e, item.href)}
+                          >
+                            <div className={styles.itemTitleRow}>
+                              <span className={styles.itemLabel}>{item.label}</span>
+                              {item.targetAppHost && (
+                                <svg
+                                  className={styles.externalIcon}
+                                  width="11"
+                                  height="11"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2.5"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  aria-hidden="true"
+                                >
+                                  <line x1="7" y1="17" x2="17" y2="7" />
+                                  <polyline points="7 7 17 7 17 17" />
+                                </svg>
+                              )}
+                              {isCurrentItem && (
+                                <span className={styles.currentDot} aria-hidden="true" />
+                              )}
+                            </div>
+                            {item.blurb && <span className={styles.itemDesc}>{item.blurb}</span>}
+                          </a>
+                        );
+                      })}
                     </div>
                   )}
                 </li>
@@ -549,7 +561,7 @@ export default function Navbar() {
           {/* Playground Toggle */}
           {isDesktop && (
             <button
-              className={`nav-cmdk-btn ${isPlaygroundActive ? 'ring-2 ring-emerald-500 text-emerald-400' : ''}`}
+              className={`nav-cmdk-btn ${isPlaygroundActive ? styles.playgroundActive : ''}`}
               onClick={togglePlayground}
               aria-label="Toggle Playground mode (interactive canvas)"
               title="Playground mode: inspect and drag interface elements"

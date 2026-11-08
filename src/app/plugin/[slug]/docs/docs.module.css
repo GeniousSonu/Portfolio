@@ -17,7 +17,7 @@
   transform: translateX(-50%);
   width: 100vw;
   height: 500px;
-  background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.06) 0%, transparent 70%);
+  background: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.06) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
 }
@@ -51,7 +51,7 @@
 
 .breadcrumbLink:hover,
 .breadcrumbLink:focus-visible {
-  color: var(--gold-bright, #34d399);
+  color: var(--gold-bright, #e5c158);
   outline: none;
 }
 
@@ -61,7 +61,7 @@
 }
 
 .breadcrumbCurrent {
-  color: var(--gold-bright, #34d399);
+  color: var(--gold-bright, #e5c158);
 }
 
 /* Two-column layout: Sidebar + Main Content */
@@ -121,16 +121,16 @@
 
 .sidebarLink:hover,
 .sidebarLink:focus-visible {
-  background: rgba(16, 185, 129, 0.08);
-  color: var(--gold-bright, #34d399);
+  background: rgba(212, 175, 55, 0.08);
+  color: var(--gold-bright, #e5c158);
   outline: none;
 }
 
 .sidebarLinkActive {
   background: var(--surface, #22262e);
-  color: var(--gold-bright, #34d399);
+  color: var(--gold-bright, #e5c158);
   font-weight: 600;
-  border-left: 3px solid var(--gold, #10b981);
+  border-left: 3px solid var(--gold, #d4af37);
 }
 
 /* Main Documentation Article */
@@ -160,9 +160,9 @@
   gap: 0.4rem;
   font-family: var(--font-mono, monospace);
   font-size: 0.74rem;
-  color: var(--gold-bright, #34d399);
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: var(--gold-bright, #e5c158);
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.25);
   padding: 0.2rem 0.6rem;
   border-radius: 6px;
   margin-bottom: 0.75rem;
@@ -204,8 +204,8 @@
 
 /* Callout Box */
 .callout {
-  background: rgba(16, 185, 129, 0.05);
-  border-left: 4px solid var(--gold, #10b981);
+  background: rgba(212, 175, 55, 0.05);
+  border-left: 4px solid var(--gold, #d4af37);
   border-radius: 0 8px 8px 0;
   padding: 1.25rem 1.5rem;
   margin: 1.5rem 0;
@@ -232,7 +232,7 @@
   padding: 1rem 1.25rem;
   font-family: var(--font-mono, monospace);
   font-size: 0.85rem;
-  color: #34d399;
+  color: #e5c158;
   overflow-x: auto;
   margin: 1.25rem 0;
 }
@@ -282,8 +282,8 @@
 }
 
 .levelA {
-  background: rgba(16, 185, 129, 0.2);
-  color: #34d399;
+  background: rgba(212, 175, 55, 0.2);
+  color: #e5c158;
 }
 
 .levelB {
@@ -330,7 +330,7 @@
 
 .paginationBtn:hover,
 .paginationBtn:focus-visible {
-  color: var(--gold-bright, #34d399);
-  border-color: rgba(16, 185, 129, 0.4);
+  color: var(--gold-bright, #e5c158);
+  border-color: rgba(212, 175, 55, 0.4);
   outline: none;
 }
