@@ -31,7 +31,7 @@ const allFiles = walkDir(srcDir);
 const errors = [];
 
 for (const file of allFiles) {
-  const relPath = path.relative(rootDir, file);
+  const relPath = path.relative(rootDir, file).replace(/\\/g, '/');
   // Skip font definition files or email routes
   const isDefinitionFile = relPath.includes('src/lib/fonts.js') || 
                            relPath.includes('src/lib/bootFonts.js') || 

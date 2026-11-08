@@ -98,7 +98,7 @@ export default async function UsesPage() {
       tag: 'Editor',
     },
     {
-      name: 'Geist Mono & JetBrains Mono',
+      name: 'Space Mono & JetBrains Mono',
       desc: 'Clean, legible monospaced developer fonts with programming ligatures for crystal-clear code readability.',
       tag: 'Typography',
     },
