@@ -6,13 +6,13 @@ import { KURACODE_FACTS } from '../src/data/kuracode/facts';
 
 describe('KuraCode Guards & Compliance Tests', () => {
   it('enforces D10: legacy internal name must NEVER appear anywhere in public repo files or metadata', () => {
-    // Search all source files excluding .git, .private, node_modules, .next, and this test file
+    // Search tracked source files excluding this test file using cross-platform git grep
     const forbiddenTerm = ['snip', 'hub'].join('');
     let matches = [];
     try {
       const output = execSync(
-        `grep -rnwi "${forbiddenTerm}" --exclude-dir=.git --exclude-dir=.private --exclude-dir=node_modules --exclude-dir=.next --exclude="kuracode-guards.test.js" . || true`,
-        { encoding: 'utf-8' }
+        `git grep -nwi "${forbiddenTerm}" -- ":!tests/kuracode-guards.test.js"`,
+        { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'ignore'] }
       );
       matches = output.trim().split('\n').filter(Boolean);
     } catch {
