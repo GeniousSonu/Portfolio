@@ -596,10 +596,6 @@ html[data-v3='true'] #cursor-ring.hover {
     display: none !important;
     pointer-events: none !important;
   }
-
-  html[data-v3='true'] body {
-    cursor: auto !important;
-  }
 }
 
 /* ─── 12. Chrome: fixed widgets ───────────────────────────────── */

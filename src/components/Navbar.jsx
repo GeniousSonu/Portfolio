@@ -45,7 +45,8 @@ export default function Navbar() {
     toggleTheme(e);
   };
   const navRef = useRef(null);
-  const dropdownTimerRef = useRef(null);
+  const openTimerRef = useRef(null);
+  const closeTimerRef = useRef(null);
   const hamburgerBtnRef = useRef(null);
   const triggerRefs = useRef({});
 
@@ -54,23 +55,42 @@ export default function Navbar() {
 
   // Close panels on route transition
   useEffect(() => {
+    if (openTimerRef.current) clearTimeout(openTimerRef.current);
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     setOpenGroup(null);
   }, [pathname]);
 
   const closeDropdown = useCallback(() => {
-    if (dropdownTimerRef.current) clearTimeout(dropdownTimerRef.current);
+    if (openTimerRef.current) clearTimeout(openTimerRef.current);
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     setOpenGroup(null);
   }, []);
 
-  const openDropdown = useCallback((groupId) => {
-    if (dropdownTimerRef.current) clearTimeout(dropdownTimerRef.current);
-    setOpenGroup(groupId);
+  const openDropdown = useCallback((groupId, immediate = false) => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+    if (openTimerRef.current) {
+      clearTimeout(openTimerRef.current);
+      openTimerRef.current = null;
+    }
+    if (immediate) {
+      setOpenGroup(groupId);
+    } else {
+      // 120ms hover-intent delay to prevent accidental flashing
+      openTimerRef.current = setTimeout(() => {
+        setOpenGroup(groupId);
+        openTimerRef.current = null;
+      }, 120);
+    }
   }, []);
 
   const handleGroupToggle = (e, groupId) => {
     e.preventDefault();
     e.stopPropagation();
-    if (dropdownTimerRef.current) clearTimeout(dropdownTimerRef.current);
+    if (openTimerRef.current) clearTimeout(openTimerRef.current);
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     setOpenGroup((prev) => (prev === groupId ? null : groupId));
   };
 
@@ -79,7 +99,8 @@ export default function Navbar() {
       typeof window !== 'undefined' &&
       window.matchMedia('(hover: hover) and (pointer: fine)').matches
     ) {
-      openDropdown(groupId);
+      // If another dropdown is already open, transition quickly; otherwise use 120ms hover intent
+      openDropdown(groupId, Boolean(openGroup));
     }
   };
 
@@ -88,8 +109,15 @@ export default function Navbar() {
       typeof window !== 'undefined' &&
       window.matchMedia('(hover: hover) and (pointer: fine)').matches
     ) {
-      dropdownTimerRef.current = setTimeout(() => {
+      if (openTimerRef.current) {
+        clearTimeout(openTimerRef.current);
+        openTimerRef.current = null;
+      }
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+      // 200ms delayed close with pointer safe path
+      closeTimerRef.current = setTimeout(() => {
         setOpenGroup(null);
+        closeTimerRef.current = null;
       }, 200);
     }
   };
@@ -98,51 +126,89 @@ export default function Navbar() {
   useEffect(() => {
     const handlePointerDown = (e) => {
       if (navRef.current && !navRef.current.contains(e.target)) {
-        setOpenGroup(null);
+        closeDropdown();
       }
     };
     document.addEventListener('pointerdown', handlePointerDown);
     return () => {
       document.removeEventListener('pointerdown', handlePointerDown);
-      if (dropdownTimerRef.current) clearTimeout(dropdownTimerRef.current);
+      if (openTimerRef.current) clearTimeout(openTimerRef.current);
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     };
-  }, []);
+  }, [closeDropdown]);
 
   // Keyboard accessibility for group triggers and panel items
   const handleTriggerKeyDown = (e, groupId) => {
     if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      setOpenGroup(groupId);
+      openDropdown(groupId, true);
       setTimeout(() => {
         const panel = document.getElementById(`nav-panel-${groupId}`);
         const firstLink = panel?.querySelector('a');
         firstLink?.focus();
       }, 40);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      openDropdown(groupId, true);
+      setTimeout(() => {
+        const panel = document.getElementById(`nav-panel-${groupId}`);
+        const items = panel?.querySelectorAll('a');
+        if (items && items.length > 0) {
+          items[items.length - 1].focus();
+        }
+      }, 40);
     } else if (e.key === 'Escape') {
       e.preventDefault();
-      setOpenGroup(null);
+      closeDropdown();
     }
   };
 
   const handlePanelKeyDown = (e, groupId) => {
+    const panel = document.getElementById(`nav-panel-${groupId}`);
+    const items = Array.from(panel?.querySelectorAll('a') || []);
+    const currentIndex = items.indexOf(document.activeElement);
+
     if (e.key === 'Escape') {
       e.preventDefault();
-      setOpenGroup(null);
+      closeDropdown();
       triggerRefs.current[groupId]?.focus();
       return;
     }
 
-    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    if (e.key === 'ArrowDown') {
       e.preventDefault();
-      const panel = document.getElementById(`nav-panel-${groupId}`);
-      const items = Array.from(panel?.querySelectorAll('a') || []);
-      const currentIndex = items.indexOf(document.activeElement);
-      if (e.key === 'ArrowDown') {
-        const nextIndex = (currentIndex + 1) % items.length;
-        items[nextIndex]?.focus();
-      } else {
-        const prevIndex = (currentIndex - 1 + items.length) % items.length;
-        items[prevIndex]?.focus();
+      const nextIndex = (currentIndex + 1) % items.length;
+      items[nextIndex]?.focus();
+      return;
+    }
+
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      const prevIndex = (currentIndex - 1 + items.length) % items.length;
+      items[prevIndex]?.focus();
+      return;
+    }
+
+    if (e.key === 'Home') {
+      e.preventDefault();
+      items[0]?.focus();
+      return;
+    }
+
+    if (e.key === 'End') {
+      e.preventDefault();
+      items[items.length - 1]?.focus();
+      return;
+    }
+
+    if (e.key === 'Tab') {
+      if (!e.shiftKey && currentIndex === items.length - 1) {
+        // Tab forward out of dropdown
+        closeDropdown();
+      } else if (e.shiftKey && currentIndex === 0) {
+        // Shift+Tab backwards out of dropdown back to trigger
+        closeDropdown();
+        triggerRefs.current[groupId]?.focus();
       }
     }
   };
@@ -361,10 +427,10 @@ export default function Navbar() {
             />
           </Link>
 
-          {/* Desktop Links (5 Groups + All Pages + Contact CTA) */}
+          {/* Desktop Links (4 Groups + All Pages + Contact CTA) */}
           <ul className="nav-links" role="list">
             {triggerGroups.map((group) => {
-              const groupItems = getNavItemsByGroup(group.id);
+              const groupItems = getNavItemsByGroup(group.id, { dropdownOnly: true });
               const isGroupActive = groupItems.some((item) => {
                 if (item.type === 'page')
                   return pathname === item.href || pathname.startsWith(item.href + '/');
@@ -385,7 +451,7 @@ export default function Navbar() {
                     className={`nav-dropdown-trigger ${isGroupActive ? 'active' : ''}`}
                     aria-expanded={isOpen}
                     aria-controls={`nav-panel-${group.id}`}
-                    aria-haspopup="true"
+                    aria-haspopup="menu"
                     aria-label={`${group.label} menu`}
                     onClick={(e) => handleGroupToggle(e, group.id)}
                     onKeyDown={(e) => handleTriggerKeyDown(e, group.id)}
@@ -411,30 +477,41 @@ export default function Navbar() {
                     <div
                       id={`nav-panel-${group.id}`}
                       className={styles.dropdownMenu}
-                      aria-label={`${group.label} pages`}
+                      role="menu"
+                      aria-label={`${group.label} menu`}
                       onMouseEnter={() => handleGroupMouseEnter(group.id)}
                       onMouseLeave={handleGroupMouseLeave}
                       onKeyDown={(e) => handlePanelKeyDown(e, group.id)}
                     >
-                      <div className={styles.panelHeader}>{group.description}</div>
                       {groupItems.map((item) => (
                         <a
                           key={item.id}
                           href={item.href}
+                          role="menuitem"
                           className={styles.dropdownItem}
                           onClick={(e) => handleLinkClick(e, item.href)}
                         >
-                          <div className={styles.itemTop}>
+                          <div className={styles.itemTitleRow}>
                             <span className={styles.itemLabel}>{item.label}</span>
-                            {item.status === 'stub' ? (
-                              <span className={`${styles.itemTag} ${styles.itemTagStub}`}>
-                                STUB
-                              </span>
-                            ) : item.type === 'anchor' ? (
-                              <span className={styles.itemTag}>#section</span>
-                            ) : null}
+                            {item.targetAppHost && (
+                              <svg
+                                className={styles.externalIcon}
+                                width="11"
+                                height="11"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                aria-hidden="true"
+                              >
+                                <line x1="7" y1="17" x2="17" y2="7" />
+                                <polyline points="7 7 17 7 17 17" />
+                              </svg>
+                            )}
                           </div>
-                          <span className={styles.itemDesc}>{item.description}</span>
+                          {item.blurb && <span className={styles.itemDesc}>{item.blurb}</span>}
                         </a>
                       ))}
                     </div>
@@ -462,8 +539,9 @@ export default function Navbar() {
                 href="/contact"
                 onClick={(e) => handleLinkClick(e, '/contact')}
                 className="nav-cta"
+                aria-label="Contact — Send a message"
               >
-                Contact →
+                Contact
               </a>
             </li>
           </ul>

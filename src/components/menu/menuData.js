@@ -1,6 +1,5 @@
 import {
   FolderKanban,
-  History,
   Globe,
   Puzzle,
   Blocks,
@@ -9,23 +8,23 @@ import {
   BookOpen,
   Network,
   Laptop,
+  Terminal,
   FlaskConical,
+  Archive,
   Video,
   Orbit,
-  Archive,
 } from 'lucide-react';
 import { NAVIGATION_ITEMS, FOOTER_LEGAL_ITEMS } from '@/config/navigation';
 
 /**
- * Menu Section Content Map (Section 5)
- * Founder Decision (2026-10-12): Icon + Title only, zero descriptions.
- * Distinct Lucide icons (stroke 1.5), continuous layout across WORK, KNOWLEDGE, LAB.
+ * Menu Section Content Map
+ * Icon + Title, compact and aligned with navigation config
  */
 export const MENU_SECTIONS = [
   {
     id: 'work',
     name: 'WORK',
-    count: '06',
+    count: '05',
     items: [
       {
         id: 'projects',
@@ -35,32 +34,27 @@ export const MENU_SECTIONS = [
         isExternal: false,
       },
       {
-        id: 'experience',
-        title: 'Experience',
-        href: '/#experience',
-        icon: History,
-        isExternal: false,
-      },
-      {
         id: 'wefik',
         title: 'WEFIK',
         href: '/wefik',
         icon: Globe,
-        isExternal: true, // External venture showcase with permanent accent arrow
+        isExternal: false,
       },
       {
         id: 'plugin',
-        title: 'Plugin',
+        title: 'Plugins',
         href: '/plugin',
         icon: Puzzle,
         isExternal: false,
+        targetAppHost: true,
       },
       {
         id: 'extension',
-        title: 'Extension',
+        title: 'Extensions',
         href: '/extensions',
         icon: Blocks,
         isExternal: false,
+        targetAppHost: true,
       },
       {
         id: 'store',
@@ -109,13 +103,27 @@ export const MENU_SECTIONS = [
   {
     id: 'lab',
     name: 'LAB',
-    count: '04',
+    count: '05',
     items: [
+      {
+        id: 'tools',
+        title: 'Tools',
+        href: '/tools',
+        icon: Terminal,
+        isExternal: false,
+      },
       {
         id: 'play',
         title: 'Play',
         href: '/play',
         icon: FlaskConical,
+        isExternal: false,
+      },
+      {
+        id: 'vault',
+        title: 'Vault',
+        href: '/vault',
+        icon: Archive,
         isExternal: false,
       },
       {
@@ -130,13 +138,6 @@ export const MENU_SECTIONS = [
         title: 'Space',
         href: '/space',
         icon: Orbit,
-        isExternal: false,
-      },
-      {
-        id: 'vault',
-        title: 'Vault',
-        href: '/vault',
-        icon: Archive,
         isExternal: false,
       },
     ],

@@ -16,6 +16,7 @@
       }
     ],
     "declaration-property-value-disallowed-list": {
+      "cursor": ["none"],
       "font-family": ["/Geist/", "/Brooklyn/", "/Instrument/", "/IBM Plex/", "/Poppins/"]
     }
   },

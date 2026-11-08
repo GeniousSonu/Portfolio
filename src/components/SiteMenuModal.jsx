@@ -85,8 +85,8 @@ export default function SiteMenuModal() {
       >
         <div className={styles.header}>
           <div>
-            <span className={styles.eyebrow}>[ COMPLETE DIRECTORY · OPERATOR CONSOLE ]</span>
-            <h2 className={styles.title}>All Pages &amp; Architecture Map</h2>
+            <span className={styles.eyebrow}>[ DIRECTORY ]</span>
+            <h2 className={styles.title}>All pages and sections</h2>
           </div>
           <button
             ref={closeBtnRef}
@@ -142,9 +142,11 @@ export default function SiteMenuModal() {
             <div className={styles.groupCol}>
               <div className={styles.groupHeader}>
                 <span className={styles.groupBadge}>LEGAL</span>
-                <h3 className={styles.groupTitle}>Compliance</h3>
+                <h3 className={styles.groupTitle}>Legal</h3>
               </div>
-              <p className={styles.groupDesc}>Privacy notices, terms of service and zero-retention policies</p>
+              <p className={styles.groupDesc}>
+                Privacy notices, terms of service and zero-retention policies
+              </p>
 
               <ul className={styles.itemList}>
                 {FOOTER_LEGAL_ITEMS.map((item) => (
@@ -169,7 +171,9 @@ export default function SiteMenuModal() {
 
         <div className={styles.footer}>
           <div className={styles.footerLeft}>
-            <span className={styles.footerMeta}>TOTAL NAVIGABLE DESTINATIONS: {NAVIGATION_ITEMS.length + FOOTER_LEGAL_ITEMS.length}</span>
+            <span className={styles.footerMeta}>
+              TOTAL NAVIGABLE DESTINATIONS: {NAVIGATION_ITEMS.length + FOOTER_LEGAL_ITEMS.length}
+            </span>
           </div>
           <Link
             href="/site-index"
