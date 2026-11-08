@@ -3,12 +3,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import styles from './kuracode.module.css';
 import { KURACODE_FACTS } from '@/data/kuracode/facts';
-import PlaceholderChip from '@/components/kuracode/PlaceholderChip';
 
 export const metadata = {
-  title: 'KuraCode — Code Snippet Manager for Developers',
+  title: 'KuraCode — Clean, Local-First Code Snippet Capture for Developers',
   description:
-    'Save code from anywhere on the web in one click, keep where it came from, find it again instantly, and share it with your team.',
+    'Save code from anywhere on the web in one click, keep source URLs and headings, automatically strip line numbers and prompts, and organize snippets locally.',
   alternates: {
     canonical: 'https://genioussonu.me/extensions/kuracode',
   },
@@ -37,51 +36,55 @@ export default function KuraCodeLandingPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Hero */}
+      {/* Hero Section */}
       <section className={styles.hero}>
         <div className={styles.badge}>
-          <span>● PRE-RELEASE STAGING</span>
-          <span>•</span>
-          <span>LOCAL-FIRST DEVELOPER PREVIEW</span>
+          <span>Local-First Browser Extension • Manifest V3</span>
         </div>
 
         <h1 className={styles.heroTitle}>
-          Save code from anywhere on the web, <span className={styles.titleGradient}>keep where it came from.</span>
+          Capture code from the web,{' '}
+          <span className={styles.titleGradient}>preserve where it came from.</span>
         </h1>
 
         <p className={styles.heroSubtitle}>
-          {KURACODE_FACTS.oneLinePromise}
+          Save snippets from technical documentation, blogs, and repositories in one shortcut.
+          KuraCode automatically strips line numbers and shell prompts while preserving exact indentation, section headings, and source URLs.
         </p>
 
         <div className={styles.heroActions}>
-          <Link href="/extensions/kuracode/install" className={styles.primaryBtn}>
+          <Link href="/extensions/kuracode/demo" className={styles.primaryBtn}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+            <span>Try Interactive Demo</span>
+          </Link>
+
+          <Link href="/extensions/kuracode/install" className={styles.secondaryBtn}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
               <polyline points="7 10 12 15 17 10" />
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
-            <span>Get Pre-Release Build</span>
+            <span>Installation Guide</span>
           </Link>
-
-          <Link href="/extensions/kuracode/demo" className={styles.secondaryBtn}>
-            <span>Try Interactive Demo</span>
-          </Link>
-        </div>
-
-        <div className="text-xs text-text-muted mb-8 font-mono">
-          <span>Owner status: </span>
-          <PlaceholderChip label={KURACODE_FACTS.owner.legalName} />
         </div>
       </section>
 
-      {/* Hero Presentation Banner */}
-      <div className={styles.showcaseCard}>
+      {/* Showcase Visual in Browser Frame */}
+      <div className={styles.browserFrame}>
+        <div className={styles.browserFrameHeader}>
+          <div className={styles.frameDot} />
+          <div className={styles.frameDot} />
+          <div className={styles.frameDot} />
+          <span className={styles.frameTitle}>KuraCode Extension Interface &amp; In-Browser Capture</span>
+        </div>
         <picture>
           <source srcSet="/assets/kuracode/kuracode-hero.avif" type="image/avif" />
           <source srcSet="/assets/kuracode/kuracode-hero.webp" type="image/webp" />
           <Image
             src="/assets/kuracode/kuracode-hero.webp"
-            alt="KuraCode extension feature presentation board showing code capture, clean line numbers, and provenance"
+            alt="KuraCode extension feature board showing code capture, clean line numbers, and provenance metadata"
             width={1920}
             height={1072}
             className="w-full h-auto block"
@@ -90,117 +93,134 @@ export default function KuraCodeLandingPage() {
         </picture>
       </div>
 
-      {/* Honest Screenshot Area */}
-      <section className="mb-16 p-8 rounded-2xl border border-dashed border-border/60 bg-surface-1/40 text-center">
-        <h3 className="text-lg font-bold text-text-primary mb-2">Extension Interface &amp; In-Product Captures</h3>
-        <p className="text-sm text-text-muted max-w-xl mx-auto mb-4">
-          In adherence to pre-release honesty standards, production UI screenshots will be captured directly from the published store builds upon store approval.
-        </p>
-        <span className="inline-block px-3 py-1 rounded-full text-xs font-mono bg-surface-2 text-gold border border-border">
-          Screenshots arriving with official store launch
-        </span>
+      {/* 3-Step Walkthrough */}
+      <section className={styles.walkthroughSection}>
+        <div className="max-w-xl">
+          <h2 className="text-xl md:text-2xl font-bold text-text-primary mb-2">
+            How It Works in Your Daily Workflow
+          </h2>
+          <p className="text-sm text-text-muted">
+            Seamless snippet collection without interrupting your development flow.
+          </p>
+        </div>
+
+        <div className={styles.walkthroughGrid}>
+          <div className={styles.stepItem}>
+            <span className={styles.stepNumber}>STEP 1</span>
+            <h3 className={styles.stepTitle}>Select Any Code</h3>
+            <p className={styles.stepDesc}>
+              Highlight any code snippet on Stack Overflow, MDN, GitHub, or any technical blog.
+            </p>
+          </div>
+
+          <div className={styles.stepItem}>
+            <span className={styles.stepNumber}>STEP 2</span>
+            <h3 className={styles.stepTitle}>Trigger Capture</h3>
+            <p className={styles.stepDesc}>
+              Press <kbd className="font-mono text-xs text-gold px-1.5 py-0.5 rounded bg-surface-2 border border-border-subtle">Alt+Shift+S</kbd> or right-click and choose Save to KuraCode.
+            </p>
+          </div>
+
+          <div className={styles.stepItem}>
+            <span className={styles.stepNumber}>STEP 3</span>
+            <h3 className={styles.stepTitle}>Clean &amp; Indexed</h3>
+            <p className={styles.stepDesc}>
+              Line numbers and shell prompts are stripped automatically. Stored locally with full-text search.
+            </p>
+          </div>
+        </div>
       </section>
 
-      {/* Core Features Grid */}
+      {/* Architectural Pillars */}
       <section className="mb-16">
-        <div className="text-center mb-10">
-          <h2 className="text-2xl md:text-3xl font-extrabold text-text-primary mb-3">
-            Built for Developer Flow
+        <div className="mb-8">
+          <h2 className="text-xl md:text-2xl font-bold text-text-primary mb-2">
+            Core Architectural Capabilities
           </h2>
-          <p className="text-sm md:text-base text-text-muted max-w-lg mx-auto">
-            Zero friction, zero account roadblocks, and zero tracking. Your code remains your own.
+          <p className="text-sm text-text-muted max-w-xl">
+            Engineered as a lightweight, local-first utility focused on developer productivity and data ownership.
           </p>
         </div>
 
         <div className={styles.grid}>
+          {/* Card 1 */}
           <div className={styles.card}>
             <div className={styles.cardIcon}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="4 17 10 11 4 5" />
-                <line x1="12" y1="19" x2="20" y2="19" />
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
               </svg>
             </div>
-            <h3 className={styles.cardTitle}>1-Click Capture with Provenance</h3>
+            <h3 className={styles.cardTitle}>Context-Aware Provenance</h3>
             <p className={styles.cardDesc}>
-              Select code anywhere and press Alt+Shift+S. KuraCode automatically records the URL, heading, and timestamp.
+              Every snippet automatically records the source webpage URL, page title, nearest section heading, and capture date so you can retrace origins instantly.
             </p>
-            <span className={styles.statusTag}>Status: Available</span>
           </div>
 
+          {/* Card 2 */}
           <div className={styles.card}>
             <div className={styles.cardIcon}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="4 7 4 4 20 4 20 7" />
+                <line x1="9" y1="20" x2="15" y2="20" />
+                <line x1="12" y1="4" x2="12" y2="20" />
               </svg>
             </div>
-            <h3 className={styles.cardTitle}>Automatic Code Cleaner</h3>
+            <h3 className={styles.cardTitle}>Automated Code Sanitization</h3>
             <p className={styles.cardDesc}>
-              Strips annoying line numbers, shell prompts ($), and copy-button text from copied snippets while preserving indentation.
+              Strips leading line counters (01:, 12 |), terminal prompts ($, &gt;), and accidental copy button text while preserving nested code indentation.
             </p>
-            <span className={styles.statusTag}>Status: Available</span>
           </div>
 
+          {/* Card 3 */}
           <div className={styles.card}>
             <div className={styles.cardIcon}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="2" y="3" width="20" height="14" rx="2" />
                 <line x1="8" y1="21" x2="16" y2="21" />
                 <line x1="12" y1="17" x2="12" y2="21" />
               </svg>
             </div>
-            <h3 className={styles.cardTitle}>Local-First &amp; Offline</h3>
+            <h3 className={styles.cardTitle}>Local-First Offline Storage</h3>
             <p className={styles.cardDesc}>
-              All data lives in your browser IndexedDB. Nothing leaves your machine without explicit sync activation.
+              All snippet contents and search indices live in your browser IndexedDB. Zero mandatory sign-up, zero server synchronization, and zero telemetry beacons.
             </p>
-            <span className={styles.statusTag}>Status: Available</span>
           </div>
 
+          {/* Card 4 */}
           <div className={styles.card}>
             <div className={styles.cardIcon}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               </svg>
             </div>
-            <h3 className={styles.cardTitle}>Pre-Save Secret Scanner</h3>
+            <h3 className={styles.cardTitle}>Client-Side Secret Detection</h3>
             <p className={styles.cardDesc}>
-              Scans highlighted code for accidentally selected API keys, private tokens, or passwords before saving.
+              Heuristic patterns flag accidental API keys, tokens, or passwords before you save or copy snippets, reducing credential leak risks.
             </p>
-            <span className={styles.statusTag}>Status: Available</span>
           </div>
+        </div>
+      </section>
 
-          <div className={styles.card}>
-            <div className={styles.cardIcon}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
-            </div>
-            <h3 className={styles.cardTitle}>Team Snippet Workspaces</h3>
-            <p className={styles.cardDesc}>
-              Shared team libraries and web-viewer links for approved engineering patterns.
-            </p>
-            <span className={styles.statusTag}>Status: Coming soon</span>
-          </div>
-
-          <div className={styles.card}>
-            <div className={styles.cardIcon}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-              </svg>
-            </div>
-            <h3 className={styles.cardTitle}>VS Code &amp; IDE Bridge</h3>
-            <p className={styles.cardDesc}>
-              Two-way sync and direct editor insertions from your KuraCode snippet library.
-            </p>
-            <span className={styles.statusTag}>Status: Planned</span>
-          </div>
+      {/* Quick Links Section */}
+      <section className="p-8 rounded-2xl border border-border-subtle bg-surface-card flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h2 className="text-lg font-bold text-text-primary mb-1">
+            Want to see how the cleaner handles your code?
+          </h2>
+          <p className="text-sm text-text-muted">
+            Test the live sanitization engine directly in your browser without installing the extension.
+          </p>
+        </div>
+        <div className="flex items-center gap-3 flex-wrap">
+          <Link href="/extensions/kuracode/demo" className={styles.primaryBtn}>
+            Launch Live Demo
+          </Link>
+          <Link href="/extensions/kuracode/faq" className={styles.secondaryBtn}>
+            Read FAQs
+          </Link>
         </div>
       </section>
     </div>
   );
 }
-

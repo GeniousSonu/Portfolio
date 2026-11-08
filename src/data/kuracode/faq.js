@@ -1,109 +1,137 @@
 /**
- * KuraCode FAQ Registry (At least 20 questions matching facts strictly)
+ * KuraCode FAQ Registry
+ * Accurate, technical, user-focused answers verified against the extension implementation.
  */
 
 export const KURACODE_FAQS = [
   {
-    category: 'General & Concepts',
+    category: 'General & Architecture',
+    id: 'general',
+    description: 'Core concepts, local-first architecture, and browser support.',
     questions: [
       {
-        q: 'What is KuraCode?',
-        a: 'KuraCode is a local-first browser extension and developer tool that lets you capture, annotate, clean, search, and organize code snippets directly from any webpage without losing their origin context.',
+        id: 'what-is-kuracode',
+        q: 'What is KuraCode and how does it work?',
+        a: 'KuraCode is a local-first browser extension designed for developers to capture, clean, organize, and search code snippets from any webpage. When you trigger capture on selected text, KuraCode cleans the code, records source provenance (URL, page title, and section heading), and stores it directly in your browser without requiring a remote server.',
       },
       {
+        id: 'difference-from-bookmarks',
         q: 'How does KuraCode differ from standard browser bookmarks?',
-        a: 'Bookmarks only save URLs. KuraCode captures the exact code text, automatically strips line numbers and shell prompts, preserves indentation, records the source heading, and provides full-text syntax-highlighted search.',
+        a: 'Browser bookmarks only save webpage URLs. KuraCode captures the actual executable code, automatically strips line numbers and shell prompts, preserves whitespace indentation, detects the programming language, and indexes snippets for full-text search.',
       },
       {
-        q: 'Is an account required to use KuraCode?',
-        a: 'No. KuraCode operates on a local-first architecture. It works offline out of the box with zero sign-up, zero login, and zero remote database dependencies.',
+        id: 'account-requirements',
+        q: 'Is an account or sign-up required to use KuraCode?',
+        a: 'No account, email, or registration is required. KuraCode operates on a local-first model where all data stays in your browser IndexedDB storage by default. You can install and use all core features completely offline.',
       },
       {
-        q: 'What is the current release status of KuraCode?',
-        a: 'KuraCode is currently in pre-release. It is being prepared for submission to official browser stores (Chrome Web Store, Microsoft Edge Add-ons, Firefox Add-ons).',
-      },
-      {
+        id: 'pricing-and-cost',
         q: 'How much does KuraCode cost?',
-        a: 'KuraCode is completely free to use at launch with full local-first capabilities.',
+        a: 'KuraCode is free to use with all local-first core features included at launch. There are no paywalls for offline storage, code cleaning, secret scanning, or data export.',
+      },
+      {
+        id: 'supported-browsers',
+        q: 'Which browsers are supported?',
+        a: 'KuraCode supports Chromium-based browsers (Google Chrome, Microsoft Edge, Brave, Vivaldi, Arc, and Opera) and Mozilla Firefox using Manifest V3. Apple Safari support is planned for a subsequent release.',
       },
     ],
   },
   {
     category: 'Capture & Code Cleaning',
+    id: 'cleaning',
+    description: 'Code sanitization, provenance preservation, and syntax detection.',
     questions: [
       {
-        q: 'How does code cleaning work?',
-        a: 'When you capture code, KuraCode strips leading line numbers (e.g. 1., 02:), terminal prompt markers ($, >, #), and accidental "Copy" button labels, while keeping indentation intact.',
+        id: 'how-cleaning-works',
+        q: 'How does automatic code cleaning work?',
+        a: 'When code is captured from technical blogs or documentation, it often contains unwanted artifacts. KuraCode runs local regex-based sanitizers to strip leading line numbers (such as "01:" or "12 |"), shell prompts ("$", ">", "#"), and accidental "Copy" button labels while strictly preserving language-specific indentation.',
       },
       {
+        id: 'supported-websites',
         q: 'Can I capture code from any website?',
-        a: 'Yes. KuraCode works on GitHub, Stack Overflow, MDN, documentation sites, blogs, and internal web tools.',
+        a: 'Yes. KuraCode functions across all public websites and web tools, including GitHub, GitLab, Stack Overflow, MDN Web Docs, official language documentation, personal engineering blogs, and intranet development portals.',
       },
       {
-        q: 'Does KuraCode capture code in private/incognito windows?',
-        a: 'No. By default, KuraCode respects privacy and does not persist snippets captured during private browsing sessions.',
+        id: 'provenance-metadata',
+        q: 'What provenance metadata is saved with each snippet?',
+        a: 'Each captured snippet automatically records the source webpage URL, page title, nearest section heading (H1–H4), capture timestamp, and detected programming language, allowing you to trace any code block back to its original reference.',
       },
       {
-        q: 'What metadata is captured automatically with each snippet?',
-        a: 'The source webpage URL, page title, surrounding section heading, timestamp, and detected programming language are stored alongside the code.',
+        id: 'private-browsing-policy',
+        q: 'Does KuraCode capture code in private or incognito windows?',
+        a: 'By default, KuraCode does not persist snippets captured during private or incognito browsing sessions to prevent inadvertent retention of confidential or temporary session data.',
       },
       {
-        q: 'What programming languages are supported for syntax highlighting?',
-        a: 'JavaScript, TypeScript, Python, Go, Rust, PHP, HTML, CSS, SQL, Bash, JSON, YAML, Dockerfile, and Markdown, with automatic language detection and manual override.',
+        id: 'syntax-languages',
+        q: 'Which programming languages are recognized for syntax highlighting?',
+        a: 'KuraCode includes syntax recognition for JavaScript, TypeScript, Python, Go, Rust, PHP, HTML, CSS, SQL, Shell/Bash, JSON, YAML, Dockerfile, and Markdown, with automatic detection and manual language override.',
       },
     ],
   },
   {
     category: 'Privacy, Security & Storage',
+    id: 'privacy',
+    description: 'Data isolation, browser permissions, and client-side secret detection.',
     questions: [
       {
-        q: 'Does KuraCode send my code to any cloud servers?',
-        a: 'No. In the pre-release and launch version, nothing leaves your device. All data is stored in your browser local storage.',
+        id: 'storage-location',
+        q: 'Where are saved snippets stored?',
+        a: 'All snippet data, metadata, and user tags are stored locally on your device using browser IndexedDB. No snippet content is transmitted to external servers.',
       },
       {
-        q: 'Does KuraCode contain any analytics or tracking scripts?',
-        a: 'No. KuraCode contains zero analytics, zero telemetry beacons, and zero tracking cookies.',
+        id: 'analytics-and-telemetry',
+        q: 'Does KuraCode contain analytics or telemetry tracking?',
+        a: 'No. The extension contains zero third-party analytics trackers, zero telemetry beacons, and zero tracking cookies. It runs self-contained within your browser.',
       },
       {
-        q: 'What does the built-in secret scanner do?',
-        a: 'The secret scanner runs locally to detect accidental tokens, passwords, AWS keys, or private SSH keys in your snippet before you copy or export it.',
+        id: 'extension-permissions',
+        q: 'What browser permissions does KuraCode request and why?',
+        a: 'KuraCode follows the principle of least privilege, declaring only 4 scoped permissions: activeTab (to capture selected code upon user command), contextMenus (for right-click snippet saving), storage (for extension settings), and unlimitedStorage (to prevent browser quota eviction of your local snippet library). No broad host permissions are requested.',
       },
       {
-        q: 'Can I export all my data?',
-        a: 'Yes. You can export your entire library at any time as JSON or structured Markdown files without lock-in.',
+        id: 'secret-scanner',
+        q: 'How does the built-in secret scanner work?',
+        a: 'The secret scanner runs locally within your browser before saving or copying a snippet. It checks against known patterns for accidental inclusions of API keys, private tokens, passwords, and private SSH keys, displaying an alert before the snippet is committed to storage.',
       },
       {
-        q: 'How are extension permissions scoped?',
-        a: 'KuraCode follows the principle of least privilege. The extension declares only 4 essential permissions: activeTab (captures highlighted code upon user trigger), contextMenus (right-click save action), storage (persists local settings), and unlimitedStorage (prevents quota eviction for large code libraries). Zero broad host permissions.',
+        id: 'data-export',
+        q: 'Can I export my snippets and data library?',
+        a: 'Yes. You can export your entire collection at any time as structured JSON or Markdown files with complete metadata, ensuring zero vendor lock-in.',
       },
     ],
   },
   {
-    category: 'Roadmap & Future Integrations',
+    category: 'Roadmap & Future Platforms',
+    id: 'roadmap',
+    description: 'Upcoming features, team collaboration, and editor integrations.',
     questions: [
       {
-        q: 'Is team collaboration or cloud sync available right now?',
-        a: 'No. Team workspaces and cloud synchronization are labeled "Coming soon" and will only be enabled after the initial local-first release.',
+        id: 'cloud-sync-availability',
+        q: 'Are team workspaces and cloud sync available right now?',
+        a: 'No. Team workspaces and encrypted cloud synchronization are planned for Phase 2. The initial release is strictly local-first and offline-only.',
       },
       {
-        q: 'Will there be a VS Code extension?',
-        a: 'A VS Code companion extension is on the planned roadmap to allow two-way insertion between browser and IDE.',
+        id: 'vscode-extension',
+        q: 'Will there be a VS Code companion extension?',
+        a: 'Yes. A companion extension for VS Code is on the development roadmap to allow inserting and managing your saved snippets directly inside your editor.',
       },
       {
-        q: 'Will KuraCode support Safari?',
-        a: 'Safari support is planned for a future release cycle following the Chromium and Firefox rollouts.',
+        id: 'safari-support',
+        q: 'Will KuraCode be available on Apple Safari?',
+        a: 'Safari support via the WebExtensions API is planned following the stable release of the Chromium and Firefox builds.',
       },
       {
-        q: 'Are AI code explanation features available now?',
-        a: 'No. AI helpers and auto-tagging are classified as "Planned" and are not included in the pre-release build.',
+        id: 'ai-features',
+        q: 'Does KuraCode include AI code explanation features?',
+        a: 'Not in the initial release. Future AI-assisted features (such as local code summarization) are under research for subsequent phases and will be strictly opt-in.',
       },
       {
-        q: 'How do I report a bug or request a feature?',
-        a: 'You can submit feedback via the KuraCode Support page or open an issue on the official GitHub repository.',
+        id: 'bug-reports',
+        q: 'How do I report bugs or submit feature suggestions?',
+        a: 'You can report bugs, submit code samples that failed cleaning, or suggest features via the official GitHub Issues repository or through the KuraCode support page.',
       },
     ],
   },
 ];
 
 export default KURACODE_FAQS;
-

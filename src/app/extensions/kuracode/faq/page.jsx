@@ -4,10 +4,15 @@ import styles from '../kuracode.module.css';
 import { KURACODE_FAQS } from '@/data/kuracode/faq';
 
 export const metadata = {
-  title: 'KuraCode FAQ — Frequently Asked Questions',
-  description: 'Answers to top questions regarding KuraCode privacy, local-first storage, code cleaning, shortcuts, and releases.',
+  title: 'KuraCode FAQ — Local Storage, Privacy & Code Capture Answers',
+  description:
+    'Answers to frequently asked questions about KuraCode: local-first storage, automatic code cleaning, browser permissions, secret scanning, and release plans.',
   alternates: {
     canonical: 'https://genioussonu.me/extensions/kuracode/faq',
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
@@ -27,49 +32,119 @@ export default function FaqPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto py-8">
+    <div>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
       {/* Breadcrumbs */}
-      <nav className={styles.breadcrumbs} aria-label="Breadcrumb">
-        <Link href="/extensions/kuracode" className={styles.breadcrumbLink}>KuraCode</Link>
+      <nav className={styles.breadcrumbs} aria-label="Breadcrumbs">
+        <Link href="/extensions/kuracode" className={styles.breadcrumbLink}>
+          KuraCode
+        </Link>
         <span className={styles.breadcrumbSeparator}>/</span>
         <span className={styles.breadcrumbCurrent}>FAQ</span>
       </nav>
 
-      <div className="mb-12 text-center">
-        <h1 className="text-3xl md:text-4xl font-extrabold text-text-primary mb-3">
-          Frequently Asked Questions
-        </h1>
-        <p className="text-base text-text-muted max-w-xl mx-auto">
-          Honest, technical answers about local-first storage, code cleaning, browser permissions, and release plans.
+      {/* Page Header */}
+      <header className={styles.pageHeader}>
+        <div className={styles.pageHeaderBadge}>DOCUMENTATION &amp; ANSWERS</div>
+        <h1 className={styles.pageTitle}>Frequently Asked Questions</h1>
+        <p className={styles.pageSubtitle}>
+          Technical answers concerning local-first architecture, automated code sanitization, browser permissions, and upcoming platforms.
         </p>
-      </div>
+      </header>
 
+      {/* Fast Category Navigation */}
+      <nav className={styles.faqNavPills} aria-label="FAQ Category Navigation">
+        {KURACODE_FAQS.map((category) => (
+          <a
+            key={category.id}
+            href={`#${category.id}`}
+            className={styles.faqNavPill}
+          >
+            {category.category} ({category.questions.length})
+          </a>
+        ))}
+      </nav>
+
+      {/* FAQ Sections */}
       <div className="space-y-12">
         {KURACODE_FAQS.map((category) => (
-          <section key={category.category}>
-            <h2 className="text-xl font-bold text-gold mb-6 border-b border-border pb-2 flex items-center gap-2">
-              <span>●</span>
-              <span>{category.category}</span>
-            </h2>
+          <section key={category.id} id={category.id} className={styles.faqSection}>
+            <div className={styles.faqCategoryHeader}>
+              <div>
+                <h2 className={styles.faqCategoryTitle}>{category.category}</h2>
+                <p className="text-xs text-text-muted mt-1">{category.description}</p>
+              </div>
+              <span className={styles.faqCategoryBadge}>
+                {category.questions.length} items
+              </span>
+            </div>
 
-            <div className="space-y-4">
-              {category.questions.map((item, idx) => (
-                <details
-                  key={idx}
-                  className="p-5 rounded-xl border border-border bg-surface-1 group open:border-gold/40 transition-colors"
-                >
-                  <summary className="font-bold text-text-primary cursor-pointer list-none flex justify-between items-center gap-4 text-base">
+            <div className={styles.faqAccordionList}>
+              {category.questions.map((item) => (
+                <details key={item.id} id={item.id} className={styles.faqAccordion}>
+                  <summary className={styles.faqSummary}>
                     <span>{item.q}</span>
-                    <span className="text-xs text-text-muted font-mono transition-transform group-open:rotate-180">▼</span>
+                    <svg
+                      className={styles.faqChevron}
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
                   </summary>
-                  <p className="mt-4 text-sm text-text-secondary leading-relaxed border-t border-border/50 pt-3">
-                    {item.a}
-                  </p>
+                  <div className={styles.faqContent}>
+                    <p>{item.a}</p>
+                    {item.id === 'extension-permissions' && (
+                      <p className="mt-3 text-xs">
+                        Review the complete privilege breakdown on the{' '}
+                        <Link href="/extensions/kuracode/permissions">
+                          Extension Permissions Page
+                        </Link>.
+                      </p>
+                    )}
+                    {item.id === 'storage-location' && (
+                      <p className="mt-3 text-xs">
+                        Read our detailed data isolation commitments in the{' '}
+                        <Link href="/extensions/kuracode/privacy">
+                          Privacy &amp; Data Policy
+                        </Link>.
+                      </p>
+                    )}
+                    {item.id === 'how-cleaning-works' && (
+                      <p className="mt-3 text-xs">
+                        Test the sanitizer on real sample code in the{' '}
+                        <Link href="/extensions/kuracode/demo">
+                          Interactive Demo Sandbox
+                        </Link>.
+                      </p>
+                    )}
+                    {item.id === 'cloud-sync-availability' && (
+                      <p className="mt-3 text-xs">
+                        Track upcoming milestones on the{' '}
+                        <Link href="/extensions/kuracode/roadmap">
+                          Product Roadmap
+                        </Link>.
+                      </p>
+                    )}
+                    {item.id === 'bug-reports' && (
+                      <p className="mt-3 text-xs">
+                        Visit the{' '}
+                        <Link href="/extensions/kuracode/support">
+                          Support &amp; Issue Tracker
+                        </Link>{' '}
+                        for contact and triage channels.
+                      </p>
+                    )}
+                  </div>
                 </details>
               ))}
             </div>
@@ -79,4 +154,3 @@ export default function FaqPage() {
     </div>
   );
 }
-
