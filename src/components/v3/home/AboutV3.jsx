@@ -151,7 +151,7 @@ export default function AboutV3() {
         <div className="v3-behind-build" data-reveal>
           <div className="v3-behind-build-header">
             <div className="v3-behind-build-meta">
-              <span className="v3-behind-build-badge">★ BEHIND THE BUILD</span>
+              <span className="v3-behind-build-badge">★ Behind the Build</span>
               <span className="v3-behind-build-handle">Dispatches &amp; Engineering Labs</span>
             </div>
             <a
